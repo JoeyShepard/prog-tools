@@ -1,0 +1,9 @@
+IMPORTANT: font data in .c file is updated! font data here is outdated
+
+1-original/font.py
+- original from calculator that won't run on PC since it uses casioplot for graphics
+- only here to extract font data
+
+2-conversion/
+- font data from font.py converted to C array
+
