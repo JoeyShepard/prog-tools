@@ -169,6 +169,20 @@
         VKEY_f,
     };
 
+    enum ModifierStates
+    {
+        MODIFIER_NONE,
+        MODIFIER_ALPHA_LOWER,
+        MODIFIER_ALPHA_LOWER_LOCK,
+        MODIFIER_ALPHA_UPPER,
+        MODIFIER_ALPHA_UPPER_LOCK,
+        MODIFIER_SHIFT_NONE,
+        MODIFIER_SHIFT_ALPHA_LOWER,
+        MODIFIER_SHIFT_ALPHA_LOWER_LOCK,
+        MODIFIER_SHIFT_ALPHA_UPPER,
+        MODIFIER_SHIFT_ALPHA_UPPER_LOCK,
+    };
+
     //Global variables
     extern const int key_shifted[];
     extern const int key_upper[];
@@ -179,6 +193,12 @@
     extern const int key_printable_lower[];
 
     //Functions
-    int getkey_wrapper(bool wait);
+    int getkey_wrapper(bool wait);              
+    int update_modifier(int modifier,int key);  //Update modifier depending on key pressed
+    int current_modifier(int modifier);         //Return none, lower, upper, or shift depending on modifier state
+    int use_modifier(int modifier);             //Mark modifier as used and return new state
+    int modify_keypress(int modifier, int key); //Return modified key
+    int getkey_text(bool wait,int *modifier);   //getkey for text editing - accounts for shift, alpha, and case
+    int sys_key_handler(int key);
 
 #endif

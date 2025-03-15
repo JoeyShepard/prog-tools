@@ -1,7 +1,5 @@
 //placeholder functions for menu
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "compatibility.h"
 #include "getkey.h"
 #include "graphics.h"
@@ -10,11 +8,14 @@
 #include "manager.h"
 #include "structs.h"
 
-int placeholder(int command_ID, struct WindowInfo window, const char *title)
+int placeholder(int command_ID, struct WindowInfo *windows, int selected_window, const char *title)
 {
-    struct point pos=window_pos(window);
+    struct WindowInfo window=windows[selected_window];
     int width=window_width(window);
     int height=window_height(window);
+    struct point pos;
+    if (command_ID==COMMAND_REDRAW) pos=window_pos(window,false);
+    else pos=window_pos(window,true);
 
     //Always redraw whether START, RESUME, or REDRAW
     draw_rect(pos.x,pos.y,width,height,COL_BLACK,COL_BLACK);
@@ -32,7 +33,7 @@ int placeholder(int command_ID, struct WindowInfo window, const char *title)
             break;
         case COMMAND_REDRAW:
             draw_text("Redraw",pos,COL_GREEN,-1,false,FONT_5x8);
-            break;
+            return COMMAND_DONE;
     }
    
     dupdate();
@@ -44,77 +45,43 @@ int placeholder(int command_ID, struct WindowInfo window, const char *title)
         case COMMAND_RESUME:
             while (1)
             {
-                //Wait for kepress
-                int key=getkey_wrapper(true);
-                if ((key==VKEY_ALPHA)||(key==VKEY_SHIFT))
-                {
-                    //Modifier key pressed
-                    modifier=update_modifier(modifier,key);
-                }
-                else
-                {
-                    //Non-modifier key pressed
-                    int key_modifier=current_modifier(modifier);
-                    modifier=use_modifier(modifier);
-                    int modified_key=modify_keypress(key_modifier,key);
-                    
-                    switch (modified_key)
-                    {
-                        case VKEY_EXIT:
-                            return COMMAND_EXIT;
-                        case VKEY_MENU:
-                            return COMMAND_MENU;
-                        case VKEY_ACOFF:
-                            return COMMAND_OFF;
-                        case VKEY_ANGLE:
-                            //shift+XOT - switch selected window split
-                            if (window.split_state!=WINDOW_WHOLE) return COMMAND_SWAP;
-                            break;
-                        case VKEY_F1:
-                            return COMMAND_TAB1;
-                        case VKEY_F2:
-                            return COMMAND_TAB2;
-                        case VKEY_F3:
-                            return COMMAND_TAB3;
-                        case VKEY_F4:
-                            return COMMAND_TAB4;
-                        case VKEY_F5:
-                            return COMMAND_TAB5;
-                        case VKEY_F6:
-                            return COMMAND_TAB6;
-                    }
-                }
+                int key=getkey_text(true,&modifier);
+                int return_command=sys_key_handler(key);
+                if (return_command!=COMMAND_NONE) return return_command;
             }
             break;
         case COMMAND_REDRAW:
             return COMMAND_DONE;
             break;
     }
+
+    //Shouldn't reach here - added to silence warning
+    return COMMAND_DONE;
 }
 
-int command_line(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)
+int command_line(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
 {
-    placeholder(command_ID, window, "text editor");
+    return placeholder(command_ID, windows, selected_window, "command line");
 }
 
-int text_editor(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)
+int text_editor(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
 {
-    placeholder(command_ID, window, "text editor");
+    return placeholder(command_ID, windows, selected_window, "text editor");
 }
 
-int forth(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)
+int forth(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
 {
-    placeholder(command_ID, window, "Forth");
+    return placeholder(command_ID, windows, selected_window, "Forth");
 }
 
-int python(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)
+int python(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
 {
-    placeholder(command_ID, window, "MCU-Python");
+    return placeholder(command_ID, windows, selected_window, "MCU-Python");
 }
 
-int help(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)
+int help(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
 {
-    placeholder(command_ID, window, "help");
+    return placeholder(command_ID, windows, selected_window, "help");
 }
 
 

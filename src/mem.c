@@ -5,6 +5,7 @@
 #include "error.h"
 #include "manager.h"
 #include "mem.h"
+#include "structs.h"
 
 uint8_t *write_heap_i32(int32_t val,uint8_t *heap_ptr)
 {

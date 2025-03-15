@@ -101,42 +101,11 @@
     #define MENU_HEIGHT         11
     #define MENU_BUFFER         30
 
-    //Programs
-    #define PROG_LIST_LEN       ((int)(sizeof(program_list)/sizeof(program_list[0])))
-
-    enum ModifierStates
-    {
-        MODIFIER_NONE,
-        MODIFIER_ALPHA_LOWER,
-        MODIFIER_ALPHA_LOWER_LOCK,
-        MODIFIER_ALPHA_UPPER,
-        MODIFIER_ALPHA_UPPER_LOCK,
-        MODIFIER_SHIFT_NONE,
-        MODIFIER_SHIFT_ALPHA_LOWER,
-        MODIFIER_SHIFT_ALPHA_LOWER_LOCK,
-        MODIFIER_SHIFT_ALPHA_UPPER,
-        MODIFIER_SHIFT_ALPHA_UPPER_LOCK,
-    };
-
     enum WindowSplitStates
     {
         WINDOW_WHOLE,
         WINDOW_VSPLIT,
         WINDOW_HSPLIT,
-    };
-
-    enum ProgramList
-    {
-        ID_COMMAND_LINE,
-        ID_TEXT_EDITOR,
-        ID_FORTH,
-        ID_MCU_PYTHON,
-        ID_SPLIT_VERTICALLY,
-        ID_SPLIT_HORIZONTALLY,
-        ID_CLOSE_SPLIT,
-        ID_HELP,
-        //ID_NONE should come last - no menu text
-        ID_NONE,
     };
 
     enum ProgramCommands
@@ -158,30 +127,21 @@
         COMMAND_TAB4,
         COMMAND_TAB5,
         COMMAND_TAB6,
+        COMMAND_NONE,   //No match in sys_key_handler
 
         //Errors
         COMMAND_ERROR_OUT_OF_MEM
     };
     
     //Global variables
-    extern const char *program_list[];
-    extern const int program_IDs[];
-    extern const int (*menu_functions[])(int command_ID, struct WindowInfo window, uint8_t *heap_ptr);
+    extern uint16_t manager_colors[];
 
     //Functions
     void window_manager();
-    //Update modifier depending on key pressed
-    int update_modifier(int modifier,int key);
-    //Return none, lower, upper, or shift depending on modifier state
-    int current_modifier(int modifier);
-    //Mark modifier as used and return new state
-    int use_modifier(int modifier);
-    //Return modified key
-    int modify_keypress(int modifier, int key);
     void draw_modifier(int modifier);
-    void draw_splits(struct WindowInfo window);
-    void draw_manager(struct WindowInfo windows[],int modifier,int selected_window);
-    struct point window_pos(struct WindowInfo window);
+    void draw_splits(struct WindowInfo *windows,int selected_window);
+    void draw_manager(struct WindowInfo *windows,int modifier,int selected_window);
+    struct point window_pos(struct WindowInfo window,bool selected);
     int window_width(struct WindowInfo window);
     int window_height(struct WindowInfo window);
 

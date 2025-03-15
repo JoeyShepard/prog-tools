@@ -2,6 +2,7 @@
 #include "command.h"
 #include "compatibility.h"
 #include "getkey.h"
+#include "manager.h"
 #include "structs.h"
 
 //Tables not externally viewable
@@ -578,5 +579,170 @@ int getkey_wrapper(bool wait)
         return key_convert[0];
     }
 
+}
+
+int update_modifier(int modifier,int key)
+{
+    if (key==VKEY_ALPHA)
+    {
+        switch (modifier) 
+        {
+            case MODIFIER_NONE:
+                return MODIFIER_ALPHA_LOWER;
+            case MODIFIER_ALPHA_LOWER:
+                return MODIFIER_ALPHA_UPPER;
+            case MODIFIER_ALPHA_LOWER_LOCK:
+            case MODIFIER_ALPHA_UPPER:
+            case MODIFIER_ALPHA_UPPER_LOCK:
+                return MODIFIER_NONE;
+            case MODIFIER_SHIFT_NONE:
+                return MODIFIER_ALPHA_LOWER_LOCK;
+            case MODIFIER_SHIFT_ALPHA_LOWER:
+            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
+                return MODIFIER_ALPHA_LOWER_LOCK;
+            case MODIFIER_SHIFT_ALPHA_UPPER:
+            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+                return MODIFIER_ALPHA_UPPER_LOCK;
+        }
+    }
+    else if (key==VKEY_SHIFT)
+    {
+        switch (modifier) 
+        {
+            case MODIFIER_NONE:
+                return MODIFIER_SHIFT_NONE;
+            case MODIFIER_ALPHA_LOWER:
+                return MODIFIER_SHIFT_ALPHA_LOWER;
+            case MODIFIER_ALPHA_LOWER_LOCK:
+                return MODIFIER_SHIFT_ALPHA_LOWER_LOCK;
+            case MODIFIER_ALPHA_UPPER:
+                return MODIFIER_SHIFT_ALPHA_UPPER;
+            case MODIFIER_ALPHA_UPPER_LOCK:
+                return MODIFIER_SHIFT_ALPHA_UPPER_LOCK;
+            case MODIFIER_SHIFT_NONE:
+            case MODIFIER_SHIFT_ALPHA_LOWER:
+                return MODIFIER_NONE;
+            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
+                return MODIFIER_ALPHA_LOWER_LOCK;
+            case MODIFIER_SHIFT_ALPHA_UPPER:
+                return MODIFIER_NONE;
+            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+                return MODIFIER_ALPHA_UPPER_LOCK;
+        }
+    }
+
+    return modifier;
+}
+
+int current_modifier(int modifier)
+{
+    switch (modifier)
+    {
+        case MODIFIER_NONE:
+            return MODIFIER_NONE;
+        case MODIFIER_ALPHA_LOWER:
+        case MODIFIER_ALPHA_LOWER_LOCK:
+            return MODIFIER_ALPHA_LOWER;
+        case MODIFIER_ALPHA_UPPER:
+        case MODIFIER_ALPHA_UPPER_LOCK:
+            return MODIFIER_ALPHA_UPPER;
+        case MODIFIER_SHIFT_NONE:
+        case MODIFIER_SHIFT_ALPHA_LOWER:
+        case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
+        case MODIFIER_SHIFT_ALPHA_UPPER:
+        case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+            return MODIFIER_SHIFT_NONE;
+    }
+    return modifier;
+}
+
+int use_modifier(int modifier)
+{
+    switch (modifier)
+    {
+        case MODIFIER_NONE:
+            return MODIFIER_NONE;
+        case MODIFIER_ALPHA_LOWER:
+            return MODIFIER_NONE;
+        case MODIFIER_ALPHA_LOWER_LOCK:
+            return MODIFIER_ALPHA_LOWER_LOCK;
+        case MODIFIER_ALPHA_UPPER:
+            return MODIFIER_NONE;
+        case MODIFIER_ALPHA_UPPER_LOCK:
+            return MODIFIER_ALPHA_UPPER_LOCK;
+        case MODIFIER_SHIFT_NONE:
+            return MODIFIER_NONE;
+        case MODIFIER_SHIFT_ALPHA_LOWER:
+            return MODIFIER_NONE;
+        case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
+            return MODIFIER_ALPHA_LOWER_LOCK;
+        case MODIFIER_SHIFT_ALPHA_UPPER:
+            return MODIFIER_NONE;
+        case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+            return MODIFIER_ALPHA_UPPER_LOCK;
+    }
+    return modifier;
+}
+
+int modify_keypress(int modifier, int key)
+{
+    switch(modifier)
+    {
+        case MODIFIER_NONE:
+            return key;
+        case MODIFIER_ALPHA_LOWER:
+            return key_lower[key];
+        case MODIFIER_ALPHA_UPPER:
+            return key_upper[key];
+        case MODIFIER_SHIFT_NONE:
+            return key_shifted[key];
+        default:
+            return key;
+    }
+}
+
+int getkey_text(bool wait, int *modifier)
+{
+    int key=getkey_wrapper(wait);
+    if ((key==VKEY_ALPHA)||(key==VKEY_SHIFT))
+    {
+        //Modifier key pressed
+        *modifier=update_modifier(*modifier,key);
+        return VKEY_NONE;
+    }
+    else
+    {
+        //Non-modifier key pressed
+        int key_modifier=current_modifier(*modifier);
+        *modifier=use_modifier(*modifier);
+        int modified_key=modify_keypress(key_modifier,key);
+        return modified_key;
+    }
+}
+
+int sys_key_handler(int key)
+{
+    switch(key)
+    {
+        case VKEY_EXIT:
+            return COMMAND_EXIT;
+        case VKEY_MENU:
+            return COMMAND_MENU;
+        case VKEY_ACOFF:
+            return COMMAND_OFF;
+        case VKEY_F1:
+        case VKEY_F2:
+        case VKEY_F3:
+        case VKEY_F4:
+        case VKEY_F5:
+        case VKEY_F6:
+            return COMMAND_TAB1+key-VKEY_F1;
+        case VKEY_ANGLE:
+            //shift+XOT - switch selected window split
+            return COMMAND_SWAP;
+            break;
+        default:
+            return COMMAND_NONE;
+    }
 }
 

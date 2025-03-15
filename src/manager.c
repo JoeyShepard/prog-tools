@@ -1,13 +1,15 @@
-#include "command.h"
 #include "compatibility.h"
-#include "dummy.h"
-#include "error.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
+#include "menu.h"
+#include "structs.h"
 #include "text.h"
 
-static uint16_t manager_colors[]=
+
+//Global variables
+//================
+uint16_t manager_colors[]=
 {
     C_RGB(0,COL_1_4,COL_MID),       //Blue
     C_RGB(COL_1_4,COL_MID,0),       //Green
@@ -17,42 +19,8 @@ static uint16_t manager_colors[]=
     C_RGB(COL_MID,0,COL_MID),       //Purple
 };
 
-const char *program_list[]=
-{
-    "command line",
-    "text editor",
-    "Forth",
-    "MCU Python",
-    "split vertically",
-    "split horizontally",
-    "close",
-    "help"
-};
-
-const int program_IDs[]=
-{
-    ID_COMMAND_LINE,
-    ID_TEXT_EDITOR,
-    ID_FORTH,
-    ID_MCU_PYTHON,
-    ID_SPLIT_VERTICALLY,
-    ID_SPLIT_HORIZONTALLY,
-    ID_CLOSE_SPLIT,
-    ID_HELP
-};
-
-const int (*menu_functions[])(int command_ID, struct WindowInfo window, uint8_t *heap_ptr)=
-{
-    &command_line,
-    &text_editor,
-    &forth,
-    &python,
-    NULL,
-    NULL,
-    NULL,
-    &help
-};
-
+//Functions
+//=========
 void window_manager()
 {
     int modifier=MODIFIER_NONE;
@@ -93,248 +61,52 @@ void window_manager()
     {
         //Render graphics
         draw_manager(windows,modifier,selected_window);
-        draw_splits(windows[selected_window]);
+        draw_splits(windows,selected_window);
         dupdate();
 
-        //Wait for kepress
-        int key=getkey_wrapper(true);
-        if ((key==VKEY_ALPHA)||(key==VKEY_SHIFT))
-        {
-            //Modifier key pressed
-            modifier=update_modifier(modifier,key);
-        }
-        else
-        {
-            //Non-modifier key pressed
-            int key_modifier=current_modifier(modifier);
-            modifier=use_modifier(modifier);
-            int modified_key=modify_keypress(key_modifier,key);
-            
-            //Used below, slightly more readable
-            int *menu_selection=&windows[selected_window].split[windows[selected_window].selected_split].menu_selection;
+        //Pass control to selected program including menu handler
+        int split_state=windows[selected_window].split_state;
+        int selected_split=0;
+        if (split_state==WINDOW_WHOLE) selected_split=0;
+        else selected_split=windows[selected_window].selected_split;
+        int new_program_ID=windows[selected_window].split[selected_split].ID;
+   
+        int return_command=(*menu_functions[new_program_ID])(COMMAND_RESUME,windows,selected_window,NULL);
 
-            //Process EXE key to reuse logic below for menu, off, etc keys
-            if (modified_key==VKEY_EXE)
-            {
-                modified_key=VKEY_NONE;
-                switch (*menu_selection)
+        //Process return from program
+        switch (return_command)
+        {
+            case COMMAND_EXIT:
+                //Program done executing
+                windows[selected_window].split[windows[selected_window].selected_split].ID=ID_NONE;
+
+                //TODO: free memory
+
+                break;
+            case COMMAND_MENU:
+                //Save here if necessary
+                gint_osmenu();
+                break;
+            case COMMAND_OFF:
+                //Save here too to be safe
+                gint_poweroff(true);
+                break;
+            case COMMAND_TAB1:
+            case COMMAND_TAB2:
+            case COMMAND_TAB3:
+            case COMMAND_TAB4:
+            case COMMAND_TAB5:
+            case COMMAND_TAB6:
+                selected_window=return_command-COMMAND_TAB1;
+                break;
+            case COMMAND_SWAP:
+                //shift+XOT - switch selected window split
+                if (windows[selected_window].split_state!=WINDOW_WHOLE)
                 {
-                    case ID_COMMAND_LINE:
-                    case ID_TEXT_EDITOR:
-                    case ID_FORTH:
-                    case ID_MCU_PYTHON:
-                    case ID_HELP:
-                        int return_command=(*menu_functions[*menu_selection])(COMMAND_START,windows[selected_window],NULL);
-                        switch (return_command)
-                        {
-                            case COMMAND_EXIT:
-                                //Program done executing
-                                windows[selected_window].split[windows[selected_window].selected_split].ID=ID_NONE;
-                                //TODO: free memory
-                                break;
-                            case COMMAND_MENU:
-                                modified_key=VKEY_MENU;
-                                break;
-                            case COMMAND_OFF:
-                                modified_key=VKEY_ACOFF;
-                                break;
-                            case COMMAND_SWAP:
-                                modified_key=VKEY_ANGLE;
-                                break;
-                            case COMMAND_TAB1:
-                                modified_key=VKEY_F1;
-                                break;
-                            case COMMAND_TAB2:
-                                modified_key=VKEY_F2;
-                                break;
-                            case COMMAND_TAB3:
-                                modified_key=VKEY_F3;
-                                break;
-                            case COMMAND_TAB4:
-                                modified_key=VKEY_F4;
-                                break;
-                            case COMMAND_TAB5:
-                                modified_key=VKEY_F5;
-                                break;
-                            case COMMAND_TAB6:
-                                modified_key=VKEY_F6;
-                                break;
-                        }
-                        break;
+                    windows[selected_window].selected_split^=1;
                 }
-            }
-
-            //Process keypress
-            switch (modified_key)
-            {
-                case VKEY_EXIT:
-                    //Exit if on PC
-                    wrapper_exit();
-                    break;
-                case VKEY_MENU:
-                    //Save here if necessary
-                    gint_osmenu();
-                    break;
-                case VKEY_ACOFF:
-                    //Save here too to be safe
-                    gint_poweroff(true);
-                    break;
-                case VKEY_F1:
-                    selected_window=0;
-                    break;
-                case VKEY_F2:
-                    selected_window=1;
-                    break;
-                case VKEY_F3:
-                    selected_window=2;
-                    break;
-                case VKEY_F4:
-                    selected_window=3;
-                    break;
-                case VKEY_F5:
-                    selected_window=4;
-                    break;
-                case VKEY_F6:
-                    selected_window=5;
-                    break;
-                case VKEY_ANGLE:
-                    //shift+XOT - switch selected window split
-                    if (windows[selected_window].split_state!=WINDOW_WHOLE)
-                    {
-                        windows[selected_window].selected_split^=1;
-                    }
-                    break;
-                case VKEY_UP:
-                    (*menu_selection)--;
-                    if ((*menu_selection)<0) *menu_selection=PROG_LIST_LEN-1;
-                    break;
-                case VKEY_DOWN:
-                    (*menu_selection)++;
-                    if (*menu_selection==PROG_LIST_LEN) *menu_selection=0;
-                    break;
-            }
+                break;
         }
-        delay();
-    }
-}
-
-int update_modifier(int modifier,int key)
-{
-    if (key==VKEY_ALPHA)
-    {
-        switch (modifier) 
-        {
-            case MODIFIER_NONE:
-                return MODIFIER_ALPHA_LOWER;
-            case MODIFIER_ALPHA_LOWER:
-                return MODIFIER_ALPHA_UPPER;
-            case MODIFIER_ALPHA_LOWER_LOCK:
-            case MODIFIER_ALPHA_UPPER:
-            case MODIFIER_ALPHA_UPPER_LOCK:
-                return MODIFIER_NONE;
-            case MODIFIER_SHIFT_NONE:
-                return MODIFIER_ALPHA_LOWER_LOCK;
-            case MODIFIER_SHIFT_ALPHA_LOWER:
-            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
-                return MODIFIER_ALPHA_LOWER_LOCK;
-            case MODIFIER_SHIFT_ALPHA_UPPER:
-            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
-                return MODIFIER_ALPHA_UPPER_LOCK;
-        }
-    }
-    else if (key==VKEY_SHIFT)
-    {
-        switch (modifier) 
-        {
-            case MODIFIER_NONE:
-                return MODIFIER_SHIFT_NONE;
-            case MODIFIER_ALPHA_LOWER:
-                return MODIFIER_SHIFT_ALPHA_LOWER;
-            case MODIFIER_ALPHA_LOWER_LOCK:
-                return MODIFIER_SHIFT_ALPHA_LOWER_LOCK;
-            case MODIFIER_ALPHA_UPPER:
-                return MODIFIER_SHIFT_ALPHA_UPPER;
-            case MODIFIER_ALPHA_UPPER_LOCK:
-                return MODIFIER_SHIFT_ALPHA_UPPER_LOCK;
-            case MODIFIER_SHIFT_NONE:
-            case MODIFIER_SHIFT_ALPHA_LOWER:
-                return MODIFIER_NONE;
-            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
-                return MODIFIER_ALPHA_LOWER_LOCK;
-            case MODIFIER_SHIFT_ALPHA_UPPER:
-                return MODIFIER_NONE;
-            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
-                return MODIFIER_ALPHA_UPPER_LOCK;
-        }
-    }
-
-    return modifier;
-}
-
-int current_modifier(int modifier)
-{
-    switch (modifier)
-    {
-        case MODIFIER_NONE:
-            return MODIFIER_NONE;
-        case MODIFIER_ALPHA_LOWER:
-        case MODIFIER_ALPHA_LOWER_LOCK:
-            return MODIFIER_ALPHA_LOWER;
-        case MODIFIER_ALPHA_UPPER:
-        case MODIFIER_ALPHA_UPPER_LOCK:
-            return MODIFIER_ALPHA_UPPER;
-        case MODIFIER_SHIFT_NONE:
-        case MODIFIER_SHIFT_ALPHA_LOWER:
-        case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
-        case MODIFIER_SHIFT_ALPHA_UPPER:
-        case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
-            return MODIFIER_SHIFT_NONE;
-    }
-    return modifier;
-}
-
-int use_modifier(int modifier)
-{
-    switch (modifier)
-    {
-        case MODIFIER_NONE:
-            return MODIFIER_NONE;
-        case MODIFIER_ALPHA_LOWER:
-            return MODIFIER_NONE;
-        case MODIFIER_ALPHA_LOWER_LOCK:
-            return MODIFIER_ALPHA_LOWER_LOCK;
-        case MODIFIER_ALPHA_UPPER:
-            return MODIFIER_NONE;
-        case MODIFIER_ALPHA_UPPER_LOCK:
-            return MODIFIER_ALPHA_UPPER_LOCK;
-        case MODIFIER_SHIFT_NONE:
-            return MODIFIER_NONE;
-        case MODIFIER_SHIFT_ALPHA_LOWER:
-            return MODIFIER_NONE;
-        case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
-            return MODIFIER_ALPHA_LOWER_LOCK;
-        case MODIFIER_SHIFT_ALPHA_UPPER:
-            return MODIFIER_NONE;
-        case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
-            return MODIFIER_ALPHA_UPPER_LOCK;
-    }
-    return modifier;
-}
-
-int modify_keypress(int modifier, int key)
-{
-    switch(modifier)
-    {
-        case MODIFIER_NONE:
-            return key;
-        case MODIFIER_ALPHA_LOWER:
-            return key_lower[key];
-        case MODIFIER_ALPHA_UPPER:
-            return key_upper[key];
-        case MODIFIER_SHIFT_NONE:
-            return key_shifted[key];
-        default:
-            return key;
     }
 }
 
@@ -395,117 +167,19 @@ void draw_modifier(int modifier)
     }
 }
 
-void draw_splits(struct WindowInfo window)
+void draw_splits(struct WindowInfo *windows, int selected_window)
 {
-    int menu_x;
-    int menu_y;
-    bool enabled;
+    struct WindowInfo window=windows[selected_window];
 
-    for (int i=0;i<SPLIT_COUNT;i++)
+    if (window.split_state==WINDOW_WHOLE)
     {
-        if ((i==1)&&(window.split_state==WINDOW_WHOLE))
-        {
-            //Only draw one window if no split
-            break;
-        }
-
-        //Draw deselected menu as gray    
-        if ((window.split_state!=WINDOW_WHOLE)&&(window.selected_split!=i)) enabled=false;
-        else enabled=true;
-        
-        //Draw splits
-        switch (window.split[i].ID)
-        {
-            case ID_NONE:
-                if (window.split_state==WINDOW_WHOLE)
-                {
-                    //Whole window - no split
-                    draw_rect(WINDOW_WHOLE_X0,WINDOW_WHOLE_Y0,WINDOW_WHOLE_WIDTH,WINDOW_WHOLE_HEIGHT,COL_MENU_BG,COL_MENU_BG);
-
-                    menu_x=WINDOW_WHOLE_X0;
-                    menu_y=WINDOW_WHOLE_Y0;
-                }
-                else if (window.split_state==WINDOW_VSPLIT)
-                {
-                    //Windows split vertically
-                    int window_y;
-                    if (i==0) window_y=WINDOW_VSPLIT_TOP_Y0;
-                    else window_y=WINDOW_VSPLIT_BOTTOM_Y0;
-                    menu_x=WINDOW_VSPLIT_X0;
-                    menu_y=window_y;
-                    if (enabled)
-                        draw_rect(WINDOW_VSPLIT_X0,window_y,WINDOW_VSPLIT_WIDTH,WINDOW_VSPLIT_HEIGHT,COL_MENU_BG,COL_MENU_BG);
-                    else draw_rect(WINDOW_VSPLIT_X0,window_y,WINDOW_VSPLIT_WIDTH,WINDOW_VSPLIT_HEIGHT,COL_MENU_DE_BG,COL_MENU_DE_BG);
-                }
-                else if (window.split_state==WINDOW_HSPLIT)
-                {
-                    //Windows split horizontally
-                    int window_x;
-                    if (i==0) window_x=WINDOW_HSPLIT_LEFT_X0;
-                    else window_x=WINDOW_HSPLIT_RIGHT_X0;
-                    menu_x=window_x;
-                    menu_y=WINDOW_HSPLIT_Y0;
-
-                    if (enabled)
-                        draw_rect(window_x,WINDOW_HSPLIT_Y0,WINDOW_HSPLIT_WIDTH,WINDOW_HSPLIT_HEIGHT,COL_MENU_BG,COL_MENU_BG);
-                    else draw_rect(window_x,WINDOW_HSPLIT_Y0,WINDOW_HSPLIT_WIDTH,WINDOW_HSPLIT_HEIGHT,COL_MENU_DE_BG,COL_MENU_DE_BG);
-                }
-
-                //Draw menu options
-                struct point pos=
-                {
-                    menu_x+MENU_X_OFFSET,
-                    menu_y+MENU_Y_OFFSET
-                };
-
-                //Loop thorugh menu options
-                for (int j=0;j<PROG_LIST_LEN;j++)
-                {
-                    char menu_print_buffer[MENU_BUFFER];
-                    menu_print_buffer[0]='1'+j;
-                    menu_print_buffer[1]=':';
-                    for (int k=0;k<MENU_BUFFER;k++)
-                    {
-                        //-1 for zero terminator, -2 for "1:"
-                        if (k==MENU_BUFFER-1-2)
-                        {
-                            //Menu text too long to fit into buffer
-                            error_exit(ERROR_MENU_TEXT_TOO_LONG);
-                        }
-                        if (program_list[j][k]==0)
-                        {
-                            //Hit end of copied string - done
-                            break;
-                        }
-                        menu_print_buffer[k+2]=program_list[j][k]; 
-                        menu_print_buffer[k+3]=0;
-                    }
-                    if (j==window.split[i].menu_selection)
-                    {
-                        //Selected menu option
-                        if (enabled)
-                            outline_text(menu_print_buffer,pos,COL_MENU_SEL_TEXT,manager_colors[window.tab_index],manager_colors[window.tab_index],false,FONT_5x8);
-                        else outline_text(menu_print_buffer,pos,COL_MENU_DE_SEL_TEXT,COL_MENU_DE_SEL_FILL,COL_MENU_DE_SEL_FILL,false,FONT_5x8);
-                    }
-                    else
-                    {
-                        //Regular menu option
-                        if (enabled)
-                            outline_text(menu_print_buffer,pos,COL_MENU_TEXT,-1,-1,false,FONT_5x8);
-                        else outline_text(menu_print_buffer,pos,COL_MENU_DE_TEXT,-1,-1,false,FONT_5x8);
-                    }
-                    pos.y+=MENU_HEIGHT;
-                }
-                break;
-            case ID_COMMAND_LINE:
-            case ID_TEXT_EDITOR:
-            case ID_FORTH:
-            case ID_MCU_PYTHON:
-            case ID_HELP:
-                (*menu_functions[window.split[i].ID])(COMMAND_REDRAW,window,NULL);
-                break;
-        }   //switch for split's ID
+        //No spits to draw if only one screen
+        return;
     }
+
+    //Only draw deselected split
+    int deselected_split=window.selected_split^1;
+    (*menu_functions[window.split[deselected_split].ID])(COMMAND_REDRAW,windows,selected_window,NULL);
 }
 
 void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
@@ -579,8 +253,11 @@ void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
     }
 }
 
-struct point window_pos(struct WindowInfo window)
+struct point window_pos(struct WindowInfo window,bool selected)
 {
+    int selected_split=window.selected_split;
+    if (selected==false) selected_split^=1;
+
     struct point pos;
     switch (window.split_state)
     {
@@ -590,12 +267,12 @@ struct point window_pos(struct WindowInfo window)
             break;
         case WINDOW_VSPLIT:
             pos.x=WINDOW_VSPLIT_X0;
-            if (window.selected_split==0) pos.y=WINDOW_VSPLIT_TOP_Y0;
+            if (selected_split==0) pos.y=WINDOW_VSPLIT_TOP_Y0;
             else pos.y=WINDOW_VSPLIT_BOTTOM_Y0;
             break;
         case WINDOW_HSPLIT:
             pos.y=WINDOW_HSPLIT_Y0;
-            if (window.selected_split==0) pos.x=WINDOW_HSPLIT_LEFT_X0;
+            if (selected_split==0) pos.x=WINDOW_HSPLIT_LEFT_X0;
             else pos.x=WINDOW_HSPLIT_RIGHT_X0;
             break;
     }

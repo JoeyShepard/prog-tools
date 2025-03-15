@@ -11,14 +11,16 @@ include(Fxconv)
 find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
-  src/main.c
   src/cg50-sdl2.c
   src/command.c
+  src/dummy.c
   src/error.c
   src/getkey.c
   src/graphics.c
+  src/main.c
   src/manager.c
   src/mem.c
+  src/menu.c
   src/text.c
   # ...
 )
