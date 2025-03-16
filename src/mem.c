@@ -120,7 +120,7 @@ void select_heap(int tab, int split)
     while (obj_end!=heap_end)
     {
         //Copy chunk of next object to buffer
-        if (heap_end-obj_end<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
+        if ((heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
         else copy_count=XRAM_SIZE/sizeof(uint32_t);
 
         for (uint32_t i=0;i<copy_count;i++)
@@ -136,7 +136,7 @@ void select_heap(int tab, int split)
         }
 
         //Copy next object in buffer to replace selected object
-        for (int i=0;i<copy_count;i++)
+        for (uint32_t i=0;i<copy_count;i++)
         {
             obj_start[i]=xram_ptr[i];
         }

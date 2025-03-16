@@ -1,0 +1,1194 @@
+ GNU assembler version 2.42 (x86_64-linux-gnu)
+	 using BFD version (GNU Binutils for Ubuntu) 2.42.
+ options passed	: -I --64 -aghlns=src/getkey.c.lst 
+ input file    	: /tmp/ccu3Blsb.s
+ output file   	: sdl2/getkey.o
+ target        	: x86_64-pc-linux-gnu
+ time stamp    	: 2025-03-16T09:20:33.000-0400
+
+   1              		.file	"getkey.c"
+   2              		.text
+   3              		.p2align 4
+   4              		.globl	getkey_wrapper
+   5              		.type	getkey_wrapper, @function
+   6              	getkey_wrapper:
+   7              	.LFB6512:
+   8              		.cfi_startproc
+   9 0000 F30F1EFA 		endbr64
+  10 0004 53       		pushq	%rbx
+  11              		.cfi_def_cfa_offset 16
+  12              		.cfi_offset 3, -16
+  13 0005 4883EC10 		subq	$16, %rsp
+  14              		.cfi_def_cfa_offset 32
+  15 0009 64488B04 		movq	%fs:40, %rax
+  15      25280000 
+  15      00
+  16 0012 48894424 		movq	%rax, 8(%rsp)
+  16      08
+  17 0017 31C0     		xorl	%eax, %eax
+  18 0019 C7442404 		movl	$1, 4(%rsp)
+  18      01000000 
+  19 0021 4084FF   		testb	%dil, %dil
+  20 0024 7452     		je	.L2
+  21 0026 488D5C24 		leaq	4(%rsp), %rbx
+  21      04
+  22 002b EB0A     		jmp	.L5
+  23 002d 0F1F00   		.p2align 4,,10
+  24              		.p2align 3
+  25              	.L3:
+  26 0030 31C0     		xorl	%eax, %eax
+  27 0032 E8000000 		call	delay@PLT
+  27      00
+  28              	.L5:
+  29 0037 4889DE   		movq	%rbx, %rsi
+  30 003a BFD40500 		movl	$1492, %edi
+  30      00
+  31 003f E8000000 		call	getkey_opt@PLT
+  31      00
+  32 0044 89C2     		movl	%eax, %edx
+  33 0046 C1EA10   		shrl	$16, %edx
+  34 0049 80FA1F   		cmpb	$31, %dl
+  35 004c 76E2     		jbe	.L3
+  36              	.L10:
+  37 004e C1E818   		shrl	$24, %eax
+  38 0051 488D1500 		leaq	key_convert(%rip), %rdx
+  38      000000
+  39 0058 8B1482   		movl	(%rdx,%rax,4), %edx
+  40              	.L1:
+  41 005b 488B4424 		movq	8(%rsp), %rax
+  41      08
+  42 0060 64482B04 		subq	%fs:40, %rax
+  42      25280000 
+  42      00
+  43 0069 752A     		jne	.L12
+  44 006b 4883C410 		addq	$16, %rsp
+  45              		.cfi_remember_state
+  46              		.cfi_def_cfa_offset 16
+  47 006f 89D0     		movl	%edx, %eax
+  48 0071 5B       		popq	%rbx
+  49              		.cfi_def_cfa_offset 8
+  50 0072 C3       		ret
+  51              		.p2align 4,,10
+  52 0073 0F1F4400 		.p2align 3
+  52      00
+  53              	.L2:
+  54              		.cfi_restore_state
+  55 0078 488D7424 		leaq	4(%rsp), %rsi
+  55      04
+  56 007d BFD40500 		movl	$1492, %edi
+  56      00
+  57 0082 E8000000 		call	getkey_opt@PLT
+  57      00
+  58 0087 31D2     		xorl	%edx, %edx
+  59 0089 89C1     		movl	%eax, %ecx
+  60 008b C1E910   		shrl	$16, %ecx
+  61 008e 80F91F   		cmpb	$31, %cl
+  62 0091 76C8     		jbe	.L1
+  63 0093 EBB9     		jmp	.L10
+  64              	.L12:
+  65 0095 E8000000 		call	__stack_chk_fail@PLT
+  65      00
+  66              		.cfi_endproc
+  67              	.LFE6512:
+  68              		.size	getkey_wrapper, .-getkey_wrapper
+  69 009a 660F1F44 		.p2align 4
+  69      0000
+  70              		.globl	update_modifier
+  71              		.type	update_modifier, @function
+  72              	update_modifier:
+  73              	.LFB6513:
+  74              		.cfi_startproc
+  75 00a0 F30F1EFA 		endbr64
+  76 00a4 89F8     		movl	%edi, %eax
+  77 00a6 83FE21   		cmpl	$33, %esi
+  78 00a9 7425     		je	.L16
+  79 00ab 83FE27   		cmpl	$39, %esi
+  80 00ae 7408     		je	.L17
+  81              	.L15:
+  82 00b0 C3       		ret
+  83              		.p2align 4,,10
+  84 00b1 0F1F8000 		.p2align 3
+  84      000000
+  85              	.L17:
+  86 00b8 83F809   		cmpl	$9, %eax
+  87 00bb 77F3     		ja	.L15
+  88 00bd 488D1500 		leaq	CSWTCH.3(%rip), %rdx
+  88      000000
+  89 00c4 8B0482   		movl	(%rdx,%rax,4), %eax
+  90 00c7 C3       		ret
+  91 00c8 0F1F8400 		.p2align 4,,10
+  91      00000000 
+  92              		.p2align 3
+  93              	.L16:
+  94 00d0 83F809   		cmpl	$9, %eax
+  95 00d3 77DB     		ja	.L15
+  96 00d5 488D1500 		leaq	CSWTCH.2(%rip), %rdx
+  96      000000
+  97 00dc 8B0482   		movl	(%rdx,%rax,4), %eax
+  98 00df C3       		ret
+  99              		.cfi_endproc
+ 100              	.LFE6513:
+ 101              		.size	update_modifier, .-update_modifier
+ 102              		.p2align 4
+ 103              		.globl	current_modifier
+ 104              		.type	current_modifier, @function
+ 105              	current_modifier:
+ 106              	.LFB6514:
+ 107              		.cfi_startproc
+ 108 00e0 F30F1EFA 		endbr64
+ 109 00e4 89F8     		movl	%edi, %eax
+ 110 00e6 83F809   		cmpl	$9, %eax
+ 111 00e9 770A     		ja	.L19
+ 112 00eb 488D1500 		leaq	CSWTCH.5(%rip), %rdx
+ 112      000000
+ 113 00f2 8B0482   		movl	(%rdx,%rax,4), %eax
+ 114              	.L19:
+ 115 00f5 C3       		ret
+ 116              		.cfi_endproc
+ 117              	.LFE6514:
+ 118              		.size	current_modifier, .-current_modifier
+ 119 00f6 662E0F1F 		.p2align 4
+ 119      84000000 
+ 119      0000
+ 120              		.globl	use_modifier
+ 121              		.type	use_modifier, @function
+ 122              	use_modifier:
+ 123              	.LFB6515:
+ 124              		.cfi_startproc
+ 125 0100 F30F1EFA 		endbr64
+ 126 0104 83FF09   		cmpl	$9, %edi
+ 127 0107 772F     		ja	.L22
+ 128 0109 B8010000 		movl	$1, %eax
+ 128      00
+ 129 010e 89F9     		movl	%edi, %ecx
+ 130 0110 31D2     		xorl	%edx, %edx
+ 131 0112 48D3E0   		salq	%cl, %rax
+ 132 0115 A96B0100 		testl	$363, %eax
+ 132      00
+ 133 011a 7516     		jne	.L20
+ 134 011c BA040000 		movl	$4, %edx
+ 134      00
+ 135 0121 A9100200 		testl	$528, %eax
+ 135      00
+ 136 0126 750A     		jne	.L20
+ 137 0128 A884     		testb	$-124, %al
+ 138 012a BA020000 		movl	$2, %edx
+ 138      00
+ 139 012f 0F44D7   		cmove	%edi, %edx
+ 140              	.L20:
+ 141 0132 89D0     		movl	%edx, %eax
+ 142 0134 C3       		ret
+ 143              		.p2align 4,,10
+ 144 0135 0F1F00   		.p2align 3
+ 145              	.L22:
+ 146 0138 89FA     		movl	%edi, %edx
+ 147 013a 89D0     		movl	%edx, %eax
+ 148 013c C3       		ret
+ 149              		.cfi_endproc
+ 150              	.LFE6515:
+ 151              		.size	use_modifier, .-use_modifier
+ 152 013d 0F1F00   		.p2align 4
+ 153              		.globl	modify_keypress
+ 154              		.type	modify_keypress, @function
+ 155              	modify_keypress:
+ 156              	.LFB6516:
+ 157              		.cfi_startproc
+ 158 0140 F30F1EFA 		endbr64
+ 159 0144 4863C6   		movslq	%esi, %rax
+ 160 0147 83FF03   		cmpl	$3, %edi
+ 161 014a 742C     		je	.L27
+ 162 014c 83FF05   		cmpl	$5, %edi
+ 163 014f 7417     		je	.L28
+ 164 0151 83FF01   		cmpl	$1, %edi
+ 165 0154 751C     		jne	.L26
+ 166 0156 488D1500 		leaq	key_lower(%rip), %rdx
+ 166      000000
+ 167 015d 8B0482   		movl	(%rdx,%rax,4), %eax
+ 168 0160 C3       		ret
+ 169              		.p2align 4,,10
+ 170 0161 0F1F8000 		.p2align 3
+ 170      000000
+ 171              	.L28:
+ 172 0168 488D1500 		leaq	key_shifted(%rip), %rdx
+ 172      000000
+ 173 016f 8B0482   		movl	(%rdx,%rax,4), %eax
+ 174              	.L26:
+ 175 0172 C3       		ret
+ 176              		.p2align 4,,10
+ 177 0173 0F1F4400 		.p2align 3
+ 177      00
+ 178              	.L27:
+ 179 0178 488D1500 		leaq	key_upper(%rip), %rdx
+ 179      000000
+ 180 017f 8B0482   		movl	(%rdx,%rax,4), %eax
+ 181 0182 C3       		ret
+ 182              		.cfi_endproc
+ 183              	.LFE6516:
+ 184              		.size	modify_keypress, .-modify_keypress
+ 185 0183 66662E0F 		.p2align 4
+ 185      1F840000 
+ 185      00000066 
+ 185      90
+ 186              		.globl	getkey_text
+ 187              		.type	getkey_text, @function
+ 188              	getkey_text:
+ 189              	.LFB6517:
+ 190              		.cfi_startproc
+ 191 0190 F30F1EFA 		endbr64
+ 192 0194 55       		pushq	%rbp
+ 193              		.cfi_def_cfa_offset 16
+ 194              		.cfi_offset 6, -16
+ 195 0195 53       		pushq	%rbx
+ 196              		.cfi_def_cfa_offset 24
+ 197              		.cfi_offset 3, -24
+ 198 0196 4889F3   		movq	%rsi, %rbx
+ 199 0199 4883EC18 		subq	$24, %rsp
+ 200              		.cfi_def_cfa_offset 48
+ 201 019d 64488B04 		movq	%fs:40, %rax
+ 201      25280000 
+ 201      00
+ 202 01a6 48894424 		movq	%rax, 8(%rsp)
+ 202      08
+ 203 01ab 31C0     		xorl	%eax, %eax
+ 204 01ad C7442404 		movl	$1, 4(%rsp)
+ 204      01000000 
+ 205 01b5 4084FF   		testb	%dil, %dil
+ 206 01b8 0F848200 		je	.L32
+ 206      0000
+ 207 01be 488D6C24 		leaq	4(%rsp), %rbp
+ 207      04
+ 208 01c3 EB0A     		jmp	.L35
+ 209              		.p2align 4,,10
+ 210 01c5 0F1F00   		.p2align 3
+ 211              	.L33:
+ 212 01c8 31C0     		xorl	%eax, %eax
+ 213 01ca E8000000 		call	delay@PLT
+ 213      00
+ 214              	.L35:
+ 215 01cf 4889EE   		movq	%rbp, %rsi
+ 216 01d2 BFD40500 		movl	$1492, %edi
+ 216      00
+ 217 01d7 E8000000 		call	getkey_opt@PLT
+ 217      00
+ 218 01dc 89C2     		movl	%eax, %edx
+ 219 01de C1EA10   		shrl	$16, %edx
+ 220 01e1 80FA1F   		cmpb	$31, %dl
+ 221 01e4 76E2     		jbe	.L33
+ 222              	.L36:
+ 223 01e6 C1E818   		shrl	$24, %eax
+ 224 01e9 488D1500 		leaq	key_convert(%rip), %rdx
+ 224      000000
+ 225 01f0 48631482 		movslq	(%rdx,%rax,4), %rdx
+ 226 01f4 8B03     		movl	(%rbx), %eax
+ 227 01f6 89C1     		movl	%eax, %ecx
+ 228 01f8 83FA21   		cmpl	$33, %edx
+ 229 01fb 0F84AF00 		je	.L57
+ 229      0000
+ 230 0201 83FA27   		cmpl	$39, %edx
+ 231 0204 7557     		jne	.L37
+ 232 0206 83FA21   		cmpl	$33, %edx
+ 233 0209 0F84A100 		je	.L57
+ 233      0000
+ 234 020f 83F809   		cmpl	$9, %eax
+ 235 0212 0F86B800 		jbe	.L59
+ 235      0000
+ 236              	.L40:
+ 237 0218 890B     		movl	%ecx, (%rbx)
+ 238 021a 31D2     		xorl	%edx, %edx
+ 239              	.L31:
+ 240 021c 488B4424 		movq	8(%rsp), %rax
+ 240      08
+ 241 0221 64482B04 		subq	%fs:40, %rax
+ 241      25280000 
+ 241      00
+ 242 022a 0F85E900 		jne	.L60
+ 242      0000
+ 243 0230 4883C418 		addq	$24, %rsp
+ 244              		.cfi_remember_state
+ 245              		.cfi_def_cfa_offset 24
+ 246 0234 89D0     		movl	%edx, %eax
+ 247 0236 5B       		popq	%rbx
+ 248              		.cfi_def_cfa_offset 16
+ 249 0237 5D       		popq	%rbp
+ 250              		.cfi_def_cfa_offset 8
+ 251 0238 C3       		ret
+ 252 0239 0F1F8000 		.p2align 4,,10
+ 252      000000
+ 253              		.p2align 3
+ 254              	.L32:
+ 255              		.cfi_restore_state
+ 256 0240 488D7424 		leaq	4(%rsp), %rsi
+ 256      04
+ 257 0245 BFD40500 		movl	$1492, %edi
+ 257      00
+ 258 024a E8000000 		call	getkey_opt@PLT
+ 258      00
+ 259 024f 89C2     		movl	%eax, %edx
+ 260 0251 C1EA10   		shrl	$16, %edx
+ 261 0254 80FA1F   		cmpb	$31, %dl
+ 262 0257 778D     		ja	.L36
+ 263 0259 8B03     		movl	(%rbx), %eax
+ 264 025b 31D2     		xorl	%edx, %edx
+ 265              	.L37:
+ 266 025d 83F809   		cmpl	$9, %eax
+ 267 0260 77BA     		ja	.L31
+ 268 0262 89C1     		movl	%eax, %ecx
+ 269 0264 488D3500 		leaq	CSWTCH.5(%rip), %rsi
+ 269      000000
+ 270 026b 8B0C8E   		movl	(%rsi,%rcx,4), %ecx
+ 271 026e 83F807   		cmpl	$7, %eax
+ 272 0271 0F849800 		je	.L49
+ 272      0000
+ 273 0277 7F67     		jg	.L44
+ 274 0279 83F802   		cmpl	$2, %eax
+ 275 027c 740C     		je	.L43
+ 276 027e 83F804   		cmpl	$4, %eax
+ 277 0281 0F94C0   		sete	%al
+ 278 0284 0FB6C0   		movzbl	%al, %eax
+ 279 0287 C1E002   		sall	$2, %eax
+ 280              	.L43:
+ 281 028a 8903     		movl	%eax, (%rbx)
+ 282 028c 83F903   		cmpl	$3, %ecx
+ 283 028f 746F     		je	.L45
+ 284 0291 83F905   		cmpl	$5, %ecx
+ 285 0294 745A     		je	.L46
+ 286 0296 83F901   		cmpl	$1, %ecx
+ 287 0299 7581     		jne	.L31
+ 288 029b 488D0500 		leaq	key_lower(%rip), %rax
+ 288      000000
+ 289 02a2 8B1490   		movl	(%rax,%rdx,4), %edx
+ 290 02a5 E972FFFF 		jmp	.L31
+ 290      FF
+ 291 02aa 660F1F44 		.p2align 4,,10
+ 291      0000
+ 292              		.p2align 3
+ 293              	.L57:
+ 294 02b0 83F809   		cmpl	$9, %eax
+ 295 02b3 0F875FFF 		ja	.L40
+ 295      FFFF
+ 296 02b9 488D1500 		leaq	CSWTCH.2(%rip), %rdx
+ 296      000000
+ 297 02c0 8B0C82   		movl	(%rdx,%rax,4), %ecx
+ 298 02c3 E950FFFF 		jmp	.L40
+ 298      FF
+ 299 02c8 0F1F8400 		.p2align 4,,10
+ 299      00000000 
+ 300              		.p2align 3
+ 301              	.L59:
+ 302 02d0 488D1500 		leaq	CSWTCH.3(%rip), %rdx
+ 302      000000
+ 303 02d7 8B0C82   		movl	(%rdx,%rax,4), %ecx
+ 304 02da E939FFFF 		jmp	.L40
+ 304      FF
+ 305 02df 90       		.p2align 4,,10
+ 306              		.p2align 3
+ 307              	.L44:
+ 308 02e0 83F809   		cmpl	$9, %eax
+ 309 02e3 0F94C0   		sete	%al
+ 310 02e6 0FB6C0   		movzbl	%al, %eax
+ 311 02e9 C1E002   		sall	$2, %eax
+ 312 02ec EB9C     		jmp	.L43
+ 313 02ee 6690     		.p2align 4,,10
+ 314              		.p2align 3
+ 315              	.L46:
+ 316 02f0 488D0500 		leaq	key_shifted(%rip), %rax
+ 316      000000
+ 317 02f7 8B1490   		movl	(%rax,%rdx,4), %edx
+ 318 02fa E91DFFFF 		jmp	.L31
+ 318      FF
+ 319 02ff 90       		.p2align 4,,10
+ 320              		.p2align 3
+ 321              	.L45:
+ 322 0300 488D0500 		leaq	key_upper(%rip), %rax
+ 322      000000
+ 323 0307 8B1490   		movl	(%rax,%rdx,4), %edx
+ 324 030a E90DFFFF 		jmp	.L31
+ 324      FF
+ 325              	.L49:
+ 326 030f B8020000 		movl	$2, %eax
+ 326      00
+ 327 0314 E971FFFF 		jmp	.L43
+ 327      FF
+ 328              	.L60:
+ 329 0319 E8000000 		call	__stack_chk_fail@PLT
+ 329      00
+ 330              		.cfi_endproc
+ 331              	.LFE6517:
+ 332              		.size	getkey_text, .-getkey_text
+ 333 031e 6690     		.p2align 4
+ 334              		.globl	sys_key_handler
+ 335              		.type	sys_key_handler, @function
+ 336              	sys_key_handler:
+ 337              	.LFB6518:
+ 338              		.cfi_startproc
+ 339 0320 F30F1EFA 		endbr64
+ 340 0324 8D47DC   		leal	-36(%rdi), %eax
+ 341 0327 83F827   		cmpl	$39, %eax
+ 342 032a 7714     		ja	.L62
+ 343 032c 488D1500 		leaq	.L64(%rip), %rdx
+ 343      000000
+ 344 0333 48630482 		movslq	(%rdx,%rax,4), %rax
+ 345 0337 4801D0   		addq	%rdx, %rax
+ 346 033a 3EFFE0   		notrack jmp	*%rax
+ 347              		.section	.rodata
+ 348              		.align 4
+ 349              		.align 4
+ 350              	.L64:
+ 351 0000 00000000 		.long	.L68-.L64
+ 352 0004 00000000 		.long	.L62-.L64
+ 353 0008 00000000 		.long	.L62-.L64
+ 354 000c 00000000 		.long	.L62-.L64
+ 355 0010 00000000 		.long	.L62-.L64
+ 356 0014 00000000 		.long	.L62-.L64
+ 357 0018 00000000 		.long	.L69-.L64
+ 358 001c 00000000 		.long	.L62-.L64
+ 359 0020 00000000 		.long	.L62-.L64
+ 360 0024 00000000 		.long	.L66-.L64
+ 361 0028 00000000 		.long	.L66-.L64
+ 362 002c 00000000 		.long	.L66-.L64
+ 363 0030 00000000 		.long	.L66-.L64
+ 364 0034 00000000 		.long	.L66-.L64
+ 365 0038 00000000 		.long	.L66-.L64
+ 366 003c 00000000 		.long	.L65-.L64
+ 367 0040 00000000 		.long	.L62-.L64
+ 368 0044 00000000 		.long	.L62-.L64
+ 369 0048 00000000 		.long	.L62-.L64
+ 370 004c 00000000 		.long	.L62-.L64
+ 371 0050 00000000 		.long	.L62-.L64
+ 372 0054 00000000 		.long	.L62-.L64
+ 373 0058 00000000 		.long	.L62-.L64
+ 374 005c 00000000 		.long	.L62-.L64
+ 375 0060 00000000 		.long	.L62-.L64
+ 376 0064 00000000 		.long	.L62-.L64
+ 377 0068 00000000 		.long	.L62-.L64
+ 378 006c 00000000 		.long	.L62-.L64
+ 379 0070 00000000 		.long	.L62-.L64
+ 380 0074 00000000 		.long	.L62-.L64
+ 381 0078 00000000 		.long	.L62-.L64
+ 382 007c 00000000 		.long	.L62-.L64
+ 383 0080 00000000 		.long	.L62-.L64
+ 384 0084 00000000 		.long	.L62-.L64
+ 385 0088 00000000 		.long	.L62-.L64
+ 386 008c 00000000 		.long	.L62-.L64
+ 387 0090 00000000 		.long	.L62-.L64
+ 388 0094 00000000 		.long	.L62-.L64
+ 389 0098 00000000 		.long	.L62-.L64
+ 390 009c 00000000 		.long	.L63-.L64
+ 391              		.text
+ 392 033d 0F1F00   		.p2align 4,,10
+ 393              		.p2align 3
+ 394              	.L62:
+ 395 0340 B80E0000 		movl	$14, %eax
+ 395      00
+ 396 0345 C3       		ret
+ 397 0346 662E0F1F 		.p2align 4,,10
+ 397      84000000 
+ 397      0000
+ 398              		.p2align 3
+ 399              	.L66:
+ 400 0350 8D47DB   		leal	-37(%rdi), %eax
+ 401 0353 C3       		ret
+ 402              		.p2align 4,,10
+ 403 0354 0F1F4000 		.p2align 3
+ 404              	.L63:
+ 405 0358 B8070000 		movl	$7, %eax
+ 405      00
+ 406 035d C3       		ret
+ 407 035e 6690     		.p2align 4,,10
+ 408              		.p2align 3
+ 409              	.L65:
+ 410 0360 B8060000 		movl	$6, %eax
+ 410      00
+ 411 0365 C3       		ret
+ 412 0366 662E0F1F 		.p2align 4,,10
+ 412      84000000 
+ 412      0000
+ 413              		.p2align 3
+ 414              	.L69:
+ 415 0370 B8050000 		movl	$5, %eax
+ 415      00
+ 416 0375 C3       		ret
+ 417 0376 662E0F1F 		.p2align 4,,10
+ 417      84000000 
+ 417      0000
+ 418              		.p2align 3
+ 419              	.L68:
+ 420 0380 B8040000 		movl	$4, %eax
+ 420      00
+ 421 0385 C3       		ret
+ 422              		.cfi_endproc
+ 423              	.LFE6518:
+ 424              		.size	sys_key_handler, .-sys_key_handler
+ 425              		.section	.rodata
+ 426              		.align 32
+ 427              		.type	CSWTCH.5, @object
+ 428              		.size	CSWTCH.5, 40
+ 429              	CSWTCH.5:
+ 430 00a0 00000000 		.long	0
+ 431 00a4 01000000 		.long	1
+ 432 00a8 01000000 		.long	1
+ 433 00ac 03000000 		.long	3
+ 434 00b0 03000000 		.long	3
+ 435 00b4 05000000 		.long	5
+ 436 00b8 05000000 		.long	5
+ 437 00bc 05000000 		.long	5
+ 438 00c0 05000000 		.long	5
+ 439 00c4 05000000 		.long	5
+ 440 00c8 00000000 		.align 32
+ 440      00000000 
+ 440      00000000 
+ 440      00000000 
+ 440      00000000 
+ 441              		.type	CSWTCH.3, @object
+ 442              		.size	CSWTCH.3, 40
+ 443              	CSWTCH.3:
+ 444 00e0 05000000 		.long	5
+ 445 00e4 06000000 		.long	6
+ 446 00e8 07000000 		.long	7
+ 447 00ec 08000000 		.long	8
+ 448 00f0 09000000 		.long	9
+ 449 00f4 00000000 		.long	0
+ 450 00f8 00000000 		.long	0
+ 451 00fc 02000000 		.long	2
+ 452 0100 00000000 		.long	0
+ 453 0104 04000000 		.long	4
+ 454 0108 00000000 		.align 32
+ 454      00000000 
+ 454      00000000 
+ 454      00000000 
+ 454      00000000 
+ 455              		.type	CSWTCH.2, @object
+ 456              		.size	CSWTCH.2, 40
+ 457              	CSWTCH.2:
+ 458 0120 01000000 		.long	1
+ 459 0124 03000000 		.long	3
+ 460 0128 00000000 		.long	0
+ 461 012c 00000000 		.long	0
+ 462 0130 00000000 		.long	0
+ 463 0134 02000000 		.long	2
+ 464 0138 02000000 		.long	2
+ 465 013c 02000000 		.long	2
+ 466 0140 04000000 		.long	4
+ 467 0144 04000000 		.long	4
+ 468              		.globl	key_printable_lower
+ 469 0148 00000000 		.align 32
+ 469      00000000 
+ 469      00000000 
+ 469      00000000 
+ 469      00000000 
+ 470              		.type	key_printable_lower, @object
+ 471              		.size	key_printable_lower, 204
+ 472              	key_printable_lower:
+ 473 0160 00000000 		.long	0
+ 474 0164 00000000 		.long	0
+ 475 0168 7A000000 		.long	122
+ 476 016c 20000000 		.long	32
+ 477 0170 22000000 		.long	34
+ 478 0174 2D000000 		.long	45
+ 479 0178 00000000 		.long	0
+ 480 017c 75000000 		.long	117
+ 481 0180 76000000 		.long	118
+ 482 0184 77000000 		.long	119
+ 483 0188 78000000 		.long	120
+ 484 018c 79000000 		.long	121
+ 485 0190 70000000 		.long	112
+ 486 0194 71000000 		.long	113
+ 487 0198 72000000 		.long	114
+ 488 019c 73000000 		.long	115
+ 489 01a0 74000000 		.long	116
+ 490 01a4 6D000000 		.long	109
+ 491 01a8 6E000000 		.long	110
+ 492 01ac 6F000000 		.long	111
+ 493 01b0 00000000 		.long	0
+ 494 01b4 67000000 		.long	103
+ 495 01b8 68000000 		.long	104
+ 496 01bc 69000000 		.long	105
+ 497 01c0 6A000000 		.long	106
+ 498 01c4 6B000000 		.long	107
+ 499 01c8 6C000000 		.long	108
+ 500 01cc 61000000 		.long	97
+ 501 01d0 62000000 		.long	98
+ 502 01d4 63000000 		.long	99
+ 503 01d8 64000000 		.long	100
+ 504 01dc 65000000 		.long	101
+ 505 01e0 66000000 		.long	102
+ 506 01e4 00000000 		.long	0
+ 507 01e8 00000000 		.long	0
+ 508 01ec 00000000 		.long	0
+ 509 01f0 00000000 		.long	0
+ 510 01f4 00000000 		.long	0
+ 511 01f8 00000000 		.long	0
+ 512 01fc 00000000 		.long	0
+ 513 0200 00000000 		.long	0
+ 514 0204 00000000 		.long	0
+ 515 0208 00000000 		.long	0
+ 516 020c 00000000 		.long	0
+ 517 0210 00000000 		.long	0
+ 518 0214 00000000 		.long	0
+ 519 0218 00000000 		.long	0
+ 520 021c 00000000 		.long	0
+ 521 0220 00000000 		.long	0
+ 522 0224 00000000 		.long	0
+ 523 0228 00000000 		.long	0
+ 524              		.globl	key_printable_upper
+ 525 022c 00000000 		.align 32
+ 525      00000000 
+ 525      00000000 
+ 525      00000000 
+ 525      00000000 
+ 526              		.type	key_printable_upper, @object
+ 527              		.size	key_printable_upper, 204
+ 528              	key_printable_upper:
+ 529 0240 00000000 		.long	0
+ 530 0244 00000000 		.long	0
+ 531 0248 5A000000 		.long	90
+ 532 024c 20000000 		.long	32
+ 533 0250 22000000 		.long	34
+ 534 0254 2D000000 		.long	45
+ 535 0258 00000000 		.long	0
+ 536 025c 55000000 		.long	85
+ 537 0260 56000000 		.long	86
+ 538 0264 57000000 		.long	87
+ 539 0268 58000000 		.long	88
+ 540 026c 59000000 		.long	89
+ 541 0270 50000000 		.long	80
+ 542 0274 51000000 		.long	81
+ 543 0278 52000000 		.long	82
+ 544 027c 53000000 		.long	83
+ 545 0280 54000000 		.long	84
+ 546 0284 4D000000 		.long	77
+ 547 0288 4E000000 		.long	78
+ 548 028c 4F000000 		.long	79
+ 549 0290 00000000 		.long	0
+ 550 0294 47000000 		.long	71
+ 551 0298 48000000 		.long	72
+ 552 029c 49000000 		.long	73
+ 553 02a0 4A000000 		.long	74
+ 554 02a4 4B000000 		.long	75
+ 555 02a8 4C000000 		.long	76
+ 556 02ac 41000000 		.long	65
+ 557 02b0 42000000 		.long	66
+ 558 02b4 43000000 		.long	67
+ 559 02b8 44000000 		.long	68
+ 560 02bc 45000000 		.long	69
+ 561 02c0 46000000 		.long	70
+ 562 02c4 00000000 		.long	0
+ 563 02c8 00000000 		.long	0
+ 564 02cc 00000000 		.long	0
+ 565 02d0 00000000 		.long	0
+ 566 02d4 00000000 		.long	0
+ 567 02d8 00000000 		.long	0
+ 568 02dc 00000000 		.long	0
+ 569 02e0 00000000 		.long	0
+ 570 02e4 00000000 		.long	0
+ 571 02e8 00000000 		.long	0
+ 572 02ec 00000000 		.long	0
+ 573 02f0 00000000 		.long	0
+ 574 02f4 00000000 		.long	0
+ 575 02f8 00000000 		.long	0
+ 576 02fc 00000000 		.long	0
+ 577 0300 00000000 		.long	0
+ 578 0304 00000000 		.long	0
+ 579 0308 00000000 		.long	0
+ 580              		.globl	key_printable_shifted
+ 581 030c 00000000 		.align 32
+ 581      00000000 
+ 581      00000000 
+ 581      00000000 
+ 581      00000000 
+ 582              		.type	key_printable_shifted, @object
+ 583              		.size	key_printable_shifted, 204
+ 584              	key_printable_shifted:
+ 585 0320 00000000 		.long	0
+ 586 0324 00000000 		.long	0
+ 587 0328 00000000 		.long	0
+ 588 032c 3D000000 		.long	61
+ 589 0330 00000000 		.long	0
+ 590 0334 00000000 		.long	0
+ 591 0338 00000000 		.long	0
+ 592 033c 00000000 		.long	0
+ 593 0340 00000000 		.long	0
+ 594 0344 00000000 		.long	0
+ 595 0348 5B000000 		.long	91
+ 596 034c 5D000000 		.long	93
+ 597 0350 00000000 		.long	0
+ 598 0354 00000000 		.long	0
+ 599 0358 00000000 		.long	0
+ 600 035c 7B000000 		.long	123
+ 601 0360 7D000000 		.long	125
+ 602 0364 00000000 		.long	0
+ 603 0368 00000000 		.long	0
+ 604 036c 00000000 		.long	0
+ 605 0370 00000000 		.long	0
+ 606 0374 00000000 		.long	0
+ 607 0378 00000000 		.long	0
+ 608 037c 00000000 		.long	0
+ 609 0380 00000000 		.long	0
+ 610 0384 00000000 		.long	0
+ 611 0388 00000000 		.long	0
+ 612 038c 00000000 		.long	0
+ 613 0390 00000000 		.long	0
+ 614 0394 00000000 		.long	0
+ 615 0398 00000000 		.long	0
+ 616 039c 00000000 		.long	0
+ 617 03a0 00000000 		.long	0
+ 618 03a4 00000000 		.long	0
+ 619 03a8 00000000 		.long	0
+ 620 03ac 00000000 		.long	0
+ 621 03b0 00000000 		.long	0
+ 622 03b4 00000000 		.long	0
+ 623 03b8 00000000 		.long	0
+ 624 03bc 00000000 		.long	0
+ 625 03c0 00000000 		.long	0
+ 626 03c4 00000000 		.long	0
+ 627 03c8 00000000 		.long	0
+ 628 03cc 00000000 		.long	0
+ 629 03d0 00000000 		.long	0
+ 630 03d4 00000000 		.long	0
+ 631 03d8 00000000 		.long	0
+ 632 03dc 00000000 		.long	0
+ 633 03e0 00000000 		.long	0
+ 634 03e4 00000000 		.long	0
+ 635 03e8 00000000 		.long	0
+ 636              		.globl	key_printable
+ 637 03ec 00000000 		.align 32
+ 637      00000000 
+ 637      00000000 
+ 637      00000000 
+ 637      00000000 
+ 638              		.type	key_printable, @object
+ 639              		.size	key_printable, 204
+ 640              	key_printable:
+ 641 0400 00000000 		.long	0
+ 642 0404 00000000 		.long	0
+ 643 0408 30000000 		.long	48
+ 644 040c 2E000000 		.long	46
+ 645 0410 00000000 		.long	0
+ 646 0414 00000000 		.long	0
+ 647 0418 00000000 		.long	0
+ 648 041c 31000000 		.long	49
+ 649 0420 32000000 		.long	50
+ 650 0424 33000000 		.long	51
+ 651 0428 2B000000 		.long	43
+ 652 042c 2D000000 		.long	45
+ 653 0430 34000000 		.long	52
+ 654 0434 35000000 		.long	53
+ 655 0438 36000000 		.long	54
+ 656 043c 2A000000 		.long	42
+ 657 0440 2F000000 		.long	47
+ 658 0444 37000000 		.long	55
+ 659 0448 38000000 		.long	56
+ 660 044c 39000000 		.long	57
+ 661 0450 00000000 		.long	0
+ 662 0454 00000000 		.long	0
+ 663 0458 00000000 		.long	0
+ 664 045c 28000000 		.long	40
+ 665 0460 29000000 		.long	41
+ 666 0464 2C000000 		.long	44
+ 667 0468 00000000 		.long	0
+ 668 046c 00000000 		.long	0
+ 669 0470 00000000 		.long	0
+ 670 0474 00000000 		.long	0
+ 671 0478 00000000 		.long	0
+ 672 047c 00000000 		.long	0
+ 673 0480 00000000 		.long	0
+ 674 0484 00000000 		.long	0
+ 675 0488 00000000 		.long	0
+ 676 048c 5E000000 		.long	94
+ 677 0490 00000000 		.long	0
+ 678 0494 00000000 		.long	0
+ 679 0498 00000000 		.long	0
+ 680 049c 00000000 		.long	0
+ 681 04a0 00000000 		.long	0
+ 682 04a4 00000000 		.long	0
+ 683 04a8 00000000 		.long	0
+ 684 04ac 00000000 		.long	0
+ 685 04b0 00000000 		.long	0
+ 686 04b4 00000000 		.long	0
+ 687 04b8 00000000 		.long	0
+ 688 04bc 00000000 		.long	0
+ 689 04c0 00000000 		.long	0
+ 690 04c4 00000000 		.long	0
+ 691 04c8 00000000 		.long	0
+ 692              		.globl	key_lower
+ 693 04cc 00000000 		.align 32
+ 693      00000000 
+ 693      00000000 
+ 693      00000000 
+ 693      00000000 
+ 694              		.type	key_lower, @object
+ 695              		.size	key_lower, 204
+ 696              	key_lower:
+ 697 04e0 00000000 		.long	0
+ 698 04e4 01000000 		.long	1
+ 699 04e8 81000000 		.long	129
+ 700 04ec 63000000 		.long	99
+ 701 04f0 64000000 		.long	100
+ 702 04f4 05000000 		.long	5
+ 703 04f8 06000000 		.long	6
+ 704 04fc 82000000 		.long	130
+ 705 0500 83000000 		.long	131
+ 706 0504 84000000 		.long	132
+ 707 0508 85000000 		.long	133
+ 708 050c 86000000 		.long	134
+ 709 0510 87000000 		.long	135
+ 710 0514 88000000 		.long	136
+ 711 0518 89000000 		.long	137
+ 712 051c 8A000000 		.long	138
+ 713 0520 8B000000 		.long	139
+ 714 0524 8C000000 		.long	140
+ 715 0528 8D000000 		.long	141
+ 716 052c 8E000000 		.long	142
+ 717 0530 72000000 		.long	114
+ 718 0534 8F000000 		.long	143
+ 719 0538 90000000 		.long	144
+ 720 053c 91000000 		.long	145
+ 721 0540 92000000 		.long	146
+ 722 0544 93000000 		.long	147
+ 723 0548 94000000 		.long	148
+ 724 054c 95000000 		.long	149
+ 725 0550 96000000 		.long	150
+ 726 0554 97000000 		.long	151
+ 727 0558 98000000 		.long	152
+ 728 055c 99000000 		.long	153
+ 729 0560 9A000000 		.long	154
+ 730 0564 21000000 		.long	33
+ 731 0568 7F000000 		.long	127
+ 732 056c 80000000 		.long	128
+ 733 0570 24000000 		.long	36
+ 734 0574 25000000 		.long	37
+ 735 0578 26000000 		.long	38
+ 736 057c 27000000 		.long	39
+ 737 0580 28000000 		.long	40
+ 738 0584 29000000 		.long	41
+ 739 0588 2A000000 		.long	42
+ 740 058c 2B000000 		.long	43
+ 741 0590 2C000000 		.long	44
+ 742 0594 2D000000 		.long	45
+ 743 0598 2E000000 		.long	46
+ 744 059c 2F000000 		.long	47
+ 745 05a0 30000000 		.long	48
+ 746 05a4 31000000 		.long	49
+ 747 05a8 32000000 		.long	50
+ 748              		.globl	key_upper
+ 749 05ac 00000000 		.align 32
+ 749      00000000 
+ 749      00000000 
+ 749      00000000 
+ 749      00000000 
+ 750              		.type	key_upper, @object
+ 751              		.size	key_upper, 204
+ 752              	key_upper:
+ 753 05c0 00000000 		.long	0
+ 754 05c4 01000000 		.long	1
+ 755 05c8 62000000 		.long	98
+ 756 05cc 63000000 		.long	99
+ 757 05d0 64000000 		.long	100
+ 758 05d4 05000000 		.long	5
+ 759 05d8 06000000 		.long	6
+ 760 05dc 65000000 		.long	101
+ 761 05e0 66000000 		.long	102
+ 762 05e4 67000000 		.long	103
+ 763 05e8 68000000 		.long	104
+ 764 05ec 69000000 		.long	105
+ 765 05f0 6A000000 		.long	106
+ 766 05f4 6B000000 		.long	107
+ 767 05f8 6C000000 		.long	108
+ 768 05fc 6D000000 		.long	109
+ 769 0600 6E000000 		.long	110
+ 770 0604 6F000000 		.long	111
+ 771 0608 70000000 		.long	112
+ 772 060c 71000000 		.long	113
+ 773 0610 72000000 		.long	114
+ 774 0614 73000000 		.long	115
+ 775 0618 74000000 		.long	116
+ 776 061c 75000000 		.long	117
+ 777 0620 76000000 		.long	118
+ 778 0624 77000000 		.long	119
+ 779 0628 78000000 		.long	120
+ 780 062c 79000000 		.long	121
+ 781 0630 7A000000 		.long	122
+ 782 0634 7B000000 		.long	123
+ 783 0638 7C000000 		.long	124
+ 784 063c 7D000000 		.long	125
+ 785 0640 7E000000 		.long	126
+ 786 0644 21000000 		.long	33
+ 787 0648 7F000000 		.long	127
+ 788 064c 80000000 		.long	128
+ 789 0650 24000000 		.long	36
+ 790 0654 25000000 		.long	37
+ 791 0658 26000000 		.long	38
+ 792 065c 27000000 		.long	39
+ 793 0660 28000000 		.long	40
+ 794 0664 29000000 		.long	41
+ 795 0668 2A000000 		.long	42
+ 796 066c 2B000000 		.long	43
+ 797 0670 2C000000 		.long	44
+ 798 0674 2D000000 		.long	45
+ 799 0678 2E000000 		.long	46
+ 800 067c 2F000000 		.long	47
+ 801 0680 30000000 		.long	48
+ 802 0684 31000000 		.long	49
+ 803 0688 32000000 		.long	50
+ 804              		.globl	key_shifted
+ 805 068c 00000000 		.align 32
+ 805      00000000 
+ 805      00000000 
+ 805      00000000 
+ 805      00000000 
+ 806              		.type	key_shifted, @object
+ 807              		.size	key_shifted, 204
+ 808              	key_shifted:
+ 809 06a0 00000000 		.long	0
+ 810 06a4 33000000 		.long	51
+ 811 06a8 34000000 		.long	52
+ 812 06ac 35000000 		.long	53
+ 813 06b0 36000000 		.long	54
+ 814 06b4 37000000 		.long	55
+ 815 06b8 38000000 		.long	56
+ 816 06bc 39000000 		.long	57
+ 817 06c0 3A000000 		.long	58
+ 818 06c4 00000000 		.long	0
+ 819 06c8 3B000000 		.long	59
+ 820 06cc 3C000000 		.long	60
+ 821 06d0 3D000000 		.long	61
+ 822 06d4 3E000000 		.long	62
+ 823 06d8 00000000 		.long	0
+ 824 06dc 3F000000 		.long	63
+ 825 06e0 40000000 		.long	64
+ 826 06e4 41000000 		.long	65
+ 827 06e8 42000000 		.long	66
+ 828 06ec 43000000 		.long	67
+ 829 06f0 44000000 		.long	68
+ 830 06f4 45000000 		.long	69
+ 831 06f8 46000000 		.long	70
+ 832 06fc 47000000 		.long	71
+ 833 0700 48000000 		.long	72
+ 834 0704 49000000 		.long	73
+ 835 0708 4A000000 		.long	74
+ 836 070c 4B000000 		.long	75
+ 837 0710 4C000000 		.long	76
+ 838 0714 4D000000 		.long	77
+ 839 0718 4E000000 		.long	78
+ 840 071c 4F000000 		.long	79
+ 841 0720 50000000 		.long	80
+ 842 0724 51000000 		.long	81
+ 843 0728 52000000 		.long	82
+ 844 072c 53000000 		.long	83
+ 845 0730 54000000 		.long	84
+ 846 0734 55000000 		.long	85
+ 847 0738 56000000 		.long	86
+ 848 073c 27000000 		.long	39
+ 849 0740 57000000 		.long	87
+ 850 0744 58000000 		.long	88
+ 851 0748 59000000 		.long	89
+ 852 074c 5A000000 		.long	90
+ 853 0750 5B000000 		.long	91
+ 854 0754 5C000000 		.long	92
+ 855 0758 5D000000 		.long	93
+ 856 075c 5E000000 		.long	94
+ 857 0760 5F000000 		.long	95
+ 858 0764 60000000 		.long	96
+ 859 0768 61000000 		.long	97
+ 860 076c 00000000 		.align 32
+ 860      00000000 
+ 860      00000000 
+ 860      00000000 
+ 860      00000000 
+ 861              		.type	key_convert, @object
+ 862              		.size	key_convert, 604
+ 863              	key_convert:
+ 864 0780 00000000 		.long	0
+ 865 0784 00000000 		.long	0
+ 866 0788 00000000 		.long	0
+ 867 078c 00000000 		.long	0
+ 868 0790 00000000 		.long	0
+ 869 0794 00000000 		.long	0
+ 870 0798 00000000 		.long	0
+ 871 079c 01000000 		.long	1
+ 872 07a0 00000000 		.long	0
+ 873 07a4 00000000 		.long	0
+ 874 07a8 00000000 		.long	0
+ 875 07ac 00000000 		.long	0
+ 876 07b0 00000000 		.long	0
+ 877 07b4 00000000 		.long	0
+ 878 07b8 00000000 		.long	0
+ 879 07bc 00000000 		.long	0
+ 880 07c0 00000000 		.long	0
+ 881 07c4 02000000 		.long	2
+ 882 07c8 03000000 		.long	3
+ 883 07cc 04000000 		.long	4
+ 884 07d0 05000000 		.long	5
+ 885 07d4 06000000 		.long	6
+ 886 07d8 00000000 		.long	0
+ 887 07dc 00000000 		.long	0
+ 888 07e0 00000000 		.long	0
+ 889 07e4 00000000 		.long	0
+ 890 07e8 00000000 		.long	0
+ 891 07ec 00000000 		.long	0
+ 892 07f0 00000000 		.long	0
+ 893 07f4 00000000 		.long	0
+ 894 07f8 00000000 		.long	0
+ 895 07fc 00000000 		.long	0
+ 896 0800 00000000 		.long	0
+ 897 0804 07000000 		.long	7
+ 898 0808 08000000 		.long	8
+ 899 080c 09000000 		.long	9
+ 900 0810 0A000000 		.long	10
+ 901 0814 0B000000 		.long	11
+ 902 0818 00000000 		.long	0
+ 903 081c 00000000 		.long	0
+ 904 0820 00000000 		.long	0
+ 905 0824 00000000 		.long	0
+ 906 0828 00000000 		.long	0
+ 907 082c 00000000 		.long	0
+ 908 0830 00000000 		.long	0
+ 909 0834 00000000 		.long	0
+ 910 0838 00000000 		.long	0
+ 911 083c 00000000 		.long	0
+ 912 0840 00000000 		.long	0
+ 913 0844 0C000000 		.long	12
+ 914 0848 0D000000 		.long	13
+ 915 084c 0E000000 		.long	14
+ 916 0850 0F000000 		.long	15
+ 917 0854 10000000 		.long	16
+ 918 0858 00000000 		.long	0
+ 919 085c 00000000 		.long	0
+ 920 0860 00000000 		.long	0
+ 921 0864 00000000 		.long	0
+ 922 0868 00000000 		.long	0
+ 923 086c 00000000 		.long	0
+ 924 0870 00000000 		.long	0
+ 925 0874 00000000 		.long	0
+ 926 0878 00000000 		.long	0
+ 927 087c 00000000 		.long	0
+ 928 0880 00000000 		.long	0
+ 929 0884 11000000 		.long	17
+ 930 0888 12000000 		.long	18
+ 931 088c 13000000 		.long	19
+ 932 0890 14000000 		.long	20
+ 933 0894 00000000 		.long	0
+ 934 0898 00000000 		.long	0
+ 935 089c 00000000 		.long	0
+ 936 08a0 00000000 		.long	0
+ 937 08a4 00000000 		.long	0
+ 938 08a8 00000000 		.long	0
+ 939 08ac 00000000 		.long	0
+ 940 08b0 00000000 		.long	0
+ 941 08b4 00000000 		.long	0
+ 942 08b8 00000000 		.long	0
+ 943 08bc 00000000 		.long	0
+ 944 08c0 00000000 		.long	0
+ 945 08c4 15000000 		.long	21
+ 946 08c8 16000000 		.long	22
+ 947 08cc 17000000 		.long	23
+ 948 08d0 18000000 		.long	24
+ 949 08d4 19000000 		.long	25
+ 950 08d8 1A000000 		.long	26
+ 951 08dc 00000000 		.long	0
+ 952 08e0 00000000 		.long	0
+ 953 08e4 00000000 		.long	0
+ 954 08e8 00000000 		.long	0
+ 955 08ec 00000000 		.long	0
+ 956 08f0 00000000 		.long	0
+ 957 08f4 00000000 		.long	0
+ 958 08f8 00000000 		.long	0
+ 959 08fc 00000000 		.long	0
+ 960 0900 00000000 		.long	0
+ 961 0904 1B000000 		.long	27
+ 962 0908 1C000000 		.long	28
+ 963 090c 1D000000 		.long	29
+ 964 0910 1E000000 		.long	30
+ 965 0914 1F000000 		.long	31
+ 966 0918 20000000 		.long	32
+ 967 091c 00000000 		.long	0
+ 968 0920 00000000 		.long	0
+ 969 0924 00000000 		.long	0
+ 970 0928 00000000 		.long	0
+ 971 092c 00000000 		.long	0
+ 972 0930 00000000 		.long	0
+ 973 0934 00000000 		.long	0
+ 974 0938 00000000 		.long	0
+ 975 093c 00000000 		.long	0
+ 976 0940 00000000 		.long	0
+ 977 0944 21000000 		.long	33
+ 978 0948 22000000 		.long	34
+ 979 094c 23000000 		.long	35
+ 980 0950 24000000 		.long	36
+ 981 0954 25000000 		.long	37
+ 982 0958 26000000 		.long	38
+ 983 095c 00000000 		.long	0
+ 984 0960 00000000 		.long	0
+ 985 0964 00000000 		.long	0
+ 986 0968 00000000 		.long	0
+ 987 096c 00000000 		.long	0
+ 988 0970 00000000 		.long	0
+ 989 0974 00000000 		.long	0
+ 990 0978 00000000 		.long	0
+ 991 097c 00000000 		.long	0
+ 992 0980 00000000 		.long	0
+ 993 0984 27000000 		.long	39
+ 994 0988 28000000 		.long	40
+ 995 098c 29000000 		.long	41
+ 996 0990 2A000000 		.long	42
+ 997 0994 2B000000 		.long	43
+ 998 0998 2C000000 		.long	44
+ 999 099c 00000000 		.long	0
+ 1000 09a0 00000000 		.long	0
+ 1001 09a4 00000000 		.long	0
+ 1002 09a8 00000000 		.long	0
+ 1003 09ac 00000000 		.long	0
+ 1004 09b0 00000000 		.long	0
+ 1005 09b4 00000000 		.long	0
+ 1006 09b8 00000000 		.long	0
+ 1007 09bc 00000000 		.long	0
+ 1008 09c0 00000000 		.long	0
+ 1009 09c4 2D000000 		.long	45
+ 1010 09c8 2E000000 		.long	46
+ 1011 09cc 2F000000 		.long	47
+ 1012 09d0 30000000 		.long	48
+ 1013 09d4 31000000 		.long	49
+ 1014 09d8 32000000 		.long	50
+ 1015              		.ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
+ 1016              		.section	.note.GNU-stack,"",@progbits
+ 1017              		.section	.note.gnu.property,"a"
+ 1018              		.align 8
+ 1019 0000 04000000 		.long	1f - 0f
+ 1020 0004 10000000 		.long	4f - 1f
+ 1021 0008 05000000 		.long	5
+ 1022              	0:
+ 1023 000c 474E5500 		.string	"GNU"
+ 1024              	1:
+ 1025              		.align 8
+ 1026 0010 020000C0 		.long	0xc0000002
+ 1027 0014 04000000 		.long	3f - 2f
+ 1028              	2:
+ 1029 0018 03000000 		.long	0x3
+ 1030              	3:
+ 1031 001c 00000000 		.align 8
+ 1032              	4:
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 getkey.c
+     /tmp/ccu3Blsb.s:6      .text:0000000000000000 getkey_wrapper
+     /tmp/ccu3Blsb.s:863    .rodata:0000000000000780 key_convert
+     /tmp/ccu3Blsb.s:72     .text:00000000000000a0 update_modifier
+     /tmp/ccu3Blsb.s:443    .rodata:00000000000000e0 CSWTCH.3
+     /tmp/ccu3Blsb.s:457    .rodata:0000000000000120 CSWTCH.2
+     /tmp/ccu3Blsb.s:105    .text:00000000000000e0 current_modifier
+     /tmp/ccu3Blsb.s:429    .rodata:00000000000000a0 CSWTCH.5
+     /tmp/ccu3Blsb.s:122    .text:0000000000000100 use_modifier
+     /tmp/ccu3Blsb.s:155    .text:0000000000000140 modify_keypress
+     /tmp/ccu3Blsb.s:696    .rodata:00000000000004e0 key_lower
+     /tmp/ccu3Blsb.s:808    .rodata:00000000000006a0 key_shifted
+     /tmp/ccu3Blsb.s:752    .rodata:00000000000005c0 key_upper
+     /tmp/ccu3Blsb.s:188    .text:0000000000000190 getkey_text
+     /tmp/ccu3Blsb.s:336    .text:0000000000000320 sys_key_handler
+     /tmp/ccu3Blsb.s:472    .rodata:0000000000000160 key_printable_lower
+     /tmp/ccu3Blsb.s:528    .rodata:0000000000000240 key_printable_upper
+     /tmp/ccu3Blsb.s:584    .rodata:0000000000000320 key_printable_shifted
+     /tmp/ccu3Blsb.s:640    .rodata:0000000000000400 key_printable
+
+UNDEFINED SYMBOLS
+delay
+getkey_opt
+__stack_chk_fail

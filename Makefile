@@ -2,6 +2,7 @@ PROJECT = cg50-sdl2
 CC = gcc
 CFLAGS = -O3 $(shell sdl2-config --cflags)
 CFLAGS += -MMD -MP
+#CFLAGS += -Wa,-aghlns=$<.lst
 LIBS = -O3 $(shell sdl2-config --libs)
 BUILD_DIR=sdl2
 SRC_DIR=src

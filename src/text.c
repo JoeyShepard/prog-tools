@@ -336,3 +336,47 @@ struct point outline_text(const char *text, struct point pos, int32_t fg, int32_
     pos.x+=width+1;
     return pos;
 }
+
+void text_int32(int32_t num, char *text)
+{
+    int32_t divider=1000000000;
+    bool digit_found=false;
+    if (num<0)
+    {
+        *text='-';
+        text++;
+        num=(~num)+1;
+    }
+    *text=0;
+    while (divider)
+    {
+        if (num/divider)
+        {
+            *text='0'+num/divider;
+            text++;
+            *text=0;
+            num%=divider;
+            digit_found=true;
+        }
+        divider/=10;
+    }
+    if (digit_found==false)
+    {
+        *text='0';
+        *(text+1)=0;
+    }
+}
+
+void text_hex32(uint32_t num, char *text, int digits)
+{
+    for (int i=(digits-1);i>=0;i--)
+    {
+        int digit=num&0xF;
+        if (digit<10) digit+='0';
+        else digit+='A'-10;
+        text[i]=digit;
+        num/=0x10;
+    }
+    text[digits]=0;
+}
+
