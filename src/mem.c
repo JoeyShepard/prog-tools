@@ -5,6 +5,7 @@
 #include "compatibility.h"
 #include "debug.h"
 #include "error.h"
+#include "getkey.h"
 #include "manager.h"
 #include "mem.h"
 #include "structs.h"
@@ -156,11 +157,16 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
         //Object size must be aligned
         error_exit(ERROR_UNALIGNED_WRITE);
     }
+
+    //Add space for address of next link
+    size+=sizeof(uint32_t);
+
     *(uint32_t *)heap_ptr+=size;
     heap_ptr+=HEAP_OBJECTS;
-    while(*(uint32_t *)heap_ptr) heap_ptr+=*(uint32_t *)heap_ptr;
+    while(*(uint32_t *)heap_ptr)
+        heap_ptr+=*(uint32_t *)heap_ptr;
     *(uint32_t *)heap_ptr=size;
     *(uint32_t *)(heap_ptr+size)=0;
-    return heap_ptr;
+    return heap_ptr+sizeof(uint32_t);
 }
 

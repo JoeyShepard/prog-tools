@@ -53,6 +53,7 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
         {
             struct point new_pos=pos;
             char num_buffer[TEXT_INT32_SIZE];
+            uint8_t *obj_ptr=heap_ptr+HEAP_OBJECTS;
 
             //Heap left
             new_pos=pos;
@@ -61,17 +62,18 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
             draw_text(num_buffer,new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
             dupdate();
 
-            debug_heap(0);
+            //debug_heap(0);
 
             //Objects
             new_pos.y+=10;
             new_pos.x=pos.x;
-            uint8_t *obj_ptr=heap_ptr+HEAP_OBJECTS;
+            obj_ptr=heap_ptr+HEAP_OBJECTS;
             int obj_count=0;
             while(*(uint32_t *)obj_ptr)
             {
                 obj_count++;
                 obj_ptr+=*(uint32_t *)obj_ptr;
+
             }
             new_pos=draw_text("Object count: ",new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
             text_int32(obj_count,num_buffer);
@@ -84,6 +86,37 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
             text_int32(obj_ptr-heap_ptr-HEAP_OBJECTS,num_buffer);
             draw_text(num_buffer,new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
             dupdate();
+
+            //Check object values
+            new_pos.y+=10;
+            new_pos.x=pos.x;
+            obj_ptr=heap_ptr+HEAP_OBJECTS;
+
+            int search_val=(window.tab_index<<4)|window.selected_split;
+            //printf("Expecting %X\n",search_val);
+            while(*(uint32_t *)obj_ptr)
+            {
+                //printf("%p: %X\n",obj_ptr,*(uint32_t *)obj_ptr);
+                //printf("(@%p = %X)\n",obj_ptr+*(uint32_t *)obj_ptr,*(uint32_t *)(obj_ptr+*(uint32_t *)obj_ptr));
+                uint8_t *start_ptr=obj_ptr+4;
+                obj_ptr+=*(uint32_t *)obj_ptr;
+                //printf(" - %p: ",start_ptr);
+                for (;start_ptr<obj_ptr;start_ptr++)
+                {
+                    if (*start_ptr!=search_val)
+                    {
+                        struct point error_pos={0,0};
+                        draw_text("ERROR: test values don't match!",error_pos,COL_WHITE,COL_RED,false,FONT_5x8);
+                        getkey_wrapper(true);
+                        getkey_wrapper(true);
+                        getkey_wrapper(true);
+
+                        return COMMAND_DONE;
+                    }
+                }
+            }
+            //printf("\n");
+            new_pos=draw_text("Test values match",new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
         }
         redraw=true;
         
@@ -93,7 +126,17 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
         switch (key)
         {
             case VKEY_EXE:
-                add_object(((window.tab_index+1)*10+window.selected_split)*4,heap_ptr);
+                int obj_size=((window.tab_index+1)*10+window.selected_split)*4;
+                uint8_t *debug_ptr=add_object(obj_size,heap_ptr);
+                int search_val=(window.tab_index<<4)|window.selected_split;
+
+                //printf("New object - writing %d to %p %X times\n\n",search_val,debug_ptr,obj_size);
+
+                for (int i=0;i<obj_size;i++)
+                {
+                    *debug_ptr=search_val;
+                    debug_ptr++;
+                }
                 break;
             default:
                 //Check for sys_keys like MENU, OFF, etc
