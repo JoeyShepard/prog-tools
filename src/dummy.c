@@ -2,11 +2,13 @@
 #include <string.h>
 
 #include "compatibility.h"
+#include "debug.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "text.h"
 #include "dummy.h"
 #include "manager.h"
+#include "mem.h"
 #include "structs.h"
 
 int placeholder(int command_ID, struct WindowInfo *windows, int selected_window, const char *title)
@@ -28,86 +30,78 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     {
         case COMMAND_START:
             draw_text("Start",pos,COL_GREEN,-1,false,FONT_5x8);
-            dupdate();
-
-            char hex_buffer[TEXT_HEX32_SIZE];
-
-            //Heap address
-            text_hex32((uint32_t)heap,hex_buffer,8);
-            pos.y+=10;
-            draw_text(hex_buffer,pos,COL_WHITE,-1,false,FONT_5x8);
-            dupdate();
-            
-            //memcpy uint32
-            uint32_t a=0x12345678;
-            uint32_t b;
-            memcpy(&b,&a,sizeof(uint32_t));
-            text_hex32(b,hex_buffer,8);
-            pos.y+=10;
-            draw_text(hex_buffer,pos,COL_WHITE,-1,false,FONT_5x8);
-            dupdate();
-
-            //memcpy uint32 to uint8
-            uint8_t test_array[7];
-            a=0x12345678;
-            memcpy(test_array,&a,sizeof(uint32_t));
-            a=0x4567890A;
-            memcpy(test_array+1,&a,sizeof(uint32_t));
-            a=0x7890ABCD;
-            memcpy(test_array+2,&a,sizeof(uint32_t));
-            a=0xABCDEF0;
-            memcpy(test_array+3,&a,sizeof(uint32_t));
-            pos.y+=10;
-            draw_text("Values written",pos,COL_WHITE,-1,false,FONT_5x8);
-            dupdate();
-
-            //check values
-            pos.y+=10;
-            struct point pos_save=pos;
-            for (int i=0;i<7;i++)
-            {
-                text_hex32(*(test_array+i),hex_buffer,2); 
-                pos=draw_text(hex_buffer,pos,COL_WHITE,-1,false,FONT_5x8);
-                pos=draw_text(" ",pos,COL_WHITE,-1,false,FONT_5x8);
-            }
-            pos=pos_save;
-
-            //memcpy uint8 to uint32
-            for (int i;i<4;i++)
-            {
-                memcpy(&b,test_array+i,sizeof(uint32_t));
-                text_hex32(b,hex_buffer,8);
-                pos.y+=10;
-                draw_text(hex_buffer,pos,COL_WHITE,-1,false,FONT_5x8);
-                dupdate();
-            }
-
             break;
         case COMMAND_RESUME:
             draw_text("Resume",pos,COL_GREEN,-1,false,FONT_5x8);
             break;
         case COMMAND_REDRAW:
             draw_text("Redraw",pos,COL_GREEN,-1,false,FONT_5x8);
+            //Return if only redrawing
             return COMMAND_DONE;
     }
-   
     dupdate();
 
+    //Start or Resume so enter input loop
+    pos.y+=10;
+    select_heap(window.tab_index,window.selected_split);
+    uint8_t *heap_ptr=get_split_heap();
     int modifier=MODIFIER_NONE;
-    switch (command_ID)
+    bool redraw=true;
+    while (1)
     {
-        case COMMAND_START:
-        case COMMAND_RESUME:
-            while (1)
+        if (redraw)
+        {
+            struct point new_pos=pos;
+            char num_buffer[TEXT_INT32_SIZE];
+
+            //Heap left
+            new_pos=pos;
+            new_pos=draw_text("Heap left: ",new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            text_int32(heap_left(),num_buffer);
+            draw_text(num_buffer,new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            dupdate();
+
+            debug_heap(0);
+
+            //Objects
+            new_pos.y+=10;
+            new_pos.x=pos.x;
+            uint8_t *obj_ptr=heap_ptr+HEAP_OBJECTS;
+            int obj_count=0;
+            while(*(uint32_t *)obj_ptr)
             {
-                int key=getkey_text(true,&modifier);
+                obj_count++;
+                obj_ptr+=*(uint32_t *)obj_ptr;
+            }
+            new_pos=draw_text("Object count: ",new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            text_int32(obj_count,num_buffer);
+            draw_text(num_buffer,new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            dupdate();
+            
+            new_pos.y+=10;
+            new_pos.x=pos.x;
+            new_pos=draw_text("Objects total size: ",new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            text_int32(obj_ptr-heap_ptr-HEAP_OBJECTS,num_buffer);
+            draw_text(num_buffer,new_pos,COL_WHITE,COL_BLACK,false,FONT_5x8);
+            dupdate();
+        }
+        redraw=true;
+        
+        int key=getkey_text(true,&modifier);
+
+        //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
+        switch (key)
+        {
+            case VKEY_EXE:
+                add_object(((window.tab_index+1)*10+window.selected_split)*4,heap_ptr);
+                break;
+            default:
+                //Check for sys_keys like MENU, OFF, etc
                 int return_command=sys_key_handler(key);
                 if (return_command!=COMMAND_NONE) return return_command;
-            }
-            break;
-        case COMMAND_REDRAW:
-            return COMMAND_DONE;
-            break;
+                redraw=false;
+        }
+
     }
 
     //Shouldn't reach here - added to silence warning

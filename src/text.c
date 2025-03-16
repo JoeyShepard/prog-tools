@@ -350,7 +350,7 @@ void text_int32(int32_t num, char *text)
     *text=0;
     while (divider)
     {
-        if (num/divider)
+        if ((num/divider)||(digit_found))
         {
             *text='0'+num/divider;
             text++;

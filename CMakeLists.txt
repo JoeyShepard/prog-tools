@@ -13,6 +13,7 @@ find_package(Gint 2.9 REQUIRED)
 set(SOURCES
   src/cg50-sdl2.c
   src/command.c
+  src/debug.c
   src/dummy.c
   src/error.c
   src/getkey.c

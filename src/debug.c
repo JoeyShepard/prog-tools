@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "compatibility.h"
 #include "debug.h"
+#include "manager.h"
 #include "mem.h"
 
 #ifdef CG50
@@ -26,15 +27,14 @@
         }
         printf("\n");
 
-
-        while (*ptr)
+        for (int i=0;i<SPLIT_COUNT*TAB_COUNT;i++)
         {
             printf("Heap object\n");
             uint32_t size=*(uint32_t *)ptr;
             printf("- Size:  %d\n",size);
             printf("- Tab:   %d\n",ptr[HEAP_TAB]);
             printf("- Split: %d\n",ptr[HEAP_SPLIT]);
-            uint32_t *tab_ptr=(uint32_t *)(ptr+HEAP_TAB_NEXT);
+            uint32_t *tab_ptr=(uint32_t *)(ptr+HEAP_OBJECTS);
             int counter=0;
             while (*tab_ptr)
             {

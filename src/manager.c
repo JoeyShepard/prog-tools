@@ -2,6 +2,7 @@
 #include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
+#include "mem.h"
 #include "menu.h"
 #include "structs.h"
 #include "text.h"
@@ -80,8 +81,8 @@ void window_manager()
                 //Program done executing
                 windows[selected_window].split[windows[selected_window].selected_split].ID=ID_NONE;
 
-                //TODO: free memory
-
+                //Free memory
+                new_split_mem(windows[selected_window].tab_index,windows[selected_window].selected_split,get_split_heap());
                 break;
             case COMMAND_MENU:
                 //Save here if necessary
@@ -279,6 +280,7 @@ struct point window_pos(struct WindowInfo window,bool selected)
 
     return pos;
 }
+
 int window_width(struct WindowInfo window)
 {
     switch (window.split_state)

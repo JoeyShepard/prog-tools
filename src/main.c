@@ -18,7 +18,6 @@
 //int main(int argc, char *argv[])  //PC only
 int main(void)                      //cg50 and PC
 {
-
     //Setup - SDL2 on PC and timer on calculator
     setup(SCALE_FACTOR,TICK_MS);
 
