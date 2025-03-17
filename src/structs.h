@@ -13,7 +13,6 @@
 
     struct WindowInfo
     {
-        char title[TAB_TITLE_LEN];
         int split_state;
         int selected_split;
         struct SplitInfo

@@ -7,6 +7,13 @@
 #include "mem.h"
 #include "text.h"
 
+//TODO
+//====
+/*
+number buttons don't work in menu
+*/
+
+
 //Constants
 //=========
 #define TICK_MS         40  //ie 25 FPS

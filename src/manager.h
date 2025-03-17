@@ -1,6 +1,7 @@
 #ifndef __GUARD_PROG_TOOLS_MANAGER
     #define __GUARD_PROG_TOOLS_MANAGER
 
+    #include "compatibility.h"
     #include "structs.h"
 
     ///Colors - modifiers
@@ -95,12 +96,6 @@
     //Vsplit: 388x100
     //Hsplit: 192x204
 
-    //Menus
-    #define MENU_X_OFFSET       4
-    #define MENU_Y_OFFSET       2
-    #define MENU_HEIGHT         11
-    #define MENU_BUFFER         30
-
     enum WindowSplitStates
     {
         WINDOW_WHOLE,
@@ -140,6 +135,7 @@
     void window_manager();
     void draw_modifier(int modifier);
     void draw_splits(struct WindowInfo *windows,int selected_window);
+    void draw_titles(struct WindowInfo *windows,int selected_window);
     void draw_manager(struct WindowInfo *windows,int modifier,int selected_window);
     struct point window_pos(struct WindowInfo window,bool selected);
     int window_width(struct WindowInfo window);

@@ -79,8 +79,6 @@ void init_heap()
     debug_heap(0);
     */
 
-    debug_heap(0);
-
 }
 
 //Move heap for selected tab/split to top so it can access free memory

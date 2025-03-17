@@ -2,6 +2,7 @@
     #define __GUARD_PROG_TOOLS_TEXT
 
     #include <stdbool.h>
+
     #include "structs.h"
 
     //Custom characters - same numbering for all fonts

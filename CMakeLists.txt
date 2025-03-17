@@ -21,6 +21,7 @@ set(SOURCES
   src/main.c
   src/manager.c
   src/mem.c
+  src/memory_manager.c
   src/menu.c
   src/text.c
   # ...

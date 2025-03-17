@@ -8,40 +8,55 @@
 #include "menu.h"
 #include "structs.h"
 #include "text.h"
+    
+static const char *menu_keys="1234567890+";
 
-const char *program_list[]=
+static const char *program_list[]=
 {
-    "command line",
-    "text editor",
+    "Calculator shell",
+    "Text editor",
     "Forth",
     "MCU Python",
-    "split vertically",
-    "split horizontally",
-    "close",
-    "help"
+    "MSP430 emulator",
+    "6502 emulator",
+    "Split vertically",
+    "Split horizontally",
+    "Close",
+    "Memory manager",
+    "Help",
 };
 
-const int program_IDs[]=
+//Each entry needs ot be 8 characters
+const char *program_titles[]=
 {
-    ID_COMMAND_LINE,
-    ID_TEXT_EDITOR,
-    ID_FORTH,
-    ID_MCU_PYTHON,
-    ID_SPLIT_VERTICALLY,
-    ID_SPLIT_HORIZONTALLY,
-    ID_CLOSE_SPLIT,
-    ID_HELP
+    "Shell   ",
+    "Editor  ",
+    "Forth   ",
+    "Python  ",
+    "MSP430  ",
+    "6502    ",
+    NULL,
+    NULL,
+    NULL,
+    "Memory  ",
+    "Help    ",
+    //None - show menu
+    "        "
 };
 
-int (*menu_functions[])(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)=
+
+int (*menu_functions[])(int command_ID, struct WindowInfo *windows, int selected_window)=
 {
     &command_line,
     &text_editor,
     &forth,
     &python,
+    &emu_msp430,
+    &emu_6502,
     NULL,
     NULL,
     NULL,
+    &memory_manager,
     &help,
     
     //Menu handler comes at end
@@ -109,7 +124,7 @@ void draw_menu(struct WindowInfo window, bool enabled)
     for (int j=0;j<PROG_LIST_LEN;j++)
     {
         char menu_print_buffer[MENU_BUFFER];
-        menu_print_buffer[0]='1'+j;
+        menu_print_buffer[0]=menu_keys[j];
         menu_print_buffer[1]=':';
         for (int k=0;k<MENU_BUFFER;k++)
         {
@@ -141,11 +156,18 @@ void draw_menu(struct WindowInfo window, bool enabled)
                 outline_text(menu_print_buffer,pos,COL_MENU_TEXT,-1,-1,false,FONT_5x8);
             else outline_text(menu_print_buffer,pos,COL_MENU_DE_TEXT,-1,-1,false,FONT_5x8);
         }
-        pos.y+=MENU_HEIGHT;
+        
+        //Put half of menu items in second column if split horizontally
+        if ((j==PROG_COL2_ID)&&(window.split_state==WINDOW_VSPLIT))
+        {
+            pos.x=menu_x+MENU_X_OFFSET2;
+            pos.y=menu_y+MENU_Y_OFFSET;
+        }
+        else pos.y+=MENU_HEIGHT;
     }
 }
 
-int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window, uint8_t *heap_ptr)
+int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     int modifier=MODIFIER_NONE;
 
@@ -176,10 +198,16 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                 case ID_TEXT_EDITOR:
                 case ID_FORTH:
                 case ID_MCU_PYTHON:
+                case ID_MSP430_EMU:
+                case ID_6502_EMU:
+                case ID_MEMORY_MANAGER:
                 case ID_HELP:
                     windows[selected_window].split[windows[selected_window].selected_split].ID=*menu_selection;
                 
-                    return (*menu_functions[*menu_selection])(COMMAND_START,windows,selected_window,NULL);
+                    //Redraw to show new title
+                    draw_titles(windows,selected_window);
+
+                    return (*menu_functions[*menu_selection])(COMMAND_START,windows,selected_window);
             }
         }
         else if (key==VKEY_UP)

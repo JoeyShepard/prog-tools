@@ -31,13 +31,6 @@ void window_manager()
     struct WindowInfo windows[TAB_COUNT];
     for (int i=0;i<TAB_COUNT;i++)
     {
-        windows[i].title[0]='1'+i;
-        windows[i].title[1]=':';
-        for (int j=2;j<TAB_TITLE_LEN-1;j++)
-        {
-            windows[i].title[j]=' ';
-        }
-        windows[i].title[TAB_TITLE_LEN-1]=0;
         windows[i].split_state=WINDOW_WHOLE;
         windows[i].selected_split=0;
         windows[i].split[0].ID=ID_NONE;
@@ -72,7 +65,7 @@ void window_manager()
         else selected_split=windows[selected_window].selected_split;
         int new_program_ID=windows[selected_window].split[selected_split].ID;
    
-        int return_command=(*menu_functions[new_program_ID])(COMMAND_RESUME,windows,selected_window,NULL);
+        int return_command=(*menu_functions[new_program_ID])(COMMAND_RESUME,windows,selected_window);
 
         //Process return from program
         switch (return_command)
@@ -180,7 +173,29 @@ void draw_splits(struct WindowInfo *windows, int selected_window)
 
     //Only draw deselected split
     int deselected_split=window.selected_split^1;
-    (*menu_functions[window.split[deselected_split].ID])(COMMAND_REDRAW,windows,selected_window,NULL);
+    (*menu_functions[window.split[deselected_split].ID])(COMMAND_REDRAW,windows,selected_window);
+}
+
+void draw_titles(struct WindowInfo windows[],int selected_window)
+{
+    struct point pos={TAB_START_X,TAB_START_Y};
+    char title_buffer[TAB_TITLE_LEN];
+    title_buffer[1]=':';
+    title_buffer[TAB_TITLE_LEN-1]=0;
+    for (int i=0;i<TAB_COUNT;i++)
+    {
+        int16_t outline;
+        if (i==selected_window) outline=COL_TAB_SEL;
+        else outline=COL_TAB_NO_SEL;
+        
+        title_buffer[0]='1'+i;
+        int title_ID=windows[i].split[windows[i].selected_split].ID;
+        for (int j=0;j<TAB_TITLE_LEN-3;j++)
+        {
+            title_buffer[j+2]=program_titles[title_ID][j];
+        }
+        pos=outline_text(title_buffer,pos,outline,manager_colors[i],outline,false,FONT_5x8);
+    }
 }
 
 void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
@@ -192,64 +207,53 @@ void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
     draw_rect(STATUS_X,STATUS_Y,STATUS_WIDTH,STATUS_HEIGHT,COL_MOD_BG,COL_MOD_BG);
     draw_modifier(modifier);
 
-    struct point pos={TAB_START_X,TAB_START_Y};
-    for (int i=0;i<TAB_COUNT;i++)
+    //Tab titles
+    draw_titles(windows,selected_window);
+
+    //Outside border
+    for (int j=0;j<BORDER_SIZE;j++)
     {
-        int16_t outline;
-        if (i==selected_window) outline=COL_TAB_SEL;
-        else outline=COL_TAB_NO_SEL;
-        
-        //Draw tab title
-        pos=outline_text(windows[i].title,pos,outline,manager_colors[i],outline,false,FONT_5x8);
-
-        if (i==selected_window)
+        draw_rect(BORDER_X+j,BORDER_Y+j,DWIDTH-j*2,DHEIGHT-j*2-BORDER_Y,manager_colors[selected_window],-1);
+    }
+    
+    if (windows[selected_window].split_state==WINDOW_VSPLIT)
+    {
+        //Vertical split 
+        for (int j=0;j<BORDER_SIZE;j++)
         {
-            //Outside border
-            for (int j=0;j<BORDER_SIZE;j++)
-            {
-                draw_rect(BORDER_X+j,BORDER_Y+j,DWIDTH-j*2,DHEIGHT-j*2-BORDER_Y,manager_colors[i],-1);
-            }
-            
-            if (windows[i].split_state==WINDOW_VSPLIT)
-            {
-                //Vertical split 
-                for (int j=0;j<BORDER_SIZE;j++)
-                {
-                    //Draw horizontal bar
-                    draw_line_horz(BORDER_VSPLIT_X0,BORDER_VSPLIT_X1,BORDER_VSPLIT_Y+j,manager_colors[i]);
-                }
+            //Draw horizontal bar
+            draw_line_horz(BORDER_VSPLIT_X0,BORDER_VSPLIT_X1,BORDER_VSPLIT_Y+j,manager_colors[selected_window]);
+        }
 
-                if (windows[i].selected_split==0)
-                {
-                    //Top window selected
-                    draw_rect(SEL_VSPLIT_X,SEL_VSPLIT_Y0,SEL_VSPLIT_WIDTH,SEL_VSPLIT_HEIGHT,SEL_COLOR,-1);
-                }
-                else
-                {
-                    //Bottom window selected
-                    draw_rect(SEL_VSPLIT_X,SEL_VSPLIT_Y1,SEL_VSPLIT_WIDTH,SEL_VSPLIT_HEIGHT,SEL_COLOR,-1);
-                }
-            }
-            else if (windows[i].split_state==WINDOW_HSPLIT)
-            {
-                //Horizontal split
-                for (int j=0;j<BORDER_SIZE;j++)
-                {
-                    //Draw vertical bar
-                    draw_line_vert(BORDER_HSPLIT_X+j,BORDER_HSPLIT_Y0,BORDER_HSPLIT_Y1,manager_colors[i]);
-                }
+        if (windows[selected_window].selected_split==0)
+        {
+            //Top window selected
+            draw_rect(SEL_VSPLIT_X,SEL_VSPLIT_Y0,SEL_VSPLIT_WIDTH,SEL_VSPLIT_HEIGHT,SEL_COLOR,-1);
+        }
+        else
+        {
+            //Bottom window selected
+            draw_rect(SEL_VSPLIT_X,SEL_VSPLIT_Y1,SEL_VSPLIT_WIDTH,SEL_VSPLIT_HEIGHT,SEL_COLOR,-1);
+        }
+    }
+    else if (windows[selected_window].split_state==WINDOW_HSPLIT)
+    {
+        //Horizontal split
+        for (int j=0;j<BORDER_SIZE;j++)
+        {
+            //Draw vertical bar
+            draw_line_vert(BORDER_HSPLIT_X+j,BORDER_HSPLIT_Y0,BORDER_HSPLIT_Y1,manager_colors[selected_window]);
+        }
 
-                if (windows[i].selected_split==0)
-                {
-                    //Left window selected
-                    draw_rect(SEL_HSPLIT_X0,SEL_HSPLIT_Y,SEL_HSPLIT_WIDTH,SEL_HSPLIT_HEIGHT,SEL_COLOR,-1);
-                }
-                else
-                {
-                    //Right window selected
-                    draw_rect(SEL_HSPLIT_X1,SEL_HSPLIT_Y,SEL_HSPLIT_WIDTH,SEL_HSPLIT_HEIGHT,SEL_COLOR,-1);
-                }
-            }
+        if (windows[selected_window].selected_split==0)
+        {
+            //Left window selected
+            draw_rect(SEL_HSPLIT_X0,SEL_HSPLIT_Y,SEL_HSPLIT_WIDTH,SEL_HSPLIT_HEIGHT,SEL_COLOR,-1);
+        }
+        else
+        {
+            //Right window selected
+            draw_rect(SEL_HSPLIT_X1,SEL_HSPLIT_Y,SEL_HSPLIT_WIDTH,SEL_HSPLIT_HEIGHT,SEL_COLOR,-1);
         }
     }
 }
