@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <string.h>
+
 #include "error.h"
 #include "graphics.h"
 #include "text.h"
@@ -378,5 +380,91 @@ void text_hex32(uint32_t num, char *text, int digits)
         num/=0x10;
     }
     text[digits]=0;
+}
+
+void text_int32_commas(int32_t num, char *text)
+{
+    char num_buffer[TEXT_INT32_SIZE];
+    text_int32(num,num_buffer);
+    int comma_counter=strlen(num_buffer);
+    for (int i=0;i<strlen(num_buffer);i++)
+    {
+        *text=num_buffer[i];
+        *(text+1)=0;
+        text++;
+        comma_counter--;
+        if ((comma_counter%3==0)&&(comma_counter))
+        {
+            //Insert comma
+            *text=',';
+            *(text+1)=0;
+            text++;
+        }
+    }
+}
+
+void text_int32_human(int32_t num, char *text)
+{
+    char num_buffer[TEXT_INT32_SIZE];
+    if (num<1024)
+    {
+        //<1024
+        text_int32(num,text);
+    }
+    else if (num<10*1024)
+    {
+        //<10K
+        text_int32(1000*num/(10*1024),num_buffer);
+        text[0]=num_buffer[0];
+        text[1]='.';
+        text[2]=num_buffer[1];
+        text[3]=num_buffer[2];
+        text[4]='K';
+        text[5]=0;
+    }
+    else if (num<100*1024)
+    {
+        //<100K
+        text_int32(1000*num/(100*1024),num_buffer);
+        text[0]=num_buffer[0];
+        text[1]=num_buffer[1];
+        text[2]='.';
+        text[3]=num_buffer[2];
+        text[4]='K';
+        text[5]=0;
+    }
+    else if (num<1000*1024)
+    {
+        //<1000K
+        text_int32(1000*num/(1000*1024),num_buffer);
+        text[0]=num_buffer[0];
+        text[1]=num_buffer[1];
+        text[2]=num_buffer[2];
+        text[3]='K';
+        text[4]=0;
+    }
+    else if (num<1024*1024)
+    {
+        //1000K and <1M as 1023K
+        text_int32(1000*num/(1000*1024),num_buffer);
+        text[0]=num_buffer[0];
+        text[1]=num_buffer[1];
+        text[2]=num_buffer[2];
+        text[3]=num_buffer[3];
+        text[4]='K';
+        text[5]=0;
+    }
+    else if (num<10*1024*1024)
+    {
+        //>=1M
+        text_int32(1000*num/(1024*1024),num_buffer);
+        text[0]=num_buffer[0];
+        text[1]='.';
+        text[2]=num_buffer[1];
+        text[3]=num_buffer[2];
+        text[4]='M';
+        text[5]=0;
+    }
+    else text[0]=0;
 }
 

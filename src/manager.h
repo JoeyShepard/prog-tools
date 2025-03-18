@@ -15,16 +15,6 @@
     #define COL_TAB_SEL         COL_WHITE
     #define COL_TAB_NO_SEL      COL_BLACK
 
-    //Colors - menu 
-    #define COL_MENU_BG         C_RGB(COL_3_4,COL_3_4,COL_3_4)
-    #define COL_MENU_TEXT       COL_BLACK
-    #define COL_MENU_SEL_TEXT   COL_WHITE
-
-    #define COL_MENU_DE_BG          C_RGB(10,10,10)
-    #define COL_MENU_DE_TEXT        C_RGB(3,3,3)
-    #define COL_MENU_DE_SEL_TEXT    C_RGB(14,14,14)
-    #define COL_MENU_DE_SEL_FILL    C_RGB(6,6,6)
-
     //Status area
     #define STATUS_X            0
     #define STATUS_Y            0

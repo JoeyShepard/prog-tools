@@ -20,6 +20,7 @@
     void init_heap();
     void select_heap(int tab, int split);
     uint32_t heap_left();
+    uint32_t heap_used();
     uint8_t *get_split_heap();
     uint8_t *add_object(size_t size,uint8_t *heap_ptr);
 

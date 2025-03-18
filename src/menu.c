@@ -5,6 +5,7 @@
 #include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
+#include "mem.h"
 #include "menu.h"
 #include "structs.h"
 #include "text.h"
@@ -153,7 +154,19 @@ void draw_menu(struct WindowInfo window, bool enabled)
         {
             //Regular menu option
             if (enabled)
-                outline_text(menu_print_buffer,pos,COL_MENU_TEXT,-1,-1,false,FONT_5x8);
+            {
+                //Gray out option if necessary - ie Close option when full screen
+                int32_t text_color=COL_MENU_TEXT;
+                if (window.split_state==WINDOW_WHOLE)
+                {
+                    if (j==ID_CLOSE_SPLIT) text_color=COL_MENU_DISABLED_TEXT;
+                }
+                else
+                {
+                    if ((j==ID_SPLIT_VERTICALLY)||(j==ID_SPLIT_HORIZONTALLY)) text_color=COL_MENU_DISABLED_TEXT;
+                }
+                outline_text(menu_print_buffer,pos,text_color,-1,-1,false,FONT_5x8);
+            }
             else outline_text(menu_print_buffer,pos,COL_MENU_DE_TEXT,-1,-1,false,FONT_5x8);
         }
         
@@ -189,47 +202,120 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
 
         //Wait for kepress
         int key=getkey_text(true,&modifier);
+        bool repeat;
             
-        if (key==VKEY_EXE)
+        switch (key)
         {
-            switch (*menu_selection)
-            {
-                case ID_COMMAND_LINE:
-                case ID_TEXT_EDITOR:
-                case ID_FORTH:
-                case ID_MCU_PYTHON:
-                case ID_MSP430_EMU:
-                case ID_6502_EMU:
-                case ID_MEMORY_MANAGER:
-                case ID_HELP:
-                    windows[selected_window].split[windows[selected_window].selected_split].ID=*menu_selection;
-                
-                    //Redraw to show new title
-                    draw_titles(windows,selected_window);
+            case VKEY_EXE:
+                switch (*menu_selection)
+                {
+                    case ID_COMMAND_LINE:
+                    case ID_TEXT_EDITOR:
+                    case ID_FORTH:
+                    case ID_MCU_PYTHON:
+                    case ID_MSP430_EMU:
+                    case ID_6502_EMU:
+                    case ID_MEMORY_MANAGER:
+                    case ID_HELP:
+                        windows[selected_window].split[windows[selected_window].selected_split].ID=*menu_selection;
+                    
+                        //Redraw to show new title
+                        draw_titles(windows,selected_window);
 
-                    return (*menu_functions[*menu_selection])(COMMAND_START,windows,selected_window);
-            }
-        }
-        else if (key==VKEY_UP)
-        {
-            (*menu_selection)--;
-            if ((*menu_selection)<0) *menu_selection=PROG_LIST_LEN-1;
-        }
-        else if (key==VKEY_DOWN)
-        {
-            (*menu_selection)++;
-            if (*menu_selection==PROG_LIST_LEN) *menu_selection=0;
-        }
-        else if (key==VKEY_EXIT)
-        {
-            //Exit if on PC
-            wrapper_exit();
-        }
-        else
-        {
-            //Handle system keys like MENU, OFF, etc in caller
-            int return_command=sys_key_handler(key);
-            if (return_command!=COMMAND_NONE) return return_command;
+                        return (*menu_functions[*menu_selection])(COMMAND_START,windows,selected_window);
+                    case ID_SPLIT_VERTICALLY:
+                        if (windows[selected_window].split_state==WINDOW_WHOLE)
+                        {
+                            windows[selected_window].split_state=WINDOW_VSPLIT;
+                            windows[selected_window].split[1].ID=ID_NONE;
+                            windows[selected_window].split[1].menu_selection=0;
+                            windows[selected_window].selected_split=1;
+                            *menu_selection=0;
+                            return COMMAND_DONE;    //Manager will redraw windows and return to menu
+                        }
+                        break;
+                    case ID_SPLIT_HORIZONTALLY:
+                        if (windows[selected_window].split_state==WINDOW_WHOLE)
+                        {
+                            windows[selected_window].split_state=WINDOW_HSPLIT;
+                            windows[selected_window].split[1].ID=ID_NONE;
+                            windows[selected_window].split[1].menu_selection=0;
+                            windows[selected_window].selected_split=1;
+                            *menu_selection=0;
+                            return COMMAND_DONE;    //Manager will redraw windows and return to menu
+                        }
+                        break;
+                    case ID_CLOSE_SPLIT:
+                        if (windows[selected_window].split_state!=WINDOW_WHOLE)
+                        {
+                            if (windows[selected_window].selected_split==0)
+                            {
+                                windows[selected_window].split_state=WINDOW_WHOLE;
+
+                                //Closing top split so need to move bottom split to full screen
+                                uint8_t *split_ptr=heap;
+                                for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
+                                {
+                                    if (split_ptr[HEAP_TAB]==windows[selected_window].tab_index)
+                                    {
+                                        //Swap split IDs for heap memory
+                                        split_ptr[HEAP_SPLIT]^=1;
+                                    }
+                                    split_ptr+=*(uint32_t *)split_ptr;
+                                }
+
+                                //Copy menu selection and ID
+                                windows[selected_window].split[0].menu_selection=windows[selected_window].split[1].menu_selection;
+                                windows[selected_window].split[0].ID=windows[selected_window].split[1].ID;
+                                windows[selected_window].split[1].ID=ID_NONE;
+                            }
+                            else
+                            {
+                                //Closing bottom split
+                                windows[selected_window].selected_split=0;
+                                windows[selected_window].split_state=WINDOW_WHOLE;
+                            }
+                            return COMMAND_DONE;    //Manager will redraw windows and return to menu
+                        }
+                        break;
+                }
+                break;
+            case VKEY_UP:
+                repeat=true;
+                while (repeat)
+                {
+                    (*menu_selection)--;
+                    if ((*menu_selection)<0) *menu_selection=PROG_LIST_LEN-1;
+
+                    //Skip grayed out menu items
+                    if ((windows[selected_window].split_state==WINDOW_WHOLE)&&(*menu_selection==ID_CLOSE_SPLIT)) repeat=true;
+                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_VERTICALLY)) repeat=true;
+                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_HORIZONTALLY)) repeat=true;
+                    else repeat=false;
+                }
+                break;
+            case VKEY_DOWN:
+                repeat=true;
+                while (repeat)
+                {
+                    (*menu_selection)++;
+                    if (*menu_selection==PROG_LIST_LEN) *menu_selection=0;
+
+                    //Skip grayed out menu items
+                    if ((windows[selected_window].split_state==WINDOW_WHOLE)&&(*menu_selection==ID_CLOSE_SPLIT)) repeat=true;
+                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_VERTICALLY)) repeat=true;
+                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_HORIZONTALLY)) repeat=true;
+                    else repeat=false;
+                }
+                break;
+            case VKEY_EXIT:
+                //Exit if on PC
+                wrapper_exit();
+                break;
+            default:
+                //Handle system keys like MENU, OFF, etc in caller
+                int return_command=sys_key_handler(key);
+                if (return_command!=COMMAND_NONE) return return_command;
         }
 
         //TODO: need this??? Had in window_manager below before moving here

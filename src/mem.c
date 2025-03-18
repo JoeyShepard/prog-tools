@@ -139,6 +139,11 @@ uint32_t heap_left()
     return (uint32_t)(heap+HEAP_SIZE-heap_ptr);
 }
 
+uint32_t heap_used()
+{
+    return HEAP_SIZE-heap_left();
+}
+
 uint8_t *get_split_heap()
 {
     uint8_t *heap_ptr=heap;

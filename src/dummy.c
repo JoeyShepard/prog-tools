@@ -23,7 +23,6 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     //Always redraw whether START, RESUME, or REDRAW
     draw_rect(pos.x,pos.y,width,height,COL_BLACK,COL_BLACK);
     draw_text(title,pos,COL_GREEN,-1,false,FONT_5x8);
-
     pos.y+=10;
 
     switch (command_ID)
@@ -39,14 +38,22 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
             //Return if only redrawing
             return COMMAND_DONE;
     }
+    pos.y+=10;
     dupdate();
 
-    //Start or Resume so enter input loop
-    pos.y+=10;
-    select_heap(window.tab_index,window.selected_split);
-    uint8_t *heap_ptr=get_split_heap();
+    //Start or Resume
     int modifier=MODIFIER_NONE;
     bool redraw=true;
+
+    //Heap memory
+    select_heap(window.tab_index,window.selected_split);
+    uint8_t *heap_ptr=get_split_heap();
+
+
+    if (command_ID==COMMAND_START) 
+        add_object((window.tab_index*2+window.selected_split)*40,heap_ptr);
+
+
     while (1)
     {
         if (redraw)

@@ -3,6 +3,17 @@
 
     #include "structs.h"
 
+    //Colors - menu 
+    #define COL_MENU_BG             C_RGB(COL_3_4,COL_3_4,COL_3_4)
+    #define COL_MENU_TEXT           COL_BLACK
+    #define COL_MENU_SEL_TEXT       COL_WHITE
+    #define COL_MENU_DISABLED_TEXT  C_RGB(16,16,16)     //Disabled (ie Close option when full screen)
+
+    #define COL_MENU_DE_BG          C_RGB(10,10,10)
+    #define COL_MENU_DE_TEXT        C_RGB(3,3,3)
+    #define COL_MENU_DE_SEL_TEXT    C_RGB(14,14,14)
+    #define COL_MENU_DE_SEL_FILL    C_RGB(6,6,6)
+
     enum ProgramList
     {
         ID_COMMAND_LINE,
