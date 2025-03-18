@@ -33,7 +33,7 @@
     
     //Programs
     #define PROG_LIST_LEN       ((int)(sizeof(program_list)/sizeof(program_list[0])))
-    #define PROG_COL2_ID        ID_6502_EMU     //Last menu item before mocing to second column
+    #define PROG_COL2_ID        ID_6502_EMU     //Last menu item before moving to second column
 
     //Menus
     #define MENU_X_OFFSET       4

@@ -180,6 +180,14 @@ void draw_menu(struct WindowInfo window, bool enabled)
     }
 }
 
+bool menu_disabled(struct WindowInfo window,int menu_selection)
+{
+    if ((window.split_state==WINDOW_WHOLE)&&(menu_selection==ID_CLOSE_SPLIT)) return true;
+    else if ((window.split_state!=WINDOW_WHOLE)&&(menu_selection==ID_SPLIT_VERTICALLY)) return true;
+    else if ((window.split_state!=WINDOW_WHOLE)&&(menu_selection==ID_SPLIT_HORIZONTALLY)) return true;
+    else return false;
+}
+
 int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     int modifier=MODIFIER_NONE;
@@ -202,10 +210,25 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
 
         //Wait for kepress
         int key=getkey_text(true,&modifier);
-        bool repeat;
-            
+        
+        //First, check for menu keys. Simplifies checks for keys like 0 and + after 9.
+        for (int i=0;i<strlen(menu_keys);i++)
+        {
+            if (menu_keys[i]==key_printable[key]) 
+            {
+                //Match found. Record selection and process below with VKEY_EXE.
+                *menu_selection=i;
+                key=VKEY_MENU_SELECTION;
+                break;
+            }
+        }
+
+        //Next, check for all other keys
         switch (key)
         {
+            case VKEY_MENU_SELECTION:
+                //See above - menu key (1-9,0,+) pressed. *menu_selection set above.
+                //Fall through
             case VKEY_EXE:
                 switch (*menu_selection)
                 {
@@ -224,20 +247,11 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
 
                         return (*menu_functions[*menu_selection])(COMMAND_START,windows,selected_window);
                     case ID_SPLIT_VERTICALLY:
-                        if (windows[selected_window].split_state==WINDOW_WHOLE)
-                        {
-                            windows[selected_window].split_state=WINDOW_VSPLIT;
-                            windows[selected_window].split[1].ID=ID_NONE;
-                            windows[selected_window].split[1].menu_selection=0;
-                            windows[selected_window].selected_split=1;
-                            *menu_selection=0;
-                            return COMMAND_DONE;    //Manager will redraw windows and return to menu
-                        }
-                        break;
                     case ID_SPLIT_HORIZONTALLY:
                         if (windows[selected_window].split_state==WINDOW_WHOLE)
                         {
-                            windows[selected_window].split_state=WINDOW_HSPLIT;
+                            if (*menu_selection==ID_SPLIT_VERTICALLY) windows[selected_window].split_state=WINDOW_VSPLIT;
+                            else if (*menu_selection==ID_SPLIT_HORIZONTALLY) windows[selected_window].split_state=WINDOW_HSPLIT;
                             windows[selected_window].split[1].ID=ID_NONE;
                             windows[selected_window].split[1].menu_selection=0;
                             windows[selected_window].selected_split=1;
@@ -253,6 +267,7 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                                 windows[selected_window].split_state=WINDOW_WHOLE;
 
                                 //Closing top split so need to move bottom split to full screen
+                                //(or closing left split and moving right split)
                                 uint8_t *split_ptr=heap;
                                 for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
                                 {
@@ -265,9 +280,16 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                                 }
 
                                 //Copy menu selection and ID
-                                windows[selected_window].split[0].menu_selection=windows[selected_window].split[1].menu_selection;
                                 windows[selected_window].split[0].ID=windows[selected_window].split[1].ID;
                                 windows[selected_window].split[1].ID=ID_NONE;
+                                int *new_menu_selection=&windows[selected_window].split[0].menu_selection;
+                                *new_menu_selection=windows[selected_window].split[1].menu_selection;
+                                while (menu_disabled(windows[selected_window],*new_menu_selection))
+                                {
+                                    //If new menu selection is disabled, go to next selection
+                                    (*new_menu_selection)++;
+                                    if (*new_menu_selection==PROG_LIST_LEN) *new_menu_selection=0;
+                                }
                             }
                             else
                             {
@@ -281,31 +303,54 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                 }
                 break;
             case VKEY_UP:
-                repeat=true;
-                while (repeat)
+                do
                 {
                     (*menu_selection)--;
                     if ((*menu_selection)<0) *menu_selection=PROG_LIST_LEN-1;
 
                     //Skip grayed out menu items
-                    if ((windows[selected_window].split_state==WINDOW_WHOLE)&&(*menu_selection==ID_CLOSE_SPLIT)) repeat=true;
-                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_VERTICALLY)) repeat=true;
-                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_HORIZONTALLY)) repeat=true;
-                    else repeat=false;
-                }
+                } while (menu_disabled(windows[selected_window],*menu_selection));
                 break;
             case VKEY_DOWN:
-                repeat=true;
-                while (repeat)
+                do
                 {
                     (*menu_selection)++;
                     if (*menu_selection==PROG_LIST_LEN) *menu_selection=0;
 
                     //Skip grayed out menu items
-                    if ((windows[selected_window].split_state==WINDOW_WHOLE)&&(*menu_selection==ID_CLOSE_SPLIT)) repeat=true;
-                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_VERTICALLY)) repeat=true;
-                    else if ((windows[selected_window].split_state!=WINDOW_WHOLE)&&(*menu_selection==ID_SPLIT_HORIZONTALLY)) repeat=true;
-                    else repeat=false;
+                } while(menu_disabled(windows[selected_window],*menu_selection));
+                break;
+            case VKEY_LEFT:
+                if (windows[selected_window].split_state==WINDOW_VSPLIT)
+                {
+                    if (*menu_selection>PROG_COL2_ID)
+                    {
+                        *menu_selection-=PROG_COL2_ID+1;
+                        if (*menu_selection>PROG_COL2_ID)
+                        {
+                            //If second column is longer, jump to last item on left
+                            *menu_selection=PROG_COL2_ID;
+                        }
+                    }
+                }
+                break;
+            case VKEY_RIGHT:
+                if (windows[selected_window].split_state==WINDOW_VSPLIT)
+                {
+                    if (*menu_selection<=PROG_COL2_ID)
+                    {
+                        *menu_selection+=PROG_COL2_ID+1;
+                        if (*menu_selection>=PROG_LIST_LEN)
+                        {
+                            //If first column is longer, jump to last item on right
+                            *menu_selection=PROG_LIST_LEN-1;
+                        }
+                        while (menu_disabled(windows[selected_window],*menu_selection))
+                        {
+                            //Skip disabled menu options 
+                            (*menu_selection)++;
+                        }
+                    }
                 }
                 break;
             case VKEY_EXIT:
