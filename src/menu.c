@@ -1,4 +1,6 @@
 //TODO: copied from manager.c - don't need all of these
+#include <string.h>
+
 #include "compatibility.h"
 #include "dummy.h"
 #include "error.h"
@@ -6,6 +8,7 @@
 #include "graphics.h"
 #include "manager.h"
 #include "mem.h"
+#include "memory_manager.h"
 #include "menu.h"
 #include "structs.h"
 #include "text.h"
@@ -212,7 +215,7 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
         int key=getkey_text(true,&modifier);
         
         //First, check for menu keys. Simplifies checks for keys like 0 and + after 9.
-        for (int i=0;i<strlen(menu_keys);i++)
+        for (size_t i=0;i<strlen(menu_keys);i++)
         {
             if (menu_keys[i]==key_printable[key]) 
             {
@@ -228,7 +231,7 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
         {
             case VKEY_MENU_SELECTION:
                 //See above - menu key (1-9,0,+) pressed. *menu_selection set above.
-                //Fall through
+                //Fall through!
             case VKEY_EXE:
                 switch (*menu_selection)
                 {

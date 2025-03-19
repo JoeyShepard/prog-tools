@@ -10,7 +10,8 @@
 //TODO
 //====
 /*
-number buttons don't work in menu
+if off for long while in app, menu key stops working
+- was this why I had delay()?
 */
 
 

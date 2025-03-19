@@ -79,11 +79,6 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     return COMMAND_DONE;
 }
 
-int command_line(int command_ID, struct WindowInfo *windows, int selected_window)
-{
-    return placeholder(command_ID, windows, selected_window, "Command line");
-}
-
 int text_editor(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     return placeholder(command_ID, windows, selected_window, "Text editor");

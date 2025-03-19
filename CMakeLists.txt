@@ -42,7 +42,8 @@ set(ASSETS_cg
 fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
 add_executable(prog-tools ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
-target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50 -Wa,-aghlns=$<.lst)
+#target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50 -Wa,-aghlns=$<.lst)
+target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50)
 target_link_libraries(prog-tools Gint::Gint)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fx9860G)

@@ -387,7 +387,7 @@ void text_int32_commas(int32_t num, char *text)
     char num_buffer[TEXT_INT32_SIZE];
     text_int32(num,num_buffer);
     int comma_counter=strlen(num_buffer);
-    for (int i=0;i<strlen(num_buffer);i++)
+    for (size_t i=0;i<strlen(num_buffer);i++)
     {
         *text=num_buffer[i];
         *(text+1)=0;

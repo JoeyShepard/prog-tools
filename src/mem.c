@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "compatibility.h"
+#include "command.h"
 #include "debug.h"
 #include "error.h"
 #include "getkey.h"
