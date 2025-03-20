@@ -12,18 +12,29 @@
 
     #define CMD_WHOLE_WIDTH     64
     #define CMD_WHOLE_HEIGHT    22
-    #define CMD_WHOLE_X         2
-    #define CMD_WHOLE_Y         3
+    #define CMD_WHOLE_X         1
+    #define CMD_WHOLE_Y         2
+
+    #define CMD_HALF_WIDTH      31
+    #define CMD_HALF_HEIGHT     11
+    #define CMD_HALF_X          2
+    #define CMD_HALF_Y          0
+    
     #define CMD_ROW_HEIGHT      9
 
     #define CMD_COL_BG          COL_BLACK
     #define CMD_COL_FG          COL_WHITE
-    
+   
+    #define CMD_BUFFER_SIZE     (CMD_WHOLE_WIDTH*CMD_WHOLE_HEIGHT+CMD_WHOLE_HEIGHT)
+
     struct ConsoleInfo
     {
-        char text[CMD_WHOLE_HEIGHT*CMD_WHOLE_WIDTH];
-        uint16_t color_fg[CMD_WHOLE_HEIGHT*CMD_WHOLE_WIDTH];
-        uint16_t color_bg[CMD_WHOLE_HEIGHT*CMD_WHOLE_WIDTH];
+        char text[CMD_BUFFER_SIZE];
+        uint16_t color_fg[CMD_BUFFER_SIZE];
+        uint16_t color_bg[CMD_BUFFER_SIZE];
+        uint32_t overflow_count;
+        int buffer_index;
+        int text_len;
     };
 
     int command_line(int command_ID, struct WindowInfo *windows, int selected_window);
