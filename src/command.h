@@ -8,7 +8,7 @@
     //- Whole:  388x204 - 64 chars, 4 pixels x 22 rows, 6 pixels (or 20 rows, 4 pixels)
     //- Vsplit: 388x100 - 64 chars, 4 pixels x 11 rows, 1 pixel  (or 10 rows, 0 pixels)
     //- Hsplit: 192x204 - 31 chars, 6 pixels x 22 rows, 6 pixels (or 20 rows, 4 pixels)
-    #define CMD_LINE_MAX        124     //Four full lines if hsplit
+    #define CMD_INPUT_MAX       124     //Four full lines if hsplit
 
     #define CMD_WHOLE_WIDTH     64
     #define CMD_WHOLE_HEIGHT    22
@@ -22,7 +22,8 @@
     
     #define CMD_ROW_HEIGHT      9
 
-    #define CMD_COL_BG          COL_BLACK
+    //#define CMD_COL_BG          COL_BLACK
+    #define CMD_COL_BG          C_RGB(0,10,0)
     #define CMD_COL_FG          COL_WHITE
    
     #define CMD_BUFFER_SIZE     (CMD_WHOLE_WIDTH*CMD_WHOLE_HEIGHT+CMD_WHOLE_HEIGHT)
@@ -35,6 +36,11 @@
         uint32_t overflow_count;
         int buffer_index;
         int text_len;
+        char input_line[CMD_INPUT_MAX];
+        uint16_t input_fg[CMD_INPUT_MAX];
+        uint16_t input_bg[CMD_INPUT_MAX];
+        int input_start;
+        int input_cursor;
     };
 
     int command_line(int command_ID, struct WindowInfo *windows, int selected_window);

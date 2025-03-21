@@ -62,7 +62,8 @@
         VKEY_F5,
         VKEY_F6,
 
-        //Virtual keys generated with modifier - order not important
+        //Virtual keys generated with modifier
+        //MUST BE SAME ORDER AS vkey_printable!
         VKEY_ACOFF,
         VKEY_IMAG,
         VKEY_EQUAL,
@@ -194,6 +195,7 @@
     extern const int key_printable_shifted[];
     extern const int key_printable_upper[];
     extern const int key_printable_lower[];
+    extern const int vkey_printable[];
 
     //Functions
     int getkey_wrapper(bool wait);              
