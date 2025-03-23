@@ -81,7 +81,8 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
 
 
     printf("%ld %d\n",strlen(console->input_line),console_width);
-    printf("input_height %d\n\n",input_height);
+    printf("input_height %d\n",input_height);
+    printf("console_height %d\n\n",console_height);
 
 
     //Find starting point in circular screen buffer for printing characters
@@ -324,6 +325,12 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
 
         if (redraw_screen)
         {
+
+
+            //TODO: remove
+            draw_rect(pos.x,pos.y,width,height,CMD_COL_BG,COL_BLACK);
+
+
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console,console_x,console_y,console_width,console_height);
                 
@@ -367,11 +374,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     //Do not exit since used to clear line
                     break;
                 case VKEY_EXE:
+                    console_char('\n',0,0,console);
                     for (int i=0;i<strlen(console->input_line);i++)
                     {
                         console_char(console->input_line[i],console->input_fg[i],console->input_bg[i],console);
                     }
-                    console_char('\n',0,0,console);
                     console->input_line[0]=0;
                     break;
                 default:

@@ -135,10 +135,12 @@
     //============================
     void wrapper_exit()
     {
+        //Shut down SDL2
         SDL_DestroyTexture(texture);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
+
         exit(0);
     }
 

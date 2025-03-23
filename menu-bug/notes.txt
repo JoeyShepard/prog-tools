@@ -1,0 +1,6 @@
+noticed if turn off calcultor when app is selected, menu key no longer works
+- flashes other screen including battery for fraction of a second then back to add-in
+
+example here did not cause bug after 5 or 10 minutes of being off but did after 1 hour, 39 minutes
+
+copied example to prog-tools project to upload to github

@@ -714,6 +714,7 @@ int getkey_wrapper(bool wait)
         //Wait for keypress
 
         //Worked on calculator but menu key didn't work
+        //Later, problem reappeared so problem is not this code
         /*
         key_event_t e;
         e=getkey_opt(GETKEY_ARGS,NULL);
