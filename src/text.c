@@ -191,7 +191,10 @@ struct point draw_text(const char *text, struct point pos, int32_t fg, int32_t b
     int vert_spacing=1;
     
     //Don't draw outside bounds of screen
-    if ((pos.x>=DWIDTH)||(pos.y>=DHEIGHT)||(pos.y+height>=DHEIGHT)) return pos;
+    if ((pos.x>=DWIDTH)||(pos.y>=DHEIGHT)||(pos.y+height>=DHEIGHT)) 
+    {
+        return pos;
+    }
 
     //Calculate offset into screen buffer
     screen+=pos.x;

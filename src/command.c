@@ -77,13 +77,7 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
 {
     //Adjust console_height to make room for input line
     int input_height=((strlen(console->input_line))/console_width)+1;
-    console_height-=input_height;
-
-
-    printf("%ld %d\n",strlen(console->input_line),console_width);
-    printf("input_height %d\n",input_height);
-    printf("console_height %d\n\n",console_height);
-
+    console_height-=(input_height-1);
 
     //Find starting point in circular screen buffer for printing characters
     int line_length=0;
@@ -182,12 +176,16 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
     int blank_count=0;
     int row=0,col=0;
     bool input_drawn=false;
-    while(row<console_height)
+    while(row<console_height-1)
     {
         if ((blank_count>0)||((buffer_start==console->buffer_index)&&(draw_once==false)))
         {
             //Draw blanks if no more text
-            text_pos=draw_char(' ',text_pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
+            char draw_char_char;
+            if (buffer_start==console->buffer_index) draw_char_char='.';
+            else draw_char_char=' ';
+
+            text_pos=draw_char(draw_char_char,text_pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
             if (blank_count>0) blank_count--;
         }
         else
@@ -225,7 +223,8 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
             text_pos.y+=CMD_ROW_HEIGHT;
             if ((buffer_start==console->buffer_index)&&(input_drawn==false))
             {
-                draw_input_line(console,text_pos,console_width,console_height);
+                //Draw input line
+                draw_input_line(console,text_pos,console_width,input_height);
                 text_pos.y+=CMD_ROW_HEIGHT*input_height;
                 input_drawn=true;
             }
@@ -374,12 +373,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     //Do not exit since used to clear line
                     break;
                 case VKEY_EXE:
-                    console_char('\n',0,0,console);
                     for (int i=0;i<strlen(console->input_line);i++)
                     {
                         console_char(console->input_line[i],console->input_fg[i],console->input_bg[i],console);
                     }
-                    console->input_line[0]=0;
+                    console_char('\n',0,0,console);
                     break;
                 default:
                     //Check for sys_keys like MENU, OFF, etc
