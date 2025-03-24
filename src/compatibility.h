@@ -53,6 +53,9 @@
         //Compiling for PC using SDL2 wrapper
         #include <SDL2/SDL.h>
 
+        //typedefs from gint
+        typedef uint16_t color_t;
+
         //Constants from gint
         #define DWIDTH          396
         #define DHEIGHT         224

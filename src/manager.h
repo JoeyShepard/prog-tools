@@ -119,7 +119,7 @@
     };
     
     //Global variables
-    extern uint16_t manager_colors[];
+    extern color_t manager_colors[];
 
     //Functions
     void window_manager();

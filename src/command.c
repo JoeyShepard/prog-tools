@@ -12,7 +12,7 @@
 #include "mem.h"
 #include "structs.h"
 
-static void console_char(const char character, uint16_t fg, uint16_t bg, struct ConsoleInfo *console)
+static void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
     if (console->text_len<CMD_BUFFER_SIZE)
     {
@@ -40,7 +40,7 @@ static void console_char(const char character, uint16_t fg, uint16_t bg, struct 
     if (console->buffer_index==CMD_BUFFER_SIZE) console->buffer_index=0;
 }
 
-static void console_text(const char *text, uint16_t fg, uint16_t bg, struct ConsoleInfo *console)
+static void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
     while (*text)
     {
@@ -49,11 +49,20 @@ static void console_text(const char *text, uint16_t fg, uint16_t bg, struct Cons
     }
 }
 
+static void add_input_char(char character,color_t fg,color_t bg,struct ConsoleInfo *console)
+{
+}
+
+static void add_input_text(const char *text,color_t fg,color_t bg,struct ConsoleInfo *console)
+{
+}
+
 static void draw_input_line(struct ConsoleInfo *console,struct point pos,int console_width,int input_height)
 {
     int starting_x=pos.x;
     int input_len=strlen(console->input_line);
     int char_index=0;
+    bool cursor_drawn=false;
     for (int row=0;row<input_height;row++)
     {
         for (int col=0;col<console_width;col++)
@@ -66,7 +75,15 @@ static void draw_input_line(struct ConsoleInfo *console,struct point pos,int con
                 pos=draw_char(console->input_line[char_index],pos,color_fg,color_bg,false,FONT_5x8);
                 char_index++;
             }
-            else pos=draw_char(' ',pos,COL_BLACK,C_RGB(10,10,10),false,FONT_5x8);
+            else
+            {
+                if (cursor_drawn==false)
+                {
+                    pos=draw_char('<',pos,CMD_COL_CUR_FG,CMD_COL_CUR_BG,false,FONT_5x8);
+                    cursor_drawn=true;
+                }
+                else pos=draw_char(' ',pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
+            }
         }
         pos.x=starting_x;
         pos.y+=CMD_ROW_HEIGHT;
@@ -181,11 +198,7 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
         if ((blank_count>0)||((buffer_start==console->buffer_index)&&(draw_once==false)))
         {
             //Draw blanks if no more text
-            char draw_char_char;
-            if (buffer_start==console->buffer_index) draw_char_char='.';
-            else draw_char_char=' ';
-
-            text_pos=draw_char(draw_char_char,text_pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
+            text_pos=draw_char(' ',text_pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
             if (blank_count>0) blank_count--;
         }
         else
@@ -201,8 +214,8 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
             else
             {
                 //Draw character
-                uint16_t fg=console->color_fg[buffer_start];
-                uint16_t bg=console->color_bg[buffer_start];
+                color_t fg=console->color_fg[buffer_start];
+                color_t bg=console->color_bg[buffer_start];
                 text_pos=draw_char(character,text_pos,fg,bg,false,FONT_5x8);
             }
 
@@ -324,12 +337,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
 
         if (redraw_screen)
         {
-
-
-            //TODO: remove
-            draw_rect(pos.x,pos.y,width,height,CMD_COL_BG,COL_BLACK);
-
-
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console,console_x,console_y,console_width,console_height);
                 
@@ -378,6 +385,14 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                         console_char(console->input_line[i],console->input_fg[i],console->input_bg[i],console);
                     }
                     console_char('\n',0,0,console);
+                    console->input_line[0]=0;
+
+                    
+                    add_input_text("fx-CG50",COL_GREEN,COL_BLACK,console);
+                    add_input_char(':',COL_WHITE,COL_BLACK,console);
+                    add_input_text("/ram/",COL_BLUE,COL_BLACK,console);
+
+
                     break;
                 default:
                     //Check for sys_keys like MENU, OFF, etc

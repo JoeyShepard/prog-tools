@@ -10,7 +10,7 @@
 
 //Global variables
 //================
-uint16_t manager_colors[]=
+color_t manager_colors[]=
 {
     C_RGB(0,COL_1_4,COL_MID),       //Blue
     C_RGB(COL_1_4,COL_MID,0),       //Green
