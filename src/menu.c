@@ -1,6 +1,7 @@
 //TODO: copied from manager.c - don't need all of these
 #include <string.h>
 
+#include "command.h"
 #include "compatibility.h"
 #include "dummy.h"
 #include "error.h"

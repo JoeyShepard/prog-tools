@@ -880,10 +880,6 @@ int getkey_text(bool wait, int *modifier)
     }
 }
 
-int get_printable(int key, int modifier)
-{
-}
-
 int sys_key_handler(int key)
 {
     switch(key)
@@ -892,8 +888,11 @@ int sys_key_handler(int key)
             return COMMAND_EXIT;
         case VKEY_MENU:
             return COMMAND_MENU;
+        //Don't allow off key since RAM lost after about an hour of being off
+        /*
         case VKEY_ACOFF:
             return COMMAND_OFF;
+        */
         case VKEY_F1:
         case VKEY_F2:
         case VKEY_F3:

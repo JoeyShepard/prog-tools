@@ -109,7 +109,7 @@ void select_heap(int tab, int split)
     while (obj_end!=heap_end)
     {
         //Copy chunk of next object to buffer
-        if ((heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
+        if ((uintptr_t)(heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
         else copy_count=XRAM_SIZE/sizeof(uint32_t);
 
         for (uint32_t i=0;i<copy_count;i++)

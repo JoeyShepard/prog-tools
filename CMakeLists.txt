@@ -16,6 +16,7 @@ set(SOURCES
   src/debug.c
   src/dummy.c
   src/error.c
+  src/exceptions.c
   src/getkey.c
   src/graphics.c
   src/main.c

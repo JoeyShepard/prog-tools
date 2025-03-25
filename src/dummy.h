@@ -4,7 +4,6 @@
     #include <stdint.h>
     #include "structs.h"
 
-    int command_line(int command_ID, struct WindowInfo *windows, int selected_window);
     int text_editor(int command_ID, struct WindowInfo *windows, int selected_window);
     int forth(int command_ID, struct WindowInfo *windows, int selected_window);
     int python(int command_ID, struct WindowInfo *windows, int selected_window);

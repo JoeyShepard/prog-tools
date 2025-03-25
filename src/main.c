@@ -16,6 +16,7 @@ remove headers
 getkey.c arrays for key_printable not used
 draw_char can draw out of bounds!
 spaces printed for console cut off right most column!
+- what did I mean by this???
 */
 
 

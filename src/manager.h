@@ -104,7 +104,7 @@
         COMMAND_DONE,
         COMMAND_EXIT,
         COMMAND_MENU,
-        COMMAND_OFF,
+        //COMMAND_OFF,  //Don't allow off key since RAM lost after about an hour of being off
         COMMAND_SWAP,
         COMMAND_TAB1,
         COMMAND_TAB2,

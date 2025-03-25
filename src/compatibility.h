@@ -48,6 +48,9 @@
         #include <gint/gint.h>
         #include <gint/keyboard.h>
         #include <gint/timer.h>
+
+        #include "exceptions.h"
+
         void wrapper_exit();
     #else
         //Compiling for PC using SDL2 wrapper

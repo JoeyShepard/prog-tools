@@ -21,13 +21,18 @@
         return TIMER_CONTINUE;
     }
 
-    //On cg50, initialize timers
+    //On CG50, initialize timer and catch unaligned memory accesses
     void setup(int scale_factor,int delay_ms)
     {
+        //Exception handling for unaligned memory accesses
+        setup_exception_handling();
+
+        //Initialize timer for limiting FPS
         tick_flag=1;
         int t=timer_configure(TIMER_ANY, delay_ms*1000, GINT_CALL(timer_callback,&tick_flag));
         if (t>=0) timer_start(t);
-        //scale_factor only used on PC. Silence not used warning.
+
+        //Scale_factor only used on PC. Silence not used warning.
         scale_factor=scale_factor;
     }
     

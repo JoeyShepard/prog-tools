@@ -9,6 +9,9 @@
 
     void debug_heap(int level)
     {
+        //Silence unused variable warning
+        level=level;
+
         return;
     }
 

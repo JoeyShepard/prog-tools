@@ -12,6 +12,8 @@
 #include "mem.h"
 #include "structs.h"
 
+
+//Functions
 static void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
     if (console->text_len<CMD_BUFFER_SIZE)
@@ -49,18 +51,37 @@ static void console_text(const char *text, color_t fg, color_t bg, struct Consol
     }
 }
 
-static void add_input_char(char character,color_t fg,color_t bg,struct ConsoleInfo *console)
+static void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
 {
+    int text_index=strlen(console->input_line); 
+    while (*text)
+    {
+        if (text_index>=CMD_INPUT_MAX-1)
+        {
+            //No more room in string - exit early
+            return;
+        }
+        console->input_line[text_index]=*text;
+        console->input_line[text_index+1]=0;
+        console->input_fg[text_index]=fg;
+        console->input_bg[text_index]=bg;
+        if (add_to_start) console->input_start++;
+        text_index++;
+        text++;
+    }
 }
 
-static void add_input_text(const char *text,color_t fg,color_t bg,struct ConsoleInfo *console)
+static void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
 {
+    char buffer[2];
+    buffer[0]=character;
+    buffer[1]=0;
+    add_input_text(buffer,fg,bg,add_to_start,console);
 }
 
 static void draw_input_line(struct ConsoleInfo *console,struct point pos,int console_width,int input_height)
 {
     int starting_x=pos.x;
-    int input_len=strlen(console->input_line);
     int char_index=0;
     bool cursor_drawn=false;
     for (int row=0;row<input_height;row++)
@@ -72,14 +93,14 @@ static void draw_input_line(struct ConsoleInfo *console,struct point pos,int con
                 char character=console->input_line[char_index];
                 int color_fg=console->input_fg[char_index];
                 int color_bg=console->input_bg[char_index];
-                pos=draw_char(console->input_line[char_index],pos,color_fg,color_bg,false,FONT_5x8);
+                pos=draw_char(character,pos,color_fg,color_bg,false,FONT_5x8);
                 char_index++;
             }
             else
             {
                 if (cursor_drawn==false)
                 {
-                    pos=draw_char('<',pos,CMD_COL_CUR_FG,CMD_COL_CUR_BG,false,FONT_5x8);
+                    pos=draw_char(CUSTOM_CURSOR,pos,CMD_COL_CUR_FG,CMD_COL_CUR_BG,true,FONT_5x8);
                     cursor_drawn=true;
                 }
                 else pos=draw_char(' ',pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
@@ -330,8 +351,22 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
     bool redraw_screen=true;
     bool redraw_modifier=true;
     bool redraw_input=true;
+    bool reset_input=true;
     while (1)
     {
+        //Set text for input line
+        if (reset_input)
+        {
+            console->input_line[0]=0;
+            console->input_start=0;
+            console->input_cursor=0;
+            add_input_text("CG50",COL_GREEN,COL_BLACK,true,console);
+            add_input_char(':',COL_WHITE,COL_BLACK,true,console);
+            add_input_text("/ram/",COL_BLUE,COL_BLACK,true,console);
+        }
+        reset_input=false;
+
+
         //Redraw modifiers (shift, alpha) as necessary even if rest of screen not redrawn
         if (redraw_modifier) draw_modifier(modifier);
 
@@ -363,14 +398,8 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         char character=vkey_printable[key];
         if (character!=0)
         {
-            int input_index=strlen(console->input_line);
-            if (input_index<CMD_INPUT_MAX-1)
-            {
-                console->input_line[input_index]=character;
-                console->input_fg[input_index]=CMD_COL_FG;
-                console->input_bg[input_index]=CMD_COL_BG;
-                console->input_line[input_index+1]=0;
-            }
+            //Printable character - add to input line
+            add_input_char(character,CMD_COL_FG,CMD_COL_BG,false,console);
         }
         else
         {
@@ -380,19 +409,12 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     //Do not exit since used to clear line
                     break;
                 case VKEY_EXE:
-                    for (int i=0;i<strlen(console->input_line);i++)
+                    for (unsigned int i=0;i<strlen(console->input_line);i++)
                     {
                         console_char(console->input_line[i],console->input_fg[i],console->input_bg[i],console);
                     }
                     console_char('\n',0,0,console);
-                    console->input_line[0]=0;
-
-                    
-                    add_input_text("fx-CG50",COL_GREEN,COL_BLACK,console);
-                    add_input_char(':',COL_WHITE,COL_BLACK,console);
-                    add_input_text("/ram/",COL_BLUE,COL_BLACK,console);
-
-
+                    reset_input=true;
                     break;
                 default:
                     //Check for sys_keys like MENU, OFF, etc

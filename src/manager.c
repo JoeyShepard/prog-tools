@@ -65,6 +65,7 @@ void window_manager()
         else selected_split=windows[selected_window].selected_split;
         int new_program_ID=windows[selected_window].split[selected_split].ID;
    
+        //Call program function
         int return_command=(*menu_functions[new_program_ID])(COMMAND_RESUME,windows,selected_window);
 
         //Process return from program
@@ -74,17 +75,25 @@ void window_manager()
                 //Program done executing
                 windows[selected_window].split[windows[selected_window].selected_split].ID=ID_NONE;
 
-                //Free memory
+                //Free memory - each program function selects own heap even if doesn't use
                 new_split_mem(windows[selected_window].tab_index,windows[selected_window].selected_split,get_split_heap());
+
                 break;
             case COMMAND_MENU:
                 //Save here if necessary
-                gint_osmenu();
+                
+                //Exit rather than showing menu to prevent being turned off in menu
+                //gint_osmenu();
+                return;
+
                 break;
+            //Don't allow off key since RAM lost after about an hour of being off
+            /*
             case COMMAND_OFF:
                 //Save here too to be safe
                 gint_poweroff(true);
                 break;
+            */
             case COMMAND_TAB1:
             case COMMAND_TAB2:
             case COMMAND_TAB3:
