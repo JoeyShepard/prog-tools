@@ -24,12 +24,9 @@
     
     #define CMD_ROW_HEIGHT      9
 
-    #define CMD_COL_BG          COL_BLACK
     #define CMD_COL_FG          COL_WHITE
+    #define CMD_COL_BG          COL_BLACK
    
-    #define CMD_COL_CUR_FG      COL_BLACK
-    #define CMD_COL_CUR_BG      COL_WHITE
-
     #define CMD_BUFFER_SIZE     (CMD_WHOLE_WIDTH*CMD_WHOLE_HEIGHT+CMD_WHOLE_HEIGHT)
 
     struct ConsoleInfo

@@ -66,6 +66,7 @@ static void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_st
         console->input_fg[text_index]=fg;
         console->input_bg[text_index]=bg;
         if (add_to_start) console->input_start++;
+        console->input_cursor++;
         text_index++;
         text++;
     }
@@ -84,27 +85,46 @@ static void draw_input_line(struct ConsoleInfo *console,struct point pos,int con
     int starting_x=pos.x;
     int char_index=0;
     bool cursor_drawn=false;
+    bool invert;
     for (int row=0;row<input_height;row++)
     {
         for (int col=0;col<console_width;col++)
         {
+            char character;
+            int color_fg, color_bg;
             if (console->input_line[char_index]!=0)
             {
-                char character=console->input_line[char_index];
-                int color_fg=console->input_fg[char_index];
-                int color_bg=console->input_bg[char_index];
-                pos=draw_char(character,pos,color_fg,color_bg,false,FONT_5x8);
+                //Draw character of input
+                character=console->input_line[char_index];
+                color_fg=console->input_fg[char_index];
+                color_bg=console->input_bg[char_index];
+                if (char_index==console->input_cursor)
+                {
+                    //Cursor character - invert
+                    invert=true;
+                    cursor_drawn=true;
+                }
+                else invert=false;
                 char_index++;
             }
             else
             {
+                character=' ';
+                color_fg=CMD_COL_FG;
+                color_bg=CMD_COL_BG;
                 if (cursor_drawn==false)
                 {
-                    pos=draw_char(CUSTOM_CURSOR,pos,CMD_COL_CUR_FG,CMD_COL_CUR_BG,true,FONT_5x8);
+                    //Cursor not drawn yet - draw cursor
+                    invert=true;
                     cursor_drawn=true;
                 }
-                else pos=draw_char(' ',pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
+                else
+                {
+                    //Draw spaces for rest of line
+                    invert=false;
+                }
             }
+            pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
         }
         pos.x=starting_x;
         pos.y+=CMD_ROW_HEIGHT;
@@ -407,6 +427,26 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
             {
                 case VKEY_EXIT:
                     //Do not exit since used to clear line
+                    //Handle here so not picked up by sys_key_handler below
+                    break;
+                case VKEY_LEFT:
+                    if (console->input_cursor>console->input_start)
+                        console->input_cursor--; 
+                    break;
+                case VKEY_RIGHT:
+                    if (console->input_cursor<strlen(console->input_line))
+                        console->input_cursor++;
+                    break;
+                case VKEY_DEL:
+                    if (console->input_cursor>console->input_start)
+                    {
+                        console->input_cursor--;
+                        int input_len=strlen(console->input_line);
+                        for (int i=console->input_cursor;i<input_len;i++)
+                        {
+                            console->input_line[i]=console->input_line[i+1];
+                        }
+                    }
                     break;
                 case VKEY_EXE:
                     for (unsigned int i=0;i<strlen(console->input_line);i++)

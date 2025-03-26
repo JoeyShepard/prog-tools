@@ -10,13 +10,10 @@
 //TODO
 //====
 /*
-if off for long while in app, menu key stops working
-- was this why I had delay()?
 remove headers
 getkey.c arrays for key_printable not used
+- deleted key_printable since compiler complained about not being used
 draw_char can draw out of bounds!
-spaces printed for console cut off right most column!
-- what did I mean by this???
 */
 
 

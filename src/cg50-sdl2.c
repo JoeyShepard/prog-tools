@@ -27,6 +27,9 @@
         //Exception handling for unaligned memory accesses
         setup_exception_handling();
 
+        //Menu functionality so add-in doesn't crash if calculator left off for too long
+        gint_setrestart(1);
+
         //Initialize timer for limiting FPS
         tick_flag=1;
         int t=timer_configure(TIMER_ANY, delay_ms*1000, GINT_CALL(timer_callback,&tick_flag));

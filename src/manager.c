@@ -82,7 +82,7 @@ void window_manager()
             case COMMAND_MENU:
                 //Save here if necessary
                 
-                //Exit rather than showing menu to prevent being turned off in menu
+                //Exit rather than showing menu to prevent power off in menu
                 //gint_osmenu();
                 return;
 
