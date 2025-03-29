@@ -21,6 +21,9 @@
             case ERROR_UNALIGNED_WRITE:
                 draw_text("Error: unaligned write to heap!", pos, COL_BLACK, COL_WHITE, false, FONT_5x8);
                 break;
+            case ERROR_BAD_HEAP_ID:
+                draw_text("Error: bad heap ID!", pos, COL_BLACK, COL_WHITE, false, FONT_5x8);
+                break;
         }
 
         //No way to exit on calculator so hang here
@@ -45,6 +48,9 @@
                 break;
             case ERROR_UNALIGNED_WRITE:
                 printf("Error: unaligned write to heap!\n");
+                break;
+            case ERROR_BAD_HEAP_ID:
+                printf("Error: bad heap ID!\n");
                 break;
         }
         exit(1);

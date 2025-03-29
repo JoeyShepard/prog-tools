@@ -23,5 +23,6 @@
     uint32_t heap_used();
     uint8_t *get_split_heap();
     uint8_t *add_object(size_t size,uint8_t *heap_ptr);
+    uint8_t *object_address(int ID, uint8_t *heap_ptr);
 
 #endif

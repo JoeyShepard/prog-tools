@@ -162,15 +162,50 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
         error_exit(ERROR_UNALIGNED_WRITE);
     }
 
-    //Add space for address of next link
+    //Add space for address of next link in list of objects
     size+=sizeof(uint32_t);
 
+    //Add size of object to total size of all objects for that tab/split pair
     *(uint32_t *)heap_ptr+=size;
+
+    //Point past header data to beginning of object list
     heap_ptr+=HEAP_OBJECTS;
+
+    //Skip over each object until end marked by 0
     while(*(uint32_t *)heap_ptr)
         heap_ptr+=*(uint32_t *)heap_ptr;
+
+    //Change 0 marker for end of object list to size of new object
     *(uint32_t *)heap_ptr=size;
+
+    //Add 0 marker to mark new end of object list
     *(uint32_t *)(heap_ptr+size)=0;
+
+    //Return address of newly added object skipping uint32 holding its size
     return heap_ptr+sizeof(uint32_t);
 }
 
+uint8_t *object_address(int ID, uint8_t *heap_ptr)
+{
+    //Point past header data to beginning of object list
+    heap_ptr+=HEAP_OBJECTS;
+
+    //Skip over each object that comes before
+    for (int i=0;i<ID;i++)
+    {
+        //Size of object to skip
+        uint32_t obj_size=*(uint32_t *)heap_ptr;
+
+        if (obj_size==0)
+        {
+            //Reached 0 marker at end unexpectedly so ID is wrong or memory is corrupted
+            error_exit(ERROR_BAD_HEAP_ID);
+        }
+
+        //Skip object and point to next one
+        heap_ptr+=obj_size;
+    }
+
+    //Return address of newly added object skipping uint32 holding its size
+    return heap_ptr+sizeof(uint32_t);
+}

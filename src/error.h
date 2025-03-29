@@ -6,7 +6,8 @@
         ERROR_NONE,
         ERROR_FONT_NOT_FOUND,
         ERROR_MENU_TEXT_TOO_LONG,
-        ERROR_UNALIGNED_WRITE
+        ERROR_UNALIGNED_WRITE,
+        ERROR_BAD_HEAP_ID,
     };
 
     void error_exit(int error);
