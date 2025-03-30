@@ -4,6 +4,8 @@
     #include <stdbool.h>
     #include <stdint.h>
 
+    #include "types.h"
+
     //Elements common to calculator and PC versions
     #define HEAP_SIZE       0x200000
     #define XRAM_SIZE       0x2000
@@ -45,6 +47,7 @@
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
         #include <gint/clock.h>
         #include <gint/display.h>
+        #include <gint/fs.h>
         #include <gint/gint.h>
         #include <gint/keyboard.h>
         #include <gint/timer.h>
@@ -54,10 +57,10 @@
         void wrapper_exit();
     #else
         //Compiling for PC using SDL2 wrapper
+        #include <linux/limits.h>
         #include <SDL2/SDL.h>
 
-        //typedefs from gint
-        typedef uint16_t color_t;
+        #include "command.h"
 
         //Constants from gint
         #define DWIDTH          396
@@ -198,6 +201,7 @@
         key_event_t getkey_opt(int options, volatile int *timeout);
         void gint_osmenu();
         void gint_poweroff(bool show_logo);
+        char *fs_path_normalize(char const *path);
 
     #endif
 #endif

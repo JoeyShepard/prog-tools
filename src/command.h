@@ -63,6 +63,21 @@
         CMD_CMD_CD,
         CMD_CMD_LS,
         CMD_CMD_LL,
+
+        //TODO: remove
+        CMD_CMD_TEST
+    };
+
+    enum ConsoleErrors
+    {
+        CMD_ERROR_NONE,
+        CMD_ERROR_PATH_TOO_LONG,
+        CMD_ERROR_NORMALIZE_PATH,
+        CMD_ERROR_PATH_NOT_FOUND,
+        CMD_ERROR_CANT_ACCESS,
+        CMD_ERROR_ARG_COUNT,
+        CMD_ERROR_ARG_MEM,
+        CMD_ERROR_NOT_FOUND
     };
 
     struct ConsoleChar

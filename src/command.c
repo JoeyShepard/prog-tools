@@ -1,6 +1,12 @@
 //placeholder functions for menu
+#include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+
+
+//TODO: remove???
+#include <sys/stat.h>
+
 
 #include "command.h"
 #include "compatibility.h"
@@ -346,16 +352,90 @@ static void copy_console_text(struct ConsoleInput *input,char *input_buffer,int 
     input_buffer[CMD_INPUT_MAX-1]=0;
 }
 
-static void console_error(const char *text,struct ConsoleInfo *console)
-{
-    console_text(text,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
-    console_char('\n',CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
-}
-
 static void console_nerror(const char *text,int text_len,struct ConsoleInfo *console)
 {
     for (int i=0;i<text_len;i++)
         console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+}
+
+static int create_path(const char *path, const char *addition, char *result)
+{
+    if (addition[0]=='/')
+    {
+        //Directory is absolute
+        if (strlen(addition)>CMD_PATH_MAX-1)
+        {
+            return CMD_ERROR_PATH_TOO_LONG;
+        }
+        else
+        {
+            strcpy(result,addition);
+        }
+    }
+    else
+    {
+        //Directory is relative
+        //-2 for terminating 0 and added / between directories
+        if (strlen(path)+strlen(addition)>CMD_PATH_MAX-2)
+        {
+            return CMD_ERROR_PATH_TOO_LONG;
+        }
+        strcpy(result,path);
+        int path_len=strlen(result);
+        strcpy(result+path_len,"/");
+        path_len+=strlen("/");
+        strcpy(result+path_len,addition);
+    }
+
+    char *normal_path=fs_path_normalize(result);
+    if (normal_path==NULL)
+    {
+        return CMD_ERROR_NORMALIZE_PATH;
+    }
+    strcpy(result,normal_path);
+    free(normal_path);
+
+    return CMD_ERROR_NONE;
+}
+
+static void command_error(const char *command,int error,struct ConsoleInfo *console)
+{
+    if (command!=NULL)
+    {
+        console_text(command,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+        console_text(": ",CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+    }
+    const char *error_msg=NULL;
+
+    switch (error)
+    {
+        case CMD_ERROR_PATH_TOO_LONG:
+            error_msg="path too long\n";
+            break;
+        case CMD_ERROR_NORMALIZE_PATH:
+            error_msg="could not normalize path\n";
+            break;
+        case CMD_ERROR_PATH_NOT_FOUND:
+            error_msg="path not found\n";
+            break;
+        case CMD_ERROR_CANT_ACCESS:
+            error_msg="cannot access file/directory\n";
+            break;
+        case CMD_ERROR_ARG_COUNT:
+            error_msg="wrong number of arguments\n";
+            break;
+        case CMD_ERROR_ARG_MEM:
+            //Triggered before any command run so doesn't have xxx: beginning so should be upper case
+            error_msg="Out of argument memory\n";
+            break;
+        case CMD_ERROR_NOT_FOUND:
+            //Print : here since no command name given so no : printed
+            error_msg=": command not found\n";
+            break;
+        default:
+            error_msg="unknown\n";
+    }
+    console_text(error_msg,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
 }
 
 static struct CommandInfo
@@ -369,6 +449,7 @@ static struct CommandInfo
     {"cd",      CMD_CMD_CD,     1},
     {"ls",      CMD_CMD_LS,     -1},
     {"ll",      CMD_CMD_LL,     -1},
+    {"test",    CMD_CMD_TEST,   0}
 };
 
 #define COMMANDS_SIZE ((int)(sizeof(commands)/sizeof(commands[0])))
@@ -404,7 +485,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             {
                 if (arg_index>=CMD_ARG_MAX)
                 {
-                    console_error("Out of argument memory",console);
+                    command_error(NULL,CMD_ERROR_ARG_MEM,console);
                     return COMMAND_NONE;
                 }
                 args[arg_index].start=text_index;
@@ -457,8 +538,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             {
                 if (commands[i].arg_count!=arg_count-1)
                 {
-                    console_nerror(input_buffer+args[0].start,args[0].len,console);
-                    console_error(": wrong number of arguments",console);
+                    command_error(commands[i].name,CMD_ERROR_ARG_COUNT,console);
                     return COMMAND_NONE;
                 }
             }
@@ -466,46 +546,69 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             break;
         }
     }
+
+    struct dirent *dir;
+    DIR *directory;
+    char new_path[CMD_PATH_MAX];
+    char arg_path[CMD_PATH_MAX];
     switch (command_id)
     {
         case CMD_CMD_NONE:
             console_nerror(input_buffer+args[0].start,args[0].len,console);
-            console_error(": command not found",console);
+            command_error("",CMD_ERROR_NOT_FOUND,console);
             break;
         case CMD_CMD_EXIT:
             return COMMAND_EXIT;
         case CMD_CMD_CD:
-            char new_path[CMD_PATH_MAX];
-            if (input_buffer[args[1].start]=='/')
+            strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+            int result=create_path(console->path,arg_path,new_path);
+
+            if (result!=CMD_ERROR_NONE)
             {
-                if (args[1].len>CMD_PATH_MAX-1)
+                command_error("cd",result,console);
+            }
+            else
+            {
+                directory=opendir(new_path);
+                if (directory)
                 {
-                    console_nerror(input_buffer+args[0].start,args[0].len,console);
-                    console_error(": path too long",console);
-                    break;
-                }
-                strncpy(new_path,input_buffer+args[1].start,args[1].len);
-                new_path[args[1].len]=0;
-                DIR *d=opendir(new_path);
-                if (d)
-                {
-                    console_text("path found\n",CMD_COL_FG,CMD_COL_BG,console);
-                    closedir(d);
+                    strcpy(console->path,new_path);
+                    closedir(directory);
                 }
                 else
                 {
-                    console_nerror(input_buffer+args[0].start,args[0].len,console);
-                    console_error(": path not found",console);
+                    command_error("cd",CMD_ERROR_PATH_NOT_FOUND,console);
                 }
             }
-
             break;
         case CMD_CMD_LS:
-            struct dirent *dir;
-            DIR *d=opendir("/");
-            if (d)
+            if (arg_count==1)
             {
-                while ((dir=readdir(d)))
+                //No arguments - first argument is "ls" itself
+                directory=opendir(console->path);
+            }
+            else if (arg_count==2)
+            {
+                //1 argument - try to use argument as path
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                int result=create_path(console->path,arg_path,new_path);
+
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error("ls",result,console);
+                    break;
+                }
+                directory=opendir(new_path);
+            }
+            else
+            {
+                command_error("ls",CMD_ERROR_ARG_COUNT,console);
+                break;
+            }
+
+            if (directory)
+            {
+                while ((dir=readdir(directory)))
                 {
                     color_t color_fg;
                     if (dir->d_type==DT_DIR)        color_fg=CMD_COL_DIR;
@@ -515,12 +618,23 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                     console_text(dir->d_name,color_fg,CMD_COL_BG,console);
                     console_text("\n",CMD_COL_FG,CMD_COL_BG,console);
                 }
-                closedir(d);
+                closedir(directory);
             }
             else
             {
-                console_error("ls: cannot access file",console);
+                command_error("ls",CMD_ERROR_CANT_ACCESS,console);
             }
+            break;
+        case CMD_CMD_TEST:
+            console_text("Test\n",CMD_COL_FG,CMD_COL_BG,console);
+
+            struct stat buffer;
+            if (stat("/home/druzyek/temp/test.txt",&buffer))
+            {
+                console_text("stat error\n",CMD_COL_FG,CMD_COL_BG,console);
+            }
+            else console_text("no stat error!\n",CMD_COL_FG,CMD_COL_BG,console);
+
             break;
         default:
             console_ntext(input_buffer+args[0].start,args[0].len,CMD_COL_FG,CMD_COL_BG,console);
@@ -637,6 +751,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
             add_input_text("CG50",CMD_COL_HOST,CMD_COL_BG,true,console);
             add_input_char(':',CMD_COL_FG,CMD_COL_BG,true,console);
             add_input_text(console->path,CMD_COL_DIR,CMD_COL_BG,true,console);
+            add_input_char(' ',CMD_COL_FG,CMD_COL_BG,true,console);
             console->input_copied=false;
         }
         console->reset_input=false;
