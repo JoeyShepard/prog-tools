@@ -1,5 +1,6 @@
 //placeholder functions for menu
 #include <string.h>
+#include <dirent.h>
 
 #include "command.h"
 #include "compatibility.h"
@@ -49,6 +50,12 @@ static void console_text(const char *text, color_t fg, color_t bg, struct Consol
         console_char(*text,fg,bg,console);
         text++;
     }
+}
+
+static void console_ntext(const char *text, int text_len, color_t fg, color_t bg, struct ConsoleInfo *console)
+{
+    for (int i=0;i<text_len;i++)
+        console_char(text[i],fg,bg,console);
 }
 
 static void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
@@ -329,6 +336,201 @@ static void add_history(struct ConsoleInfo *console)
         console->history_count++;
 }
 
+static void copy_console_text(struct ConsoleInput *input,char *input_buffer,int offset)
+{
+    //Copy all characters excluding color data
+    for (int i=offset;i<CMD_INPUT_MAX;i++)
+        input_buffer[i-offset]=input->text[i].character;
+
+    //Loop above copies 0 terminator but add here just in case
+    input_buffer[CMD_INPUT_MAX-1]=0;
+}
+
+static void console_error(const char *text,struct ConsoleInfo *console)
+{
+    console_text(text,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+    console_char('\n',CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+}
+
+static void console_nerror(const char *text,int text_len,struct ConsoleInfo *console)
+{
+    for (int i=0;i<text_len;i++)
+        console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+}
+
+static struct CommandInfo
+{
+    const char *name;
+    const int command;
+    const int arg_count;
+}commands[]=
+{
+    {"exit",    CMD_CMD_EXIT,   0},
+    {"cd",      CMD_CMD_CD,     1},
+    {"ls",      CMD_CMD_LS,     -1},
+    {"ll",      CMD_CMD_LL,     -1},
+};
+
+#define COMMANDS_SIZE ((int)(sizeof(commands)/sizeof(commands[0])))
+
+static int process_input(char *input_buffer,struct ConsoleInfo *console)
+{
+    struct Parse
+    {
+        int start,len;
+    } args[CMD_ARG_MAX];
+
+    int parse_state=CMD_PARSE_NONE;
+    int arg_index=0;
+    int text_index=0;
+    int arg_count=0;
+
+    for (int i=0;i<CMD_ARG_MAX;i++)
+        args[i].len=0;
+
+    while(input_buffer[text_index])
+    {
+        if (input_buffer[text_index]==' ')
+        {
+            if (parse_state==CMD_PARSE_WORD)
+            {
+                parse_state=CMD_PARSE_NONE;
+                arg_index++;
+            }
+        }
+        else
+        {
+            if (parse_state==CMD_PARSE_NONE) 
+            {
+                if (arg_index>=CMD_ARG_MAX)
+                {
+                    console_error("Out of argument memory",console);
+                    return COMMAND_NONE;
+                }
+                args[arg_index].start=text_index;
+                args[arg_index].len=1;
+                parse_state=CMD_PARSE_WORD;
+            }
+            else if (parse_state==CMD_PARSE_WORD) 
+            {
+                args[arg_index].len++;
+            }
+        }
+        text_index++;
+    }
+
+    //Count number of arguments
+    for (int i=0;i<CMD_ARG_MAX;i++)
+    {
+        if (args[i].len>0)
+            arg_count++;
+        else break;
+    }
+
+    //Nothing to process - return
+    if (arg_count==0) return COMMAND_NONE;
+
+    //Match to commands
+    int command_id=CMD_CMD_NONE;
+    for (int i=0;i<COMMANDS_SIZE;i++)
+    {
+        bool command_found=true;
+        int j;
+        for (j=0;j<args[0].len;j++)
+        {
+            if (input_buffer[args[0].start+j]!=commands[i].name[j])
+            {
+                command_found=false;
+                break;
+            }
+        }
+        if (commands[i].name[j]!=0)
+        {
+            //Make sure command ends in 0 and not just matching on first letters
+            command_found=false;
+        }
+
+        if (command_found==true)
+        {
+            //If command doesn't have unlimited arguments
+            if (commands[i].arg_count!=-1)
+            {
+                if (commands[i].arg_count!=arg_count-1)
+                {
+                    console_nerror(input_buffer+args[0].start,args[0].len,console);
+                    console_error(": wrong number of arguments",console);
+                    return COMMAND_NONE;
+                }
+            }
+            command_id=commands[i].command;
+            break;
+        }
+    }
+    switch (command_id)
+    {
+        case CMD_CMD_NONE:
+            console_nerror(input_buffer+args[0].start,args[0].len,console);
+            console_error(": command not found",console);
+            break;
+        case CMD_CMD_EXIT:
+            return COMMAND_EXIT;
+        case CMD_CMD_CD:
+            char new_path[CMD_PATH_MAX];
+            if (input_buffer[args[1].start]=='/')
+            {
+                if (args[1].len>CMD_PATH_MAX-1)
+                {
+                    console_nerror(input_buffer+args[0].start,args[0].len,console);
+                    console_error(": path too long",console);
+                    break;
+                }
+                strncpy(new_path,input_buffer+args[1].start,args[1].len);
+                new_path[args[1].len]=0;
+                DIR *d=opendir(new_path);
+                if (d)
+                {
+                    console_text("path found\n",CMD_COL_FG,CMD_COL_BG,console);
+                    closedir(d);
+                }
+                else
+                {
+                    console_nerror(input_buffer+args[0].start,args[0].len,console);
+                    console_error(": path not found",console);
+                }
+            }
+
+            break;
+        case CMD_CMD_LS:
+            struct dirent *dir;
+            DIR *d=opendir("/");
+            if (d)
+            {
+                while ((dir=readdir(d)))
+                {
+                    color_t color_fg;
+                    if (dir->d_type==DT_DIR)        color_fg=CMD_COL_DIR;
+                    else if (dir->d_type==DT_REG)   color_fg=CMD_COL_FILE;
+                    else                            color_fg=CMD_COL_UNKNOWN;
+
+                    console_text(dir->d_name,color_fg,CMD_COL_BG,console);
+                    console_text("\n",CMD_COL_FG,CMD_COL_BG,console);
+                }
+                closedir(d);
+            }
+            else
+            {
+                console_error("ls: cannot access file",console);
+            }
+            break;
+        default:
+            console_ntext(input_buffer+args[0].start,args[0].len,CMD_COL_FG,CMD_COL_BG,console);
+            console_text(": command found",CMD_COL_FG,CMD_COL_BG,console);
+            console_text("\n",CMD_COL_FG,CMD_COL_BG,console);
+            return COMMAND_NONE;
+    }
+    return COMMAND_NONE;
+}
+
 int command_line(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     struct WindowInfo window=windows[selected_window];
@@ -377,6 +579,9 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         }
         console->history_index=0;
         console->history_count=0;
+
+        //Init file system path
+        strcpy(console->path,"/");
     }
     else
     {
@@ -429,9 +634,9 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
             console->input.start=0;
             console->input.cursor=0;
             console->input.len=0;
-            add_input_text("CG50",COL_GREEN,COL_BLACK,true,console);
-            add_input_char(':',COL_WHITE,COL_BLACK,true,console);
-            add_input_text("/ram/",COL_BLUE,COL_BLACK,true,console);
+            add_input_text("CG50",CMD_COL_HOST,CMD_COL_BG,true,console);
+            add_input_char(':',CMD_COL_FG,CMD_COL_BG,true,console);
+            add_input_text(console->path,CMD_COL_DIR,CMD_COL_BG,true,console);
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -467,10 +672,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         char character=vkey_printable[key];
         if (character!=0)
         {
-            if (character=='1') add_input_text("Test text!",COL_RED,COL_BLUE,false,console);
-            else if (character=='2') add_input_text("Test text!",COL_BLUE,COL_RED,false,console);
-            else
-
             //Printable character - add to input line
             add_input_char(character,CMD_COL_FG,CMD_COL_BG,false,console);
         }
@@ -478,6 +679,10 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         {
             switch (key)
             {
+                case VKEY_QUIT:
+                    //shift+EXIT
+                    return COMMAND_EXIT;
+                    break;
                 case VKEY_EXIT:
                     //Clear line but do not exit program
                     //Handle here so not picked up by sys_key_handler below which would exit program
@@ -489,7 +694,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
-                    if (console->input.len>=CMD_INPUT_MAX-strlen(cancel_text))
+                    if (console->input.len>=CMD_INPUT_MAX-(int)strlen(cancel_text))
                     {
                         //Not enough room to append ^C so drop characters from end of input to make room
                         console->input.len=CMD_INPUT_MAX-strlen(cancel_text)-1;
@@ -500,7 +705,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     //Fallthrough
                 case VKEY_EXE:
                     //Copy input text to console
-                    for (unsigned int i=0;i<console->input.len;i++)
+                    for (int i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
@@ -512,11 +717,19 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     {
                         //Add input to history
                         add_history(console);
+                        
+                        //Process input
+                        char input_buffer[CMD_INPUT_MAX];
+                        copy_console_text(&console->input,input_buffer,console->input.start);
+                        int return_code=process_input(input_buffer,console);
+                        if (return_code!=COMMAND_NONE)
+                            return return_code;
                     }
                     break;
                 case VKEY_UP:
                     if (console->history_count>0)
                     {
+                        //Scroll up in history if there are history lines
                         if (console->input_copied==false)
                         {
                             //First time up pressed - save current input
@@ -527,10 +740,16 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
 
                         if (console->history_read_count>0)
                         {
+                            //Items left to scroll back to
                             if (console->history_count==console->history_read_count)
                             {
+                                //Current line edited is copy of input when up was pressed meaning input
+                                //scrolled up then back to original input. Save that input including changes
+                                //in case scroll back to that.
                                 console->input_copy=console->input;
                             }
+
+                            //Scroll up one line and copy line from history to input
                             console->history_read_count--;
                             int read_index=console->history_index;
                             read_index-=console->history_count;
@@ -543,18 +762,26 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                 case VKEY_DOWN:
                     if (console->input_copied)
                     {
+                        //Only scroll down in history if previously scrolled up
                         if (console->history_read_count==console->history_count)
                         {
+                            //Already scrolled all the way down - nothing to do
                             break;
                         }
-
+                        
+                        //Advance to next history line
                         console->history_read_count++;
                         if (console->history_read_count==console->history_count)
                         {
+                            //Advanced past last line so use copy of original input from before
+                            //scrolling up. This way, scrolling up, scrolling down, modifying 
+                            //original input then scrolling up then back down to original input
+                            //doesn't lose changes.
                             console->input=console->input_copy;    
                         }
                         else
                         {
+                            //Copy line from history to input
                             int read_index=console->history_index;
                             read_index-=console->history_count;
                             read_index+=console->history_read_count;
