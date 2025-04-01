@@ -64,6 +64,17 @@
         CMD_CMD_LS,
         CMD_CMD_LL,
 
+        //TODO:
+        CMD_CMD_CAT,
+        CMD_CMD_RMDIR,
+        CMD_CMD_MKDIR,
+        CMD_CMD_MV,
+        CMD_CMD_RM,
+        CMD_CMD_CP,
+        CMD_CMD_TOUCH,
+        CMD_CMD_HELP,
+        CMD_CMD_CLEAR,
+
         //TODO: remove
         CMD_CMD_TEST
     };
@@ -77,7 +88,8 @@
         CMD_ERROR_CANT_ACCESS,
         CMD_ERROR_ARG_COUNT,
         CMD_ERROR_ARG_MEM,
-        CMD_ERROR_NOT_FOUND
+        CMD_ERROR_NOT_FOUND,
+        CMD_ERROR_NOT_DIRECTORY
     };
 
     struct ConsoleChar
@@ -118,6 +130,13 @@
 
         //File system
         char path[CMD_PATH_MAX];
+    };
+
+    enum FileTypes
+    {
+        FILE_TYPE_DIR,
+        FILE_TYPE_REG,
+        FILE_TYPE_UNKNOWN
     };
 
     int command_line(int command_ID, struct WindowInfo *windows, int selected_window);

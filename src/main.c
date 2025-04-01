@@ -14,6 +14,7 @@ remove headers
 getkey.c arrays for key_printable not used
 - deleted key_printable since compiler complained about not being used
 draw_char can draw out of bounds!
+need to world switch for stat and opendir???
 */
 
 

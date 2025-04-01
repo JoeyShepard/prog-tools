@@ -3,7 +3,7 @@
 
     #include <stdint.h>
 
-    #include "compatibility.h"
+    #include "types.h"
 
     extern uint16_t *vram_main, *vram_buffer;
 
