@@ -623,10 +623,12 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
     char new_path[CMD_PATH_MAX];
     char arg_path[CMD_PATH_MAX];
     struct stat stat_buffer;
+    int result;
     switch (command_id)
     {
         case CMD_CMD_NONE:
             strncpy(arg_path,input_buffer+args[0].start,args[0].len);
+            arg_path[args[0].len]=0;
             command_error(arg_path,CMD_ERROR_NOT_FOUND,console);
             break;
         case CMD_CMD_EXIT:
@@ -669,7 +671,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             }
             else
             {
-                //Only one argument or no arguments allowed
+                //Either one argument or no arguments allowed
                 command_error("cd",CMD_ERROR_ARG_COUNT,console);
                 break;
             }
@@ -694,12 +696,14 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
 
                 //Normalize path
-                int result=create_path(console->path,arg_path,new_path);
+                /*
+                result=create_path(console->path,arg_path,new_path);
                 if (result!=CMD_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
                 }
+                */
 
                 //Fetch info on path
                 result=path_type(new_path,&file_type);
@@ -731,6 +735,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                 {
                     if (strcmp(dir->d_name,".")&&strcmp(dir->d_name,".."))
                     {
+                        //Color code output
                         if (dir->d_type==DT_DIR)        file_type=FILE_TYPE_DIR;
                         else if (dir->d_type==DT_REG)   file_type=FILE_TYPE_REG;
                         else                            file_type=FILE_TYPE_UNKNOWN;
