@@ -237,7 +237,7 @@ static void draw_console(struct ConsoleInfo *console,int console_x,int console_y
             //Still room left on screen for more lines
             if ((console->overflow_count+line_length)%console_width!=0)
             {
-                //Align text accounting for characters that has scrolled out of the buffer
+                //Align text accounting for characters that have scrolled out of the buffer
                 buffer_start-=(console->overflow_count+line_length)%console_width;
                 line_count++;
             }
@@ -363,7 +363,7 @@ static void console_nerror(const char *text,int text_len,struct ConsoleInfo *con
         console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
 }
 
-static int create_path(const char *path, const char *addition, char *result)
+static int add_path(const char *path, const char *addition, char *result)
 {
     if (addition[0]=='/')
     {
@@ -390,6 +390,18 @@ static int create_path(const char *path, const char *addition, char *result)
         strcpy(result+path_len,"/");
         path_len+=strlen("/");
         strcpy(result+path_len,addition);
+    }
+
+    return CMD_ERROR_NONE;
+}
+
+static int create_path(const char *path, const char *addition, char *result)
+{
+
+    int result_code=add_path(path,addition,result);
+    if (result_code!=CMD_ERROR_NONE)
+    {
+        return result_code;
     }
 
     char *normal_path=fs_path_normalize(result);
@@ -525,6 +537,17 @@ static int path_type(const char *path, int *result)
     return CMD_ERROR_NONE;
 }
 
+int console_strlen(struct ConsoleChar *text)
+{
+    int size=0;
+    while(text->character)
+    {
+        text++;
+        size++;
+    }
+    return size;
+}
+
 static int process_input(char *input_buffer,struct ConsoleInfo *console)
 {
     struct Parse
@@ -618,155 +641,207 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
         }
     }
 
-    struct dirent *dir;
-    DIR *directory;
-    char new_path[CMD_PATH_MAX];
-    char arg_path[CMD_PATH_MAX];
-    struct stat stat_buffer;
-    int result;
+    char human_buffer[TEXT_INT32_SIZE];
+
     switch (command_id)
     {
         case CMD_CMD_NONE:
-            strncpy(arg_path,input_buffer+args[0].start,args[0].len);
-            arg_path[args[0].len]=0;
-            command_error(arg_path,CMD_ERROR_NOT_FOUND,console);
+            char command_name[CMD_PATH_MAX];
+            strncpy(command_name,input_buffer+args[0].start,args[0].len);
+            command_name[args[0].len]=0;
+            command_error(command_name,CMD_ERROR_NOT_FOUND,console);
             break;
         case CMD_CMD_EXIT:
             return COMMAND_EXIT;
         case CMD_CMD_CD:
-            if (arg_count==1)
+            //Anonymous block - reuse variable names
             {
-                //No arguments - "cd" is first argument. Change path to root.
-                strcpy(console->path,"/");
-            }
-            else if (arg_count==2)
-            {
-                //One argument - use argument as path
-
-                //Normalize path
-                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
-                int result=create_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                if (arg_count==1)
                 {
-                    command_error("cd",result,console);
+                    //No arguments - "cd" is first argument. Change path to root.
+                    strcpy(console->path,"/");
+                }
+                else if (arg_count==2)
+                {
+                    //One argument - use argument as path
+
+                    //Normalize path
+                    char arg_path[CMD_PATH_MAX];
+                    char new_path[CMD_PATH_MAX];
+                    strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                    int result=create_path(console->path,arg_path,new_path);
+                    if (result!=CMD_ERROR_NONE)
+                    {
+                        command_error("cd",result,console);
+                        break;
+                    }
+
+                    //Fetch info on path
+                    struct stat stat_buffer;
+                    if (stat(new_path,&stat_buffer))
+                    {
+                        command_error("cd",CMD_ERROR_PATH_NOT_FOUND,console); 
+                        break;
+                    }
+
+                    //Make sure target path is directory
+                    if ((stat_buffer.st_mode&S_IFMT)!=S_IFDIR)
+                    {
+                        command_error("cd",CMD_ERROR_NOT_DIRECTORY,console); 
+                        break;
+                    }
+
+                    //Set current path to new path 
+                    strcpy(console->path,new_path);
+                }
+                else
+                {
+                    //Either one argument or no arguments allowed
+                    command_error("cd",CMD_ERROR_ARG_COUNT,console);
                     break;
                 }
-
-                //Fetch info on path
-                if (stat(new_path,&stat_buffer))
-                {
-                    command_error("cd",CMD_ERROR_PATH_NOT_FOUND,console); 
-                    break;
-                }
-
-                //Make sure target path is directory
-                if ((stat_buffer.st_mode&S_IFMT)!=S_IFDIR)
-                {
-                    command_error("cd",CMD_ERROR_NOT_DIRECTORY,console); 
-                    break;
-                }
-
-                //Set current path to new path 
-                strcpy(console->path,new_path);
-            }
-            else
-            {
-                //Either one argument or no arguments allowed
-                command_error("cd",CMD_ERROR_ARG_COUNT,console);
                 break;
             }
-            break;
         case CMD_CMD_LL:
         case CMD_CMD_LS:
-            const char *command_name;
-            if (command_id==CMD_CMD_LL) command_name="ll";
-            else command_name="ls";
-
-            color_t color_fg;
-            int file_type;
-            if (arg_count==1)
+            //Anonymous block - reuse variable names between cases
             {
-                //No arguments - first argument is "ll"/"ls" itself. Use path as directory.
-                strcpy(new_path,console->path);
-                file_type=FILE_TYPE_DIR;
-            }
-            else if (arg_count==2)
-            {
-                //One argument - use argument as path
-                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                const char *command_name;
+                if (command_id==CMD_CMD_LL) command_name="ll";
+                else command_name="ls";
 
-                //Normalize path
-                /*
-                result=create_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                color_t color_fg;
+                int file_type;
+                char new_path[CMD_PATH_MAX];
+                if (arg_count==1)
                 {
-                    command_error(command_name,result,console);
-                    break;
+                    //No arguments - first argument is "ll"/"ls" itself. Use path as directory.
+                    strcpy(new_path,console->path);
+                    file_type=FILE_TYPE_DIR;
                 }
-                */
-
-                //Fetch info on path
-                result=path_type(new_path,&file_type);
-                if (result!=CMD_ERROR_NONE)
+                else if (arg_count==2)
                 {
-                    command_error(command_name,result,console); 
-                    break;
-                }
-            }
-            else
-            {
-                //Only one argument or no arguments allowed
-                command_error(command_name,CMD_ERROR_ARG_COUNT,console);
-                break;
-            }
+                    //One argument - use argument as path
+                    char arg_path[CMD_PATH_MAX];
+                    strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
 
-            if (file_type==FILE_TYPE_DIR)
-            {
-                //Target path is directory - show contents
-                directory=opendir(new_path);
-                if (directory==NULL)
-                {
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
-                    break;
-                }
-
-                //Print all files and directories
-                while ((dir=readdir(directory)))
-                {
-                    if (strcmp(dir->d_name,".")&&strcmp(dir->d_name,".."))
+                    //Add argument to current path if partial or use argument as path if full
+                    int result=add_path(console->path,arg_path,new_path);
+                    if (result!=CMD_ERROR_NONE)
                     {
-                        //Color code output
-                        if (dir->d_type==DT_DIR)        file_type=FILE_TYPE_DIR;
-                        else if (dir->d_type==DT_REG)   file_type=FILE_TYPE_REG;
-                        else                            file_type=FILE_TYPE_UNKNOWN;
-                        color_fg=file_color(dir->d_name,file_type);
+                        command_error(command_name,result,console);
+                        break;
+                    }
 
-                        console_text(dir->d_name,color_fg,CMD_COL_BG,console);
-                        console_text_default("\n",console);
+                    //Fetch info on path
+                    strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                    result=path_type(new_path,&file_type);
+                    if (result!=CMD_ERROR_NONE)
+                    {
+                        command_error(command_name,result,console); 
+                        break;
                     }
                 }
-                closedir(directory);
-            }
-            else
-            {
-                //Target path points to file - print name
-                char *basename=strrchr(new_path,'/');
-                if (basename==NULL)
+                else
                 {
-                    //Forward slash not found in path - should never happen but just in case
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                    //Only one argument or no arguments allowed
+                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
                     break;
                 }
 
-                //Skip preceding /
-                basename++;
-                
-                //Print name depending on type - file_type set above after stat
-                color_fg=file_color(basename,file_type);
-                console_text(basename,color_fg,CMD_COL_BG,console);
-                console_text_default("\n",console);
+                if (file_type==FILE_TYPE_DIR)
+                {
+                    //Target path is directory - show contents
+                    DIR *directory=opendir(new_path);
+                    if (directory==NULL)
+                    {
+                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                        break;
+                    }
+
+                    //Print all files and directories
+                    struct dirent *dir;
+                    int print_width=0;
+                    bool file_printed=false;
+                    while ((dir=readdir(directory)))
+                    {
+                        //Don't print . or ..
+                        if (strcmp(dir->d_name,".")&&strcmp(dir->d_name,".."))
+                        {
+                            //Color code output
+                            if (dir->d_type==DT_DIR)        file_type=FILE_TYPE_DIR;
+                            else if (dir->d_type==DT_REG)   file_type=FILE_TYPE_REG;
+                            else                            file_type=FILE_TYPE_UNKNOWN;
+                            color_fg=file_color(dir->d_name,file_type);
+
+                            if (command_id==CMD_CMD_LS)
+                            {
+                                //ls - print filename and prevent name from wrapping at screen edge
+                                if (file_printed)
+                                {
+                                    if (print_width+strlen(CMD_LS_SEPARATOR)>=CMD_WHOLE_WIDTH)
+                                    {
+                                        console_text_default("\n",console);
+                                        print_width=0;
+                                    }
+                                    else
+                                    {
+                                        console_text_default(CMD_LS_SEPARATOR,console);
+                                        print_width+=strlen(CMD_LS_SEPARATOR);
+                                    }
+                                }
+
+                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
+                                print_width+=strlen(dir->d_name);
+                                file_printed=true;
+                            }
+                            else if (command_id==CMD_CMD_LL)
+                            {
+                                //TODO
+                                /*
+                                if (stat(paths[i],&stat_buffer))
+                                {
+                                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                    console_
+                                    break;
+                                }
+                                */
+
+                                if (strlen(dir->d_name)>CMD_LL_WIDTH)
+                                {
+                                    //Screen not wide enough for filename and size so print size without alignment
+                                    console_text_default(" ",console);
+                                    console_text_default("\n",console);
+                                }
+                            }
+
+                        }
+
+                    }
+                    console_text_default("\n",console);
+                    closedir(directory);
+                }
+                else
+                {
+                    //Target path points to file - print name
+                    char *basename=strrchr(new_path,'/');
+                    if (basename==NULL)
+                    {
+                        //Forward slash not found in path - should never happen but just in case
+                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                        break;
+                    }
+
+                    //Skip preceding /
+                    basename++;
+                    
+                    //Print name depending on type - file_type set above after stat
+                    color_fg=file_color(basename,file_type);
+                    console_text(basename,color_fg,CMD_COL_BG,console);
+                    console_text_default("\n",console);
+                }
+                break;
             }
-            break;
         case CMD_CMD_TEST:
             console_text_default("Test\n",console);
 
@@ -781,22 +856,21 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             for (int i=0;i<5;i++)
             {
                 console_text_default(paths[i],console);
+                struct stat stat_buffer;
                 if (stat(paths[i],&stat_buffer))
                     console_text_default(" - stat error\n",console);
                 else
                 {
                     console_text_default(" - no stat error!\n",console);
 
-                    char num_buffer[TEXT_INT32_SIZE];
-
                     console_text_default("- size: ",console);
-                    text_int32_human(stat_buffer.st_size,num_buffer);
-                    console_text_default(num_buffer,console);
+                    text_int32_human(stat_buffer.st_size,human_buffer);
+                    console_text_default(human_buffer,console);
                     console_text_default("\n",console);
 
                     console_text_default("- type: ",console);
-                    text_int32(stat_buffer.st_mode & S_IFMT,num_buffer);
-                    console_text_default(num_buffer,console);
+                    text_int32(stat_buffer.st_mode & S_IFMT,human_buffer);
+                    console_text_default(human_buffer,console);
                     console_text_default("\n",console);
                 }
             }
@@ -848,7 +922,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         //Init input
         console_text_default("Calculator shell for fx-CG50\nType 'help' for more info.\n",console);
         console->reset_input=true;
-        console->modifier=MODIFIER_NONE;
+        console->modifier=MODIFIER_ALPHA_LOWER_LOCK;
         console->input_copied=false;
 
         //Init history
@@ -1078,6 +1152,12 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                 case VKEY_RIGHT:
                     if (console->input.cursor<console->input.len)
                         console->input.cursor++;
+                    break;
+                case VKEY_SHIFT_LEFT:
+                    console->input.cursor=console->input.start;
+                    break;
+                case VKEY_SHIFT_RIGHT:
+                    console->input.cursor=console_strlen(console->input.text);
                     break;
                 case VKEY_UNDO:
                     //DEL with alpha active - treat as DEL so don't need to remove alpha to delete

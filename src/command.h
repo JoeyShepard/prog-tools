@@ -55,6 +55,9 @@
 
     //File system
     #define CMD_PATH_MAX        128     //Should be at least as long as CMD_INPUT_MAX
+    #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
+    #define CMD_LS_WIDTH        CMD_WHOLE_WIDTH
+    #define CMD_LL_WIDTH        (CMD_WHOLE_WIDTH-TEXT_INT32_HUMAN_SIZE)
 
     enum ConsoleCommands
     {
