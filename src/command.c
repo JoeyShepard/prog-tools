@@ -363,6 +363,7 @@ static void console_nerror(const char *text,int text_len,struct ConsoleInfo *con
         console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
 }
 
+//TODO: remove console - only used for debugging
 static int add_path(const char *path, const char *addition, char *result)
 {
     if (addition[0]=='/')
@@ -395,6 +396,7 @@ static int add_path(const char *path, const char *addition, char *result)
     return CMD_ERROR_NONE;
 }
 
+//TODO: remove console - only used for debugging
 static int create_path(const char *path, const char *addition, char *result)
 {
 
@@ -485,7 +487,7 @@ static color_t file_color(const char *path, int file_type)
         case FILE_TYPE_REG:
             //Check if any files end in executable ending
             int path_len=strlen(path);
-            for (int i=0;i<(sizeof(exec_endings)/sizeof(exec_endings[0]));i++)
+            for (int i=0;i<(int)(sizeof(exec_endings)/sizeof(exec_endings[0]));i++)
             {
                 //Skip ending if larger than path
                 int ending_len=strlen(exec_endings[i]);
@@ -532,7 +534,7 @@ static int path_type(const char *path, int *result)
             *result=FILE_TYPE_REG;
             break;
         default:
-            *result-FILE_TYPE_UNKNOWN;
+            *result=FILE_TYPE_UNKNOWN;
     }
     return CMD_ERROR_NONE;
 }
@@ -548,12 +550,19 @@ int console_strlen(struct ConsoleChar *text)
     return size;
 }
 
-static int process_input(char *input_buffer,struct ConsoleInfo *console)
+
+//IMPORTANT! - called on calculator with gint_world_switch so don't call gint functions (dupate, dclear, etc) or will crash!
+static int process_input(void *struct_args)
 {
     struct Parse
     {
         int start,len;
     } args[CMD_ARG_MAX];
+
+    //Arguments must be passed as void pointer to struct on calculator for this function
+    struct ProcessInput *temp_args=struct_args;
+    const char *input_buffer=temp_args->input_buffer;
+    struct ConsoleInfo *console=temp_args->console;
 
     int parse_state=CMD_PARSE_NONE;
     int arg_index=0;
@@ -667,6 +676,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                     char arg_path[CMD_PATH_MAX];
                     char new_path[CMD_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+
                     int result=create_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
@@ -801,50 +811,60 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                             {
                                 //ll - print one file/directory and its size per line
 
-                                //Print directory or file name
-                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
-
-                                //Find full path of file
-                                char file_path[CMD_PATH_MAX];
-                                int result=add_path(new_path,dir->d_name,file_path);
-                                if (result!=CMD_ERROR_NONE)
+                                int num_len;
+                                if (file_type==FILE_TYPE_DIR)
                                 {
-                                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
-                                    break;
-                                }
-
-                                //Find file size
-                                struct stat stat_buffer;
-                                if (stat(file_path,&stat_buffer))
-                                {
-                                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
-                                    break;
-                                }
-    
-                                //Convert file size to human readable form - ie 1.2M rather than 1234567
-                                char human_buffer[TEXT_INT32_SIZE];
-                                text_int32_human(stat_buffer.st_size,human_buffer);
-                                int name_len=strlen(dir->d_name);
-
-                                if (strlen(dir->d_name)>=CMD_LL_WIDTH)
-                                {
-                                    //Screen not wide enough for filename and size so print size without alignment
-                                    console_text_default(" ",console);
+                                    //Direcotry - no size to print since reads as -1 on calculator
+                                    //No digits to print so spaces printed below for alignment
+                                    num_len=0;
                                 }
                                 else
                                 {
-                                    //Print blank space after file name so all file sizes will be aligned on right of screen
-                                    for (int i=0;i<CMD_LL_WIDTH-strlen(dir->d_name);i++)
+                                    //File or unknown type - print size 
+
+                                    //Find full path of file
+                                    char file_path[CMD_PATH_MAX];
+                                    int result=add_path(new_path,dir->d_name,file_path);
+                                    if (result!=CMD_ERROR_NONE)
+                                    {
+                                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                        break;
+                                    }
+
+                                    //Find file size
+                                    struct stat stat_buffer;
+                                    if (stat(file_path,&stat_buffer))
+                                    {
+                                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                        break;
+                                    }
+        
+                                    //Convert file size to human readable form - ie 1.2M rather than 1234567
+                                    char human_buffer[TEXT_INT32_SIZE];
+                                    text_int32_human(stat_buffer.st_size,human_buffer);
+
+                                    //Print file size
+                                    console_text_default(human_buffer,console);
+
+                                    //Number of spaces to print after file size to align file names
+                                    num_len=strlen(human_buffer);
+                                }
+
+                                //Blank space for alignment if file size doesn't take full space or no file size if directory
+                                if (num_len<CMD_LL_WIDTH)
+                                {
+                                    for (int i=0;i<(int)(CMD_LL_WIDTH-num_len);i++)
                                         console_text_default(" ",console);
                                 }
 
-                                //Print file size
-                                console_text_default(human_buffer,console);
+                                //Print separator
+                                console_text_default(CMD_LL_SEPARATOR,console);
+
+                                //Print directory or file name
+                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
                                 console_text_default("\n",console);
                             }
-
                         }
-
                     }
                     if (command_id==CMD_CMD_LS)
                     {
@@ -889,8 +909,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                         char human_buffer[TEXT_INT32_SIZE];
                         text_int32_human(stat_buffer.st_size,human_buffer);
                         int name_len=strlen(basename);
-
-                        if (strlen(basename)>CMD_LL_WIDTH)
+                        if (name_len>CMD_LL_WIDTH)
                         {
                             //Screen not wide enough for filename and size so print size without alignment
                             console_text_default(" ",console);
@@ -898,7 +917,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                         else
                         {
                             //Print blank space after file name so all file sizes will be aligned on right of screen
-                            for (int i=0;i<CMD_LL_WIDTH-strlen(basename);i++)
+                            for (int i=0;i<(int)(CMD_LL_WIDTH-name_len);i++)
                                 console_text_default(" ",console);
                         }
 
@@ -1144,9 +1163,15 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                         //Process input
                         char input_buffer[CMD_INPUT_MAX];
                         copy_console_text(&console->input,input_buffer,console->input.start);
-                        int return_code=process_input(input_buffer,console);
+                        //gint_world_switch here necessary since process_input accesses file system
+                        //so need to pass arguments as void pointer to structure
+                        struct ProcessInput temp_args={input_buffer,console};
+                        int return_code=gint_world_switch(GINT_CALL(process_input,(void *)(&temp_args)));
                         if (return_code!=COMMAND_NONE)
+                        {
+                            //Return to window manager to process any return code such as closing console
                             return return_code;
+                        }
                     }
                     break;
                 case VKEY_UP:

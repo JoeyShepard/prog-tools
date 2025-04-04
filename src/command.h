@@ -55,10 +55,13 @@
 
     //File system
     #define CMD_PATH_MAX        128     //Should be at least as long as CMD_INPUT_MAX
-    #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
     #define CMD_LS_WIDTH        CMD_WHOLE_WIDTH
-    #define CMD_LL_WIDTH        (CMD_WHOLE_WIDTH-TEXT_INT32_HUMAN_SIZE)
+    #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
+    #define CMD_LL_WIDTH        (TEXT_INT32_HUMAN_SIZE-1)
+    #define CMD_LL_SEPARATOR    "  "    //Printed between filenames by ll
 
+    //enums
+    //=====
     enum ConsoleCommands
     {
         CMD_CMD_NONE,
@@ -95,6 +98,16 @@
         CMD_ERROR_NOT_DIRECTORY
     };
 
+    enum FileTypes
+    {
+        FILE_TYPE_DIR,
+        FILE_TYPE_REG,
+        FILE_TYPE_UNKNOWN
+    };
+
+
+    //structures
+    //==========
     struct ConsoleChar
     {
         char character;
@@ -135,13 +148,15 @@
         char path[CMD_PATH_MAX];
     };
 
-    enum FileTypes
+    struct ProcessInput
     {
-        FILE_TYPE_DIR,
-        FILE_TYPE_REG,
-        FILE_TYPE_UNKNOWN
+        char *input_buffer;
+        struct ConsoleInfo *console;
     };
 
+
+    //Functions
+    //=========
     int command_line(int command_ID, struct WindowInfo *windows, int selected_window);
 
 #endif

@@ -758,11 +758,15 @@ int update_modifier(int modifier,int key)
             case MODIFIER_SHIFT_NONE:
                 return MODIFIER_ALPHA_LOWER_LOCK;
             case MODIFIER_SHIFT_ALPHA_LOWER:
-            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
                 return MODIFIER_ALPHA_LOWER_LOCK;
-            case MODIFIER_SHIFT_ALPHA_UPPER:
-            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+            case MODIFIER_SHIFT_ALPHA_LOWER_LOCK:
+                //Keep lock but swap case
                 return MODIFIER_ALPHA_UPPER_LOCK;
+            case MODIFIER_SHIFT_ALPHA_UPPER:
+                return MODIFIER_ALPHA_UPPER_LOCK;
+            case MODIFIER_SHIFT_ALPHA_UPPER_LOCK:
+                //Keep lock but swap case
+                return MODIFIER_ALPHA_LOWER_LOCK;
         }
     }
     else if (key==VKEY_SHIFT)

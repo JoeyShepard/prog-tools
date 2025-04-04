@@ -130,6 +130,10 @@
             KEY_ACON	= 0x07  //todo
         };
 
+        //Dummy macros for gint_world_switch
+        #define gint_world_switch(x) x
+        #define GINT_CALL(x,y) x(y)
+
         //Constants needed for wrapper
         #define WINDOW_TITLE    "SDL2 wrapper for fx-CG50"
         
