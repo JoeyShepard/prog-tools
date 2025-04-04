@@ -641,8 +641,6 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
         }
     }
 
-    char human_buffer[TEXT_INT32_SIZE];
-
     switch (command_id)
     {
         case CMD_CMD_NONE:
@@ -725,7 +723,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                     char arg_path[CMD_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
 
-                    //Add argument to current path if partial or use argument as path if full
+                    //Add argument to current path if partial or use argument as path if full path
                     int result=add_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
@@ -779,46 +777,82 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                                 //ls - print filename and prevent name from wrapping at screen edge
                                 if (file_printed)
                                 {
-                                    if (print_width+strlen(CMD_LS_SEPARATOR)>=CMD_WHOLE_WIDTH)
+                                    //Only print spacing before filename if not first filename
+                                    if (print_width+strlen(CMD_LS_SEPARATOR)+strlen(dir->d_name)>=CMD_LS_WIDTH)
                                     {
+                                        //If text would wrap, print on new line instead
                                         console_text_default("\n",console);
                                         print_width=0;
                                     }
                                     else
                                     {
+                                        //Print separation between files rather than newline
                                         console_text_default(CMD_LS_SEPARATOR,console);
                                         print_width+=strlen(CMD_LS_SEPARATOR);
                                     }
                                 }
-
+                                
+                                //Print directory or file name
                                 console_text(dir->d_name,color_fg,CMD_COL_BG,console);
                                 print_width+=strlen(dir->d_name);
                                 file_printed=true;
                             }
                             else if (command_id==CMD_CMD_LL)
                             {
-                                //TODO
-                                /*
-                                if (stat(paths[i],&stat_buffer))
+                                //ll - print one file/directory and its size per line
+
+                                //Print directory or file name
+                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
+
+                                //Find full path of file
+                                char file_path[CMD_PATH_MAX];
+                                int result=add_path(new_path,dir->d_name,file_path);
+                                if (result!=CMD_ERROR_NONE)
                                 {
                                     command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
-                                    console_
                                     break;
                                 }
-                                */
 
-                                if (strlen(dir->d_name)>CMD_LL_WIDTH)
+                                //Find file size
+                                struct stat stat_buffer;
+                                if (stat(file_path,&stat_buffer))
+                                {
+                                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                    break;
+                                }
+    
+                                //Convert file size to human readable form - ie 1.2M rather than 1234567
+                                char human_buffer[TEXT_INT32_SIZE];
+                                text_int32_human(stat_buffer.st_size,human_buffer);
+                                int name_len=strlen(dir->d_name);
+
+                                if (strlen(dir->d_name)>=CMD_LL_WIDTH)
                                 {
                                     //Screen not wide enough for filename and size so print size without alignment
                                     console_text_default(" ",console);
-                                    console_text_default("\n",console);
                                 }
+                                else
+                                {
+                                    //Print blank space after file name so all file sizes will be aligned on right of screen
+                                    for (int i=0;i<CMD_LL_WIDTH-strlen(dir->d_name);i++)
+                                        console_text_default(" ",console);
+                                }
+
+                                //Print file size
+                                console_text_default(human_buffer,console);
+                                console_text_default("\n",console);
                             }
 
                         }
 
                     }
-                    console_text_default("\n",console);
+                    if (command_id==CMD_CMD_LS)
+                    {
+                        //Print newline after done with ls (not need for ll which prints newline after every file/directory)
+                        console_text_default("\n",console);
+                    }
+                    
+                    //Done searching directory
                     closedir(directory);
                 }
                 else
@@ -838,6 +872,39 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
                     //Print name depending on type - file_type set above after stat
                     color_fg=file_color(basename,file_type);
                     console_text(basename,color_fg,CMD_COL_BG,console);
+                    
+                    if (command_id==CMD_CMD_LL)
+                    {
+                        //ll - print size of file
+
+                        //Find file size
+                        struct stat stat_buffer;
+                        if (stat(new_path,&stat_buffer))
+                        {
+                            command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                            break;
+                        }
+
+                        //Convert file size to human readable form - ie 1.2M rather than 1234567
+                        char human_buffer[TEXT_INT32_SIZE];
+                        text_int32_human(stat_buffer.st_size,human_buffer);
+                        int name_len=strlen(basename);
+
+                        if (strlen(basename)>CMD_LL_WIDTH)
+                        {
+                            //Screen not wide enough for filename and size so print size without alignment
+                            console_text_default(" ",console);
+                        }
+                        else
+                        {
+                            //Print blank space after file name so all file sizes will be aligned on right of screen
+                            for (int i=0;i<CMD_LL_WIDTH-strlen(basename);i++)
+                                console_text_default(" ",console);
+                        }
+
+                        //Print file size
+                        console_text_default(human_buffer,console);
+                    }
                     console_text_default("\n",console);
                 }
                 break;
@@ -857,6 +924,7 @@ static int process_input(char *input_buffer,struct ConsoleInfo *console)
             {
                 console_text_default(paths[i],console);
                 struct stat stat_buffer;
+                char human_buffer[TEXT_INT32_SIZE];
                 if (stat(paths[i],&stat_buffer))
                     console_text_default(" - stat error\n",console);
                 else
@@ -1146,17 +1214,21 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     }
                     break;
                 case VKEY_LEFT:
+                    //Move cursor left
                     if (console->input.cursor>console->input.start)
                         console->input.cursor--; 
                     break;
                 case VKEY_RIGHT:
+                    //Move cursor right
                     if (console->input.cursor<console->input.len)
                         console->input.cursor++;
                     break;
                 case VKEY_SHIFT_LEFT:
+                    //Move cursor to beginning of input
                     console->input.cursor=console->input.start;
                     break;
                 case VKEY_SHIFT_RIGHT:
+                    //Move cursor to end of input
                     console->input.cursor=console_strlen(console->input.text);
                     break;
                 case VKEY_UNDO:

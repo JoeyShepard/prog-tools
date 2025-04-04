@@ -459,8 +459,11 @@ void text_int32_human(int32_t num, char *text)
     }
     else if (num<10*1024*1024)
     {
+        //Intermediate value could overflow int32
+        int32_t size_digits=(1000*(int64_t)num)/(1024*1024);
+
         //>=1M
-        text_int32(1000*num/(1024*1024),num_buffer);
+        text_int32(size_digits,num_buffer);
         text[0]=num_buffer[0];
         text[1]='.';
         text[2]=num_buffer[1];

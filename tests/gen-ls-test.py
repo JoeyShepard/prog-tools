@@ -3,7 +3,7 @@
 import sys
 import os
 
-DIR_NAME="ls-test/"
+DIR_NAME="/home/druzyek/ls-test/"
 
 if len(sys.argv)!=3:
     print("Expected - exactly two arguments")
@@ -19,13 +19,18 @@ os.system(f"rm {DIR_NAME}/*")
 name_len=int(sys.argv[1])
 count=int(sys.argv[2])
 
+size=5
+
 char=ord('a')
 for i in range(count):
-    f=open(DIR_NAME+chr(char)*name_len,"w")
-    f.close()
+    with open(DIR_NAME+chr(char)*name_len,"wt") as f:
+        f.write(chr(char)*size)
     char+=1
     if char>ord('z'):
         char=ord('a')
+
+    if size<5000000:
+        size*=10
 
 
 os.system(f"ls {DIR_NAME}")
