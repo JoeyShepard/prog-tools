@@ -3,7 +3,7 @@
 import sys
 import os
 
-DIR_NAME="/home/druzyek/ls-test/"
+DIR_NAME="/calc/size-test/"
 
 if len(sys.argv)!=3:
     print("Expected - exactly two arguments")

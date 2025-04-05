@@ -208,11 +208,8 @@ struct point draw_text(const char *text, struct point pos, int32_t fg, int32_t b
         bg=swap_temp;
     }
 
-    if (*text==0)
-    {
-        //Exit early and don't draw spacing-wide vertical column if no characters to draw
-        return pos;
-    }
+    //Exit early and don't draw spacing-wide vertical column if no characters to draw
+    if (*text==0) return pos;
 
     //Draw one spacing-wide vertical column before first character
     for (int j=0;j<height+vert_spacing*2;j++)

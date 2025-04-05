@@ -50,6 +50,11 @@
         //Empty function for compatibility
     }
 
+    void wrapper_screenshot()
+    {
+        //Empty function for compatibility
+    }
+
 #else
 //PC specific
 //===========
@@ -69,119 +74,9 @@
     uint8_t *xram;
     uint8_t *yram;
 
-    //Functions with separate copies for cg50 and PC
-    //==============================================
-    //On PC, start SDL2
-    void setup(int scale_factor, int delay_ms)
-    {
-        //Allocate 2MB heap to use like 2MB RAM on calculator
-        heap=malloc(HEAP_SIZE);
-        if (heap==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator heap.\n");
-            exit(1);
-        }
-
-        //Allocate 8K for XRAM memory on calculator
-        xram=malloc(XRAM_SIZE);
-        if (xram==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator XRAM.\n");
-            exit(1);
-        }
-
-        //Allocate 8K for YRAM memory on calculator
-        yram=malloc(YRAM_SIZE);
-        if (yram==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator XRAM.\n");
-            exit(1);
-        }
-
-        //Save scale factor for use with dupdate
-        global_scale_factor=scale_factor;
-        global_delay_ms=delay_ms;
-
-        //Initialize SDL
-        if (SDL_Init(SDL_INIT_VIDEO)<0)
-        {
-            printf("Error: SDL2 did not initialize. SDL error: %s\n", SDL_GetError());
-            exit(1);
-        }
-        
-        //Create window
-        window=SDL_CreateWindow(WINDOW_TITLE,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,DWIDTH*scale_factor,DHEIGHT*scale_factor,SDL_WINDOW_SHOWN);
-        if (window==NULL)
-        {
-            printf("Error: SDL2 could not create window. SDL error: %s\n", SDL_GetError());
-            exit(1);
-        }
-
-        //Draw to texture
-        renderer=SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
-        texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB565,SDL_TEXTUREACCESS_STREAMING,DWIDTH,DHEIGHT);
-    }
-
-    void delay()
-    {
-        wrapper_events();
-        SDL_Delay(global_delay_ms);
-    }
-
-    void gint_osmenu()
-    {
-        //Empty function for compatibility
-    }
-
-    void gint_poweroff(bool show_logo)
-    {
-        //Empty function for compatibility
-    }
-
-    char *fs_path_normalize(char const *path)
-    {
-        char result_path[PATH_MAX+1];
-        char *ptr=realpath(path,result_path);
-        if (ptr==NULL) return NULL;
-        if (strlen(result_path)>CMD_PATH_MAX-1) return NULL;
-        char *return_path=malloc(CMD_PATH_MAX);
-        strcpy(return_path,result_path);
-        return return_path;
-    }
-
-
-    //Functions only in PC version
-    //============================
-    void wrapper_exit()
-    {
-        //Shut down SDL2
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-
-        exit(0);
-    }
-
-    void wrapper_events()
-    {
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-                case SDL_QUIT:
-                    wrapper_exit();
-                    break;
-                case SDL_KEYDOWN:
-                    keys[keys_end]=wrapper_convert_key(event.key.keysym.scancode);
-                    keys_end=(keys_end+1)%KEYS_SIZE;
-                    break;
-            }
-        }
-    }
-
-    int wrapper_convert_key(int key)
+    //Static functions only in PC version
+    //===================================
+    static int wrapper_convert_key(int key)
     {
         const int key_table[]=
         {
@@ -297,6 +192,113 @@
         return 0;
     }
 
+    static void wrapper_events()
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                    wrapper_exit();
+                    break;
+                case SDL_KEYDOWN:
+                    keys[keys_end]=wrapper_convert_key(event.key.keysym.scancode);
+                    keys_end=(keys_end+1)%KEYS_SIZE;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    wrapper_screenshot();
+                    printf("screenshot saved to screenshot/screenshot.raw\n");
+                    break;
+            }
+        }
+    }
+
+    //Functions with separate copies for cg50 and PC
+    //==============================================
+    //On PC, start SDL2
+    void setup(int scale_factor, int delay_ms)
+    {
+        //Allocate 2MB heap to use like 2MB RAM on calculator
+        heap=malloc(HEAP_SIZE);
+        if (heap==NULL)
+        {
+            printf("Error: failed to allocate memory for calculator heap.\n");
+            exit(1);
+        }
+
+        //Allocate 8K for XRAM memory on calculator
+        xram=malloc(XRAM_SIZE);
+        if (xram==NULL)
+        {
+            printf("Error: failed to allocate memory for calculator XRAM.\n");
+            exit(1);
+        }
+
+        //Allocate 8K for YRAM memory on calculator
+        yram=malloc(YRAM_SIZE);
+        if (yram==NULL)
+        {
+            printf("Error: failed to allocate memory for calculator XRAM.\n");
+            exit(1);
+        }
+
+        //Save scale factor for use with dupdate
+        global_scale_factor=scale_factor;
+        global_delay_ms=delay_ms;
+
+        //Initialize SDL
+        if (SDL_Init(SDL_INIT_VIDEO)<0)
+        {
+            printf("Error: SDL2 did not initialize. SDL error: %s\n", SDL_GetError());
+            exit(1);
+        }
+        
+        //Create window
+        window=SDL_CreateWindow(WINDOW_TITLE,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,DWIDTH*scale_factor,DHEIGHT*scale_factor,SDL_WINDOW_SHOWN);
+        if (window==NULL)
+        {
+            printf("Error: SDL2 could not create window. SDL error: %s\n", SDL_GetError());
+            exit(1);
+        }
+
+        //Draw to texture
+        renderer=SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+        texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB565,SDL_TEXTUREACCESS_STREAMING,DWIDTH,DHEIGHT);
+    }
+
+    void delay()
+    {
+        wrapper_events();
+        SDL_Delay(global_delay_ms);
+    }
+
+    void wrapper_exit()
+    {
+        //Free allocated memory
+        free(heap);
+        free(xram);
+        free(yram);
+
+        //Shut down SDL2
+        SDL_DestroyTexture(texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+
+        exit(0);
+    }
+
+    void wrapper_screenshot()
+    {
+        //None of the examples with SDL_RenderReadPixels worked even when adjusted for 16bit format so output raw data
+        FILE *fptr=fopen("screenshot/screenshot.raw","w");
+        fwrite(screen,2,DWIDTH*DHEIGHT,fptr);
+        fclose(fptr);
+    }
+
+    //Replacements for gint functions
+    //===============================
     void dgetvram(uint16_t **main, uint16_t **secondary)
     {
         //No equivalent of main for SDL2 so set main to screen instead of NULL in case used for calculating 
@@ -356,6 +358,27 @@
 
             return ret_val;
         }
+    }
+
+    void gint_osmenu()
+    {
+        //Empty function for compatibility
+    }
+
+    void gint_poweroff(bool show_logo)
+    {
+        //Empty function for compatibility
+    }
+
+    char *fs_path_normalize(char const *path)
+    {
+        char result_path[PATH_MAX+1];
+        char *ptr=realpath(path,result_path);
+        if (ptr==NULL) return NULL;
+        if (strlen(result_path)>CMD_PATH_MAX-1) return NULL;
+        char *return_path=malloc(CMD_PATH_MAX);
+        strcpy(return_path,result_path);
+        return return_path;
     }
 #endif
 

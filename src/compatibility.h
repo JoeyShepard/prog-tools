@@ -40,8 +40,11 @@
     extern uint8_t *xram;
     extern uint8_t *yram;
 
+    //Functions on both PC and CG50
     void setup(int scale_factor,int tick_ms);
     void delay();
+    void wrapper_exit();
+    void wrapper_screenshot();
 
     #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
     
@@ -56,11 +59,11 @@
 
         #include "exceptions.h"
 
-        void wrapper_exit();
     #else
         //Compiling for PC using SDL2 wrapper
         #include <linux/limits.h>
         #include <SDL2/SDL.h>
+        #include <SDL2/SDL_image.h>
 
         #include "command.h"
 
@@ -191,14 +194,6 @@
             /* Default settings of getkey() */
             GETKEY_DEFAULT        = 0x05df,
         };
-
-
-        //Wrapper functions
-        void wrapper_init(int scale_factor);
-        void wrapper_exit();
-        void wrapper_events();
-        void wrapper_delay(int ms);
-        int wrapper_convert_key(int key);
 
         //gint replacement functions
         void dgetvram(uint16_t **main, uint16_t **secondary);

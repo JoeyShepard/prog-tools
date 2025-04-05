@@ -1,4 +1,5 @@
 //placeholder functions for menu
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
@@ -18,7 +19,6 @@
 #include "manager.h"
 #include "mem.h"
 #include "structs.h"
-
 
 //Functions
 static void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console)
@@ -449,6 +449,9 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
         case CMD_ERROR_NOT_DIRECTORY:
             error_msg="not a directory\n";
             break;
+        case CMD_ERROR_CAT_FILE:
+            error_msg="target must be file\n";
+            break;
         default:
             error_msg="unknown\n";
     }
@@ -464,13 +467,13 @@ static struct CommandInfo
 }commands[]=
 {
     {"cat",     CMD_CMD_CAT,    1,  "output contents of file"},
-    {"cd",      CMD_CMD_CD,     -1, "change directory"},                    //done
-    {"clear",   CMD_CMD_CLEAR,  0,  "clear console"},
+    {"cd",      CMD_CMD_CD,     -1, "change directory"},
+    {"clear",   CMD_CMD_CLEAR,  0,  "clear the console screen"},
     {"cp",      CMD_CMD_CP,     2,  "copy file"},
-    {"exit",    CMD_CMD_EXIT,   0,  "exit command line"},                   //done
+    {"exit",    CMD_CMD_EXIT,   0,  "exit command line"},
     {"help",    CMD_CMD_HELP,   -1, "display help on commands"},
-    {"ll",      CMD_CMD_LL,     -1, "list directory contents and sizes"},   //done
-    {"ls",      CMD_CMD_LS,     -1, "list directory contents"},             //done
+    {"ll",      CMD_CMD_LL,     -1, "list directory contents and sizes"},
+    {"ls",      CMD_CMD_LS,     -1, "list directory contents"},
     {"mkdir",   CMD_CMD_MKDIR,  1,  "create directory"},
     {"mv",      CMD_CMD_MV,     2,  "move file or directory"},
     {"rm",      CMD_CMD_RM,     1,  "remove file"},
@@ -691,6 +694,69 @@ static int process_input(void *struct_args)
             command_name[args[0].len]=0;
             command_error(command_name,CMD_ERROR_NOT_FOUND,console);
             break;
+        case CMD_CMD_CAT:
+            {
+                //Normalize path
+                char arg_path[CMD_PATH_MAX];
+                char new_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                int result=create_path(console->path,arg_path,new_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error("cat",result,console);
+                    break;
+                }
+
+                //Exception - can't fetch info on path if root directory on calculator. Handle manually.
+                if (!strcmp(new_path,"/"))
+                {
+                    command_error("cat",CMD_ERROR_CAT_FILE,console);
+                    break;
+                }
+
+                //Fetch info on path
+                if (path_type(new_path,&result)!=CMD_ERROR_NONE)
+                {
+                    command_error("cat",CMD_ERROR_CANT_ACCESS,console); 
+                    break;
+                }
+
+                //Make sure target path is file
+                if (result!=FILE_TYPE_REG)
+                {
+                    command_error("cat",CMD_ERROR_CAT_FILE,console); 
+                    break;
+                }
+
+                //Open file
+                FILE *cat_file=fopen(new_path,"r");
+                if (cat_file==NULL)
+                {
+                    command_error("cat",CMD_ERROR_CANT_ACCESS,console); 
+                    break;
+                }
+
+                //Read all bytes from file
+                char cat_buffer[CMD_CAT_SIZE];
+                size_t byte_count;
+                do
+                {
+                    //-1 to make room for terminating 0
+                    byte_count=fread(cat_buffer,1,CMD_CAT_SIZE-1,cat_file); 
+                    if (byte_count>0)
+                    {
+                        cat_buffer[byte_count]=0;
+                        console_text_default(cat_buffer,console);
+                    }
+                } while (byte_count);
+
+                //Done reading file
+                console_text_default("\n",console);
+                fclose(cat_file);
+            
+                break;
+            }
+
         case CMD_CMD_CD:
             //Anonymous block - reuse variable names
             {
@@ -748,6 +814,10 @@ static int process_input(void *struct_args)
                 }
                 break;
             }
+        case CMD_CMD_CLEAR:
+            reset_console(console);
+            console_text_default(CMD_CONSOLE_STRING,console);
+            break;
         case CMD_CMD_EXIT:
             return COMMAND_EXIT;
         case CMD_CMD_HELP:
@@ -995,6 +1065,7 @@ static int process_input(void *struct_args)
                 break;
             }
         case CMD_CMD_TEST:
+
             console_text_default("Test\n",console);
 
             const char *paths[]=
@@ -1073,7 +1144,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         reset_console(console);
 
         //Init input
-        console_text_default("Calculator shell for fx-CG50\nType 'help' for more info.\n",console);
+        console_text_default(CMD_CONSOLE_STRING,console);
         console->reset_input=true;
         console->modifier=MODIFIER_ALPHA_LOWER_LOCK;
         console->input_copied=false;

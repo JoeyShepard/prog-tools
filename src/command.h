@@ -44,6 +44,7 @@
 
     //Console
     #define CMD_INPUT_MAX       124     //Four full lines of text input if hsplit
+    #define CMD_CONSOLE_STRING  "Calculator shell for fx-CG50\nType 'help' for more info.\n" 
     
     //History
     #define CMD_HIST_COUNT      10
@@ -55,24 +56,27 @@
 
     //File system
     #define CMD_PATH_MAX        128     //Should be at least as long as CMD_INPUT_MAX
+
+    //Commands
     #define CMD_LS_WIDTH        CMD_WHOLE_WIDTH
     #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
     #define CMD_LL_WIDTH        (TEXT_INT32_HUMAN_SIZE-1)
     #define CMD_LL_SEPARATOR    "  "    //Printed between file size and filename by ll
+    #define CMD_CAT_SIZE        64
 
     //enums
     //=====
     enum ConsoleCommands
     {
         CMD_CMD_NONE,
-        CMD_CMD_CAT,
-        CMD_CMD_CD,
-        CMD_CMD_CLEAR,
+        CMD_CMD_CAT,    //done
+        CMD_CMD_CD,     //done
+        CMD_CMD_CLEAR,  //done
         CMD_CMD_CP,
-        CMD_CMD_EXIT,
-        CMD_CMD_HELP,
-        CMD_CMD_LL,
-        CMD_CMD_LS,
+        CMD_CMD_EXIT,   //done
+        CMD_CMD_HELP,   //done
+        CMD_CMD_LL,     //done
+        CMD_CMD_LS,     //done
         CMD_CMD_MKDIR,
         CMD_CMD_MV,
         CMD_CMD_RM,
@@ -93,7 +97,8 @@
         CMD_ERROR_ARG_COUNT,
         CMD_ERROR_ARG_MEM,
         CMD_ERROR_NOT_FOUND,
-        CMD_ERROR_NOT_DIRECTORY
+        CMD_ERROR_NOT_DIRECTORY,
+        CMD_ERROR_CAT_FILE
     };
 
     enum FileTypes
