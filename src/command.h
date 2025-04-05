@@ -58,28 +58,26 @@
     #define CMD_LS_WIDTH        CMD_WHOLE_WIDTH
     #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
     #define CMD_LL_WIDTH        (TEXT_INT32_HUMAN_SIZE-1)
-    #define CMD_LL_SEPARATOR    "  "    //Printed between filenames by ll
+    #define CMD_LL_SEPARATOR    "  "    //Printed between file size and filename by ll
 
     //enums
     //=====
     enum ConsoleCommands
     {
         CMD_CMD_NONE,
-        CMD_CMD_EXIT,
-        CMD_CMD_CD,
-        CMD_CMD_LS,
-        CMD_CMD_LL,
-
-        //TODO:
         CMD_CMD_CAT,
-        CMD_CMD_RMDIR,
+        CMD_CMD_CD,
+        CMD_CMD_CLEAR,
+        CMD_CMD_CP,
+        CMD_CMD_EXIT,
+        CMD_CMD_HELP,
+        CMD_CMD_LL,
+        CMD_CMD_LS,
         CMD_CMD_MKDIR,
         CMD_CMD_MV,
         CMD_CMD_RM,
-        CMD_CMD_CP,
+        CMD_CMD_RMDIR,
         CMD_CMD_TOUCH,
-        CMD_CMD_HELP,
-        CMD_CMD_CLEAR,
 
         //TODO: remove
         CMD_CMD_TEST

@@ -43,6 +43,8 @@
     void setup(int scale_factor,int tick_ms);
     void delay();
 
+    #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
+    
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
         #include <gint/clock.h>

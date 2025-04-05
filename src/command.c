@@ -363,7 +363,6 @@ static void console_nerror(const char *text,int text_len,struct ConsoleInfo *con
         console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
 }
 
-//TODO: remove console - only used for debugging
 static int add_path(const char *path, const char *addition, char *result)
 {
     if (addition[0]=='/')
@@ -396,7 +395,6 @@ static int add_path(const char *path, const char *addition, char *result)
     return CMD_ERROR_NONE;
 }
 
-//TODO: remove console - only used for debugging
 static int create_path(const char *path, const char *addition, char *result)
 {
 
@@ -462,16 +460,26 @@ static struct CommandInfo
     const char *name;
     const int command;
     const int arg_count;
+    const char *help_string;
 }commands[]=
 {
-    {"exit",    CMD_CMD_EXIT,   0},
-    {"cd",      CMD_CMD_CD,     -1},
-    {"ls",      CMD_CMD_LS,     -1},
-    {"ll",      CMD_CMD_LL,     -1},
-    {"test",    CMD_CMD_TEST,   0}
-};
+    {"cat",     CMD_CMD_CAT,    1,  "output contents of file"},
+    {"cd",      CMD_CMD_CD,     -1, "change directory"},                    //done
+    {"clear",   CMD_CMD_CLEAR,  0,  "clear console"},
+    {"cp",      CMD_CMD_CP,     2,  "copy file"},
+    {"exit",    CMD_CMD_EXIT,   0,  "exit command line"},                   //done
+    {"help",    CMD_CMD_HELP,   -1, "display help on commands"},
+    {"ll",      CMD_CMD_LL,     -1, "list directory contents and sizes"},   //done
+    {"ls",      CMD_CMD_LS,     -1, "list directory contents"},             //done
+    {"mkdir",   CMD_CMD_MKDIR,  1,  "create directory"},
+    {"mv",      CMD_CMD_MV,     2,  "move file or directory"},
+    {"rm",      CMD_CMD_RM,     1,  "remove file"},
+    {"rmdir",   CMD_CMD_RMDIR,  1,  "remove directory"},
+    {"touch",   CMD_CMD_TOUCH,  1,  "create file if it doesn't exist"},
 
-#define COMMANDS_SIZE ((int)(sizeof(commands)/sizeof(commands[0])))
+    //TODO: remove
+    {"test",    CMD_CMD_TEST,   0,  "testing"}
+};
 
 static color_t file_color(const char *path, int file_type)
 {
@@ -487,7 +495,7 @@ static color_t file_color(const char *path, int file_type)
         case FILE_TYPE_REG:
             //Check if any files end in executable ending
             int path_len=strlen(path);
-            for (int i=0;i<(int)(sizeof(exec_endings)/sizeof(exec_endings[0]));i++)
+            for (int i=0;i<ARRAY_SIZE(exec_endings);i++)
             {
                 //Skip ending if larger than path
                 int ending_len=strlen(exec_endings[i]);
@@ -550,6 +558,31 @@ int console_strlen(struct ConsoleChar *text)
     return size;
 }
 
+void show_help(const char *command,struct ConsoleInfo *console)
+{
+    bool command_found=false;
+    for (int i=0;i<ARRAY_SIZE(commands);i++)
+    {
+        //Print help string if it matches search command or if search command is NULL (ie show all)
+        bool print_help;
+        if (command==NULL) print_help=true;
+        else if (!strcmp(command,commands[i].name)) print_help=true;
+        else print_help=false;
+        if (print_help)
+        {
+            console_text_default(commands[i].name,console);
+            console_text_default(" - ",console);
+            console_text_default(commands[i].help_string,console);
+            console_text_default("\n",console);
+            command_found=true;
+        }
+    }
+    if (command_found==false)
+    {
+        if (command!=NULL)
+            command_error(command,CMD_ERROR_NOT_FOUND,console);
+    }
+}
 
 //IMPORTANT! - called on calculator with gint_world_switch so don't call gint functions (dupate, dclear, etc) or will crash!
 static int process_input(void *struct_args)
@@ -616,7 +649,7 @@ static int process_input(void *struct_args)
 
     //Match to commands
     int command_id=CMD_CMD_NONE;
-    for (int i=0;i<COMMANDS_SIZE;i++)
+    for (int i=0;i<ARRAY_SIZE(commands);i++)
     {
         bool command_found=true;
         int j;
@@ -658,8 +691,6 @@ static int process_input(void *struct_args)
             command_name[args[0].len]=0;
             command_error(command_name,CMD_ERROR_NOT_FOUND,console);
             break;
-        case CMD_CMD_EXIT:
-            return COMMAND_EXIT;
         case CMD_CMD_CD:
             //Anonymous block - reuse variable names
             {
@@ -676,7 +707,6 @@ static int process_input(void *struct_args)
                     char arg_path[CMD_PATH_MAX];
                     char new_path[CMD_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
-
                     int result=create_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
@@ -684,32 +714,62 @@ static int process_input(void *struct_args)
                         break;
                     }
 
-                    //Fetch info on path
-                    struct stat stat_buffer;
-                    if (stat(new_path,&stat_buffer))
+                    //Exception - can't fetch info on path if root directory on calculator. Handle manually.
+                    if (!strcmp(new_path,"/"))
                     {
-                        command_error("cd",CMD_ERROR_PATH_NOT_FOUND,console); 
-                        break;
+                        strcpy(console->path,"/");
                     }
-
-                    //Make sure target path is directory
-                    if ((stat_buffer.st_mode&S_IFMT)!=S_IFDIR)
+                    else
                     {
-                        command_error("cd",CMD_ERROR_NOT_DIRECTORY,console); 
-                        break;
-                    }
+                        //Fetch info on path
+                        int result;
+                        if (path_type(new_path,&result)!=CMD_ERROR_NONE)
+                        {
+                            command_error("cd",CMD_ERROR_CANT_ACCESS,console); 
+                            break;
+                        }
 
-                    //Set current path to new path 
-                    strcpy(console->path,new_path);
+                        //Make sure target path is directory
+                        if (result!=FILE_TYPE_DIR)
+                        {
+                            command_error("cd",CMD_ERROR_NOT_DIRECTORY,console); 
+                            break;
+                        }
+
+                        //Set current path to new path 
+                        strcpy(console->path,new_path);
+                    }
                 }
                 else
                 {
-                    //Either one argument or no arguments allowed
+                    //More than one argument not allowed
                     command_error("cd",CMD_ERROR_ARG_COUNT,console);
                     break;
                 }
                 break;
             }
+        case CMD_CMD_EXIT:
+            return COMMAND_EXIT;
+        case CMD_CMD_HELP:
+            if (arg_count==1)
+            {
+                //No arguments - show help for all commands
+                show_help(NULL,console);
+            }
+            else if (arg_count==2)
+            {
+                //One argument - show help for command
+                char command_name[CMD_PATH_MAX];
+                strncpy(command_name,input_buffer+args[1].start,args[1].len+1);
+                show_help(command_name,console);
+            }
+            else
+            {
+                //More than one argument not allowed
+                command_error("help",CMD_ERROR_ARG_COUNT,console);
+                break;
+            }
+            break;
         case CMD_CMD_LL:
         case CMD_CMD_LS:
             //Anonymous block - reuse variable names between cases
@@ -734,25 +794,32 @@ static int process_input(void *struct_args)
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
 
                     //Add argument to current path if partial or use argument as path if full path
-                    int result=add_path(console->path,arg_path,new_path);
+                    int result=create_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
                         command_error(command_name,result,console);
                         break;
                     }
 
-                    //Fetch info on path
-                    strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
-                    result=path_type(new_path,&file_type);
-                    if (result!=CMD_ERROR_NONE)
+                    //Exception - can't fetch info on path if root directory on calculator. Handle manually.
+                    if (!strcmp(new_path,"/"))
                     {
-                        command_error(command_name,result,console); 
-                        break;
+                        file_type=FILE_TYPE_DIR;
+                    }
+                    else
+                    {
+                        //Fetch info on path
+                        result=path_type(new_path,&file_type);
+                        if (result!=CMD_ERROR_NONE)
+                        {
+                            command_error(command_name,result,console); 
+                            break;
+                        }
                     }
                 }
                 else
                 {
-                    //Only one argument or no arguments allowed
+                    //More than 1 argument not allowed
                     command_error(command_name,CMD_ERROR_ARG_COUNT,console);
                     break;
                 }
@@ -889,10 +956,6 @@ static int process_input(void *struct_args)
                     //Skip preceding /
                     basename++;
                     
-                    //Print name depending on type - file_type set above after stat
-                    color_fg=file_color(basename,file_type);
-                    console_text(basename,color_fg,CMD_COL_BG,console);
-                    
                     if (command_id==CMD_CMD_LL)
                     {
                         //ll - print size of file
@@ -908,22 +971,25 @@ static int process_input(void *struct_args)
                         //Convert file size to human readable form - ie 1.2M rather than 1234567
                         char human_buffer[TEXT_INT32_SIZE];
                         text_int32_human(stat_buffer.st_size,human_buffer);
-                        int name_len=strlen(basename);
-                        if (name_len>CMD_LL_WIDTH)
-                        {
-                            //Screen not wide enough for filename and size so print size without alignment
-                            console_text_default(" ",console);
-                        }
-                        else
-                        {
-                            //Print blank space after file name so all file sizes will be aligned on right of screen
-                            for (int i=0;i<(int)(CMD_LL_WIDTH-name_len);i++)
-                                console_text_default(" ",console);
-                        }
 
                         //Print file size
                         console_text_default(human_buffer,console);
+
+                        //Blank space for alignment if file size doesn't take full space
+                        int num_len=strlen(human_buffer);
+                        if (num_len<CMD_LL_WIDTH)
+                        {
+                            for (int i=0;i<(int)(CMD_LL_WIDTH-num_len);i++)
+                                console_text_default(" ",console);
+                        }
+
+                        //Print separator
+                        console_text_default(CMD_LL_SEPARATOR,console);
                     }
+
+                    //Print name depending on type - file_type set above after stat
+                    color_fg=file_color(basename,file_type);
+                    console_text(basename,color_fg,CMD_COL_BG,console);
                     console_text_default("\n",console);
                 }
                 break;
@@ -1121,8 +1187,8 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         {
             switch (key)
             {
-                case VKEY_QUIT:
-                    //shift+EXIT
+                case VKEY_QUIT: //Shift+EXIT
+                    //Exit and return to window manager
                     return COMMAND_EXIT;
                     break;
                 case VKEY_EXIT:
