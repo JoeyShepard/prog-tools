@@ -448,7 +448,7 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
         case CMD_ERROR_NOT_DIRECTORY:
             error_msg="not a directory\n";
             break;
-        case CMD_ERROR_CAT_FILE:
+        case CMD_ERROR_TARGET_FILE:
             error_msg="target must be file\n";
             break;
         case CMD_ERROR_CP_SOURCE_NOT_FILE:
@@ -471,6 +471,9 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
             break;
         case CMD_ERROR_CANT_ACCESS_DEST:
             error_msg="cannot access destination file\n";
+            break;
+        case CMD_ERROR_READ_ONLY:
+            error_msg="file is read-only\n";
             break;
         default:
             error_msg="unknown error\n";
@@ -765,7 +768,7 @@ static int process_input(void *struct_args)
                 //Make sure target path is file
                 if (result!=FILE_TYPE_REG)
                 {
-                    command_error(command_name,CMD_ERROR_CAT_FILE,console); 
+                    command_error(command_name,CMD_ERROR_TARGET_FILE,console); 
                     break;
                 }
 
@@ -1199,6 +1202,56 @@ static int process_input(void *struct_args)
                     color_fg=file_color(basename,file_type);
                     console_text(basename,color_fg,CMD_COL_BG,console);
                     console_text_default("\n",console);
+                }
+                break;
+            }
+        case CMD_CMD_RM:
+            {
+                //Command name in case of error message
+                const char *command_name="rm";
+
+                //Source argument
+                char arg_path[CMD_PATH_MAX];
+                char new_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,new_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on target path
+                int target_type;
+                result=path_type(new_path,&target_type);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console); 
+                    break;
+                }
+
+                //Make sure target path is file
+                if (target_type!=FILE_TYPE_REG)
+                {
+                    command_error(command_name,CMD_ERROR_TARGET_FILE,console); 
+                    break;
+                }
+
+                //Check if file is read-only based on file extension
+                if (file_special(new_path)==FILE_SPECIAL_RO)
+                {
+                    command_error(command_name,CMD_ERROR_READ_ONLY,console); 
+                    break;
+                }
+
+                //Delete file
+                if (remove(new_path)!=0)
+                {
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    break;
                 }
                 break;
             }
