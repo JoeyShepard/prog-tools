@@ -397,7 +397,6 @@ static int add_path(const char *path, const char *addition, char *result)
 
 static int create_path(const char *path, const char *addition, char *result)
 {
-
     int result_code=add_path(path,addition,result);
     if (result_code!=CMD_ERROR_NONE)
     {
@@ -452,8 +451,29 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
         case CMD_ERROR_CAT_FILE:
             error_msg="target must be file\n";
             break;
+        case CMD_ERROR_CP_SOURCE_NOT_FILE:
+            error_msg="source must be file\n";
+            break;
+        case CMD_ERROR_CP_DEST_EXISTS:
+            error_msg="destination exists. Delete before copying.\n";
+            break;
+        case CMD_ERROR_CP_SOURCE:
+            error_msg="cannot open source file\n";
+            break;
+        case CMD_ERROR_CP_DEST:
+            error_msg="cannot open destination file\n";
+            break;
+        case CMD_ERROR_CP_COPYING:
+            error_msg="error while copying\n";
+            break;
+        case CMD_ERROR_CANT_ACCESS_SOURCE:
+            error_msg="cannot access source file\n";
+            break;
+        case CMD_ERROR_CANT_ACCESS_DEST:
+            error_msg="cannot access destination file\n";
+            break;
         default:
-            error_msg="unknown\n";
+            error_msg="unknown error\n";
     }
     console_text(error_msg,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
 }
@@ -484,42 +504,57 @@ static struct CommandInfo
     {"test",    CMD_CMD_TEST,   0,  "testing"}
 };
 
-static color_t file_color(const char *path, int file_type)
+static int file_special(const char *path)
 {
-    const char *exec_endings[]=
+    struct FileEndings
     {
-        ".f"
+        const char *text;
+        const int type;
+    } endings[]=
+    {
+        {".f",      FILE_SPECIAL_EXEC},
+        {".g3a",    FILE_SPECIAL_RO}
     };
 
+    int path_len=strlen(path);
+    for (int i=0;i<ARRAY_SIZE(endings);i++)
+    {
+        //Skip ending if larger than path
+        int ending_len=strlen(endings[i].text);
+        if (path_len<ending_len) continue;
+
+        //Compare ending to ending of file in path
+        bool found=true;
+        for (int j=0;j<ending_len;j++)
+        {
+            if (endings[i].text[j]!=path[path_len-ending_len+j])
+            {
+                //Found mistmatched character - not a match
+                found=false;
+                break;
+            }
+        }
+
+        //Last ending was a match - return special type
+        if (found) return endings[i].type;
+    }
+
+    //No matches found
+    return FILE_SPECIAL_NONE;
+}
+
+static color_t file_color(const char *path, int file_type)
+{
     switch (file_type)
     {
         case FILE_TYPE_DIR:
             return CMD_COL_DIR;
         case FILE_TYPE_REG:
-            //Check if any files end in executable ending
-            int path_len=strlen(path);
-            for (int i=0;i<ARRAY_SIZE(exec_endings);i++)
-            {
-                //Skip ending if larger than path
-                int ending_len=strlen(exec_endings[i]);
-                if (path_len<ending_len) continue;
-
-                //Compare ending to ending of file in path
-                bool found=true;
-                for (int j=0;j<ending_len;j++)
-                {
-                    if (exec_endings[i][j]!=path[path_len-ending_len+j])
-                    {
-                        //Found mistmatched character - not a match
-                        found=false;
-                        break;
-                    }
-                }
-
-                //Last ending was a match - file name is executable
-                if (found) return CMD_COL_EXEC;
-            }
-            return CMD_COL_FILE;
+            //Check if any files have special status
+            int special=file_special(path);
+            if (special==FILE_SPECIAL_EXEC)     return CMD_COL_EXEC;
+            else if (special==FILE_SPECIAL_RO)  return CMD_COL_RO;
+            else                                return CMD_COL_FILE;
         case FILE_TYPE_UNKNOWN:
             return CMD_COL_UNKNOWN;
         default:
@@ -529,6 +564,13 @@ static color_t file_color(const char *path, int file_type)
 
 static int path_type(const char *path, int *result)
 {
+    //Exception - can't fetch info on path if root directory on calculator. Handle manually.
+    if (!strcmp(path,"/"))
+    {
+        *result=FILE_TYPE_DIR;
+        return CMD_ERROR_NONE;
+    }
+
     //Fetch info on path
     struct stat stat_buffer;
     if (stat(path,&stat_buffer)) return CMD_ERROR_CANT_ACCESS;
@@ -689,42 +731,41 @@ static int process_input(void *struct_args)
     switch (command_id)
     {
         case CMD_CMD_NONE:
-            char command_name[CMD_PATH_MAX];
-            strncpy(command_name,input_buffer+args[0].start,args[0].len);
-            command_name[args[0].len]=0;
-            command_error(command_name,CMD_ERROR_NOT_FOUND,console);
-            break;
+            {
+                char command_name[CMD_PATH_MAX];
+                strncpy(command_name,input_buffer+args[0].start,args[0].len);
+                command_name[args[0].len]=0;
+                command_error(command_name,CMD_ERROR_NOT_FOUND,console);
+                break;
+            }
         case CMD_CMD_CAT:
             {
+                //Command name in case of error message
+                const char *command_name="cat";
+
                 //Normalize path
                 char arg_path[CMD_PATH_MAX];
                 char new_path[CMD_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
-                int result=create_path(console->path,arg_path,new_path);
+                arg_path[args[1].len]=0;
+                int result=add_path(console->path,arg_path,new_path);
                 if (result!=CMD_ERROR_NONE)
                 {
-                    command_error("cat",result,console);
-                    break;
-                }
-
-                //Exception - can't fetch info on path if root directory on calculator. Handle manually.
-                if (!strcmp(new_path,"/"))
-                {
-                    command_error("cat",CMD_ERROR_CAT_FILE,console);
+                    command_error(command_name,result,console);
                     break;
                 }
 
                 //Fetch info on path
                 if (path_type(new_path,&result)!=CMD_ERROR_NONE)
                 {
-                    command_error("cat",CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
                     break;
                 }
 
                 //Make sure target path is file
                 if (result!=FILE_TYPE_REG)
                 {
-                    command_error("cat",CMD_ERROR_CAT_FILE,console); 
+                    command_error(command_name,CMD_ERROR_CAT_FILE,console); 
                     break;
                 }
 
@@ -732,7 +773,7 @@ static int process_input(void *struct_args)
                 FILE *cat_file=fopen(new_path,"r");
                 if (cat_file==NULL)
                 {
-                    command_error("cat",CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
                     break;
                 }
 
@@ -753,13 +794,15 @@ static int process_input(void *struct_args)
                 //Done reading file
                 console_text_default("\n",console);
                 fclose(cat_file);
-            
                 break;
             }
 
         case CMD_CMD_CD:
             //Anonymous block - reuse variable names
             {
+                //Command name in case of error message
+                const char *command_name="cd";
+
                 if (arg_count==1)
                 {
                     //No arguments - "cd" is first argument. Change path to root.
@@ -773,43 +816,35 @@ static int process_input(void *struct_args)
                     char arg_path[CMD_PATH_MAX];
                     char new_path[CMD_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                    arg_path[args[1].len]=0;
                     int result=create_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
-                        command_error("cd",result,console);
+                        command_error(command_name,result,console);
                         break;
                     }
 
-                    //Exception - can't fetch info on path if root directory on calculator. Handle manually.
-                    if (!strcmp(new_path,"/"))
+                    //Fetch info on path
+                    if (path_type(new_path,&result)!=CMD_ERROR_NONE)
                     {
-                        strcpy(console->path,"/");
+                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                        break;
                     }
-                    else
+
+                    //Make sure target path is directory
+                    if (result!=FILE_TYPE_DIR)
                     {
-                        //Fetch info on path
-                        int result;
-                        if (path_type(new_path,&result)!=CMD_ERROR_NONE)
-                        {
-                            command_error("cd",CMD_ERROR_CANT_ACCESS,console); 
-                            break;
-                        }
-
-                        //Make sure target path is directory
-                        if (result!=FILE_TYPE_DIR)
-                        {
-                            command_error("cd",CMD_ERROR_NOT_DIRECTORY,console); 
-                            break;
-                        }
-
-                        //Set current path to new path 
-                        strcpy(console->path,new_path);
+                        command_error(command_name,CMD_ERROR_NOT_DIRECTORY,console); 
+                        break;
                     }
+
+                    //Set current path to new path 
+                    strcpy(console->path,new_path);
                 }
                 else
                 {
                     //More than one argument not allowed
-                    command_error("cd",CMD_ERROR_ARG_COUNT,console);
+                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
                     break;
                 }
                 break;
@@ -818,32 +853,142 @@ static int process_input(void *struct_args)
             reset_console(console);
             console_text_default(CMD_CONSOLE_STRING,console);
             break;
+        case CMD_CMD_CP:
+            {
+                //Command name in case of error message
+                const char *command_name="cp";
+
+                //Source argument
+                char arg_path[CMD_PATH_MAX];
+                char src_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,src_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on source path
+                int source_type;
+                result=path_type(src_path,&source_type);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    //Note error in result from path_type may be different!
+                    //Substitue error code so obvious problem is with source
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS_SOURCE,console); 
+                    break;
+                }
+
+                //Make sure source path is file
+                if (source_type!=FILE_TYPE_REG)
+                {
+                    command_error(command_name,CMD_ERROR_CP_SOURCE_NOT_FILE,console); 
+                    break;
+                }
+
+                //Destination argument
+                char dest_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[2].start,args[2].len+1);
+                arg_path[args[2].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                result=add_path(console->path,arg_path,dest_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on destination path
+                int dest_type;
+                result=path_type(dest_path,&dest_type);
+                if (result==CMD_ERROR_NONE)
+                {
+                    //Error - destination exists. Delete before copying.
+                    command_error(command_name,CMD_ERROR_CP_DEST_EXISTS,console); 
+                    break;
+                }
+
+                //Open source file
+                FILE *read_ptr=fopen(src_path,"r");
+                if (read_ptr==NULL)
+                {
+                    command_error(command_name,CMD_ERROR_CP_SOURCE,console); 
+                    break;
+                }
+
+                //Open destination file
+                FILE *write_ptr=fopen(dest_path,"w");
+                if (write_ptr==NULL)
+                {
+                    fclose(read_ptr);
+                    command_error(command_name,CMD_ERROR_CP_DEST,console); 
+                    break;
+                }
+
+                //Manually copy bytes from source to destination
+                uint8_t copy_buffer[CMD_CP_SIZE];
+                size_t bytes_read;
+                size_t bytes_written;
+                do
+                {
+                    bytes_read=fread(copy_buffer,1,CMD_CP_SIZE,read_ptr);
+                    bytes_written=fwrite(copy_buffer,1,bytes_read,write_ptr);
+                    if (bytes_written!=bytes_read)
+                    {
+                        //Close files here even though closed below since break here exits loop NOT case statement!
+                        fclose(read_ptr);
+                        read_ptr=NULL;
+                        fclose(write_ptr);
+                        write_ptr=NULL;
+                        command_error(command_name,CMD_ERROR_CP_COPYING,console); 
+                        break;
+                    }
+                }while(bytes_read>0);
+                
+                //Close files. May have been closed during copy operation above so check if still open.
+                if (read_ptr!=NULL) fclose(read_ptr);
+                if (write_ptr!=NULL) fclose(write_ptr);
+
+                break;
+            }
         case CMD_CMD_EXIT:
             return COMMAND_EXIT;
         case CMD_CMD_HELP:
-            if (arg_count==1)
             {
-                //No arguments - show help for all commands
-                show_help(NULL,console);
-            }
-            else if (arg_count==2)
-            {
-                //One argument - show help for command
-                char command_name[CMD_PATH_MAX];
-                strncpy(command_name,input_buffer+args[1].start,args[1].len+1);
-                show_help(command_name,console);
-            }
-            else
-            {
-                //More than one argument not allowed
-                command_error("help",CMD_ERROR_ARG_COUNT,console);
+                //Command name in case of error message
+                const char *command_name="cp";
+
+                if (arg_count==1)
+                {
+                    //No arguments - show help for all commands
+                    show_help(NULL,console);
+                }
+                else if (arg_count==2)
+                {
+                    //One argument - show help for command
+                    char command_name[CMD_PATH_MAX];
+                    strncpy(command_name,input_buffer+args[1].start,args[1].len+1);
+                    command_name[args[1].len]=0;
+                    show_help(command_name,console);
+                }
+                else
+                {
+                    //More than one argument not allowed
+                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
+                    break;
+                }
                 break;
             }
-            break;
         case CMD_CMD_LL:
         case CMD_CMD_LS:
             //Anonymous block - reuse variable names between cases
             {
+                //Command name in case of error message
                 const char *command_name;
                 if (command_id==CMD_CMD_LL) command_name="ll";
                 else command_name="ls";
@@ -862,29 +1007,22 @@ static int process_input(void *struct_args)
                     //One argument - use argument as path
                     char arg_path[CMD_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                    arg_path[args[1].len]=0;
 
                     //Add argument to current path if partial or use argument as path if full path
-                    int result=create_path(console->path,arg_path,new_path);
+                    int result=add_path(console->path,arg_path,new_path);
                     if (result!=CMD_ERROR_NONE)
                     {
                         command_error(command_name,result,console);
                         break;
                     }
 
-                    //Exception - can't fetch info on path if root directory on calculator. Handle manually.
-                    if (!strcmp(new_path,"/"))
+                    //Fetch info on path
+                    result=path_type(new_path,&file_type);
+                    if (result!=CMD_ERROR_NONE)
                     {
-                        file_type=FILE_TYPE_DIR;
-                    }
-                    else
-                    {
-                        //Fetch info on path
-                        result=path_type(new_path,&file_type);
-                        if (result!=CMD_ERROR_NONE)
-                        {
-                            command_error(command_name,result,console); 
-                            break;
-                        }
+                        command_error(command_name,result,console); 
+                        break;
                     }
                 }
                 else

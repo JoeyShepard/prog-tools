@@ -37,6 +37,7 @@
     #define CMD_COL_DIR         C_RGB(COL_1_4,COL_1_4,COL_MAX)
     #define CMD_COL_FILE        COL_WHITE
     #define CMD_COL_EXEC        C_RGB(COL_1_4,COL_MAX,COL_1_4)
+    #define CMD_COL_RO          C_RGB(COL_MAX,COL_1_4,COL_1_4)
     #define CMD_COL_UNKNOWN     C_RGB(COL_MAX,COL_1_4,COL_MAX)
 
     //Heap memory
@@ -62,7 +63,8 @@
     #define CMD_LS_SEPARATOR    "  "    //Printed between filenames by ls
     #define CMD_LL_WIDTH        (TEXT_INT32_HUMAN_SIZE-1)
     #define CMD_LL_SEPARATOR    "  "    //Printed between file size and filename by ll
-    #define CMD_CAT_SIZE        64
+    #define CMD_CAT_SIZE        1024
+    #define CMD_CP_SIZE         1024
 
     //enums
     //=====
@@ -72,7 +74,7 @@
         CMD_CMD_CAT,    //done
         CMD_CMD_CD,     //done
         CMD_CMD_CLEAR,  //done
-        CMD_CMD_CP,
+        CMD_CMD_CP,     //done
         CMD_CMD_EXIT,   //done
         CMD_CMD_HELP,   //done
         CMD_CMD_LL,     //done
@@ -98,7 +100,15 @@
         CMD_ERROR_ARG_MEM,
         CMD_ERROR_NOT_FOUND,
         CMD_ERROR_NOT_DIRECTORY,
-        CMD_ERROR_CAT_FILE
+        CMD_ERROR_CAT_FILE,
+        CMD_ERROR_CP_SOURCE_NOT_FILE,
+        CMD_ERROR_CP_DEST_EXISTS,
+        CMD_ERROR_CP_SOURCE,
+        CMD_ERROR_CP_DEST,
+        CMD_ERROR_CP_COPYING,
+        CMD_ERROR_CANT_ACCESS_SOURCE,
+        CMD_ERROR_CANT_ACCESS_DEST,
+        CMD_ERROR_READ_ONLY,
     };
 
     enum FileTypes
@@ -106,6 +116,13 @@
         FILE_TYPE_DIR,
         FILE_TYPE_REG,
         FILE_TYPE_UNKNOWN
+    };
+
+    enum FileSpecialTypes
+    {
+        FILE_SPECIAL_NONE,
+        FILE_SPECIAL_EXEC,
+        FILE_SPECIAL_RO
     };
 
 
