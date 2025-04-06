@@ -65,20 +65,22 @@
     #define CMD_LL_SEPARATOR    "  "    //Printed between file size and filename by ll
     #define CMD_CAT_SIZE        1024
     #define CMD_CP_SIZE         1024
+    //TODO: matters on calculator? needed on linux
+    #define CMD_MKDIR_FLAGS     0755
 
     //enums
     //=====
     enum ConsoleCommands
     {
         CMD_CMD_NONE,
-        CMD_CMD_CAT,    //done
-        CMD_CMD_CD,     //done
-        CMD_CMD_CLEAR,  //done
-        CMD_CMD_CP,     //done
-        CMD_CMD_EXIT,   //done
-        CMD_CMD_HELP,   //done
-        CMD_CMD_LL,     //done
-        CMD_CMD_LS,     //done
+        CMD_CMD_CAT,
+        CMD_CMD_CD,
+        CMD_CMD_CLEAR,
+        CMD_CMD_CP,
+        CMD_CMD_EXIT,
+        CMD_CMD_HELP,
+        CMD_CMD_LL,
+        CMD_CMD_LS,
         CMD_CMD_MKDIR,
         CMD_CMD_MV,
         CMD_CMD_RM,
@@ -101,6 +103,7 @@
         CMD_ERROR_NOT_FOUND,
         CMD_ERROR_NOT_DIRECTORY,
         CMD_ERROR_TARGET_FILE,
+        CMD_ERROR_TARGET_DIR,
         CMD_ERROR_CP_SOURCE_NOT_FILE,
         CMD_ERROR_CP_DEST_EXISTS,
         CMD_ERROR_CP_SOURCE,
@@ -109,6 +112,13 @@
         CMD_ERROR_CANT_ACCESS_SOURCE,
         CMD_ERROR_CANT_ACCESS_DEST,
         CMD_ERROR_READ_ONLY,
+        CMD_ERROR_MKDIR_FILE,
+        CMD_ERROR_MKDIR_DIR,
+        CMD_ERROR_MKDIR,
+        CMD_ERROR_PATH_INVALID,
+        CMD_ERROR_MV_DEST_EXISTS,
+        CMD_ERROR_MV,
+        CMD_ERROR_TOUCH
     };
 
     enum FileTypes

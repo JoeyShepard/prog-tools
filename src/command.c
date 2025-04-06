@@ -3,11 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-
-
-//TODO: remove???
 #include <sys/stat.h>
-
+#include <unistd.h>
 
 #include "command.h"
 #include "compatibility.h"
@@ -61,12 +58,6 @@ static void console_text(const char *text, color_t fg, color_t bg, struct Consol
 static void console_text_default(const char *text, struct ConsoleInfo *console)
 {
     console_text(text,CMD_COL_FG,CMD_COL_BG,console);
-}
-
-static void console_ntext(const char *text, int text_len, color_t fg, color_t bg, struct ConsoleInfo *console)
-{
-    for (int i=0;i<text_len;i++)
-        console_char(text[i],fg,bg,console);
 }
 
 static void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
@@ -357,12 +348,6 @@ static void copy_console_text(struct ConsoleInput *input,char *input_buffer,int 
     input_buffer[CMD_INPUT_MAX-1]=0;
 }
 
-static void console_nerror(const char *text,int text_len,struct ConsoleInfo *console)
-{
-    for (int i=0;i<text_len;i++)
-        console_char(text[i],CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
-}
-
 static int add_path(const char *path, const char *addition, char *result)
 {
     if (addition[0]=='/')
@@ -451,11 +436,14 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
         case CMD_ERROR_TARGET_FILE:
             error_msg="target must be file\n";
             break;
+        case CMD_ERROR_TARGET_DIR:
+            error_msg="target must be directory\n";
+            break;
         case CMD_ERROR_CP_SOURCE_NOT_FILE:
             error_msg="source must be file\n";
             break;
         case CMD_ERROR_CP_DEST_EXISTS:
-            error_msg="destination exists. Delete before copying.\n";
+            error_msg="destination exists - delete before copying\n";
             break;
         case CMD_ERROR_CP_SOURCE:
             error_msg="cannot open source file\n";
@@ -464,7 +452,7 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
             error_msg="cannot open destination file\n";
             break;
         case CMD_ERROR_CP_COPYING:
-            error_msg="error while copying\n";
+            error_msg="error occurred while copying\n";
             break;
         case CMD_ERROR_CANT_ACCESS_SOURCE:
             error_msg="cannot access source file\n";
@@ -474,6 +462,27 @@ static void command_error(const char *command,int error,struct ConsoleInfo *cons
             break;
         case CMD_ERROR_READ_ONLY:
             error_msg="file is read-only\n";
+            break;
+        case CMD_ERROR_MKDIR_FILE:
+            error_msg="file already exists\n";
+            break;
+        case CMD_ERROR_MKDIR_DIR:
+            error_msg="directory already exists\n";
+            break;
+        case CMD_ERROR_MKDIR:
+            error_msg="failed to create directory\n";
+            break;
+        case CMD_ERROR_PATH_INVALID:
+            error_msg="invalid character in destination path\n";
+            break;
+        case CMD_ERROR_MV_DEST_EXISTS:
+            error_msg="destination exists - delete before moving\n";
+            break;
+        case CMD_ERROR_MV:
+            error_msg="failed to move file\n";
+            break;
+        case CMD_ERROR_TOUCH:
+            error_msg="failed to create file\n";
             break;
         default:
             error_msg="unknown error\n";
@@ -565,6 +574,17 @@ static color_t file_color(const char *path, int file_type)
     }
 }
 
+static bool path_valid(const char *path)
+{
+    const char *allowed_chars="/-_.0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    while (*path)
+    {
+        if (strchr(allowed_chars,*path)==NULL) return false;
+        path++;
+    }
+    return true;
+}
+
 static int path_type(const char *path, int *result)
 {
     //Exception - can't fetch info on path if root directory on calculator. Handle manually.
@@ -595,7 +615,7 @@ static int path_type(const char *path, int *result)
     return CMD_ERROR_NONE;
 }
 
-int console_strlen(struct ConsoleChar *text)
+static int console_strlen(struct ConsoleChar *text)
 {
     int size=0;
     while(text->character)
@@ -606,7 +626,7 @@ int console_strlen(struct ConsoleChar *text)
     return size;
 }
 
-void show_help(const char *command,struct ConsoleInfo *console)
+static void show_help(const char *command,struct ConsoleInfo *console)
 {
     bool command_found=false;
     for (int i=0;i<ARRAY_SIZE(commands);i++)
@@ -801,7 +821,6 @@ static int process_input(void *struct_args)
             }
 
         case CMD_CMD_CD:
-            //Anonymous block - reuse variable names
             {
                 //Command name in case of error message
                 const char *command_name="cd";
@@ -916,6 +935,13 @@ static int process_input(void *struct_args)
                     break;
                 }
 
+                //Make sure all characters in destination path are valid
+                if (path_valid(dest_path)==false)
+                {
+                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    break;
+                }
+
                 //Open source file
                 FILE *read_ptr=fopen(src_path,"r");
                 if (read_ptr==NULL)
@@ -964,7 +990,7 @@ static int process_input(void *struct_args)
         case CMD_CMD_HELP:
             {
                 //Command name in case of error message
-                const char *command_name="cp";
+                const char *command_name="help";
 
                 if (arg_count==1)
                 {
@@ -989,7 +1015,6 @@ static int process_input(void *struct_args)
             }
         case CMD_CMD_LL:
         case CMD_CMD_LS:
-            //Anonymous block - reuse variable names between cases
             {
                 //Command name in case of error message
                 const char *command_name;
@@ -1146,8 +1171,13 @@ static int process_input(void *struct_args)
                     }
                     if (command_id==CMD_CMD_LS)
                     {
-                        //Print newline after done with ls (not need for ll which prints newline after every file/directory)
-                        console_text_default("\n",console);
+                        //Print newline after done with ls
+                        //(not needed for ll which prints newline after every file/directory)
+                        if (file_printed==true)
+                        {
+                            //Only print newline if at least one file printed
+                            console_text_default("\n",console);
+                        }
                     }
                     
                     //Done searching directory
@@ -1205,6 +1235,121 @@ static int process_input(void *struct_args)
                 }
                 break;
             }
+        case CMD_CMD_MKDIR:
+            {
+                //Command name in case of error message
+                const char *command_name="mkdir";
+
+                //Target argument
+                char arg_path[CMD_PATH_MAX];
+                char new_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,new_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on target path
+                int target_type;
+                result=path_type(new_path,&target_type);
+                if (result==CMD_ERROR_NONE)
+                {
+                    //Error - target path already exists
+                    if (target_type==FILE_TYPE_REG)
+                        command_error(command_name,CMD_ERROR_MKDIR_FILE,console); 
+                    else command_error(command_name,CMD_ERROR_MKDIR_DIR,console); 
+                    break;
+                }
+
+                //Make sure all characters in path are valid
+                if (path_valid(new_path)==false)
+                {
+                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    break;
+                }
+
+                //Make directory
+                if (mkdir(new_path,CMD_MKDIR_FLAGS)!=0)
+                {
+                    command_error(command_name,CMD_ERROR_MKDIR,console);
+                    break;
+                }
+                break;
+            }
+        case CMD_CMD_MV:
+            {
+                //Command name in case of error message
+                const char *command_name="mv";
+
+                //Source argument
+                char arg_path[CMD_PATH_MAX];
+                char src_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,src_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on source path
+                int source_type;
+                result=path_type(src_path,&source_type);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    //Note error in result from path_type may be different!
+                    //Substitue error code so obvious problem is with source
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS_SOURCE,console); 
+                    break;
+                }
+
+                //Destination argument
+                char dest_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[2].start,args[2].len+1);
+                arg_path[args[2].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                result=add_path(console->path,arg_path,dest_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on destination path
+                int dest_type;
+                result=path_type(dest_path,&dest_type);
+                if (result==CMD_ERROR_NONE)
+                {
+                    //Error - destination exists. Delete before moving.
+                    command_error(command_name,CMD_ERROR_MV_DEST_EXISTS,console); 
+                    break;
+                }
+
+                //Make sure all characters in destination path are valid
+                if (path_valid(dest_path)==false)
+                {
+                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    break;
+                }
+
+                //Move file
+                if (rename(src_path,dest_path)!=0)
+                {
+                    command_error(command_name,CMD_ERROR_MV,console); 
+                    break;
+                }
+
+                break;
+            }
         case CMD_CMD_RM:
             {
                 //Command name in case of error message
@@ -1255,47 +1400,93 @@ static int process_input(void *struct_args)
                 }
                 break;
             }
-        case CMD_CMD_TEST:
-
-            console_text_default("Test\n",console);
-
-            const char *paths[]=
+        case CMD_CMD_RMDIR:
             {
-                "/home/druzyek/temp",
-                "/home/druzyek/temp/test.txt",
-                "/home/druzyek/temp/test2k.txt",
-                "/ROBOTS",
-                "/ROBOTS/main.py"
-            };
-            for (int i=0;i<5;i++)
-            {
-                console_text_default(paths[i],console);
-                struct stat stat_buffer;
-                char human_buffer[TEXT_INT32_SIZE];
-                if (stat(paths[i],&stat_buffer))
-                    console_text_default(" - stat error\n",console);
-                else
+                //Command name in case of error message
+                const char *command_name="rmdir";
+
+                //Source argument
+                char arg_path[CMD_PATH_MAX];
+                char new_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,new_path);
+                if (result!=CMD_ERROR_NONE)
                 {
-                    console_text_default(" - no stat error!\n",console);
-
-                    console_text_default("- size: ",console);
-                    text_int32_human(stat_buffer.st_size,human_buffer);
-                    console_text_default(human_buffer,console);
-                    console_text_default("\n",console);
-
-                    console_text_default("- type: ",console);
-                    text_int32(stat_buffer.st_mode & S_IFMT,human_buffer);
-                    console_text_default(human_buffer,console);
-                    console_text_default("\n",console);
+                    command_error(command_name,result,console);
+                    break;
                 }
+                
+                //Fetch info on target path
+                int target_type;
+                result=path_type(new_path,&target_type);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console); 
+                    break;
+                }
+
+                //Make sure target path is directory
+                if (target_type!=FILE_TYPE_DIR)
+                {
+                    command_error(command_name,CMD_ERROR_TARGET_DIR,console); 
+                    break;
+                }
+
+                //Delete directory
+                if (rmdir(new_path)!=0)
+                {
+                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    break;
+                }
+                break;
             }
-            break;
-        default:
-            //TODO: remove - should never reach here
-            console_ntext(input_buffer+args[0].start,args[0].len,CMD_COL_FG,CMD_COL_BG,console);
-            console_text_default(": command found",console);
-            console_text_default("\n",console);
-            return COMMAND_NONE;
+        case CMD_CMD_TOUCH:
+            {
+                //Command name in case of error message
+                const char *command_name="touch";
+
+                //Target argument
+                char arg_path[CMD_PATH_MAX];
+                char target_path[CMD_PATH_MAX];
+                strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
+                arg_path[args[1].len]=0;
+
+                //Add argument to current path if partial or use argument as path if full path
+                int result=add_path(console->path,arg_path,target_path);
+                if (result!=CMD_ERROR_NONE)
+                {
+                    command_error(command_name,result,console);
+                    break;
+                }
+                
+                //Fetch info on target path
+                int target_type;
+                result=path_type(target_path,&target_type);
+                if (result==CMD_ERROR_NONE)
+                {
+                    //Target exists - exit silently without error
+                    break;
+                }
+
+                //Make sure all characters in target path are valid
+                if (path_valid(target_path)==false)
+                {
+                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    break;
+                }
+
+                //Create target file
+                FILE *write_ptr=fopen(target_path,"w");
+                if (write_ptr==NULL)
+                {
+                    command_error(command_name,CMD_ERROR_TOUCH,console); 
+                    break;
+                }
+                fclose(write_ptr);
+            }
     }
     return COMMAND_NONE;
 }
