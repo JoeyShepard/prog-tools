@@ -16,7 +16,7 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     struct WindowInfo window=windows[selected_window];
     int width=window_width(window);
     int height=window_height(window);
-    struct point pos;
+    struct Point pos;
     if (command_ID==COMMAND_REDRAW) pos=window_pos(window,false);
     else pos=window_pos(window,true);
 

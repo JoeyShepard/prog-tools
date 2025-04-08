@@ -37,7 +37,7 @@ rename cmd
 vsplit vim src/command.c
 
 window vim src/console.h
-rename dummy
+rename console
 vsplit vim src/console.c
 
 

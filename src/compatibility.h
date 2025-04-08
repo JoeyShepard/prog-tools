@@ -45,6 +45,7 @@
     void delay();
     void wrapper_exit();
     void wrapper_screenshot();
+    char *wrapper_normalize_path(const char *path,int local_path_max);
 
     #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
     
@@ -64,8 +65,6 @@
         #include <linux/limits.h>
         #include <SDL2/SDL.h>
         #include <SDL2/SDL_image.h>
-
-        #include "command.h"
 
         //Constants from gint
         #define DWIDTH          396

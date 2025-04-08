@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "compatibility.h"
 
 #ifdef CG50
@@ -55,6 +56,10 @@
         //Empty function for compatibility
     }
 
+    char *wrapper_normalize_path(const char *path,int local_path_max)
+    {
+        return fs_path_normalize(path);
+    }
 #else
 //PC specific
 //===========
@@ -370,13 +375,13 @@
         //Empty function for compatibility
     }
 
-    char *fs_path_normalize(char const *path)
+    char *wrapper_normalize_path(const char *path,int local_path_max)
     {
         char result_path[PATH_MAX+1];
         char *ptr=realpath(path,result_path);
         if (ptr==NULL) return NULL;
-        if (strlen(result_path)>SHELL_PATH_MAX-1) return NULL;
-        char *return_path=malloc(SHELL_PATH_MAX);
+        if (strlen(result_path)>local_path_max-1) return NULL;
+        char *return_path=malloc(local_path_max);
         strcpy(return_path,result_path);
         return return_path;
     }

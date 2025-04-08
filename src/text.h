@@ -26,9 +26,9 @@
     int font_height(int font);
     int text_width(const char *text, int font);
     bool text_printable(char text);
-    struct point draw_char(char text, struct point pos, int32_t fg, int32_t bg, bool invert, int font);
-    struct point draw_text(const char *text, struct point pos, int32_t fg, int32_t bg, bool invert, int font);
-    struct point outline_text(const char *text, struct point pos, int32_t fg, int32_t bg, int32_t border, bool invert, int font);
+    struct Point draw_char(char text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font);
+    struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font);
+    struct Point outline_text(const char *text, struct Point pos, int32_t fg, int32_t bg, int32_t border, bool invert, int font);
     void text_int32(int32_t num, char *text);
     void text_hex32(uint32_t num, char *text, int digits);
     void text_int32_commas(int32_t num, char *text);

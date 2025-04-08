@@ -18,7 +18,7 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
     struct WindowInfo window=windows[selected_window];
     int width=window_width(window);
     int height=window_height(window);
-    struct point pos;
+    struct Point pos;
     if (command_ID==COMMAND_REDRAW) pos=window_pos(window,false);
     else pos=window_pos(window,true);
 
@@ -28,7 +28,7 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
     
     //Heap memory
     pos.y+=MEM_MGR_OUTLINE_HEIGHT;
-    struct point new_pos;
+    struct Point new_pos;
     char int32_buffer[TEXT_INT32_COMMAS_SIZE];
     new_pos=draw_text("Heap used: ",pos,COL_MEM_MGR_FG,COL_MEM_MGR_BG,false,FONT_5x8);
     text_int32_commas(heap_used(),int32_buffer);

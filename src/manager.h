@@ -127,7 +127,7 @@
     void draw_splits(struct WindowInfo *windows,int selected_window);
     void draw_titles(struct WindowInfo *windows,int selected_window);
     void draw_manager(struct WindowInfo *windows,int modifier,int selected_window);
-    struct point window_pos(struct WindowInfo window,bool selected);
+    struct Point window_pos(struct WindowInfo window,bool selected);
     int window_width(struct WindowInfo window);
     int window_height(struct WindowInfo window);
 

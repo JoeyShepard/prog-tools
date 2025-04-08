@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include "command.h"
 #include "compatibility.h"
 #include "getkey.h"
 #include "manager.h"

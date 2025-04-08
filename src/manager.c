@@ -115,7 +115,7 @@ void window_manager()
 
 void draw_modifier(int modifier)
 {
-    struct point pos={0,0};
+    struct Point pos={0,0};
     char text[2]=" ";
 
     //Draw shift key
@@ -187,7 +187,7 @@ void draw_splits(struct WindowInfo *windows, int selected_window)
 
 void draw_titles(struct WindowInfo windows[],int selected_window)
 {
-    struct point pos={TAB_START_X,TAB_START_Y};
+    struct Point pos={TAB_START_X,TAB_START_Y};
     char title_buffer[TAB_TITLE_LEN];
     title_buffer[1]=':';
     title_buffer[TAB_TITLE_LEN-1]=0;
@@ -267,12 +267,12 @@ void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
     }
 }
 
-struct point window_pos(struct WindowInfo window,bool selected)
+struct Point window_pos(struct WindowInfo window,bool selected)
 {
     int selected_split=window.selected_split;
     if (selected==false) selected_split^=1;
 
-    struct point pos;
+    struct Point pos;
     switch (window.split_state)
     {
         case WINDOW_WHOLE:

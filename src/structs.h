@@ -5,7 +5,7 @@
 
     #define TAB_TITLE_LEN       11      //Title size including x: and terminating 0
 
-    struct point
+    struct Point
     {
         int x;
         int y;

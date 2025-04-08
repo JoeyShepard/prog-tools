@@ -3,7 +3,6 @@
 
     #include <stdint.h>
 
-    #include "compatibility.h"
     #include "structs.h"
 
     //Dimensions (may change - see manager.h):
@@ -90,7 +89,7 @@
     void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console);
     void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
     void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
-    void draw_input_line(struct ConsoleInfo *console,struct point pos,int console_width,int input_height);
+    void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_width,int input_height);
     void draw_console(struct ConsoleInfo *console,int console_x,int console_y,int console_width,int console_height);
     void reset_console(struct ConsoleInfo *console);
     void add_history(struct ConsoleInfo *console);

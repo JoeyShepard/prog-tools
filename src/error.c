@@ -1,12 +1,15 @@
 #include "compatibility.h"
-#include "error.h"
+#include "error.h"          
+#include "getkey.h"
+#include "graphics.h"
+#include "structs.h"
 #include "text.h"
 
 #ifdef CG50
     //Calculator version
     void error_exit(int error)
     {
-        struct point pos={0,0};
+        struct Point pos={0,0};
 
         switch (error)
         {
@@ -25,6 +28,7 @@
                 draw_text("Error: bad heap ID!", pos, COL_BLACK, COL_WHITE, false, FONT_5x8);
                 break;
         }
+        dupdate();
 
         //No way to exit on calculator so hang here
         while(1);
@@ -57,3 +61,41 @@
     }
 
 #endif
+
+void error_screen(int error,struct Point pos,int width,int height)
+{
+    const int font=FONT_5x8;
+    const char *error_msg;
+    switch (error)
+    {
+        case ERROR_OUT_OF_MEMORY:
+            error_msg="Error: out of heap memory!";
+            break;
+        default:
+            error_msg="Unknown error";
+    }
+
+    draw_rect(pos.x,pos.y,width,height,ERROR_COL_BG,ERROR_COL_BG);
+    for (int i=0;i<2;i++)
+    {
+        const char *print_text;
+        if (i==0) print_text=error_msg;
+        else print_text="Press EXE to exit";
+
+        struct Point new_pos=pos;
+        new_pos.x+=width/2-text_width(print_text,font)/2;
+        new_pos.y+=height/2;
+
+        if (i==0) new_pos.y-=ERROR_SPACING_Y;
+        else new_pos.y+=ERROR_SPACING_Y-font_height(font);
+
+        draw_text(print_text,new_pos,ERROR_COL_FG,-1,false,font);
+    }
+    dupdate();
+    
+    int key;
+    do
+    {
+        key=getkey_wrapper(true);
+    } while(key!=VKEY_EXE);
+}

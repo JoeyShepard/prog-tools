@@ -27,7 +27,7 @@
     //Console
     #define SHELL_INPUT_MAX         124     //Four full lines of text input if hsplit
     #define SHELL_CONSOLE_STRING    "Calculator shell for fx-CG50\nType 'help' for more info.\n" 
-    
+   
     //History
     #define SHELL_HIST_COUNT    10
 

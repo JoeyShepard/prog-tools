@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "compatibility.h"
-#include "command.h"
 #include "debug.h"
 #include "error.h"
 #include "getkey.h"
@@ -164,6 +163,9 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
 
     //Add space for address of next link in list of objects
     size+=sizeof(uint32_t);
+
+    //Check if enough memory left
+    if (size>heap_left()) return NULL;
 
     //Add size of object to total size of all objects for that tab/split pair
     *(uint32_t *)heap_ptr+=size;

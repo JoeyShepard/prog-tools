@@ -164,7 +164,7 @@ bool text_printable(char text)
     return ((text>=CHAR_PRINTABLE_MIN)&&(text<=CHAR_PRINTABLE_MAX));
 }
 
-struct point draw_char(char text, struct point pos, int32_t fg, int32_t bg, bool invert, int font)
+struct Point draw_char(char text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font)
 {
     char buffer[2];
     buffer[0]=text;
@@ -172,7 +172,7 @@ struct point draw_char(char text, struct point pos, int32_t fg, int32_t bg, bool
     return draw_text(buffer,pos,fg,bg,invert,font);
 }
 
-struct point draw_text(const char *text, struct point pos, int32_t fg, int32_t bg, bool invert, int font)
+struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font)
 { 
     //Copy of pointer to video memory
      uint16_t *screen=vram_buffer;
@@ -316,7 +316,7 @@ struct point draw_text(const char *text, struct point pos, int32_t fg, int32_t b
 }
 
 
-struct point outline_text(const char *text, struct point pos, int32_t fg, int32_t bg, int32_t border, bool invert, int font)
+struct Point outline_text(const char *text, struct Point pos, int32_t fg, int32_t bg, int32_t border, bool invert, int font)
 {
     int width=text_width(text,font);
     

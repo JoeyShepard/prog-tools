@@ -1,19 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
-#include "command.h"
 #include "compatibility.h"
-#include "debug.h"
-#include "getkey.h"
-#include "graphics.h"
+#include "console.h"
 #include "text.h"
-#include "dummy.h"
-#include "manager.h"
-#include "mem.h"
 #include "structs.h"
 
 //Functions
@@ -143,7 +132,7 @@ void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struc
     add_input_text(buffer,fg,bg,add_to_start,console);
 }
 
-void draw_input_line(struct ConsoleInfo *console,struct point pos,int console_width,int input_height)
+void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_width,int input_height)
 {
     int starting_x=pos.x;
     int char_index=0;
@@ -293,7 +282,7 @@ void draw_console(struct ConsoleInfo *console,int console_x,int console_y,int co
     }
 
     //Draw screen output
-    struct point text_pos={console_x,console_y};
+    struct Point text_pos={console_x,console_y};
     int blank_count=0;
     int row=0,col=0;
     bool input_drawn=false;
@@ -362,10 +351,7 @@ void reset_console(struct ConsoleInfo *console)
 
 void add_history(struct ConsoleInfo *console)
 {
-    //TODO: remove after working
-    //console->history[console->history_index]=console->input;
     input_deep_copy(console->history+console->history_index,&console->input,console->input_text_max);
-
     console->history_index++;
     if (console->history_index==console->history_array_size)
         console->history_index=0;

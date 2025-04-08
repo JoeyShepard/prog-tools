@@ -7,11 +7,10 @@
 
 #include "command.h"
 #include "compatibility.h"
-#include "debug.h"
+#include "error.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "text.h"
-#include "dummy.h"
 #include "manager.h"
 #include "mem.h"
 #include "structs.h"
@@ -62,7 +61,7 @@ static int create_path(const char *path, const char *addition, char *result)
         return result_code;
     }
 
-    char *normal_path=fs_path_normalize(result);
+    char *normal_path=wrapper_normalize_path(result,SHELL_PATH_MAX);
     if (normal_path==NULL)
     {
         return SHELL_ERROR_NORMALIZE_PATH;
@@ -1157,7 +1156,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
     struct WindowInfo window=windows[selected_window];
     int width=window_width(window);
     int height=window_height(window);
-    struct point pos;
+    struct Point pos;
     int drawn_split;
     if (command_ID==COMMAND_REDRAW)
     {
@@ -1184,9 +1183,12 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         //Allocate memory for and initialize console
         shell=(struct ShellInfo *)add_object(sizeof(struct ShellInfo),heap_ptr);
         
-
-        //TODO: check if allocation succeeded
-
+        //Make sure allocation succeeded
+        if (shell==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
 
         //Init console
         console=&shell->console;
@@ -1203,8 +1205,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
             SHELL_COL_BG);
         reset_console_pointers(console);
         reset_console(console);
-
-        //TODO: move to init_console?
 
         //Init input
         console_text_default(SHELL_CONSOLE_STRING,console);
@@ -1383,11 +1383,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                         if (console->input_copied==false)
                         {
                             //First time up pressed - save current input
-                            
-                            //TODO: remove after working
-                            //console->input_copy=console->input;
                             input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
-
                             console->input_copied=true;
                             console->history_read_count=console->history_count;
                         }
@@ -1400,9 +1396,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                                 //Current line edited is copy of input when up was pressed meaning input
                                 //scrolled up then back to original input. Save that input including changes
                                 //in case scroll back to that.
-
-                                //TODO: remove after working
-                                //console->input_copy=console->input;
                                 input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
                             }
 
@@ -1412,9 +1405,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             read_index-=console->history_count;
                             read_index+=console->history_read_count;
                             if (read_index<0) read_index+=SHELL_HIST_COUNT;
-
-                            //TODO: remove after working
-                            //console->input=console->history[read_index];
                             input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
                         }
                     }
@@ -1437,9 +1427,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             //scrolling up. This way, scrolling up, scrolling down, modifying 
                             //original input then scrolling up then back down to original input
                             //doesn't lose changes.
-
-                            //TODO: remove after working
-                            //console->input=console->input_copy;    
                             input_deep_copy(&console->input,&console->input_copy,SHELL_INPUT_MAX);
                         }
                         else
@@ -1449,9 +1436,6 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             read_index-=console->history_count;
                             read_index+=console->history_read_count;
                             if (read_index<0) read_index+=SHELL_HIST_COUNT;
-
-                            //TODO: remove after working
-                            //console->input=console->history[read_index];
                             input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
                         }
                     }

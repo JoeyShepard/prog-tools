@@ -119,7 +119,7 @@ void draw_menu(struct WindowInfo window, bool enabled)
     }
 
     //Draw menu options
-    struct point pos=
+    struct Point pos=
     {
         menu_x+MENU_X_OFFSET,
         menu_y+MENU_Y_OFFSET
