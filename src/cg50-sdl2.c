@@ -375,8 +375,8 @@
         char result_path[PATH_MAX+1];
         char *ptr=realpath(path,result_path);
         if (ptr==NULL) return NULL;
-        if (strlen(result_path)>CMD_PATH_MAX-1) return NULL;
-        char *return_path=malloc(CMD_PATH_MAX);
+        if (strlen(result_path)>SHELL_PATH_MAX-1) return NULL;
+        char *return_path=malloc(SHELL_PATH_MAX);
         strcpy(return_path,result_path);
         return return_path;
     }

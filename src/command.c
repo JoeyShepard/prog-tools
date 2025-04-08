@@ -1,4 +1,3 @@
-//placeholder functions for menu
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,334 +17,9 @@
 #include "structs.h"
 
 //Functions
-static void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console)
-{
-    if (console->text_len<CMD_BUFFER_SIZE)
-    {
-        //Text buffer not full yet
-        console->text_len++;
-    }
-    else
-    {
-        //Buffer full - keep track of number of characters overwritten
-        if (console->text[console->buffer_index].character=='\n')
-        {
-            //New line overwritten - reset count
-            console->overflow_count=0;
-        }
-        else
-        {
-            //Add character overwritten to count for alignment when printing
-            console->overflow_count++;
-        }
-    }
-    console->text[console->buffer_index].character=character;
-    console->text[console->buffer_index].fg=fg;
-    console->text[console->buffer_index].bg=bg;
-    console->buffer_index++;
-    if (console->buffer_index==CMD_BUFFER_SIZE) console->buffer_index=0;
-}
-
-static void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console)
-{
-    while (*text)
-    {
-        console_char(*text,fg,bg,console);
-        text++;
-    }
-}
-
 static void console_text_default(const char *text, struct ConsoleInfo *console)
 {
-    console_text(text,CMD_COL_FG,CMD_COL_BG,console);
-}
-
-static void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
-{
-    int text_len=strlen(text);
-    if (console->input.len+text_len>=CMD_INPUT_MAX-1)
-    {
-        //Shorten text to be added if longer than space available
-        text_len=CMD_INPUT_MAX-1-console->input.len;
-    }
-
-    int text_index;
-    if (add_to_start)
-    {
-        //Add text to display text at the beginning
-        text_index=console->input.len;
-    }
-    else
-    {
-        //Add text to input
-        text_index=console->input.cursor;
-    }
-
-    //Move existing text right if inserting text in middle of string
-    for (int i=console->input.len;i>=text_index;i--)
-    {
-        console->input.text[i+text_len]=console->input.text[i];
-    }
-
-    //Copy in new text
-    for (int i=0;i<text_len;i++)
-    {
-        console->input.text[text_index+i].character=text[i];
-        console->input.text[text_index+i].fg=fg;
-        console->input.text[text_index+i].bg=bg;
-    }
-
-    if (add_to_start)
-    {
-        //Text added to display text at beginning
-        console->input.start+=text_len;
-    }
-    console->input.cursor+=text_len;
-    console->input.len+=text_len;
-}
-
-static void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
-{
-    char buffer[2];
-    buffer[0]=character;
-    buffer[1]=0;
-    add_input_text(buffer,fg,bg,add_to_start,console);
-}
-
-static void draw_input_line(struct ConsoleInfo *console,struct point pos,int console_width,int input_height)
-{
-    int starting_x=pos.x;
-    int char_index=0;
-    bool cursor_drawn=false;
-    bool invert;
-    for (int row=0;row<input_height;row++)
-    {
-        for (int col=0;col<console_width;col++)
-        {
-            char character;
-            int color_fg, color_bg;
-            if (console->input.text[char_index].character!=0)
-            {
-                //Draw character of input
-                character=console->input.text[char_index].character;
-                color_fg=console->input.text[char_index].fg;
-                color_bg=console->input.text[char_index].bg;
-                if (char_index==console->input.cursor)
-                {
-                    //Cursor character - invert
-                    invert=true;
-                    cursor_drawn=true;
-                }
-                else invert=false;
-                char_index++;
-            }
-            else
-            {
-                character=' ';
-                color_fg=CMD_COL_FG;
-                color_bg=CMD_COL_BG;
-                if (cursor_drawn==false)
-                {
-                    //Cursor not drawn yet - draw cursor
-                    invert=true;
-                    cursor_drawn=true;
-                }
-                else
-                {
-                    //Draw spaces for rest of line
-                    invert=false;
-                }
-            }
-            pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
-        }
-        pos.x=starting_x;
-        pos.y+=CMD_ROW_HEIGHT;
-    }
-}
-
-static void draw_console(struct ConsoleInfo *console,int console_x,int console_y,int console_width,int console_height)
-{
-    //Adjust console_height to make room for input line
-    int input_height=((console->input.len)/console_width)+1;
-    console_height-=(input_height-1);
-
-    //Find starting point in circular screen buffer for printing characters
-    int line_length=0;
-    int line_count=0;
-    int buffer_counter=console->buffer_index;
-    int buffer_start=buffer_counter;
-    for (int i=0;i<console->text_len;i++)
-    {
-        //Loop backwords through screen buffer until enough lines are generated to fill screen
-        buffer_counter--;
-        if (buffer_counter<0)
-        {
-            //Wrap index - buffer is circular
-            buffer_counter=CMD_BUFFER_SIZE-1;
-        }
-
-        if (console->text[buffer_counter].character=='\n')
-        {
-            //Newline character - calculate number of lines generated by text on this line
-            line_count++;
-            buffer_start-=line_length%console_width;
-            int line_length_copy=line_length;
-            line_length=0;
-            if (line_count==console_height)
-            {
-                //Found enough lines of text to fill the screen - stop looping
-                break;
-            }
-            int new_lines=line_length_copy/console_width;
-            if (line_count+new_lines<console_height)
-            {
-                //Add remaining lines to output
-                buffer_start-=new_lines*console_width;
-                buffer_start--;
-                line_count+=new_lines;
-            }
-            else
-            {
-                //More than enough lines found so only add enough to fill the screen
-                new_lines=console_height-line_count;
-                buffer_start-=new_lines*console_width;
-                line_count+=new_lines;
-                break;
-            }
-        }
-        else
-        {
-            //Character other than newline in buffer. Just count then make adjustment later.
-            line_length++;
-        }
-    }
-    
-    if (line_length>0)
-    {
-        //Process characters left over from searching output buffer
-        if (line_count<console_height)
-        {
-            //Still room left on screen for more lines
-            if ((console->overflow_count+line_length)%console_width!=0)
-            {
-                //Align text accounting for characters that have scrolled out of the buffer
-                buffer_start-=(console->overflow_count+line_length)%console_width;
-                line_count++;
-            }
-        }
-        int new_lines=line_length/console_width;
-        if (line_count+new_lines<console_height)
-        {
-            //Add more lines if room left
-            buffer_start-=new_lines*console_width;
-        }
-        else
-        {
-            //More than enough lines left. Add enough to fill screen.
-            new_lines=console_height-line_count;
-            buffer_start-=new_lines*console_width;
-        }
-    }
-
-    bool draw_once=false;
-    while (buffer_start<0)
-    {
-        //Code above starts at end of output and moves buffer_start back until it finds where to start
-        //to output the correct number of characters. Screen buffer is circular so buffer_start may
-        //become negative. It seems that adding CMD_BUFFER_SIZE once would account for all cases of
-        //wrapping but looping here in case once isn't enough.
-        buffer_start+=CMD_BUFFER_SIZE;
-        //Make sure loop below draws a character at least once since buffer_start may be equal to
-        //-CMD_BUFFER_SIZE then becomes 0 with line above which signals no more characters whereas
-        //exactly CMD_BUFFER_SIZE characters should be drawn.
-        draw_once=true;
-    }
-
-    //Draw screen output
-    struct point text_pos={console_x,console_y};
-    int blank_count=0;
-    int row=0,col=0;
-    bool input_drawn=false;
-    while(row<console_height-1)
-    {
-        if ((blank_count>0)||((buffer_start==console->buffer_index)&&(draw_once==false)))
-        {
-            //Draw blanks if no more text
-            text_pos=draw_char(' ',text_pos,CMD_COL_FG,CMD_COL_BG,false,FONT_5x8);
-            if (blank_count>0) blank_count--;
-        }
-        else
-        {
-            char character=console->text[buffer_start].character;
-            if (character=='\n')
-            {
-                //Newline character - fill rest of line with blanks
-                blank_count=console_width-col;
-                //Draw one character less so no blank character for newline
-                col--;
-            }
-            else
-            {
-                //Draw character
-                color_t fg=console->text[buffer_start].fg;
-                color_t bg=console->text[buffer_start].bg;
-                text_pos=draw_char(character,text_pos,fg,bg,false,FONT_5x8);
-            }
-
-            //Advance to next character in buffer
-            buffer_start++;
-            if (buffer_start==CMD_BUFFER_SIZE) buffer_start=0;
-            draw_once=false;
-        }
-
-        //Advance to next character on screen
-        col++;
-        if (col==console_width)
-        {
-            //Reached end of line on screen - go to next line
-            col=0;
-            row++;
-            text_pos.x=console_x;
-            text_pos.y+=CMD_ROW_HEIGHT;
-            if ((buffer_start==console->buffer_index)&&(input_drawn==false))
-            {
-                //Draw input line
-                draw_input_line(console,text_pos,console_width,input_height);
-                text_pos.y+=CMD_ROW_HEIGHT*input_height;
-                input_drawn=true;
-            }
-        }
-    }
-}
-static void reset_console(struct ConsoleInfo *console)
-{
-    console->overflow_count=0;
-    console->buffer_index=0;
-    console->text_len=0;
-    console->input.text[0].character=0;
-    console->input.start=0;
-    console->input.cursor=0;
-    console->input.len=0;
-}
-
-static void add_history(struct ConsoleInfo *console)
-{
-    console->history[console->history_index]=console->input;
-    console->history_index++;
-    if (console->history_index==CMD_HIST_COUNT)
-        console->history_index=0;
-    if (console->history_count<CMD_HIST_COUNT)
-        console->history_count++;
-}
-
-static void copy_console_text(struct ConsoleInput *input,char *input_buffer,int offset)
-{
-    //Copy all characters excluding color data
-    for (int i=offset;i<CMD_INPUT_MAX;i++)
-        input_buffer[i-offset]=input->text[i].character;
-
-    //Loop above copies 0 terminator but add here just in case
-    input_buffer[CMD_INPUT_MAX-1]=0;
+    console_text(text,SHELL_COL_FG,SHELL_COL_BG,console);
 }
 
 static int add_path(const char *path, const char *addition, char *result)
@@ -353,9 +27,9 @@ static int add_path(const char *path, const char *addition, char *result)
     if (addition[0]=='/')
     {
         //Directory is absolute
-        if (strlen(addition)>CMD_PATH_MAX-1)
+        if (strlen(addition)>SHELL_PATH_MAX-1)
         {
-            return CMD_ERROR_PATH_TOO_LONG;
+            return SHELL_ERROR_PATH_TOO_LONG;
         }
         else
         {
@@ -366,9 +40,9 @@ static int add_path(const char *path, const char *addition, char *result)
     {
         //Directory is relative
         //-2 for terminating 0 and added / between directories
-        if (strlen(path)+strlen(addition)>CMD_PATH_MAX-2)
+        if (strlen(path)+strlen(addition)>SHELL_PATH_MAX-2)
         {
-            return CMD_ERROR_PATH_TOO_LONG;
+            return SHELL_ERROR_PATH_TOO_LONG;
         }
         strcpy(result,path);
         int path_len=strlen(result);
@@ -377,13 +51,13 @@ static int add_path(const char *path, const char *addition, char *result)
         strcpy(result+path_len,addition);
     }
 
-    return CMD_ERROR_NONE;
+    return SHELL_ERROR_NONE;
 }
 
 static int create_path(const char *path, const char *addition, char *result)
 {
     int result_code=add_path(path,addition,result);
-    if (result_code!=CMD_ERROR_NONE)
+    if (result_code!=SHELL_ERROR_NONE)
     {
         return result_code;
     }
@@ -391,103 +65,103 @@ static int create_path(const char *path, const char *addition, char *result)
     char *normal_path=fs_path_normalize(result);
     if (normal_path==NULL)
     {
-        return CMD_ERROR_NORMALIZE_PATH;
+        return SHELL_ERROR_NORMALIZE_PATH;
     }
     strcpy(result,normal_path);
     free(normal_path);
 
-    return CMD_ERROR_NONE;
+    return SHELL_ERROR_NONE;
 }
 
 static void command_error(const char *command,int error,struct ConsoleInfo *console)
 {
-    console_text(command,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
-    console_text(": ",CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+    console_text(command,SHELL_COL_ERR_FG,SHELL_COL_ERR_BG,console);
+    console_text(": ",SHELL_COL_ERR_FG,SHELL_COL_ERR_BG,console);
 
     const char *error_msg=NULL;
 
     switch (error)
     {
-        case CMD_ERROR_PATH_TOO_LONG:
+        case SHELL_ERROR_PATH_TOO_LONG:
             error_msg="path too long\n";
             break;
-        case CMD_ERROR_NORMALIZE_PATH:
+        case SHELL_ERROR_NORMALIZE_PATH:
             error_msg="could not normalize path\n";
             break;
-        case CMD_ERROR_PATH_NOT_FOUND:
+        case SHELL_ERROR_PATH_NOT_FOUND:
             error_msg="path not found\n";
             break;
-        case CMD_ERROR_CANT_ACCESS:
+        case SHELL_ERROR_CANT_ACCESS:
             error_msg="cannot access file/directory\n";
             break;
-        case CMD_ERROR_ARG_COUNT:
+        case SHELL_ERROR_ARG_COUNT:
             error_msg="wrong number of arguments\n";
             break;
-        case CMD_ERROR_ARG_MEM:
+        case SHELL_ERROR_ARG_MEM:
             //Triggered before any command run so doesn't have xxx: beginning so should be upper case
             error_msg="Out of argument memory\n";
             break;
-        case CMD_ERROR_NOT_FOUND:
+        case SHELL_ERROR_NOT_FOUND:
             error_msg="command not found\n";
             break;
-        case CMD_ERROR_NOT_DIRECTORY:
+        case SHELL_ERROR_NOT_DIRECTORY:
             error_msg="not a directory\n";
             break;
-        case CMD_ERROR_TARGET_FILE:
+        case SHELL_ERROR_TARGET_FILE:
             error_msg="target must be file\n";
             break;
-        case CMD_ERROR_TARGET_DIR:
+        case SHELL_ERROR_TARGET_DIR:
             error_msg="target must be directory\n";
             break;
-        case CMD_ERROR_CP_SOURCE_NOT_FILE:
+        case SHELL_ERROR_CP_SOURCE_NOT_FILE:
             error_msg="source must be file\n";
             break;
-        case CMD_ERROR_CP_DEST_EXISTS:
+        case SHELL_ERROR_CP_DEST_EXISTS:
             error_msg="destination exists - delete before copying\n";
             break;
-        case CMD_ERROR_CP_SOURCE:
+        case SHELL_ERROR_CP_SOURCE:
             error_msg="cannot open source file\n";
             break;
-        case CMD_ERROR_CP_DEST:
+        case SHELL_ERROR_CP_DEST:
             error_msg="cannot open destination file\n";
             break;
-        case CMD_ERROR_CP_COPYING:
+        case SHELL_ERROR_CP_COPYING:
             error_msg="error occurred while copying\n";
             break;
-        case CMD_ERROR_CANT_ACCESS_SOURCE:
+        case SHELL_ERROR_CANT_ACCESS_SOURCE:
             error_msg="cannot access source file\n";
             break;
-        case CMD_ERROR_CANT_ACCESS_DEST:
+        case SHELL_ERROR_CANT_ACCESS_DEST:
             error_msg="cannot access destination file\n";
             break;
-        case CMD_ERROR_READ_ONLY:
+        case SHELL_ERROR_READ_ONLY:
             error_msg="file is read-only\n";
             break;
-        case CMD_ERROR_MKDIR_FILE:
+        case SHELL_ERROR_MKDIR_FILE:
             error_msg="file already exists\n";
             break;
-        case CMD_ERROR_MKDIR_DIR:
+        case SHELL_ERROR_MKDIR_DIR:
             error_msg="directory already exists\n";
             break;
-        case CMD_ERROR_MKDIR:
+        case SHELL_ERROR_MKDIR:
             error_msg="failed to create directory\n";
             break;
-        case CMD_ERROR_PATH_INVALID:
+        case SHELL_ERROR_PATH_INVALID:
             error_msg="invalid character in destination path\n";
             break;
-        case CMD_ERROR_MV_DEST_EXISTS:
+        case SHELL_ERROR_MV_DEST_EXISTS:
             error_msg="destination exists - delete before moving\n";
             break;
-        case CMD_ERROR_MV:
+        case SHELL_ERROR_MV:
             error_msg="failed to move file\n";
             break;
-        case CMD_ERROR_TOUCH:
+        case SHELL_ERROR_TOUCH:
             error_msg="failed to create file\n";
             break;
         default:
             error_msg="unknown error\n";
     }
-    console_text(error_msg,CMD_COL_ERR_FG,CMD_COL_ERR_BG,console);
+    console_text(error_msg,SHELL_COL_ERR_FG,SHELL_COL_ERR_BG,console);
 }
 
 static struct CommandInfo
@@ -498,22 +172,19 @@ static struct CommandInfo
     const char *help_string;
 }commands[]=
 {
-    {"cat",     CMD_CMD_CAT,    1,  "output contents of file"},
-    {"cd",      CMD_CMD_CD,     -1, "change directory"},
-    {"clear",   CMD_CMD_CLEAR,  0,  "clear the console screen"},
-    {"cp",      CMD_CMD_CP,     2,  "copy file"},
-    {"exit",    CMD_CMD_EXIT,   0,  "exit command line"},
-    {"help",    CMD_CMD_HELP,   -1, "display help on commands"},
-    {"ll",      CMD_CMD_LL,     -1, "list directory contents and sizes"},
-    {"ls",      CMD_CMD_LS,     -1, "list directory contents"},
-    {"mkdir",   CMD_CMD_MKDIR,  1,  "create directory"},
-    {"mv",      CMD_CMD_MV,     2,  "move file or directory"},
-    {"rm",      CMD_CMD_RM,     1,  "remove file"},
-    {"rmdir",   CMD_CMD_RMDIR,  1,  "remove directory"},
-    {"touch",   CMD_CMD_TOUCH,  1,  "create file if it doesn't exist"},
-
-    //TODO: remove
-    {"test",    CMD_CMD_TEST,   0,  "testing"}
+    {"cat",     SHELL_CMD_CAT,    1,  "output contents of file"},
+    {"cd",      SHELL_CMD_CD,     -1, "change directory"},
+    {"clear",   SHELL_CMD_CLEAR,  0,  "clear the console screen"},
+    {"cp",      SHELL_CMD_CP,     2,  "copy file"},
+    {"exit",    SHELL_CMD_EXIT,   0,  "exit command line"},
+    {"help",    SHELL_CMD_HELP,   -1, "display help on commands"},
+    {"ll",      SHELL_CMD_LL,     -1, "list directory contents and sizes"},
+    {"ls",      SHELL_CMD_LS,     -1, "list directory contents"},
+    {"mkdir",   SHELL_CMD_MKDIR,  1,  "create directory"},
+    {"mv",      SHELL_CMD_MV,     2,  "move file or directory"},
+    {"rm",      SHELL_CMD_RM,     1,  "remove file"},
+    {"rmdir",   SHELL_CMD_RMDIR,  1,  "remove directory"},
+    {"touch",   SHELL_CMD_TOUCH,  1,  "create file if it doesn't exist"},
 };
 
 static int file_special(const char *path)
@@ -560,17 +231,17 @@ static color_t file_color(const char *path, int file_type)
     switch (file_type)
     {
         case FILE_TYPE_DIR:
-            return CMD_COL_DIR;
+            return SHELL_COL_DIR;
         case FILE_TYPE_REG:
             //Check if any files have special status
             int special=file_special(path);
-            if (special==FILE_SPECIAL_EXEC)     return CMD_COL_EXEC;
-            else if (special==FILE_SPECIAL_RO)  return CMD_COL_RO;
-            else                                return CMD_COL_FILE;
+            if (special==FILE_SPECIAL_EXEC)     return SHELL_COL_EXEC;
+            else if (special==FILE_SPECIAL_RO)  return SHELL_COL_RO;
+            else                                return SHELL_COL_FILE;
         case FILE_TYPE_UNKNOWN:
-            return CMD_COL_UNKNOWN;
+            return SHELL_COL_UNKNOWN;
         default:
-            return CMD_COL_UNKNOWN;
+            return SHELL_COL_UNKNOWN;
     }
 }
 
@@ -591,12 +262,12 @@ static int path_type(const char *path, int *result)
     if (!strcmp(path,"/"))
     {
         *result=FILE_TYPE_DIR;
-        return CMD_ERROR_NONE;
+        return SHELL_ERROR_NONE;
     }
 
     //Fetch info on path
     struct stat stat_buffer;
-    if (stat(path,&stat_buffer)) return CMD_ERROR_CANT_ACCESS;
+    if (stat(path,&stat_buffer)) return SHELL_ERROR_CANT_ACCESS;
 
     //Determine whether target path is to file or directory
     switch (stat_buffer.st_mode&S_IFMT)
@@ -612,18 +283,7 @@ static int path_type(const char *path, int *result)
         default:
             *result=FILE_TYPE_UNKNOWN;
     }
-    return CMD_ERROR_NONE;
-}
-
-static int console_strlen(struct ConsoleChar *text)
-{
-    int size=0;
-    while(text->character)
-    {
-        text++;
-        size++;
-    }
-    return size;
+    return SHELL_ERROR_NONE;
 }
 
 static void show_help(const char *command,struct ConsoleInfo *console)
@@ -648,7 +308,7 @@ static void show_help(const char *command,struct ConsoleInfo *console)
     if (command_found==false)
     {
         if (command!=NULL)
-            command_error(command,CMD_ERROR_NOT_FOUND,console);
+            command_error(command,SHELL_ERROR_NOT_FOUND,console);
     }
 }
 
@@ -658,45 +318,46 @@ static int process_input(void *struct_args)
     struct Parse
     {
         int start,len;
-    } args[CMD_ARG_MAX];
+    } args[SHELL_ARG_MAX];
 
     //Arguments must be passed as void pointer to struct on calculator for this function
     struct ProcessInput *temp_args=struct_args;
     const char *input_buffer=temp_args->input_buffer;
     struct ConsoleInfo *console=temp_args->console;
+    char *shell_path=temp_args->path;
 
-    int parse_state=CMD_PARSE_NONE;
+    int parse_state=SHELL_PARSE_NONE;
     int arg_index=0;
     int text_index=0;
     int arg_count=0;
 
-    for (int i=0;i<CMD_ARG_MAX;i++)
+    for (int i=0;i<SHELL_ARG_MAX;i++)
         args[i].len=0;
 
     while(input_buffer[text_index])
     {
         if (input_buffer[text_index]==' ')
         {
-            if (parse_state==CMD_PARSE_WORD)
+            if (parse_state==SHELL_PARSE_WORD)
             {
-                parse_state=CMD_PARSE_NONE;
+                parse_state=SHELL_PARSE_NONE;
                 arg_index++;
             }
         }
         else
         {
-            if (parse_state==CMD_PARSE_NONE) 
+            if (parse_state==SHELL_PARSE_NONE) 
             {
-                if (arg_index>=CMD_ARG_MAX)
+                if (arg_index>=SHELL_ARG_MAX)
                 {
-                    command_error(NULL,CMD_ERROR_ARG_MEM,console);
+                    command_error(NULL,SHELL_ERROR_ARG_MEM,console);
                     return COMMAND_NONE;
                 }
                 args[arg_index].start=text_index;
                 args[arg_index].len=1;
-                parse_state=CMD_PARSE_WORD;
+                parse_state=SHELL_PARSE_WORD;
             }
-            else if (parse_state==CMD_PARSE_WORD) 
+            else if (parse_state==SHELL_PARSE_WORD) 
             {
                 args[arg_index].len++;
             }
@@ -705,7 +366,7 @@ static int process_input(void *struct_args)
     }
 
     //Count number of arguments
-    for (int i=0;i<CMD_ARG_MAX;i++)
+    for (int i=0;i<SHELL_ARG_MAX;i++)
     {
         if (args[i].len>0)
             arg_count++;
@@ -716,7 +377,7 @@ static int process_input(void *struct_args)
     if (arg_count==0) return COMMAND_NONE;
 
     //Match to commands
-    int command_id=CMD_CMD_NONE;
+    int command_id=SHELL_CMD_NONE;
     for (int i=0;i<ARRAY_SIZE(commands);i++)
     {
         bool command_found=true;
@@ -742,7 +403,7 @@ static int process_input(void *struct_args)
             {
                 if (commands[i].arg_count!=arg_count-1)
                 {
-                    command_error(commands[i].name,CMD_ERROR_ARG_COUNT,console);
+                    command_error(commands[i].name,SHELL_ERROR_ARG_COUNT,console);
                     return COMMAND_NONE;
                 }
             }
@@ -753,42 +414,42 @@ static int process_input(void *struct_args)
 
     switch (command_id)
     {
-        case CMD_CMD_NONE:
+        case SHELL_CMD_NONE:
             {
-                char command_name[CMD_PATH_MAX];
+                char command_name[SHELL_PATH_MAX];
                 strncpy(command_name,input_buffer+args[0].start,args[0].len);
                 command_name[args[0].len]=0;
-                command_error(command_name,CMD_ERROR_NOT_FOUND,console);
+                command_error(command_name,SHELL_ERROR_NOT_FOUND,console);
                 break;
             }
-        case CMD_CMD_CAT:
+        case SHELL_CMD_CAT:
             {
                 //Command name in case of error message
                 const char *command_name="cat";
 
                 //Normalize path
-                char arg_path[CMD_PATH_MAX];
-                char new_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char new_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
-                int result=add_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,new_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
                 }
 
                 //Fetch info on path
-                if (path_type(new_path,&result)!=CMD_ERROR_NONE)
+                if (path_type(new_path,&result)!=SHELL_ERROR_NONE)
                 {
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS,console); 
                     break;
                 }
 
                 //Make sure target path is file
                 if (result!=FILE_TYPE_REG)
                 {
-                    command_error(command_name,CMD_ERROR_TARGET_FILE,console); 
+                    command_error(command_name,SHELL_ERROR_TARGET_FILE,console); 
                     break;
                 }
 
@@ -796,17 +457,17 @@ static int process_input(void *struct_args)
                 FILE *cat_file=fopen(new_path,"r");
                 if (cat_file==NULL)
                 {
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS,console); 
                     break;
                 }
 
                 //Read all bytes from file
-                char cat_buffer[CMD_CAT_SIZE];
+                char cat_buffer[SHELL_CAT_SIZE];
                 size_t byte_count;
                 do
                 {
                     //-1 to make room for terminating 0
-                    byte_count=fread(cat_buffer,1,CMD_CAT_SIZE-1,cat_file); 
+                    byte_count=fread(cat_buffer,1,SHELL_CAT_SIZE-1,cat_file); 
                     if (byte_count>0)
                     {
                         cat_buffer[byte_count]=0;
@@ -820,7 +481,7 @@ static int process_input(void *struct_args)
                 break;
             }
 
-        case CMD_CMD_CD:
+        case SHELL_CMD_CD:
             {
                 //Command name in case of error message
                 const char *command_name="cd";
@@ -828,67 +489,67 @@ static int process_input(void *struct_args)
                 if (arg_count==1)
                 {
                     //No arguments - "cd" is first argument. Change path to root.
-                    strcpy(console->path,"/");
+                    strcpy(shell_path,"/");
                 }
                 else if (arg_count==2)
                 {
                     //One argument - use argument as path
 
                     //Normalize path
-                    char arg_path[CMD_PATH_MAX];
-                    char new_path[CMD_PATH_MAX];
+                    char arg_path[SHELL_PATH_MAX];
+                    char new_path[SHELL_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                     arg_path[args[1].len]=0;
-                    int result=create_path(console->path,arg_path,new_path);
-                    if (result!=CMD_ERROR_NONE)
+                    int result=create_path(shell_path,arg_path,new_path);
+                    if (result!=SHELL_ERROR_NONE)
                     {
                         command_error(command_name,result,console);
                         break;
                     }
 
                     //Fetch info on path
-                    if (path_type(new_path,&result)!=CMD_ERROR_NONE)
+                    if (path_type(new_path,&result)!=SHELL_ERROR_NONE)
                     {
-                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                        command_error(command_name,SHELL_ERROR_CANT_ACCESS,console); 
                         break;
                     }
 
                     //Make sure target path is directory
                     if (result!=FILE_TYPE_DIR)
                     {
-                        command_error(command_name,CMD_ERROR_NOT_DIRECTORY,console); 
+                        command_error(command_name,SHELL_ERROR_NOT_DIRECTORY,console); 
                         break;
                     }
 
                     //Set current path to new path 
-                    strcpy(console->path,new_path);
+                    strcpy(shell_path,new_path);
                 }
                 else
                 {
                     //More than one argument not allowed
-                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
+                    command_error(command_name,SHELL_ERROR_ARG_COUNT,console);
                     break;
                 }
                 break;
             }
-        case CMD_CMD_CLEAR:
+        case SHELL_CMD_CLEAR:
             reset_console(console);
-            console_text_default(CMD_CONSOLE_STRING,console);
+            console_text_default(SHELL_CONSOLE_STRING,console);
             break;
-        case CMD_CMD_CP:
+        case SHELL_CMD_CP:
             {
                 //Command name in case of error message
                 const char *command_name="cp";
 
                 //Source argument
-                char arg_path[CMD_PATH_MAX];
-                char src_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char src_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,src_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,src_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -897,29 +558,29 @@ static int process_input(void *struct_args)
                 //Fetch info on source path
                 int source_type;
                 result=path_type(src_path,&source_type);
-                if (result!=CMD_ERROR_NONE)
+                if (result!=SHELL_ERROR_NONE)
                 {
                     //Note error in result from path_type may be different!
                     //Substitue error code so obvious problem is with source
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS_SOURCE,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS_SOURCE,console); 
                     break;
                 }
 
                 //Make sure source path is file
                 if (source_type!=FILE_TYPE_REG)
                 {
-                    command_error(command_name,CMD_ERROR_CP_SOURCE_NOT_FILE,console); 
+                    command_error(command_name,SHELL_ERROR_CP_SOURCE_NOT_FILE,console); 
                     break;
                 }
 
                 //Destination argument
-                char dest_path[CMD_PATH_MAX];
+                char dest_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[2].start,args[2].len+1);
                 arg_path[args[2].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                result=add_path(console->path,arg_path,dest_path);
-                if (result!=CMD_ERROR_NONE)
+                result=add_path(shell_path,arg_path,dest_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -928,17 +589,17 @@ static int process_input(void *struct_args)
                 //Fetch info on destination path
                 int dest_type;
                 result=path_type(dest_path,&dest_type);
-                if (result==CMD_ERROR_NONE)
+                if (result==SHELL_ERROR_NONE)
                 {
                     //Error - destination exists. Delete before copying.
-                    command_error(command_name,CMD_ERROR_CP_DEST_EXISTS,console); 
+                    command_error(command_name,SHELL_ERROR_CP_DEST_EXISTS,console); 
                     break;
                 }
 
                 //Make sure all characters in destination path are valid
                 if (path_valid(dest_path)==false)
                 {
-                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    command_error(command_name,SHELL_ERROR_PATH_INVALID,console); 
                     break;
                 }
 
@@ -946,7 +607,7 @@ static int process_input(void *struct_args)
                 FILE *read_ptr=fopen(src_path,"r");
                 if (read_ptr==NULL)
                 {
-                    command_error(command_name,CMD_ERROR_CP_SOURCE,console); 
+                    command_error(command_name,SHELL_ERROR_CP_SOURCE,console); 
                     break;
                 }
 
@@ -955,17 +616,17 @@ static int process_input(void *struct_args)
                 if (write_ptr==NULL)
                 {
                     fclose(read_ptr);
-                    command_error(command_name,CMD_ERROR_CP_DEST,console); 
+                    command_error(command_name,SHELL_ERROR_CP_DEST,console); 
                     break;
                 }
 
                 //Manually copy bytes from source to destination
-                uint8_t copy_buffer[CMD_CP_SIZE];
+                uint8_t copy_buffer[SHELL_CP_SIZE];
                 size_t bytes_read;
                 size_t bytes_written;
                 do
                 {
-                    bytes_read=fread(copy_buffer,1,CMD_CP_SIZE,read_ptr);
+                    bytes_read=fread(copy_buffer,1,SHELL_CP_SIZE,read_ptr);
                     bytes_written=fwrite(copy_buffer,1,bytes_read,write_ptr);
                     if (bytes_written!=bytes_read)
                     {
@@ -974,7 +635,7 @@ static int process_input(void *struct_args)
                         read_ptr=NULL;
                         fclose(write_ptr);
                         write_ptr=NULL;
-                        command_error(command_name,CMD_ERROR_CP_COPYING,console); 
+                        command_error(command_name,SHELL_ERROR_CP_COPYING,console); 
                         break;
                     }
                 }while(bytes_read>0);
@@ -985,9 +646,9 @@ static int process_input(void *struct_args)
 
                 break;
             }
-        case CMD_CMD_EXIT:
+        case SHELL_CMD_EXIT:
             return COMMAND_EXIT;
-        case CMD_CMD_HELP:
+        case SHELL_CMD_HELP:
             {
                 //Command name in case of error message
                 const char *command_name="help";
@@ -1000,7 +661,7 @@ static int process_input(void *struct_args)
                 else if (arg_count==2)
                 {
                     //One argument - show help for command
-                    char command_name[CMD_PATH_MAX];
+                    char command_name[SHELL_PATH_MAX];
                     strncpy(command_name,input_buffer+args[1].start,args[1].len+1);
                     command_name[args[1].len]=0;
                     show_help(command_name,console);
@@ -1008,38 +669,38 @@ static int process_input(void *struct_args)
                 else
                 {
                     //More than one argument not allowed
-                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
+                    command_error(command_name,SHELL_ERROR_ARG_COUNT,console);
                     break;
                 }
                 break;
             }
-        case CMD_CMD_LL:
-        case CMD_CMD_LS:
+        case SHELL_CMD_LL:
+        case SHELL_CMD_LS:
             {
                 //Command name in case of error message
                 const char *command_name;
-                if (command_id==CMD_CMD_LL) command_name="ll";
+                if (command_id==SHELL_CMD_LL) command_name="ll";
                 else command_name="ls";
 
                 color_t color_fg;
                 int file_type;
-                char new_path[CMD_PATH_MAX];
+                char new_path[SHELL_PATH_MAX];
                 if (arg_count==1)
                 {
                     //No arguments - first argument is "ll"/"ls" itself. Use path as directory.
-                    strcpy(new_path,console->path);
+                    strcpy(new_path,shell_path);
                     file_type=FILE_TYPE_DIR;
                 }
                 else if (arg_count==2)
                 {
                     //One argument - use argument as path
-                    char arg_path[CMD_PATH_MAX];
+                    char arg_path[SHELL_PATH_MAX];
                     strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                     arg_path[args[1].len]=0;
 
                     //Add argument to current path if partial or use argument as path if full path
-                    int result=add_path(console->path,arg_path,new_path);
-                    if (result!=CMD_ERROR_NONE)
+                    int result=add_path(shell_path,arg_path,new_path);
+                    if (result!=SHELL_ERROR_NONE)
                     {
                         command_error(command_name,result,console);
                         break;
@@ -1047,7 +708,7 @@ static int process_input(void *struct_args)
 
                     //Fetch info on path
                     result=path_type(new_path,&file_type);
-                    if (result!=CMD_ERROR_NONE)
+                    if (result!=SHELL_ERROR_NONE)
                     {
                         command_error(command_name,result,console); 
                         break;
@@ -1056,7 +717,7 @@ static int process_input(void *struct_args)
                 else
                 {
                     //More than 1 argument not allowed
-                    command_error(command_name,CMD_ERROR_ARG_COUNT,console);
+                    command_error(command_name,SHELL_ERROR_ARG_COUNT,console);
                     break;
                 }
 
@@ -1066,7 +727,7 @@ static int process_input(void *struct_args)
                     DIR *directory=opendir(new_path);
                     if (directory==NULL)
                     {
-                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                        command_error(command_name,SHELL_ERROR_CANT_ACCESS,console);
                         break;
                     }
 
@@ -1085,13 +746,13 @@ static int process_input(void *struct_args)
                             else                            file_type=FILE_TYPE_UNKNOWN;
                             color_fg=file_color(dir->d_name,file_type);
 
-                            if (command_id==CMD_CMD_LS)
+                            if (command_id==SHELL_CMD_LS)
                             {
                                 //ls - print filename and prevent name from wrapping at screen edge
                                 if (file_printed)
                                 {
                                     //Only print spacing before filename if not first filename
-                                    if (print_width+strlen(CMD_LS_SEPARATOR)+strlen(dir->d_name)>=CMD_LS_WIDTH)
+                                    if (print_width+strlen(SHELL_LS_SEPARATOR)+strlen(dir->d_name)>=SHELL_LS_WIDTH)
                                     {
                                         //If text would wrap, print on new line instead
                                         console_text_default("\n",console);
@@ -1100,17 +761,17 @@ static int process_input(void *struct_args)
                                     else
                                     {
                                         //Print separation between files rather than newline
-                                        console_text_default(CMD_LS_SEPARATOR,console);
-                                        print_width+=strlen(CMD_LS_SEPARATOR);
+                                        console_text_default(SHELL_LS_SEPARATOR,console);
+                                        print_width+=strlen(SHELL_LS_SEPARATOR);
                                     }
                                 }
                                 
                                 //Print directory or file name
-                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
+                                console_text(dir->d_name,color_fg,SHELL_COL_BG,console);
                                 print_width+=strlen(dir->d_name);
                                 file_printed=true;
                             }
-                            else if (command_id==CMD_CMD_LL)
+                            else if (command_id==SHELL_CMD_LL)
                             {
                                 //ll - print one file/directory and its size per line
 
@@ -1126,11 +787,11 @@ static int process_input(void *struct_args)
                                     //File or unknown type - print size 
 
                                     //Find full path of file
-                                    char file_path[CMD_PATH_MAX];
+                                    char file_path[SHELL_PATH_MAX];
                                     int result=add_path(new_path,dir->d_name,file_path);
-                                    if (result!=CMD_ERROR_NONE)
+                                    if (result!=SHELL_ERROR_NONE)
                                     {
-                                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                        command_error(command_name,SHELL_ERROR_CANT_ACCESS,console);
                                         break;
                                     }
 
@@ -1138,7 +799,7 @@ static int process_input(void *struct_args)
                                     struct stat stat_buffer;
                                     if (stat(file_path,&stat_buffer))
                                     {
-                                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                                        command_error(command_name,SHELL_ERROR_CANT_ACCESS,console);
                                         break;
                                     }
         
@@ -1154,22 +815,22 @@ static int process_input(void *struct_args)
                                 }
 
                                 //Blank space for alignment if file size doesn't take full space or no file size if directory
-                                if (num_len<CMD_LL_WIDTH)
+                                if (num_len<SHELL_LL_WIDTH)
                                 {
-                                    for (int i=0;i<(int)(CMD_LL_WIDTH-num_len);i++)
+                                    for (int i=0;i<(int)(SHELL_LL_WIDTH-num_len);i++)
                                         console_text_default(" ",console);
                                 }
 
                                 //Print separator
-                                console_text_default(CMD_LL_SEPARATOR,console);
+                                console_text_default(SHELL_LL_SEPARATOR,console);
 
                                 //Print directory or file name
-                                console_text(dir->d_name,color_fg,CMD_COL_BG,console);
+                                console_text(dir->d_name,color_fg,SHELL_COL_BG,console);
                                 console_text_default("\n",console);
                             }
                         }
                     }
-                    if (command_id==CMD_CMD_LS)
+                    if (command_id==SHELL_CMD_LS)
                     {
                         //Print newline after done with ls
                         //(not needed for ll which prints newline after every file/directory)
@@ -1190,14 +851,14 @@ static int process_input(void *struct_args)
                     if (basename==NULL)
                     {
                         //Forward slash not found in path - should never happen but just in case
-                        command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                        command_error(command_name,SHELL_ERROR_CANT_ACCESS,console);
                         break;
                     }
 
                     //Skip preceding /
                     basename++;
                     
-                    if (command_id==CMD_CMD_LL)
+                    if (command_id==SHELL_CMD_LL)
                     {
                         //ll - print size of file
 
@@ -1205,7 +866,7 @@ static int process_input(void *struct_args)
                         struct stat stat_buffer;
                         if (stat(new_path,&stat_buffer))
                         {
-                            command_error(command_name,CMD_ERROR_CANT_ACCESS,console);
+                            command_error(command_name,SHELL_ERROR_CANT_ACCESS,console);
                             break;
                         }
 
@@ -1218,37 +879,37 @@ static int process_input(void *struct_args)
 
                         //Blank space for alignment if file size doesn't take full space
                         int num_len=strlen(human_buffer);
-                        if (num_len<CMD_LL_WIDTH)
+                        if (num_len<SHELL_LL_WIDTH)
                         {
-                            for (int i=0;i<(int)(CMD_LL_WIDTH-num_len);i++)
+                            for (int i=0;i<(int)(SHELL_LL_WIDTH-num_len);i++)
                                 console_text_default(" ",console);
                         }
 
                         //Print separator
-                        console_text_default(CMD_LL_SEPARATOR,console);
+                        console_text_default(SHELL_LL_SEPARATOR,console);
                     }
 
                     //Print name depending on type - file_type set above after stat
                     color_fg=file_color(basename,file_type);
-                    console_text(basename,color_fg,CMD_COL_BG,console);
+                    console_text(basename,color_fg,SHELL_COL_BG,console);
                     console_text_default("\n",console);
                 }
                 break;
             }
-        case CMD_CMD_MKDIR:
+        case SHELL_CMD_MKDIR:
             {
                 //Command name in case of error message
                 const char *command_name="mkdir";
 
                 //Target argument
-                char arg_path[CMD_PATH_MAX];
-                char new_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char new_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,new_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1257,44 +918,44 @@ static int process_input(void *struct_args)
                 //Fetch info on target path
                 int target_type;
                 result=path_type(new_path,&target_type);
-                if (result==CMD_ERROR_NONE)
+                if (result==SHELL_ERROR_NONE)
                 {
                     //Error - target path already exists
                     if (target_type==FILE_TYPE_REG)
-                        command_error(command_name,CMD_ERROR_MKDIR_FILE,console); 
-                    else command_error(command_name,CMD_ERROR_MKDIR_DIR,console); 
+                        command_error(command_name,SHELL_ERROR_MKDIR_FILE,console); 
+                    else command_error(command_name,SHELL_ERROR_MKDIR_DIR,console); 
                     break;
                 }
 
                 //Make sure all characters in path are valid
                 if (path_valid(new_path)==false)
                 {
-                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    command_error(command_name,SHELL_ERROR_PATH_INVALID,console); 
                     break;
                 }
 
                 //Make directory
-                if (mkdir(new_path,CMD_MKDIR_FLAGS)!=0)
+                if (mkdir(new_path,SHELL_MKDIR_FLAGS)!=0)
                 {
-                    command_error(command_name,CMD_ERROR_MKDIR,console);
+                    command_error(command_name,SHELL_ERROR_MKDIR,console);
                     break;
                 }
                 break;
             }
-        case CMD_CMD_MV:
+        case SHELL_CMD_MV:
             {
                 //Command name in case of error message
                 const char *command_name="mv";
 
                 //Source argument
-                char arg_path[CMD_PATH_MAX];
-                char src_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char src_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,src_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,src_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1303,22 +964,22 @@ static int process_input(void *struct_args)
                 //Fetch info on source path
                 int source_type;
                 result=path_type(src_path,&source_type);
-                if (result!=CMD_ERROR_NONE)
+                if (result!=SHELL_ERROR_NONE)
                 {
                     //Note error in result from path_type may be different!
                     //Substitue error code so obvious problem is with source
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS_SOURCE,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS_SOURCE,console); 
                     break;
                 }
 
                 //Destination argument
-                char dest_path[CMD_PATH_MAX];
+                char dest_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[2].start,args[2].len+1);
                 arg_path[args[2].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                result=add_path(console->path,arg_path,dest_path);
-                if (result!=CMD_ERROR_NONE)
+                result=add_path(shell_path,arg_path,dest_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1327,43 +988,43 @@ static int process_input(void *struct_args)
                 //Fetch info on destination path
                 int dest_type;
                 result=path_type(dest_path,&dest_type);
-                if (result==CMD_ERROR_NONE)
+                if (result==SHELL_ERROR_NONE)
                 {
                     //Error - destination exists. Delete before moving.
-                    command_error(command_name,CMD_ERROR_MV_DEST_EXISTS,console); 
+                    command_error(command_name,SHELL_ERROR_MV_DEST_EXISTS,console); 
                     break;
                 }
 
                 //Make sure all characters in destination path are valid
                 if (path_valid(dest_path)==false)
                 {
-                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    command_error(command_name,SHELL_ERROR_PATH_INVALID,console); 
                     break;
                 }
 
                 //Move file
                 if (rename(src_path,dest_path)!=0)
                 {
-                    command_error(command_name,CMD_ERROR_MV,console); 
+                    command_error(command_name,SHELL_ERROR_MV,console); 
                     break;
                 }
 
                 break;
             }
-        case CMD_CMD_RM:
+        case SHELL_CMD_RM:
             {
                 //Command name in case of error message
                 const char *command_name="rm";
 
                 //Source argument
-                char arg_path[CMD_PATH_MAX];
-                char new_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char new_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,new_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1372,7 +1033,7 @@ static int process_input(void *struct_args)
                 //Fetch info on target path
                 int target_type;
                 result=path_type(new_path,&target_type);
-                if (result!=CMD_ERROR_NONE)
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console); 
                     break;
@@ -1381,39 +1042,39 @@ static int process_input(void *struct_args)
                 //Make sure target path is file
                 if (target_type!=FILE_TYPE_REG)
                 {
-                    command_error(command_name,CMD_ERROR_TARGET_FILE,console); 
+                    command_error(command_name,SHELL_ERROR_TARGET_FILE,console); 
                     break;
                 }
 
                 //Check if file is read-only based on file extension
                 if (file_special(new_path)==FILE_SPECIAL_RO)
                 {
-                    command_error(command_name,CMD_ERROR_READ_ONLY,console); 
+                    command_error(command_name,SHELL_ERROR_READ_ONLY,console); 
                     break;
                 }
 
                 //Delete file
                 if (remove(new_path)!=0)
                 {
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS,console); 
                     break;
                 }
                 break;
             }
-        case CMD_CMD_RMDIR:
+        case SHELL_CMD_RMDIR:
             {
                 //Command name in case of error message
                 const char *command_name="rmdir";
 
                 //Source argument
-                char arg_path[CMD_PATH_MAX];
-                char new_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char new_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,new_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,new_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1422,7 +1083,7 @@ static int process_input(void *struct_args)
                 //Fetch info on target path
                 int target_type;
                 result=path_type(new_path,&target_type);
-                if (result!=CMD_ERROR_NONE)
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console); 
                     break;
@@ -1431,32 +1092,32 @@ static int process_input(void *struct_args)
                 //Make sure target path is directory
                 if (target_type!=FILE_TYPE_DIR)
                 {
-                    command_error(command_name,CMD_ERROR_TARGET_DIR,console); 
+                    command_error(command_name,SHELL_ERROR_TARGET_DIR,console); 
                     break;
                 }
 
                 //Delete directory
                 if (rmdir(new_path)!=0)
                 {
-                    command_error(command_name,CMD_ERROR_CANT_ACCESS,console); 
+                    command_error(command_name,SHELL_ERROR_CANT_ACCESS,console); 
                     break;
                 }
                 break;
             }
-        case CMD_CMD_TOUCH:
+        case SHELL_CMD_TOUCH:
             {
                 //Command name in case of error message
                 const char *command_name="touch";
 
                 //Target argument
-                char arg_path[CMD_PATH_MAX];
-                char target_path[CMD_PATH_MAX];
+                char arg_path[SHELL_PATH_MAX];
+                char target_path[SHELL_PATH_MAX];
                 strncpy(arg_path,input_buffer+args[1].start,args[1].len+1);
                 arg_path[args[1].len]=0;
 
                 //Add argument to current path if partial or use argument as path if full path
-                int result=add_path(console->path,arg_path,target_path);
-                if (result!=CMD_ERROR_NONE)
+                int result=add_path(shell_path,arg_path,target_path);
+                if (result!=SHELL_ERROR_NONE)
                 {
                     command_error(command_name,result,console);
                     break;
@@ -1465,7 +1126,7 @@ static int process_input(void *struct_args)
                 //Fetch info on target path
                 int target_type;
                 result=path_type(target_path,&target_type);
-                if (result==CMD_ERROR_NONE)
+                if (result==SHELL_ERROR_NONE)
                 {
                     //Target exists - exit silently without error
                     break;
@@ -1474,7 +1135,7 @@ static int process_input(void *struct_args)
                 //Make sure all characters in target path are valid
                 if (path_valid(target_path)==false)
                 {
-                    command_error(command_name,CMD_ERROR_PATH_INVALID,console); 
+                    command_error(command_name,SHELL_ERROR_PATH_INVALID,console); 
                     break;
                 }
 
@@ -1482,7 +1143,7 @@ static int process_input(void *struct_args)
                 FILE *write_ptr=fopen(target_path,"w");
                 if (write_ptr==NULL)
                 {
-                    command_error(command_name,CMD_ERROR_TOUCH,console); 
+                    command_error(command_name,SHELL_ERROR_TOUCH,console); 
                     break;
                 }
                 fclose(write_ptr);
@@ -1513,26 +1174,46 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
     //Heap memory
     select_heap(window.tab_index,drawn_split);
     uint8_t *heap_ptr=get_split_heap();
+
+    //Pointers to data on heap
+    struct ShellInfo *shell;
     struct ConsoleInfo *console;
 
     if (command_ID==COMMAND_START) 
     {
-        //Start - allocate memory for and initialize console
-        console=(struct ConsoleInfo *)add_object(sizeof(struct ConsoleInfo),heap_ptr);
+        //Allocate memory for and initialize console
+        shell=(struct ShellInfo *)add_object(sizeof(struct ShellInfo),heap_ptr);
+        
 
         //TODO: check if allocation succeeded
 
+
         //Init console
+        console=&shell->console;
+
+        init_console(
+            console,
+            shell->input_text,
+            shell->input_copy_text,
+            SHELL_INPUT_MAX,
+            shell->history,
+            shell->history_texts,
+            SHELL_HIST_COUNT,
+            SHELL_COL_FG,
+            SHELL_COL_BG);
+        reset_console_pointers(console);
         reset_console(console);
 
+        //TODO: move to init_console?
+
         //Init input
-        console_text_default(CMD_CONSOLE_STRING,console);
+        console_text_default(SHELL_CONSOLE_STRING,console);
         console->reset_input=true;
         console->modifier=MODIFIER_ALPHA_LOWER_LOCK;
         console->input_copied=false;
 
         //Init history
-        for (int i=0;i<CMD_HIST_COUNT;i++)
+        for (int i=0;i<SHELL_HIST_COUNT;i++)
         {
             console->history[i].text[0].character=0;
             console->history[i].len=0;
@@ -1541,44 +1222,46 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         console->history_count=0;
 
         //Init file system path
-        strcpy(console->path,"/");
+        strcpy(shell->path,"/");
     }
     else
     {
         //Resume or Redraw - reuse existing memory for console
-        console=(struct ConsoleInfo *)object_address(CMD_ID_CONSOLE,heap_ptr);
+        shell=(struct ShellInfo *)object_address(SHELL_ID_CONSOLE,heap_ptr);
+        console=&shell->console;
+        reset_console_pointers(console);
     }
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
-    draw_rect(pos.x,pos.y,width,height,CMD_COL_BG,CMD_COL_BG);
+    draw_rect(pos.x,pos.y,width,height,SHELL_COL_BG,SHELL_COL_BG);
 
     //Set coordinates, width, and height based on window state
     int console_width,console_x;
     if (window.split_state==WINDOW_HSPLIT)
     {
         //Split horizontally - half width
-        console_x=pos.x+CMD_HALF_X;
-        console_width=CMD_HALF_WIDTH;
+        console_x=pos.x+CONS_HALF_X;
+        console_width=CONS_HALF_WIDTH;
     }
     else
     {
         //Whole screen or split vertically - full width
-        console_x=pos.x+CMD_WHOLE_X;
-        console_width=CMD_WHOLE_WIDTH;
+        console_x=pos.x+CONS_WHOLE_X;
+        console_width=CONS_WHOLE_WIDTH;
     }
     
     int console_height,console_y;
     if (window.split_state==WINDOW_VSPLIT)
     {
         //Split vertically - half height
-        console_y=pos.y+CMD_HALF_Y;
-        console_height=CMD_HALF_HEIGHT;
+        console_y=pos.y+CONS_HALF_Y;
+        console_height=CONS_HALF_HEIGHT;
     }
     else
     {
         //Whole screen or split horizontally - full height
-        console_y=pos.y+CMD_WHOLE_Y;
-        console_height=CMD_WHOLE_HEIGHT;
+        console_y=pos.y+CONS_WHOLE_Y;
+        console_height=CONS_WHOLE_HEIGHT;
     }
 
     //Main loop
@@ -1594,10 +1277,10 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
             console->input.start=0;
             console->input.cursor=0;
             console->input.len=0;
-            add_input_text("CG50",CMD_COL_HOST,CMD_COL_BG,true,console);
-            add_input_char(':',CMD_COL_FG,CMD_COL_BG,true,console);
-            add_input_text(console->path,CMD_COL_DIR,CMD_COL_BG,true,console);
-            add_input_char(' ',CMD_COL_FG,CMD_COL_BG,true,console);
+            add_input_text("CG50",SHELL_COL_HOST,SHELL_COL_BG,true,console);
+            add_input_char(':',SHELL_COL_FG,SHELL_COL_BG,true,console);
+            add_input_text(shell->path,SHELL_COL_DIR,SHELL_COL_BG,true,console);
+            add_input_char(' ',SHELL_COL_FG,SHELL_COL_BG,true,console);
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -1634,7 +1317,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         if (character!=0)
         {
             //Printable character - add to input line
-            add_input_char(character,CMD_COL_FG,CMD_COL_BG,false,console);
+            add_input_char(character,SHELL_COL_FG,SHELL_COL_BG,false,console);
         }
         else
         {
@@ -1655,13 +1338,13 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
-                    if (console->input.len>=CMD_INPUT_MAX-(int)strlen(cancel_text))
+                    if (console->input.len>=SHELL_INPUT_MAX-(int)strlen(cancel_text))
                     {
                         //Not enough room to append ^C so drop characters from end of input to make room
-                        console->input.len=CMD_INPUT_MAX-strlen(cancel_text)-1;
-                        console->input.cursor=CMD_INPUT_MAX-strlen(cancel_text)-1;
+                        console->input.len=SHELL_INPUT_MAX-strlen(cancel_text)-1;
+                        console->input.cursor=SHELL_INPUT_MAX-strlen(cancel_text)-1;
                     }
-                    add_input_text(cancel_text,CMD_COL_FG,CMD_COL_BG,false,console);
+                    add_input_text(cancel_text,SHELL_COL_FG,SHELL_COL_BG,false,console);
 
                     //Fallthrough
                 case VKEY_EXE:
@@ -1680,11 +1363,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                         add_history(console);
                         
                         //Process input
-                        char input_buffer[CMD_INPUT_MAX];
-                        copy_console_text(&console->input,input_buffer,console->input.start);
+                        char input_buffer[SHELL_INPUT_MAX];
+                        copy_console_text(&console->input,input_buffer,SHELL_INPUT_MAX,console->input.start);
                         //gint_world_switch here necessary since process_input accesses file system
                         //so need to pass arguments as void pointer to structure
-                        struct ProcessInput temp_args={input_buffer,console};
+                        struct ProcessInput temp_args={input_buffer,console,shell->path};
                         int return_code=gint_world_switch(GINT_CALL(process_input,(void *)(&temp_args)));
                         if (return_code!=COMMAND_NONE)
                         {
@@ -1700,7 +1383,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                         if (console->input_copied==false)
                         {
                             //First time up pressed - save current input
-                            console->input_copy=console->input;
+                            
+                            //TODO: remove after working
+                            //console->input_copy=console->input;
+                            input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
+
                             console->input_copied=true;
                             console->history_read_count=console->history_count;
                         }
@@ -1713,7 +1400,10 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                                 //Current line edited is copy of input when up was pressed meaning input
                                 //scrolled up then back to original input. Save that input including changes
                                 //in case scroll back to that.
-                                console->input_copy=console->input;
+
+                                //TODO: remove after working
+                                //console->input_copy=console->input;
+                                input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
                             }
 
                             //Scroll up one line and copy line from history to input
@@ -1721,8 +1411,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             int read_index=console->history_index;
                             read_index-=console->history_count;
                             read_index+=console->history_read_count;
-                            if (read_index<0) read_index+=CMD_HIST_COUNT;
-                            console->input=console->history[read_index];
+                            if (read_index<0) read_index+=SHELL_HIST_COUNT;
+
+                            //TODO: remove after working
+                            //console->input=console->history[read_index];
+                            input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
                         }
                     }
                     break;
@@ -1744,7 +1437,10 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             //scrolling up. This way, scrolling up, scrolling down, modifying 
                             //original input then scrolling up then back down to original input
                             //doesn't lose changes.
-                            console->input=console->input_copy;    
+
+                            //TODO: remove after working
+                            //console->input=console->input_copy;    
+                            input_deep_copy(&console->input,&console->input_copy,SHELL_INPUT_MAX);
                         }
                         else
                         {
@@ -1752,8 +1448,11 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                             int read_index=console->history_index;
                             read_index-=console->history_count;
                             read_index+=console->history_read_count;
-                            if (read_index<0) read_index+=CMD_HIST_COUNT;
-                            console->input=console->history[read_index];
+                            if (read_index<0) read_index+=SHELL_HIST_COUNT;
+
+                            //TODO: remove after working
+                            //console->input=console->history[read_index];
+                            input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
                         }
                     }
                     break;
