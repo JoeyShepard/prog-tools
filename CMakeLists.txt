@@ -12,7 +12,6 @@ find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
   src/cg50-sdl2.c
-  src/command.c
   src/console.c
   src/debug.c
   src/dummy.c
@@ -25,6 +24,7 @@ set(SOURCES
   src/mem.c
   src/memory_manager.c
   src/menu.c
+  src/shell.c
   src/text.c
   # ...
 )

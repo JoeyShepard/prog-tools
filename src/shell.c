@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "command.h"
 #include "compatibility.h"
 #include "error.h"
 #include "getkey.h"
@@ -13,14 +12,10 @@
 #include "text.h"
 #include "manager.h"
 #include "mem.h"
+#include "shell.h"
 #include "structs.h"
 
 //Functions
-static void console_text_default(const char *text, struct ConsoleInfo *console)
-{
-    console_text(text,SHELL_COL_FG,SHELL_COL_BG,console);
-}
-
 static int add_path(const char *path, const char *addition, char *result)
 {
     if (addition[0]=='/')
@@ -1151,7 +1146,7 @@ static int process_input(void *struct_args)
     return COMMAND_NONE;
 }
 
-int command_line(int command_ID, struct WindowInfo *windows, int selected_window)
+int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     struct WindowInfo window=windows[selected_window];
     int width=window_width(window);
@@ -1192,17 +1187,21 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
 
         //Init console
         console=&shell->console;
-
         init_console(
+            //Console
             console,
+            SHELL_COL_FG,
+            SHELL_COL_BG,
+            //Input
             shell->input_text,
             shell->input_copy_text,
             SHELL_INPUT_MAX,
+            SHELL_COL_FG,
+            SHELL_COL_BG,
+            //History
             shell->history,
             shell->history_texts,
-            SHELL_HIST_COUNT,
-            SHELL_COL_FG,
-            SHELL_COL_BG);
+            SHELL_HIST_COUNT);
         reset_console_pointers(console);
         reset_console(console);
 
@@ -1213,13 +1212,7 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         console->input_copied=false;
 
         //Init history
-        for (int i=0;i<SHELL_HIST_COUNT;i++)
-        {
-            console->history[i].text[0].character=0;
-            console->history[i].len=0;
-        }
-        console->history_index=0;
-        console->history_count=0;
+        init_history(console);
 
         //Init file system path
         strcpy(shell->path,"/");
@@ -1235,39 +1228,12 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,SHELL_COL_BG,SHELL_COL_BG);
 
-    //Set coordinates, width, and height based on window state
-    int console_width,console_x;
-    if (window.split_state==WINDOW_HSPLIT)
-    {
-        //Split horizontally - half width
-        console_x=pos.x+CONS_HALF_X;
-        console_width=CONS_HALF_WIDTH;
-    }
-    else
-    {
-        //Whole screen or split vertically - full width
-        console_x=pos.x+CONS_WHOLE_X;
-        console_width=CONS_WHOLE_WIDTH;
-    }
-    
-    int console_height,console_y;
-    if (window.split_state==WINDOW_VSPLIT)
-    {
-        //Split vertically - half height
-        console_y=pos.y+CONS_HALF_Y;
-        console_height=CONS_HALF_HEIGHT;
-    }
-    else
-    {
-        //Whole screen or split horizontally - full height
-        console_y=pos.y+CONS_WHOLE_Y;
-        console_height=CONS_WHOLE_HEIGHT;
-    }
+    //Set position based on split location
+    init_position(console,pos,window.split_state);
 
     //Main loop
     bool redraw_screen=true;
     bool redraw_modifier=true;
-    bool redraw_input=true;
     while (1)
     {
         //Set text for input line
@@ -1291,17 +1257,14 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
         if (redraw_screen)
         {
             //Always redraw screen whether START, RESUME, or REDRAW
-            draw_console(console,console_x,console_y,console_width,console_height);
+            draw_console(console);
                 
             //Return if Redraw only
             if (command_ID==COMMAND_REDRAW) return COMMAND_DONE;
         }
 
-        //TODO
-        //if (redraw_input)
-
         //Copy updates to screen if modifier keys or text have changed
-        if ((redraw_screen)||(redraw_modifier)||(redraw_input)) dupdate();
+        if ((redraw_screen)||(redraw_modifier)) dupdate();
         redraw_screen=true;
         
         //Get key
@@ -1377,100 +1340,16 @@ int command_line(int command_ID, struct WindowInfo *windows, int selected_window
                     }
                     break;
                 case VKEY_UP:
-                    if (console->history_count>0)
-                    {
-                        //Scroll up in history if there are history lines
-                        if (console->input_copied==false)
-                        {
-                            //First time up pressed - save current input
-                            input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
-                            console->input_copied=true;
-                            console->history_read_count=console->history_count;
-                        }
-
-                        if (console->history_read_count>0)
-                        {
-                            //Items left to scroll back to
-                            if (console->history_count==console->history_read_count)
-                            {
-                                //Current line edited is copy of input when up was pressed meaning input
-                                //scrolled up then back to original input. Save that input including changes
-                                //in case scroll back to that.
-                                input_deep_copy(&console->input_copy,&console->input,SHELL_INPUT_MAX);
-                            }
-
-                            //Scroll up one line and copy line from history to input
-                            console->history_read_count--;
-                            int read_index=console->history_index;
-                            read_index-=console->history_count;
-                            read_index+=console->history_read_count;
-                            if (read_index<0) read_index+=SHELL_HIST_COUNT;
-                            input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
-                        }
-                    }
-                    break;
                 case VKEY_DOWN:
-                    if (console->input_copied)
-                    {
-                        //Only scroll down in history if previously scrolled up
-                        if (console->history_read_count==console->history_count)
-                        {
-                            //Already scrolled all the way down - nothing to do
-                            break;
-                        }
-                        
-                        //Advance to next history line
-                        console->history_read_count++;
-                        if (console->history_read_count==console->history_count)
-                        {
-                            //Advanced past last line so use copy of original input from before
-                            //scrolling up. This way, scrolling up, scrolling down, modifying 
-                            //original input then scrolling up then back down to original input
-                            //doesn't lose changes.
-                            input_deep_copy(&console->input,&console->input_copy,SHELL_INPUT_MAX);
-                        }
-                        else
-                        {
-                            //Copy line from history to input
-                            int read_index=console->history_index;
-                            read_index-=console->history_count;
-                            read_index+=console->history_read_count;
-                            if (read_index<0) read_index+=SHELL_HIST_COUNT;
-                            input_deep_copy(&console->input,console->history+read_index,SHELL_INPUT_MAX);
-                        }
-                    }
-                    break;
                 case VKEY_LEFT:
-                    //Move cursor left
-                    if (console->input.cursor>console->input.start)
-                        console->input.cursor--; 
-                    break;
                 case VKEY_RIGHT:
-                    //Move cursor right
-                    if (console->input.cursor<console->input.len)
-                        console->input.cursor++;
-                    break;
                 case VKEY_SHIFT_LEFT:
-                    //Move cursor to beginning of input
-                    console->input.cursor=console->input.start;
-                    break;
                 case VKEY_SHIFT_RIGHT:
-                    //Move cursor to end of input
-                    console->input.cursor=console_strlen(console->input.text);
-                    break;
                 case VKEY_UNDO:
                     //DEL with alpha active - treat as DEL so don't need to remove alpha to delete
                     //Fallthrough!
                 case VKEY_DEL:
-                    if (console->input.cursor>console->input.start)
-                    {
-                        console->input.cursor--;
-                        for (int i=console->input.cursor;i<console->input.len;i++)
-                        {
-                            console->input.text[i]=console->input.text[i+1];
-                        }
-                        console->input.len--;
-                    }
+                    history_key(console,key);
                     break;
                 default:
                     //Check for sys_keys like MENU, OFF, etc

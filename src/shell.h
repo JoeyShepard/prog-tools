@@ -1,5 +1,5 @@
-#ifndef __GUARD_PROG_TOOLS_COMMAND
-    #define __GUARD_PROG_TOOLS_COMMAND
+#ifndef __GUARD_PROG_TOOLS_SHELL
+    #define __GUARD_PROG_TOOLS_SHELL
 
     #include <stdint.h>
 
@@ -139,6 +139,6 @@
 
     //Functions
     //=========
-    int command_line(int command_ID, struct WindowInfo *windows, int selected_window);
+    int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window);
 
 #endif

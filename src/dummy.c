@@ -17,8 +17,17 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     int width=window_width(window);
     int height=window_height(window);
     struct Point pos;
-    if (command_ID==COMMAND_REDRAW) pos=window_pos(window,false);
-    else pos=window_pos(window,true);
+    int drawn_split;
+    if (command_ID==COMMAND_REDRAW) 
+    {
+        drawn_split=window.selected_split^1;
+        pos=window_pos(window,false);
+    }
+    else
+    {
+        drawn_split=window.selected_split;
+        pos=window_pos(window,true);
+    }
 
     //Always redraw whether START, RESUME, or REDRAW
     draw_rect(pos.x,pos.y,width,height,COL_BLACK,COL_BLACK);
@@ -46,7 +55,7 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     bool redraw=true;
 
     //Heap memory
-    select_heap(window.tab_index,window.selected_split);
+    select_heap(window.tab_index,drawn_split);
     uint8_t *heap_ptr=get_split_heap();
 
 
@@ -82,11 +91,6 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
 int text_editor(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     return placeholder(command_ID, windows, selected_window, "Text editor");
-}
-
-int forth(int command_ID, struct WindowInfo *windows, int selected_window)
-{
-    return placeholder(command_ID, windows, selected_window, "Forth");
 }
 
 int python(int command_ID, struct WindowInfo *windows, int selected_window)

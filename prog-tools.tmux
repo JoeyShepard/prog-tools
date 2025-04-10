@@ -28,17 +28,17 @@ window vim src/mem.h
 rename mem
 vsplit vim src/mem.c
 
-window vim src/manager.h
-rename win
-vsplit vim src/manager.c
-
-window vim src/command.h
-rename cmd
-vsplit vim src/command.c
-
 window vim src/console.h
-rename console
+rename cons
 vsplit vim src/console.c
+
+window vim src/shell.h
+rename shell
+vsplit vim src/shell.c
+
+window vim src/forth.h
+rename forth
+vsplit vim src/forth.c
 
 
 

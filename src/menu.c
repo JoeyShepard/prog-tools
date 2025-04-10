@@ -1,16 +1,16 @@
-//TODO: copied from manager.c - don't need all of these
 #include <string.h>
 
-#include "command.h"
 #include "compatibility.h"
 #include "dummy.h"
 #include "error.h"
+#include "forth.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
 #include "mem.h"
 #include "memory_manager.h"
 #include "menu.h"
+#include "shell.h"
 #include "structs.h"
 #include "text.h"
     
@@ -52,7 +52,7 @@ const char *program_titles[]=
 
 int (*menu_functions[])(int command_ID, struct WindowInfo *windows, int selected_window)=
 {
-    &command_line,
+    &calc_shell,
     &text_editor,
     &forth,
     &python,

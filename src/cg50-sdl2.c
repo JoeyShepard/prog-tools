@@ -58,6 +58,9 @@
 
     char *wrapper_normalize_path(const char *path,int local_path_max)
     {
+        //Silence unused variable warning
+        local_path_max=local_path_max;
+
         return fs_path_normalize(path);
     }
 #else

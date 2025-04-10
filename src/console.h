@@ -49,6 +49,12 @@
         int text_len;
         uint32_t overflow_count;
         int buffer_index;
+        color_t text_col_fg;
+        color_t text_col_bg;
+        int x;
+        int y;
+        int width;
+        int height;
 
         //Input line
         struct ConsoleInput input;
@@ -56,6 +62,7 @@
         bool reset_input;
         int modifier;
         bool input_copied;
+        int input_text_max;
         color_t input_col_fg;
         color_t input_col_bg;
 
@@ -65,6 +72,7 @@
         int history_index;
         int history_count;
         int history_read_count;
+        int history_array_size;
 
         //Offset in memory from beginning of struct where pointers above point to.
         //Used to reset pointers when address of struct shifts since offset
@@ -74,25 +82,24 @@
         ptrdiff_t offset_input_copy_text;
         ptrdiff_t offset_history;
         ptrdiff_t offset_history_texts;
-
-        //Sizes set at initialization
-        int input_text_max;
-        int history_array_size;
-
     };
 
     //Functions
     //=========
-    void init_console(struct ConsoleInfo *console,struct ConsoleChar *input_text,struct ConsoleChar *input_copy_text,int input_text_max,struct ConsoleInput *history,struct ConsoleChar *history_texts,int history_array_size,color_t input_fg,color_t input_bg);
+    void init_console(struct ConsoleInfo *console,color_t text_col_fg,color_t text_col_bg,struct ConsoleChar *input_text,struct ConsoleChar *input_copy_text,int input_text_max,color_t input_fg,color_t input_bg,struct ConsoleInput *history,struct ConsoleChar *history_texts,int history_array_size);
     void reset_console_pointers(struct ConsoleInfo *console);
+    void init_history(struct ConsoleInfo *console);
+    void init_position(struct ConsoleInfo *console,struct Point pos,int split_state);
     void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console);
     void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console);
+    void console_text_default(const char *text, struct ConsoleInfo *console);
     void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
     void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
     void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_width,int input_height);
-    void draw_console(struct ConsoleInfo *console,int console_x,int console_y,int console_width,int console_height);
+    void draw_console(struct ConsoleInfo *console);
     void reset_console(struct ConsoleInfo *console);
     void add_history(struct ConsoleInfo *console);
+    void history_key(struct ConsoleInfo *console,int key);
     void copy_console_text(struct ConsoleInput *input,char *input_buffer,int input_size,int offset);
     int console_strlen(struct ConsoleChar *text);
     void input_deep_copy(struct ConsoleInput *dest,struct ConsoleInput *source,int elements);

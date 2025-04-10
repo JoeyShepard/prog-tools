@@ -5,7 +5,6 @@
     #include "structs.h"
 
     int text_editor(int command_ID, struct WindowInfo *windows, int selected_window);
-    int forth(int command_ID, struct WindowInfo *windows, int selected_window);
     int python(int command_ID, struct WindowInfo *windows, int selected_window);
     int emu_msp430(int command_ID, struct WindowInfo *windows, int selected_window);
     int emu_6502(int command_ID, struct WindowInfo *windows, int selected_window);
