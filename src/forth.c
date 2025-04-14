@@ -13,6 +13,182 @@
 #include "structs.h"
 
 //Functions
+
+//TODO: table look up if this is too slow
+static int classify_char(char c)
+{
+    if (c=='-') return FORTH_CHAR_MINUS; 
+    else if (c=='0') return FORTH_CHAR_0; 
+    else if (strchr("123456789",c)) return FORTH_CHAR_1_9;
+    else if (strchr("abcdef",c)) return FORTH_CHAR_A_F;
+    else if (strchr("ABCDEF",c)) return FORTH_CHAR_A_F;
+    else if (c=='x') return FORTH_CHAR_x;
+    else if (strchr("ghijklmnopqrstuvwyz",c)) return FORTH_CHAR_G_Z;
+    else if (strchr("GHIJKLMNOPQRSTUVWYZ",c)) return FORTH_CHAR_G_Z;
+    return FORTH_CHAR_OTHER;
+}
+
+static int classify_word(const char *word)
+{
+    int text_type=FORTH_TYPE_NONE;
+    while(*word)
+    {
+        int char_class=classify_char(*word);
+        switch(text_type)
+        {
+            case FORTH_TYPE_NONE:
+                if (char_class==FORTH_CHAR_MINUS) text_type=FORTH_TYPE_MINUS;
+                else if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_0;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_OTHER;
+                else if (char_class==FORTH_CHAR_G_Z) text_type=FORTH_TYPE_OTHER;
+                else if (char_class==FORTH_CHAR_x) text_type=FORTH_TYPE_OTHER;
+                else if (char_class==FORTH_CHAR_OTHER) text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_NUMBER:
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_NUMBER;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
+                else text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_HEX: 
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_HEX;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_HEX;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_HEX;
+                else text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_MINUS:
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_0;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
+                else text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_0:        
+                if (char_class==FORTH_CHAR_x) text_type=FORTH_TYPE_0x;
+                else text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_0x:       
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_HEX;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_HEX;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_HEX;
+                else text_type=FORTH_TYPE_OTHER;
+                break;
+            case FORTH_TYPE_OTHER:       
+                //No changes - always stays same type
+                break;
+        }
+        word++;
+    }
+
+    switch (text_type)
+    {
+        case FORTH_TYPE_NUMBER:
+        case FORTH_TYPE_HEX:
+        case FORTH_TYPE_NONE:
+        case FORTH_TYPE_OTHER:
+            return text_type;
+        case FORTH_TYPE_MINUS:
+        case FORTH_TYPE_0x:
+            return FORTH_TYPE_OTHER;
+        case FORTH_TYPE_0:
+            return FORTH_TYPE_NUMBER;
+        default:
+            //Should not be possible but just in case
+            return FORTH_TYPE_NONE;
+    }
+}
+
+static int check_primitive(const char *word)
+{
+    int word_len=strlen(word);
+    for (int i=0;i<forth_primitives_len;i++)
+    {
+        if (forth_primitives[i].len==word_len)
+        {
+            if (!strcmp(forth_primitives[i].name,word)) return i;
+        }
+    }
+    return -1;
+}
+
+static void color_input(struct ConsoleInfo *console,bool color_highlighted)
+{
+    int parse_state=FORTH_PARSE_NONE;
+    int len=0;
+    int start=console->input.start;
+    bool process_word=false;
+    for (int i=start;i<console->input.len;i++)
+    {
+        char new_char=console->input.text[i].character;
+        if (parse_state==FORTH_PARSE_NONE)
+        {
+            if (new_char!=' ')
+            {
+                start=i;
+                len=1;
+                parse_state=FORTH_PARSE_WORD;
+            }
+        }
+        else if (parse_state==FORTH_PARSE_WORD)
+        {
+            if (new_char!=' ')
+            {
+                len++;
+                if (len>FORTH_WORD_MAX)
+                {
+                    //TODO: handle word too long
+                }
+            }
+            else process_word=true;
+        }
+
+        if (i==console->input.len-1)
+        {
+            //Last character in string - process
+            process_word=true;
+        }
+
+        if (process_word)
+        {
+            char word_buffer[FORTH_WORD_MAX+1];
+            for (int j=start;j<start+len;j++)
+            {
+                word_buffer[j-start]=console->input.text[j].character;
+                word_buffer[j-start+1]=0;
+            }
+
+            int word_type=classify_word(word_buffer);
+            bool word_primitive=false;
+            if (word_type==FORTH_TYPE_OTHER)
+            {
+                if (check_primitive(word_buffer)!=-1) word_primitive=true;
+                else word_primitive=false;
+            }
+
+            color_t word_color;
+            bool cursor_on_word=(console->input.cursor>=start)&&(console->input.cursor<=start+len);
+            if ((cursor_on_word)&&(word_primitive==false)&&(color_highlighted==false)) word_color=FORTH_COL_TYPING;
+            else if (word_type==FORTH_TYPE_NUMBER) word_color=FORTH_COL_NUMBER;
+            else if (word_type==FORTH_TYPE_HEX) word_color=FORTH_COL_HEX;
+            else if (word_type==FORTH_TYPE_OTHER)
+            {
+                if (word_primitive) word_color=FORTH_COL_PRIMITIVE;
+                else word_color=FORTH_COL_SECONDARY;
+            }
+            else if (word_type==FORTH_TYPE_NONE)
+            {
+                //Should never happen but just in case
+                word_color=FORTH_COL_NONE;
+            }
+            
+            for (int j=start;j<start+len;j++)
+            {
+                console->input.text[j].fg=word_color;
+            }
+            parse_state=FORTH_PARSE_NONE;
+            process_word=false;
+        }
+    }
+}
+
 int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     struct WindowInfo window=windows[selected_window];
@@ -107,7 +283,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             console->input.start=0;
             console->input.cursor=0;
             console->input.len=0;
-            add_input_text(">",FORTH_COL_FG,FORTH_COL_BG,true,console);
+            add_input_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,true,console);
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -117,6 +293,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         if (redraw_screen)
         {
+            //Color code input
+            color_input(console,false);
+
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console);
                 
@@ -173,6 +352,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Fallthrough
                 case VKEY_EXE:
                     //Copy input text to console
+                    color_input(console,true);
                     for (int i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);

@@ -32,9 +32,9 @@ window vim src/console.h
 rename cons
 vsplit vim src/console.c
 
-window vim src/shell.h
-rename shell
-vsplit vim src/shell.c
+window vim src/forth-primitives.h
+rename prim
+vsplit vim src/forth-primitives.c
 
 window vim src/forth.h
 rename forth

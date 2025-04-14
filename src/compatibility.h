@@ -15,6 +15,7 @@
     #define COL_1_4         0x8
     #define COL_MID         0x10
     #define COL_3_4         0x18
+    #define COL_7_8         0x1C
 
     #ifndef C_RGB
         #define C_RGB(r,g,b) (((r) << 11) | ((g) << 6) | (b))

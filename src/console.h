@@ -36,8 +36,8 @@
 
     struct ConsoleInput
     {
-        struct ConsoleChar *text;
-        int len;
+        struct ConsoleChar *text;   //Zero-terminated string
+        int len;                    //Cached length to speed up processing
         int start;
         int cursor;
     };
