@@ -15,6 +15,8 @@ getkey.c arrays for key_printable not used
 - deleted key_printable since compiler complained about not being used
 draw_char can draw out of bounds!
 TODOs in all files
+rearrange struct orders for speed
+error_exit in mem? maybe better to recover
 */
 
 

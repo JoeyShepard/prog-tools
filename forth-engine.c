@@ -103,7 +103,7 @@ static int find_primitive(const char *word)
     {
         if (forth_primitives[i].len==word_len)
         {
-            if (!strcasecmp(forth_primitives[i].name,word)) return i;
+            if (!strcmp(forth_primitives[i].name,word)) return i;
         }
     }
     return -1;
@@ -157,7 +157,6 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
         //Stop looping if no words left
         if (word_len==0) break;
 
-        //Figure out what color to use for word
         color_t word_color;
         if (word_len>FORTH_WORD_MAX)
         {
@@ -180,31 +179,18 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
             else if (word_type==FORTH_TYPE_HEX) word_color=FORTH_COL_HEX;
             else if (word_type==FORTH_TYPE_OTHER)
             {
-                if (find_primitive(word_buffer)!=-1)
-                {
-                    //Always color primitives
-                    word_color=FORTH_COL_PRIMITIVE;
-                }
+                if (find_primitive(word_buffer)!=-1) word_color=FORTH_COL_PRIMITIVE;
                 else 
                 {
                     bool cursor_on_word=(console->input.cursor>=start)&&(console->input.cursor<=start+word_len);
                     if ((cursor_on_word)&&(color_highlighted==false))
                     {
-                        //Cursor is on secondary word - don't color as unknown since still typing
                         word_color=FORTH_COL_TYPING;
                     }
                     else 
                     {
-                        if (find_secondary(word_buffer)!=NULL)
-                        {
-                            //Secondary found
-                            word_color=FORTH_COL_SECONDARY;
-                        }
-                        else
-                        {
-                            //Unknown word
-                            word_color=FORTH_COL_NOT_FOUND;
-                        }
+                        if (find_secondary(word_buffer)!=NULL) word_color=FORTH_COL_SECONDARY;
+                        else word_color=FORTH_COL_NOT_FOUND;
                     }
                 }
             }
@@ -213,6 +199,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
                 //Should never happen but just in case
                 word_color=FORTH_COL_NONE;
             }
+            
         }
 
         //Apply color to word
@@ -252,10 +239,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
     if (command_ID==COMMAND_START) 
     {
-        //Allocate memory for console and Forth systems
+        //Allocate memory for and initialize console
         forth=(struct ForthInfo *)add_object(sizeof(struct ForthInfo),heap_ptr);
-
-        //START HERE: allocate space for definitions
         
         //Make sure allocation succeeded
         if (forth==NULL)
@@ -292,10 +277,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Init history
         init_history(console);
-
-        //Init Forth Engine
-        forth->engine.data=forth->data;
-        forth->engine.stack_ptr=FORTH_STACK_SIZE-1;
     }
     else
     {
@@ -303,9 +284,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth=(struct ForthInfo *)object_address(FORTH_ID_CONSOLE,heap_ptr);
         console=&forth->console;
         reset_console_pointers(console);
-
-        //Reset pointer to Forth data
-        forth->engine.data=forth->data;
     }
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.

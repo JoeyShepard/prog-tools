@@ -1,13 +1,11 @@
 #ifndef __GUARD_PROG_TOOLS_FORTH
     #define __GUARD_PROG_TOOLS_FORTH
 
-    #include <stdalign.h>
     #include <stdint.h>
 
     #include "compatibility.h"
     #include "console.h"
     #include "forth-primitives.h"
-    #include "forth-engine.h"
     #include "structs.h"
 
     //Colors
@@ -39,8 +37,7 @@
     #define FORTH_COL_NONE      COL_WHITE
 
     //Heap memory
-    #define FORTH_ID_CONSOLE        0
-    #define FORTH_ID_DEFINITIONS    1
+    #define FORTH_ID_CONSOLE    0
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
@@ -52,9 +49,6 @@
     //Forth
     #define FORTH_WORD_MAX      16
     #define FORTH_PROMPT        ">" 
-
-    //Forth memory
-    #define FORTH_DATA_SIZE     0x10000
 
     //enums
     //=====
@@ -96,10 +90,9 @@
         FORTH_ERROR_TOO_LONG
     };
 
-    //Custom struct to save everything the program uses to heap
+    //Custom struct to save everything to heap
     struct ForthInfo
     {
-        //Data for printing to console
         struct ConsoleInfo console; 
         
         //Custom size memory used by console above
@@ -107,13 +100,6 @@
         struct ConsoleChar input_copy_text[FORTH_INPUT_MAX];
         struct ConsoleInput history[FORTH_HIST_COUNT];
         struct ConsoleChar history_texts[FORTH_HIST_COUNT*FORTH_INPUT_MAX];
-
-        //Memory for Forth programs to use - must be aligned for int32_t access
-        //TODO: might be nice to have data size be adjustable
-        alignas(uint32_t) uint8_t data[FORTH_DATA_SIZE];
-
-        //Data for Forth Engine
-        struct ForthEngine engine;
     };
 
     //Functions

@@ -16,9 +16,8 @@ window vim src/getkey.h
 rename key
 vsplit vim src/getkey.c
 
-window vim src/graphics.h
-rename gfx
-vsplit vim src/graphics.c
+window vim src/structs.h
+rename structs
 
 window vim src/text.h
 rename txt
@@ -28,9 +27,9 @@ window vim src/mem.h
 rename mem
 vsplit vim src/mem.c
 
-window vim src/console.h
+window vim src/forth-engine.h
 rename cons
-vsplit vim src/console.c
+vsplit vim src/forth-engine.c
 
 window vim src/forth-primitives.h
 rename prim
