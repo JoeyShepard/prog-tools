@@ -17,6 +17,7 @@ draw_char can draw out of bounds!
 TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
+copy of forth struct needs to be stored in XRAM
 */
 
 

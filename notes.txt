@@ -1,0 +1,269 @@
+Forth stack
+- circular so no need to check for under/overflow
+- uint8_t as an index wraps at 256 elements naturally, so try that
+- also try with pointers
+- CONCLUSION: 
+  - drop_aligned4 makes most sense and works for dup too
+    - store aligned stack base as uintptr_t in struct
+    - mask and calculate lower bits
+    - OR the two together
+  - also, checked using globals instead of struct but about 2x longer
+
+
+- examples on godbolt:
+
+    #include <string.h>
+    #include <stdint.h>
+    #include <stdalign.h>
+
+    struct Forth
+    {
+        int32_t *stack;
+        uint8_t stack_index;
+
+        int32_t *stack_base;
+        int32_t *stack_ptr;
+        int32_t *stack_end;
+
+        int8_t *stack8;
+        uint32_t stack_offset;
+    };
+
+    void dup_index(struct Forth *forth)
+    {
+        uint8_t ptr=forth->stack_index;
+        forth->stack_index++;
+        forth->stack[forth->stack_index]=forth->stack[ptr];
+    }
+
+    void dup_ptr(struct Forth *forth)
+    {
+        uint32_t *ptr=forth->stack_ptr;
+        forth->stack_ptr++;
+        if (forth->stack_ptr==forth->stack_end) forth->stack_ptr=forth->stack_base;
+        *forth->stack_ptr=*ptr;
+    }
+
+    void dup_ptr8(struct Forth *forth)
+    {
+        uint32_t old_offset=forth->stack_offset;
+        forth->stack_offset=((forth->stack_offset+sizeof(int32_t))&0x3FC);
+        *(int32_t*)(forth->stack8+forth->stack_offset)=*(int32_t*)(forth->stack8+old_offset);
+    }
+
+    void dup_index2(struct Forth *forth)
+    {
+        uint8_t ptr=forth->stack_index;
+        forth->stack_index++;
+        *(forth->stack+(forth->stack_index<<2))=*(forth->stack+(ptr<<2));
+    }
+
+    //Better optimization if base is always aligned?
+    //Yes, but doesn't work for underflow
+        //SOLVED - see below
+    void dup_aligned(struct Forth *forth)
+    {
+        uint32_t ptr=forth->stack_offset;
+        forth->stack_offset+=sizeof(int32_t);
+        forth->stack_offset&=0xFFFFFFBFF;
+        *(int32_t *)forth->stack_offset=*(int32_t*)ptr;
+    }
+
+    _dup_index:
+            mov.b   @(4,r4),r0
+            extu.b  r0,r1
+            mov     r1,r0
+            add     #1,r0
+            extu.b  r0,r3
+            mov.l   @r4,r2
+            mov     r3,r0
+            mov.b   r0,@(4,r4)
+            shll2   r1
+            mov     r1,r0
+            mov.l   @(r0,r2),r1
+            mov     r3,r0
+            shll2   r0
+            rts
+            mov.l   r1,@(r0,r2)
+    _dup_ptr:
+            mov.l   @(12,r4),r2
+            mov.l   @(16,r4),r3
+            mov     r2,r1
+            add     #4,r1
+            mov.l   r1,@(12,r4)
+            cmp/eq  r3,r1
+            bt      .L5
+            mov.l   @r2,r2
+            rts
+            mov.l   r2,@r1
+    .L5:
+            mov.l   @(8,r4),r1
+            mov.l   @r2,r2
+            mov.l   r1,@(12,r4)
+            rts
+            mov.l   r2,@r1
+    _dup_ptr8:
+            mov.l   @(24,r4),r2
+            mov.w   .L7,r1
+            mov     r2,r0
+            add     #4,r0
+            mov     r0,r3
+            and     r1,r3
+            mov.l   @(20,r4),r1
+            mov     r2,r0
+            mov.l   r3,@(24,r4)
+            mov.l   @(r0,r1),r2
+            mov     r3,r0
+            rts
+            mov.l   r2,@(r0,r1)
+    .L7:
+            .short  1020
+    _dup_index2:
+            mov.b   @(4,r4),r0
+            extu.b  r0,r1
+            mov     r1,r0
+            add     #1,r0
+            extu.b  r0,r3
+            mov.l   @r4,r2
+            mov     r3,r0
+            shll2   r1
+            mov.b   r0,@(4,r4)
+            shll2   r1
+            mov     r1,r0
+            mov.l   @(r0,r2),r1
+            mov     r3,r0
+            shll2   r0
+            shll2   r0
+            rts
+            mov.l   r1,@(r0,r2)
+    _dup_aligned:
+            mov.l   @(24,r4),r2
+            mov.w   .L10,r3
+            mov     r2,r1
+            add     #4,r1
+            and     r3,r1
+            mov.l   r1,@(24,r4)
+            mov.l   @r2,r2
+            rts
+            mov.l   r2,@r1
+    .L10:
+            .short  -1025
+
+
+- try the same for DROP since stack goes in the other direction
+- drop_aligned4 is the best 
+  - need to align xram and yram on PC to work
+  - need #define to get xram address as constant on calculator
+
+    #include <string.h>
+    #include <stdint.h>
+    #include <stdalign.h>
+
+    #define XRAM        0x8c200000
+    #define STACK_SIZE  1024
+
+    extern uint32_t xram;
+
+    struct Forth
+    {
+        int32_t *stack;
+        uint8_t stack_index;
+
+        int32_t *stack_base;
+        int32_t *stack_ptr;
+        int32_t *stack_end;
+
+        int8_t *stack8;
+        uint32_t stack_offset;
+
+        uint32_t upper;
+    };
+
+    //Assume stack is aligned
+    void drop_aligned1(struct Forth *forth)
+    {
+        forth->stack_offset--;
+        if (forth->stack_offset<XRAM) forth->stack_offset+=STACK_SIZE;
+    }
+
+    void drop_aligned2(struct Forth *forth)
+    {
+        if (forth->stack_offset==XRAM) forth->stack_offset+=STACK_SIZE;
+        else forth->stack_offset--;
+    }
+
+    void drop_aligned3(struct Forth *forth)
+    {
+        #define MASK 0x3FF
+        uint32_t upper=forth->stack_offset&~MASK;
+        uint32_t lower=(forth->stack_offset-1)&MASK;
+        forth->stack_offset=upper|lower;
+    }
+
+    //Seems to be the best
+    void drop_aligned4(struct Forth *forth)
+    {
+        #define MASK 0x3FF
+        uint32_t lower=(forth->stack_offset-1)&MASK;
+        forth->stack_offset=forth->upper|lower;
+    }
+
+
+    _drop_aligned1:
+            mov.l   @(24,r4),r2
+            mov.l   .L4,r3
+            mov     r2,r1
+            add     #-1,r1
+            cmp/hi  r3,r1
+            bt      .L2
+            mov.w   .L5,r1
+            add     r2,r1
+    .L2:
+            rts
+            mov.l   r1,@(24,r4)
+    .L5:
+            .short  1023
+    .L4:
+            .long   -1944059905
+    _drop_aligned2:
+            mov.l   @(24,r4),r1
+            mov.l   .L10,r2
+            cmp/eq  r2,r1
+            bt      .L9
+            add     #-1,r1
+            rts
+            mov.l   r1,@(24,r4)
+    .L9:
+            mov.l   .L11,r1
+            rts
+            mov.l   r1,@(24,r4)
+    .L10:
+            .long   -1944059904
+    .L11:
+            .long   -1944058880
+    _drop_aligned3:
+            mov.l   @(24,r4),r2
+            mov.w   .L14,r3
+            mov     r2,r1
+            add     #-1,r1
+            and     r3,r1
+            mov.w   .L15,r3
+            and     r3,r2
+            or      r2,r1
+            rts
+            mov.l   r1,@(24,r4)
+    .L14:
+            .short  1023
+    .L15:
+            .short  -1024
+    _drop_aligned4:
+            mov.l   @(24,r4),r1
+            mov.w   .L17,r2
+            add     #-1,r1
+            and     r2,r1
+            mov.l   @(28,r4),r2
+            or      r2,r1
+            rts
+            mov.l   r1,@(24,r4)
+    .L17:
+            .short  1023

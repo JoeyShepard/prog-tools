@@ -40,6 +40,9 @@
     extern uint8_t *heap;
     extern uint8_t *xram;
     extern uint8_t *yram;
+    //Copy of address from malloc later passed to free
+    extern uint8_t *xram_base;
+    extern uint8_t *yram_base;
 
     //Functions on both PC and CG50
     void setup(int scale_factor,int tick_ms);

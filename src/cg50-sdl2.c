@@ -81,6 +81,8 @@
     uint8_t *heap;
     uint8_t *xram;
     uint8_t *yram;
+    uint8_t *xram_base;
+    uint8_t *yram_base;
 
     //Static functions only in PC version
     //===================================
@@ -235,21 +237,27 @@
             exit(1);
         }
 
-        //Allocate 8K for XRAM memory on calculator
-        xram=malloc(XRAM_SIZE);
-        if (xram==NULL)
+        //Allocate 8K for XRAM memory on calculator plus padding so 8K can be aligned
+        xram_base=malloc(XRAM_SIZE*2);
+        if (xram_base==NULL)
         {
             printf("Error: failed to allocate memory for calculator XRAM.\n");
             exit(1);
         }
+        //Round up xram to nearest 8K boundary keeping xram_base to pass to free later
+        uintptr_t xram_diff=XRAM_SIZE-((uintptr_t)(xram_base))%XRAM_SIZE;
+        xram=xram_base+xram_diff;
 
-        //Allocate 8K for YRAM memory on calculator
-        yram=malloc(YRAM_SIZE);
-        if (yram==NULL)
+        //Allocate 8K for YRAM memory on calculator plus 8K for padding so 8K can be aligned
+        yram_base=malloc(YRAM_SIZE*2);
+        if (yram_base==NULL)
         {
-            printf("Error: failed to allocate memory for calculator XRAM.\n");
+            printf("Error: failed to allocate memory for calculator YRAM.\n");
             exit(1);
         }
+        //Round up yram to nearest 8K boundary keeping yram_base to pass to free later
+        uintptr_t yram_diff=YRAM_SIZE-((uintptr_t)(yram_base))%YRAM_SIZE;
+        yram=yram_base+yram_diff;
 
         //Save scale factor for use with dupdate
         global_scale_factor=scale_factor;
@@ -285,8 +293,8 @@
     {
         //Free allocated memory
         free(heap);
-        free(xram);
-        free(yram);
+        free(xram_base);
+        free(yram_base);
 
         //Shut down SDL2
         SDL_DestroyTexture(texture);

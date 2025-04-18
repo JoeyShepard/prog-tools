@@ -295,7 +295,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Init Forth Engine
         forth->engine.data=forth->data;
-        forth->engine.stack_ptr=FORTH_STACK_SIZE-1;
+        //forth->engine.stack=
     }
     else
     {
