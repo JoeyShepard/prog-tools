@@ -249,20 +249,35 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Pointers to data on heap
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
+    uint8_t *forth_definitions;
+    uint8_t *forth_code;
 
     if (command_ID==COMMAND_START) 
     {
         //Allocate memory for console and Forth systems
         forth=(struct ForthInfo *)add_object(sizeof(struct ForthInfo),heap_ptr);
 
-        //START HERE: allocate space for definitions
-        
         //Make sure allocation succeeded
         if (forth==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
+
+        //Allocate space for Forth words
+        forth_definitions=add_object(sizeof(struct ForthWordHeader),heap_ptr);
+
+        //Make sure allocation succeeded
+        if (forth==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+        //First definition is empty marking end of definitions
+        ((struct ForthWordHeader *)forth_definitions)->size=0;
+        //TODO: remove
+        ((struct ForthWordHeader *)forth_definitions)->name_len=42;
 
         //Init console
         console=&forth->console;
@@ -293,9 +308,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Init history
         init_history(console);
 
-        //Init Forth Engine
-        forth->engine.data=forth->data;
-        //forth->engine.stack=
+        //Init Forth Engine (these values don't change when program is reloaded)
+        forth->engine.stack_upper=(int32_t *)FORTH_STACK_ADDRESS;
+        forth->engine.stack=(int32_t *)(FORTH_STACK_ADDRESS+FORTH_STACK_SIZE-FORTH_CELL_SIZE);
+        forth->engine.rstack_upper=(int32_t *)FORTH_RSTACK_ADDRESS;
+        forth->engine.rstack=(int32_t *)(FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE-FORTH_CELL_SIZE);
     }
     else
     {
@@ -304,9 +321,16 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         console=&forth->console;
         reset_console_pointers(console);
 
-        //Reset pointer to Forth data
-        forth->engine.data=forth->data;
+        //Restore pointer to Forth definitions
+        forth_definitions=object_address(FORTH_ID_DEFINITIONS,heap_ptr);
+
+        //Restore stack memory
+        memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);
+        memcpy(FORTH_RSTACK_ADDRESS,forth->rstack_copy,FORTH_RSTACK_SIZE);
     }
+
+    //Reset pointers in Forth object
+    forth->engine.data=forth->data;
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);
@@ -438,11 +462,15 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     history_key(console,key);
                     break;
                 default:
-                    //Check for sys_keys like MENU, OFF, etc
+                    //Check for system keys like MENU, OFF, etc
                     int return_command=sys_key_handler(key);
                     if (return_command!=COMMAND_NONE)
                     {
-                        //System key - return to window manager to handle key
+                        //System key - save Forth stack memory before returning
+                        memcpy(forth->stack_copy,FORTH_STACK_ADDRESS,FORTH_STACK_SIZE);
+                        memcpy(forth->rstack_copy,FORTH_RSTACK_ADDRESS,FORTH_RSTACK_SIZE);
+
+                        //Return to window manager to handle system key
                         return return_command;
                     }
                     else

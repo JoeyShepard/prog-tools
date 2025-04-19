@@ -27,10 +27,10 @@
 
     struct ForthEngine
     {
-        uint32_t *stack_upper;
-        uint32_t *stack;
-        uint32_t *rstack_upper;
-        uint32_t *rstack;
+        int32_t *stack_upper;
+        int32_t *stack;
+        int32_t *rstack_upper;
+        int32_t *rstack;
         uint8_t *data;
     };
 

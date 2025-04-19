@@ -41,6 +41,7 @@
     //Heap memory
     #define FORTH_ID_CONSOLE        0
     #define FORTH_ID_DEFINITIONS    1
+    #define FORTH_ID_CODE           2
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
@@ -96,7 +97,16 @@
         FORTH_ERROR_TOO_LONG
     };
 
-    //Custom struct to save everything the program uses to heap
+    //structs
+    struct ForthWordHeader
+    {
+        uint32_t size;
+        uint8_t name_len;
+        //Flexible Array Member - memory allocated after struct holds name
+        char name[];
+    };
+
+    //Custom struct to save data the program uses to heap
     struct ForthInfo
     {
         //Data for printing to console

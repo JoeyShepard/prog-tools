@@ -28,7 +28,7 @@ rename mem
 vsplit vim src/mem.c
 
 window vim src/forth-engine.h
-rename cons
+rename engine
 vsplit vim src/forth-engine.c
 
 window vim src/forth-primitives.h
