@@ -124,11 +124,11 @@ static uint8_t *find_secondary(const char *word)
     else return NULL;
 }
 
-static int32_t next_word(struct ConsoleInfo *console,int32_t *start)
+static uint32_t next_word(struct ConsoleInfo *console,uint32_t *start)
 {
     int parse_state=FORTH_PARSE_NONE;
-    int len=0;
-    for (int32_t i=*start;i<console->input.len;i++)
+    uint32_t len=0;
+    for (uint32_t i=*start;i<console->input.len;i++)
     {
         char new_char=console->input.text[i].character;
         if (parse_state==FORTH_PARSE_NONE)
@@ -153,6 +153,33 @@ static int32_t next_word(struct ConsoleInfo *console,int32_t *start)
     return 0;
 }
 
+static uint32_t next_word_source(const char *source,uint32_t *start)
+{
+    int parse_state=FORTH_PARSE_NONE;
+    uint32_t len=0;
+    uint32_t index=*start;
+    while (source[index])
+    {
+        char new_char=source[index];
+        if (parse_state==FORTH_PARSE_NONE)
+        {
+            if (new_char!=' ')
+            {
+                *start=index;
+                len=1;
+                parse_state=FORTH_PARSE_WORD;
+            }
+        }
+        else if (parse_state==FORTH_PARSE_WORD)
+        {
+            if (new_char!=' ') len++;
+            else return len;
+        }
+        index++;
+    }
+    return len;
+}
+
 static void color_input(struct ConsoleInfo *console,bool color_highlighted)
 {
     int32_t start=console->input.start;
@@ -170,21 +197,13 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
         //Stop looping if no words left
         if (word_len==0) break;
 
-        //Copy word to buffer for classification
-        char word_buffer[FORTH_WORD_MAX+1];
-        for (int32_t j=start;j<start+word_len;j++)
-        {
-            word_buffer[j-start]=console->input.text[j].character;
-            word_buffer[j-start+1]=0;
-        }
-
         //Figure out what color to use for word
         color_t word_color;
         if (in_quote)
         {
             //In quote like s" or ."
             word_color=FORTH_COL_STRING;
-            if (word_buffer[word_len-1]=='"') in_quote=false;
+            if (console->input.text[start+word_len-1].character=='"') in_quote=false;
         }
         else
         {
@@ -195,6 +214,14 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
             }
             else
             {
+                //Copy word to buffer for classification
+                char word_buffer[FORTH_WORD_MAX+1];
+                for (int32_t j=start;j<start+word_len;j++)
+                {
+                    word_buffer[j-start]=console->input.text[j].character;
+                    word_buffer[j-start+1]=0;
+                }
+
                 //Classify word
                 int word_type=classify_word(word_buffer);
                 if ((word_type!=FORTH_TYPE_OTHER)&&(colon_last==true))
@@ -310,6 +337,30 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
             console->input.text[j].fg=word_color;
         }
     }
+}
+
+static int process_source(const char *source)
+{
+    uint32_t word_len;
+    uint32_t start=0;
+    do
+    {
+        word_len=next_word_source(source,&start);
+        if (word_len>FORTH_WORD_MAX) return FORTH_ERROR_TOO_LONG;
+        else if (word_len>0)
+        {
+            char word_buffer[FORTH_WORD_MAX+1];
+            strncpy(word_buffer,source+start,word_len);
+            word_buffer[word_len]=0;
+
+            printf(">>%s<<\n",word_buffer);
+
+
+            start+=word_len;
+        }
+    }while(word_len>0);
+
+    return FORTH_ERROR_NONE;
 }
 
 int forth(int command_ID, struct WindowInfo *windows, int selected_window)
@@ -531,6 +582,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Process input
                         char input_buffer[FORTH_INPUT_MAX];
                         copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
+                        process_source(input_buffer);
 
                         /*
                         int return_code=

@@ -100,7 +100,8 @@
     enum ForthErrors
     {
         FORTH_ERROR_NONE,
-        FORTH_ERROR_TOO_LONG
+        FORTH_ERROR_TOO_LONG,
+        FORTH_ERROR_INTERNAL,
     };
 
     //structs
