@@ -12,6 +12,15 @@
 #include "mem.h"
 #include "structs.h"
 
+//Tables
+static const char *quote_words[]=
+{
+    ".\"",
+    "S\"",
+    "S\\\""
+};
+
+
 //Functions
 
 //TODO: table look up if this is too slow
@@ -148,6 +157,10 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
 {
     int32_t start=console->input.start;
     int32_t word_len=0;
+    bool in_quote=false;
+    bool in_word=false;
+    bool colon_last=false;
+    bool colon_current=false;
     while(1)
     {
         //Get next word in input
@@ -157,64 +170,140 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
         //Stop looping if no words left
         if (word_len==0) break;
 
+        //Copy word to buffer for classification
+        char word_buffer[FORTH_WORD_MAX+1];
+        for (int32_t j=start;j<start+word_len;j++)
+        {
+            word_buffer[j-start]=console->input.text[j].character;
+            word_buffer[j-start+1]=0;
+        }
+
         //Figure out what color to use for word
         color_t word_color;
-        if (word_len>FORTH_WORD_MAX)
+        if (in_quote)
         {
-            //Word too long - color but do not check if primitive or secondary
-            word_color=FORTH_COL_TOO_LONG;   
+            //In quote like s" or ."
+            word_color=FORTH_COL_STRING;
+            if (word_buffer[word_len-1]=='"') in_quote=false;
         }
         else
         {
-            //Copy word to buffer for classification
-            char word_buffer[FORTH_WORD_MAX+1];
-            for (int32_t j=start;j<start+word_len;j++)
+            if (word_len>FORTH_WORD_MAX)
             {
-                word_buffer[j-start]=console->input.text[j].character;
-                word_buffer[j-start+1]=0;
+                //Word too long - color but do not check if primitive or secondary
+                word_color=FORTH_COL_ERROR;   
             }
-            
-            //Classify word
-            int word_type=classify_word(word_buffer);
-            if (word_type==FORTH_TYPE_NUMBER) word_color=FORTH_COL_NUMBER;
-            else if (word_type==FORTH_TYPE_HEX) word_color=FORTH_COL_HEX;
-            else if (word_type==FORTH_TYPE_OTHER)
+            else
             {
-                if (find_primitive(word_buffer)!=-1)
+                //Classify word
+                int word_type=classify_word(word_buffer);
+                if ((word_type!=FORTH_TYPE_OTHER)&&(colon_last==true))
                 {
-                    //Always color primitives
-                    word_color=FORTH_COL_PRIMITIVE;
+                    //Name in colon definition can't be number 
+                    word_color=FORTH_COL_ERROR;
                 }
-                else 
+                else if (word_type==FORTH_TYPE_NUMBER) word_color=FORTH_COL_NUMBER;
+                else if (word_type==FORTH_TYPE_HEX) word_color=FORTH_COL_HEX;
+                else if (word_type==FORTH_TYPE_OTHER)
                 {
-                    bool cursor_on_word=(console->input.cursor>=start)&&(console->input.cursor<=start+word_len);
-                    if ((cursor_on_word)&&(color_highlighted==false))
+                    if (!strcmp(word_buffer,":"))
                     {
-                        //Cursor is on secondary word - don't color as unknown since still typing
-                        word_color=FORTH_COL_TYPING;
-                    }
-                    else 
-                    {
-                        if (find_secondary(word_buffer)!=NULL)
+                        //Handle : different from other primitives
+                        if (in_word)
                         {
-                            //Secondary found
-                            word_color=FORTH_COL_SECONDARY;
+                            //Not allowed in definition
+                            word_color=FORTH_COL_ERROR;
                         }
                         else
                         {
-                            //Unknown word
-                            word_color=FORTH_COL_NOT_FOUND;
+                            in_word=true;
+                            word_color=FORTH_COL_DEF;
+                            colon_current=true;
+                        }
+                    }
+                    else if (!strcmp(word_buffer,";"))
+                    {
+                        //Handle ; different from other primitives
+                        if (in_word)
+                        {
+                            in_word=false;
+                            word_color=FORTH_COL_DEF;
+                        }
+                        else
+                        {
+                            //Not allowed outside of definition
+                            word_color=FORTH_COL_ERROR;
+                        }
+                    }
+                    else if (find_primitive(word_buffer)!=-1)
+                    {
+                        //Always color primitives
+                        if (colon_last)
+                        {
+                            //Primitive can't be word name after colon
+                            word_color=FORTH_COL_ERROR;
+                        }
+                        else
+                        {
+                            //Default color for primitives
+                            word_color=FORTH_COL_PRIMITIVE;
+
+                            //Start quoted string if word found
+                            for (int i=0;i<ARRAY_SIZE(quote_words);i++)
+                            {
+                                if (!strcasecmp(word_buffer,quote_words[i]))
+                                {
+                                    in_quote=true;
+                                    word_color=FORTH_COL_STRING;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Word is not primitive
+                        bool cursor_on_word=(console->input.cursor>=start)&&(console->input.cursor<=start+word_len);
+                        if ((cursor_on_word)&&(color_highlighted==false))
+                        {
+                            //Cursor is on secondary word - don't color as unknown since still typing
+                            word_color=FORTH_COL_TYPING;
+                        }
+                        else 
+                        {
+                            if (find_secondary(word_buffer)!=NULL)
+                            {
+                                //Secondary found
+                                word_color=FORTH_COL_SECONDARY;
+                            }
+                            else
+                            {
+                                if (colon_last)
+                                {
+                                    //Name of word definition;
+                                    word_color=FORTH_COL_NEW_WORD;
+                                }
+                                else
+                                {
+                                    //Unknown word
+                                    word_color=FORTH_COL_NOT_FOUND;
+                                }
+                            }
                         }
                     }
                 }
-            }
-            else if (word_type==FORTH_TYPE_NONE)
-            {
-                //Should never happen but just in case
-                word_color=FORTH_COL_NONE;
+                else if (word_type==FORTH_TYPE_NONE)
+                {
+                    //Should never happen but just in case
+                    word_color=FORTH_COL_NONE;
+                }
             }
         }
 
+        //Logic to color definition name after colon
+        colon_last=colon_current;
+        colon_current=false;
+    
         //Apply color to word
         for (int j=start;j<start+word_len;j++)
         {
@@ -377,6 +466,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Get key
         int old_modifier=console->modifier;
         int key=getkey_text(true,&console->modifier);
+
+        //Remap keys for characters not on keypad
+        if (key==VKEY_COS) key=VKEY_COLON;
+        else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
 
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;

@@ -24,14 +24,20 @@
         #define FORTH_COL_PRIMITIVE C_RGB(COL_MAX,COL_MID,COL_MAX)  //Magenta
         #define FORTH_COL_SECONDARY C_RGB(COL_MID,COL_MID,COL_MAX)  //Blue
         #define FORTH_COL_NOT_FOUND C_RGB(COL_MAX,COL_MAX,COL_MID)  //Yellow
-        #define FORTH_COL_TOO_LONG  C_RGB(COL_MAX,COL_MID,COL_MID)  //Red
+        #define FORTH_COL_ERROR     C_RGB(COL_MAX,COL_MID,COL_MID)  //Red
+        #define FORTH_COL_DEF       C_RGB(COL_3_4,COL_3_4,COL_3_4)  //Definition words ; and ;
+        #define FORTH_COL_STRING    C_RGB(COL_1_4,COL_MAX,COL_1_4)  //Green
+        #define FORTH_COL_NEW_WORD  FORTH_COL_SECONDARY
     #else
         #define FORTH_COL_NUMBER    C_RGB(COL_1_4,COL_MAX,COL_1_4)  //Green 
         #define FORTH_COL_HEX       C_RGB(COL_1_4,COL_MAX,COL_MAX)  //Cyan
-        #define FORTH_COL_PRIMITIVE C_RGB(COL_MAX,COL_1_4,COL_MAX)  //Magenta
-        #define FORTH_COL_SECONDARY C_RGB(COL_1_4,COL_MID,COL_MAX)  //Blue (lighter here since too close to black)
+        #define FORTH_COL_PRIMITIVE C_RGB(COL_3_4,COL_1_4,COL_MAX)  //Purple
+        #define FORTH_COL_SECONDARY C_RGB(COL_1_4,COL_MID,COL_MAX)  //Blue (lighter here so not too close to black)
         #define FORTH_COL_NOT_FOUND C_RGB(COL_MAX,COL_MAX,COL_1_4)  //Yellow
-        #define FORTH_COL_TOO_LONG  C_RGB(COL_MAX,COL_1_4,COL_1_4)  //Red
+        #define FORTH_COL_ERROR     C_RGB(COL_MAX,COL_1_4,COL_1_4)  //Red
+        #define FORTH_COL_DEF       C_RGB(COL_MID,COL_MID,COL_MID)  //Definition words ; and ;
+        #define FORTH_COL_STRING    C_RGB(COL_1_4,COL_MAX,COL_1_4)  //Green
+        #define FORTH_COL_NEW_WORD  FORTH_COL_SECONDARY
     #endif
 
     #define FORTH_COL_TYPING    COL_WHITE
