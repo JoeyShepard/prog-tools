@@ -1,0 +1,19 @@
+source of words held in RAM
+- easy to edit
+- compile when needed
+- save words in RAM to file
+- can reference word that hasn't been defined yet
+  - redefining word replaces existing word rather than creating new version
+  - existing references to the word now point to the new word
+  - if referenced word hasn't been defined yet, create empty word in memory and mark as
+    undefined. replace empty definition if word is defined.
+    - no need to resolve all references at compile time. empty word throws error if executed
+    - maybe word isn't empty but instead has code to throw error
+  - each word assigned ID when encountered. same ID stays until next reload
+  - tick fetches ID and EXECUTE accepts ID
+
+CREATE
+- if saving words then also need to save result of CREATE?
+  - no, this is appealing but not possible since in addition to , would also need to save the
+    calculations that led to the value laid down by ,
+

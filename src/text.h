@@ -16,6 +16,8 @@
     #define TEXT_INT32_COMMAS_SIZE  15  //max 10 digits, max 3 commas, 1 for - sign, 1 for terminator 
     #define TEXT_INT32_HUMAN_SIZE   6   //max len of: 999,0.99k 9.99K, 99.9K, 999K, 9.99M
 
+    #define FONT_HORZ_SPACING       1   //space between letters
+
     enum FontSizes
     {
         FONT_5x8

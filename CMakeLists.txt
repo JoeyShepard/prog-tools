@@ -18,6 +18,7 @@ set(SOURCES
   src/error.c
   src/exceptions.c
   src/forth.c
+  src/forth-engine.c
   src/forth-primitives.c
   src/getkey.c
   src/graphics.c

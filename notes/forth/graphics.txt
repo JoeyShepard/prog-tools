@@ -1,0 +1,8 @@
+images for games
+- need some way to get graphics into source
+- should work with graphics editor
+  - graphics editor should be in forth
+- graphics as text (ie hex values in Forth source) should be possible but is too inefficient for lots of graphics
+- problem is Forth system shouldn't have much access to file system
+  - maybe INCLUDE keyword to embed file into dictionary memory
+  - reading from memory but not writing is good compromise

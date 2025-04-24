@@ -1,6 +1,7 @@
 Forth stack
 - circular so no need to check for under/overflow
-- uint8_t as an index wraps at 256 elements naturally, so try that
+- uint8_t as an index wraps at 256 elements naturally
+  - adds a lot of cycles
 - also try with pointers
 - CONCLUSION: 
   - drop_aligned4 makes most sense and works for dup too

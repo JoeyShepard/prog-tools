@@ -11,13 +11,15 @@
 //====
 /*
 remove headers
-getkey.c arrays for key_printable not used
-- deleted key_printable since compiler complained about not being used
 draw_char can draw out of bounds!
 TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
 copy of forth struct needs to be stored in XRAM
+shift+enter for new line in Forth
+forth variables are IDs 0-255 so faster (not locals)
+- words and create are 256 and up
+in Forth console, cursor in last column is one pixel too wide
 */
 
 

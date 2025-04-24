@@ -142,21 +142,13 @@ int text_width(const char *text, int font)
     int width=font_width(font);
 
     //Fixed spacing for now though may change in the future
-    int horz_spacing=1;
+    int horz_spacing=FONT_HORZ_SPACING;
 
     //Return if font not found
     if (width==0) return 0;
 
-    //Find length of string
-    int len=0;
-    while (*text)
-    {
-        len++;
-        text++;
-    }
-
     //Calculate width in pixels
-    return len*(width+horz_spacing)+horz_spacing;
+    return strlen(text)*(width+horz_spacing)+horz_spacing;
 }
 
 bool text_printable(char text)

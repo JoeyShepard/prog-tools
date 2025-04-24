@@ -60,6 +60,20 @@
     #define FORTH_WORD_MAX      16
     #define FORTH_PROMPT        ">" 
 
+    //Forth stack display
+    #define FORTH_STACK_CHAR_WIDTH          10
+    #define FORTH_STACK_FONT_WIDTH          5   //5x8 font
+    #define FORTH_STACK_WIDTH               ((FORTH_STACK_FONT_WIDTH+FONT_HORZ_SPACING)*FORTH_STACK_CHAR_WIDTH+FONT_HORZ_SPACING)
+    #define FORTH_STACK_FG                  COL_WHITE
+    #define FORTH_STACK_BG                  C_RGB(6,6,6)
+    #define FORTH_STACK_BG2                 C_RGB(9,9,9)
+    #define FORTH_STACK_BORDER              FORTH_STACK_BG
+    #define FORTH_STACK_SHOW_COUNT          8
+    //Small adjustments to align stack display and console
+    #define FORTH_STACK_CONSOLE_X_OFFSET    1
+    #define FORTH_STACK_WIDTH_OFFSET        1
+
+
     //Forth memory
     #define FORTH_DATA_SIZE     0x10000
 
@@ -86,17 +100,18 @@
         //Full types
         FORTH_TYPE_NUMBER,
         FORTH_TYPE_HEX,
-        FORTH_TYPE_PRIMARY,
+        FORTH_TYPE_PRIMATIVE,
         FORTH_TYPE_SECONDARY,
-        FORTH_NOT_FOUND,
+        FORTH_TYPE_NOT_FOUND,
         //Partial types used only for parsing
         FORTH_TYPE_NONE,
         FORTH_TYPE_MINUS,
         FORTH_TYPE_0,
         FORTH_TYPE_0x,
-        FORTH_TYPE_OTHER
+        FORTH_TYPE_OTHER,
     };
 
+    //Not different from enum ForthEngineErrors
     enum ForthErrors
     {
         FORTH_ERROR_NONE,
@@ -124,6 +139,9 @@
         struct ConsoleChar input_copy_text[FORTH_INPUT_MAX];
         struct ConsoleInput history[FORTH_HIST_COUNT];
         struct ConsoleChar history_texts[FORTH_HIST_COUNT*FORTH_INPUT_MAX];
+
+        //Whether to draw stack in console
+        bool draw_stack;
 
         //Memory for Forth programs to use - must be aligned for int32_t access
         //TODO: might be nice to have data size be adjustable

@@ -705,6 +705,8 @@ const int vkey_printable[]={
     'f',    //VKEY_f,
     ':',    //VKEY_COLON,
     ';',    //VKEY_SEMICOLON,
+    '<',    //VKEY_LESS_THAN,
+    '>',    //CKEY_GREATER_THAN,
 };
 
 

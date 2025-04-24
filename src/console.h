@@ -4,6 +4,7 @@
     #include <stdint.h>
 
     #include "structs.h"
+    #include "compatibility.h"
 
     //Dimensions (may change - see manager.h):
     //- Whole:  388x204 - 64 chars, 4 pixels x 22 rows, 6 pixels (or 20 rows, 4 pixels)
@@ -14,7 +15,8 @@
     #define CONS_WHOLE_WIDTH    64
     #define CONS_WHOLE_HEIGHT   22
     #define CONS_WHOLE_X        1
-    #define CONS_WHOLE_Y        2
+    //#define CONS_WHOLE_Y        2 //Equal space above and below console - top text doesn't line up with vertical split
+    #define CONS_WHOLE_Y        0   //Top text lines up with vertical split - space above and below console not equal
 
     #define CONS_HALF_WIDTH     31
     #define CONS_HALF_HEIGHT    11
@@ -90,7 +92,7 @@
     void reset_console_pointers(struct ConsoleInfo *console);
     void init_history(struct ConsoleInfo *console);
     void init_position(struct ConsoleInfo *console,struct Point pos,int split_state);
-    void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console);
+    void console_char(char character, color_t fg, color_t bg, struct ConsoleInfo *console);
     void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console);
     void console_text_default(const char *text, struct ConsoleInfo *console);
     void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);

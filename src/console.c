@@ -104,7 +104,7 @@ void init_position(struct ConsoleInfo *console,struct Point pos,int split_state)
     }
 }
 
-void console_char(const char character, color_t fg, color_t bg, struct ConsoleInfo *console)
+void console_char(char character, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
     if (console->text_len<CONS_BUFFER_SIZE)
     {

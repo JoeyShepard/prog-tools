@@ -5,6 +5,8 @@
 #include "compatibility.h"
 #include "error.h"
 #include "forth.h"
+#include "forth-compatibility.h"
+#include "forth-engine.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "text.h"
@@ -339,28 +341,187 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
     }
 }
 
-static int process_source(const char *source)
+static int process_source(struct ForthEngine *engine,const char *source)
 {
     uint32_t word_len;
     uint32_t start=0;
     do
     {
+        //Get next word of source
         word_len=next_word_source(source,&start);
-        if (word_len>FORTH_WORD_MAX) return FORTH_ERROR_TOO_LONG;
+
+        if (word_len>FORTH_WORD_MAX)
+        {
+            //Error - word of source is longer than allowed
+            return FORTH_ERROR_TOO_LONG;
+        }
         else if (word_len>0)
         {
+            //Word found
             char word_buffer[FORTH_WORD_MAX+1];
             strncpy(word_buffer,source+start,word_len);
             word_buffer[word_len]=0;
 
-            printf(">>%s<<\n",word_buffer);
+            //Classify word
+            int32_t num=0;
+            int primitive_ID;
+            uint8_t *secondary_ptr;
+            int word_type=classify_word(word_buffer);
+            if (word_type==FORTH_TYPE_NUMBER)
+            {
+                //Number
+                bool negative=false;
+                char *num_ptr=word_buffer;
+                if (*num_ptr=='-')
+                {
+                    negative=true;
+                    num_ptr++;
+                }
+                while (*num_ptr)
+                {
+                    num*=10;
+                    num+=*num_ptr-'0';
+                    num_ptr++;
+                }
+                if (negative) num*=-1;
+            }
+            else if (word_type==FORTH_TYPE_HEX)
+            {
+                //Hex
+                bool negative=false;
+                char *num_ptr=word_buffer;
+                if (*num_ptr=='-')
+                {
+                    negative=true;
+                    num_ptr++;
+                }
+                while (*num_ptr)
+                {
+                    num*=0x10;
+                    if ((*num_ptr>='0')&&(*num_ptr<='9'))
+                        num+=*num_ptr-'0';
+                    else if ((*num_ptr>='a')&&(*num_ptr<='f'))
+                        num+=*num_ptr-'a'+10;
+                    else if ((*num_ptr>='A')&&(*num_ptr<='F'))
+                        num+=*num_ptr-'A'+10;
+                    num_ptr++;
+                }
+                if (negative) num*=-1;
+            } 
+            else if (word_type==FORTH_TYPE_OTHER)
+            {
+                primitive_ID=find_primitive(word_buffer);
+                if (primitive_ID!=-1)
+                {
+                    //Word is primitive
+                    word_type=FORTH_TYPE_PRIMATIVE;
+                }
+                else
+                {
+                    secondary_ptr=find_secondary(word_buffer);
+                    if (secondary_ptr!=NULL)
+                    {
+                        //Word is secondary
+                        word_type=FORTH_TYPE_SECONDARY;
+                    }
+                    else
+                    {
+                        //Word not primitve or secondary - not found
+                        word_type=FORTH_TYPE_NOT_FOUND;
+                    }
+                }
+               
+            }
+            else
+            {
+                //Other value including FORTH_TYPE_NONE which should not be possible
+                //TODO: error!
+            }
 
+            if (engine->state==0)
+            {
+                //Interpret mode
+                if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
+                {
+                    //Number or hex - push to stack
+                    forth_push(engine,num);
+                }
+                else if (word_type==FORTH_TYPE_PRIMATIVE)
+                {
+                    //Primitive
+                    int (*immediate)(struct ForthEngine *engine)=forth_primitives[primitive_ID].immediate;
+                    if (immediate!=NULL)
+                    {
+                        //Primitive has special immediate behavior
+                        immediate(engine);
+                    }
+                    else
+                    {
+                        //No special immediate behavior - execute body
+                        forth_primitives[primitive_ID].body(engine);
+                    }
+                }
+            }
+            else
+            {
+                //Compile mode
+            }
 
+            //Advance past word in source
             start+=word_len;
         }
     }while(word_len>0);
 
     return FORTH_ERROR_NONE;
+}
+
+static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,int text_y,int height,int window_state)
+{
+    //Text buffer to output stack count and stack values (ie "0:12345678")
+    char text_buffer[sizeof("x:xxxxxxxx")];
+
+    //Gray background to left of console window
+    draw_rect(x,y,FORTH_STACK_WIDTH,height,FORTH_STACK_BORDER,FORTH_STACK_BG);
+
+    //Print out Stack title and stack count
+    struct Point pos={text_x,text_y};
+    pos=draw_text("Stack[",pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
+
+    //Stack count should always be less than 256 but limit anyway since only space for three characters on screen
+    uint8_t stack_count=forth_stack_count(engine);
+    text_int32(stack_count,text_buffer);
+    pos=draw_text(text_buffer,pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
+    pos=draw_text("]",pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
+
+    //Print stack values
+    pos.x=text_x;
+    pos.y+=CONS_ROW_HEIGHT;
+    text_buffer[1]=':';
+    for (int i=0;i<FORTH_STACK_SHOW_COUNT;i++)
+    {
+        int index=FORTH_STACK_SHOW_COUNT-i-1;
+        text_buffer[0]=index+'0';
+        if (index<stack_count)
+        {
+            //Stack value to print
+            text_hex32(*(engine->stack+index+1),text_buffer+2,8);
+        }
+        else
+        {
+            //Out of stack values - print placeholder instead
+            strcpy(text_buffer+2," --     ");
+        }
+
+        //Color every other row of stack values slightly darker
+        int32_t color;
+        if ((i&1)==0) color=COL_TRANS;
+        else color=FORTH_STACK_BG2;
+        pos=draw_text(text_buffer,pos,FORTH_STACK_FG,color,false,FONT_5x8);
+
+        //Advance to next stack value
+        pos.y+=CONS_ROW_HEIGHT;
+        pos.x=text_x;
+    }
 }
 
 int forth(int command_ID, struct WindowInfo *windows, int selected_window)
@@ -416,8 +577,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //First definition is empty marking end of definitions
         ((struct ForthWordHeader *)forth_definitions)->size=0;
-        //TODO: remove
-        ((struct ForthWordHeader *)forth_definitions)->name_len=42;
 
         //Init console
         console=&forth->console;
@@ -448,11 +607,17 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Init history
         init_history(console);
 
-        //Init Forth Engine (these values don't change when program is reloaded)
-        forth->engine.stack_upper=(int32_t *)FORTH_STACK_ADDRESS;
+        //Init Forth window
+        forth->draw_stack=true;
+
+        //Init Forth engine pointers (these values don't change when program is reloaded)
+        forth->engine.stack_base=(uintptr_t)FORTH_STACK_ADDRESS;
         forth->engine.stack=(int32_t *)(FORTH_STACK_ADDRESS+FORTH_STACK_SIZE-FORTH_CELL_SIZE);
-        forth->engine.rstack_upper=(int32_t *)FORTH_RSTACK_ADDRESS;
+        forth->engine.rstack_base=(uintptr_t)FORTH_RSTACK_ADDRESS;
         forth->engine.rstack=(int32_t *)(FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE-FORTH_CELL_SIZE);
+
+        //Init Forth engine
+        forth->engine.state=0;
     }
     else
     {
@@ -469,6 +634,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         memcpy(FORTH_RSTACK_ADDRESS,forth->rstack_copy,FORTH_RSTACK_SIZE);
     }
 
+    //Compatibility functions
+    forth_engine_console=console;
+    forth->engine.print=forth_print;
+    forth->engine.max_spaces=FORTH_MAX_SPACES;
+
     //Reset pointers in Forth object
     forth->engine.data=forth->data;
 
@@ -477,6 +647,23 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
     //Set position based on split location
     init_position(console,pos,window.split_state);
+
+    //Display stack if split vertically or no split
+    bool draw_stack;
+    int stack_x,stack_y;
+    int stack_text_x;
+    int stack_text_y;
+    if (((window.split_state==WINDOW_VSPLIT)||(window.split_state==WINDOW_WHOLE))&&(forth->draw_stack))
+    {
+        stack_x=pos.x;
+        stack_y=pos.y;
+        stack_text_x=pos.x;
+        stack_text_y=console->y;
+        console->x+=FORTH_STACK_WIDTH+FORTH_STACK_CONSOLE_X_OFFSET;
+        console->width-=FORTH_STACK_CHAR_WIDTH;
+        draw_stack=true;
+    }
+    else draw_stack=false;
 
     //Main loop
     bool redraw_screen=true;
@@ -505,6 +692,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console);
+
+            //Redraw stack if visible
+            if (draw_stack)
+            {
+                draw_forth_stack(&forth->engine,stack_x,stack_y,stack_text_x,stack_text_y,height,window.split_state);
+            }
                 
             //Return if Redraw only
             if (command_ID==COMMAND_REDRAW) return COMMAND_DONE;
@@ -521,6 +714,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Remap keys for characters not on keypad
         if (key==VKEY_COS) key=VKEY_COLON;
         else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
+        else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
+        else if (key==VKEY_PI) key=VKEY_GREATER_THAN;
 
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;
@@ -550,6 +745,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         break;
                     }
                     
+                    //Color line before ^C added
+                    color_input(console,true);
+
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
                     if (console->input.len>=FORTH_INPUT_MAX-(int)strlen(cancel_text))
@@ -563,14 +761,17 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Fallthrough
                 case VKEY_EXE:
                     //Color input before copying to console since secondaries previously not colored if cursor is on them
-                    color_input(console,true);
+                    if (key==VKEY_EXE) 
+                    {
+                        //If VKEY_EXIT, colored above before ^C added
+                        color_input(console,true);
+                    }
 
                     //Copy input text to console
                     for (int i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
-                    console_char('\n',0,0,console);
                     console->reset_input=true;
 
                     //Process input if EXE pressed (just copy input if ESC)
@@ -582,7 +783,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Process input
                         char input_buffer[FORTH_INPUT_MAX];
                         copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
-                        process_source(input_buffer);
+                        console_text_default(" ",console);
+                        process_source(&forth->engine,input_buffer);
 
                         /*
                         int return_code=
@@ -593,6 +795,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         }
                         */
                     }
+                    console_char('\n',0,0,console);
                     break;
                 case VKEY_UP:
                 case VKEY_DOWN:
