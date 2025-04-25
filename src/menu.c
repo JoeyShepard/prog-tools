@@ -213,12 +213,12 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
         dupdate();
 
         //Wait for kepress
-        int key=getkey_text(true,&modifier);
+        int key=getkey_text(true,&modifier,NULL);
         
         //First, check for menu keys. Simplifies checks for keys like 0 and + after 9.
         for (size_t i=0;i<strlen(menu_keys);i++)
         {
-            if (menu_keys[i]==key_printable[key]) 
+            if (menu_keys[i]==vkey_printable[key]) 
             {
                 //Match found. Record selection and process below with VKEY_EXE.
                 *menu_selection=i;

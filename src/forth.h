@@ -6,6 +6,7 @@
 
     #include "compatibility.h"
     #include "console.h"
+    #include "forth-compatibility.h"
     #include "forth-primitives.h"
     #include "forth-engine.h"
     #include "structs.h"
@@ -52,13 +53,10 @@
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
     #define FORTH_CONSOLE_STRING    "Forth for fx-CG50\n"
+    #define FORTH_PROMPT            ">" 
    
     //History
     #define FORTH_HIST_COUNT    10
-
-    //Forth
-    #define FORTH_WORD_MAX      16
-    #define FORTH_PROMPT        ">" 
 
     //Forth stack display
     #define FORTH_STACK_CHAR_WIDTH          10

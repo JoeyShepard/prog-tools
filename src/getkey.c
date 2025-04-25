@@ -327,226 +327,6 @@ const int key_lower[]=
     VKEY_F6,
 };
 
-const int key_printable[]=
-{
-    0,      //VKEY_NONE
-    0,      //VKEY_ACON
-    '0',    //VKEY_0
-    '.',    //VKEY_DOT
-    0,      //VKEY_EXP
-    0,      //VKEY_NEG
-    0,      //VKEY_EXE
-    '1',    //VKEY_1
-    '2',    //VKEY_2
-    '3',    //VKEY_3
-    '+',    //VKEY_ADD
-    '-',    //VKEY_SUB
-    '4',    //VKEY_4
-    '5',    //VKEY_5
-    '6',    //VKEY_6
-    '*',    //VKEY_MUL
-    '/',    //VKEY_DIV
-    '7',    //VKEY_7
-    '8',    //VKEY_8
-    '9',    //VKEY_9
-    0,      //VKEY_DEL
-    0,      //VKEY_FRAC
-    0,      //VKEY_FD
-    '(',    //VKEY_LEFTP
-    ')',    //VKEY_RIGHTP
-    ',',    //VKEY_COMMA
-    0,      //VKEY_ARROW
-    0,      //VKEY_XOT
-    0,      //VKEY_LOG
-    0,      //VKEY_LN
-    0,      //VKEY_SIN
-    0,      //VKEY_COS
-    0,      //VKEY_TA
-    0,      //VKEY_ALPHA
-    0,      //VKEY_SQUARE
-    '^',    //VKEY_POWER
-    0,      //VKEY_EXIT
-    0,      //VKEY_DOWN
-    0,      //VKEY_RIGHT
-    0,      //VKEY_SHIFT
-    0,      //VKEY_OPTN
-    0,      //VKEY_VARS
-    0,      //VKEY_MENU
-    0,      //VKEY_LEFT
-    0,      //VKEY_UP
-    0,      //VKEY_F1
-    0,      //VKEY_F2
-    0,      //VKEY_F3
-    0,      //VKEY_F4
-    0,      //VKEY_F5
-    0,      //VKEY_F6
-};
-
-const int key_printable_shifted[]=
-{
-    0,      //VKEY_NONE
-    0,      //VKEY_ACON
-    0,      //VKEY_0
-    '=',    //VKEY_DOT
-    0,      //VKEY_EXP
-    0,      //VKEY_NEG
-    0,      //VKEY_EXE
-    0,      //VKEY_1
-    0,      //VKEY_2
-    0,      //VKEY_3
-    '[',    //VKEY_ADD
-    ']',    //VKEY_SUB
-    0,      //VKEY_4
-    0,      //VKEY_5
-    0,      //VKEY_6
-    '{',    //VKEY_MUL
-    '}',    //VKEY_DIV
-    0,      //VKEY_7
-    0,      //VKEY_8
-    0,      //VKEY_9
-    0,      //VKEY_DEL
-    0,      //VKEY_FRAC
-    0,      //VKEY_FD
-    0,      //VKEY_LEFTP
-    0,      //VKEY_RIGHTP
-    0,      //VKEY_COMMA
-    0,      //VKEY_ARROW
-    0,      //VKEY_XOT
-    0,      //VKEY_LOG
-    0,      //VKEY_LN
-    0,      //VKEY_SIN
-    0,      //VKEY_COS
-    0,      //VKEY_TA
-    0,      //VKEY_ALPHA
-    0,      //VKEY_SQUARE
-    0,      //VKEY_POWER
-    0,      //VKEY_EXIT
-    0,      //VKEY_DOWN
-    0,      //VKEY_RIGHT
-    0,      //VKEY_SHIFT
-    0,      //VKEY_OPTN
-    0,      //VKEY_VARS
-    0,      //VKEY_MENU
-    0,      //VKEY_LEFT
-    0,      //VKEY_UP
-    0,      //VKEY_F1
-    0,      //VKEY_F2
-    0,      //VKEY_F3
-    0,      //VKEY_F4
-    0,      //VKEY_F5
-    0,      //VKEY_F6
-};
-
-const int key_printable_upper[]=
-{
-    0,      //VKEY_NONE
-    0,      //VKEY_ACON
-    'Z',    //VKEY_0
-    ' ',    //VKEY_DOT
-    '"',    //VKEY_EXP
-    '-',    //VKEY_NEG
-    0,      //VKEY_EXE
-    'U',    //VKEY_1
-    'V',    //VKEY_2
-    'W',    //VKEY_3
-    'X',    //VKEY_ADD
-    'Y',    //VKEY_SUB
-    'P',    //VKEY_4
-    'Q',    //VKEY_5
-    'R',    //VKEY_6
-    'S',    //VKEY_MUL
-    'T',    //VKEY_DIV
-    'M',    //VKEY_7
-    'N',    //VKEY_8
-    'O',    //VKEY_9
-    0,      //VKEY_DEL
-    'G',    //VKEY_FRAC
-    'H',    //VKEY_FD
-    'I',    //VKEY_LEFTP
-    'J',    //VKEY_RIGHTP
-    'K',    //VKEY_COMMA
-    'L',    //VKEY_ARROW
-    'A',    //VKEY_XOT
-    'B',    //VKEY_LOG
-    'C',    //VKEY_LN
-    'D',    //VKEY_SIN
-    'E',    //VKEY_COS
-    'F',    //VKEY_TA
-    0,      //VKEY_ALPHA
-    0,      //VKEY_SQUARE
-    0,      //VKEY_POWER
-    0,      //VKEY_EXIT
-    0,      //VKEY_DOWN
-    0,      //VKEY_RIGHT
-    0,      //VKEY_SHIFT
-    0,      //VKEY_OPTN
-    0,      //VKEY_VARS
-    0,      //VKEY_MENU
-    0,      //VKEY_LEFT
-    0,      //VKEY_UP
-    0,      //VKEY_F1
-    0,      //VKEY_F2
-    0,      //VKEY_F3
-    0,      //VKEY_F4
-    0,      //VKEY_F5
-    0,      //VKEY_F6
-};
-
-const int key_printable_lower[]=
-{
-    0,      //VKEY_NONE
-    0,      //VKEY_ACON
-    'z',    //VKEY_0
-    ' ',    //VKEY_DOT
-    '"',    //VKEY_EXP
-    '-',    //VKEY_NEG
-    0,      //VKEY_EXE
-    'u',    //VKEY_1
-    'v',    //VKEY_2
-    'w',    //VKEY_3
-    'x',    //VKEY_ADD
-    'y',    //VKEY_SUB
-    'p',    //VKEY_4
-    'q',    //VKEY_5
-    'r',    //VKEY_6
-    's',    //VKEY_MUL
-    't',    //VKEY_DIV
-    'm',    //VKEY_7
-    'n',    //VKEY_8
-    'o',    //VKEY_9
-    0,      //VKEY_DEL
-    'g',    //VKEY_FRAC
-    'h',    //VKEY_FD
-    'i',    //VKEY_LEFTP
-    'j',    //VKEY_RIGHTP
-    'k',    //VKEY_COMMA
-    'l',    //VKEY_ARROW
-    'a',    //VKEY_XOT
-    'b',    //VKEY_LOG
-    'c',    //VKEY_LN
-    'd',    //VKEY_SIN
-    'e',    //VKEY_COS
-    'f',    //VKEY_TA
-    0,      //VKEY_ALPHA
-    0,      //VKEY_SQUARE
-    0,      //VKEY_POWER
-    0,      //VKEY_EXIT
-    0,      //VKEY_DOWN
-    0,      //VKEY_RIGHT
-    0,      //VKEY_SHIFT
-    0,      //VKEY_OPTN
-    0,      //VKEY_VARS
-    0,      //VKEY_MENU
-    0,      //VKEY_LEFT
-    0,      //VKEY_UP
-    0,      //VKEY_F1
-    0,      //VKEY_F2
-    0,      //VKEY_F3
-    0,      //VKEY_F4
-    0,      //VKEY_F5
-    0,      //VKEY_F6
-};
-
 const int vkey_printable[]={
     0,      //VKEY_NONE,
     0,      //VKEY_ACON,
@@ -706,7 +486,9 @@ const int vkey_printable[]={
     ':',    //VKEY_COLON,
     ';',    //VKEY_SEMICOLON,
     '<',    //VKEY_LESS_THAN,
-    '>',    //CKEY_GREATER_THAN,
+    '>',    //VKEY_GREATER_THAN,
+    '@',    //VKEY_AT,
+    '!',    //VKEY_EXCLAMATION,
 };
 
 
@@ -851,24 +633,35 @@ int use_modifier(int modifier)
     return modifier;
 }
 
-int modify_keypress(int modifier, int key)
+int modify_keypress(int modifier,int key,struct KeyRemap *key_list)
 {
-    switch(modifier)
+    //Remap keys on PC for easier debugging
+    int pc_key=wrapper_remap_key(modifier,wrapper_pc_key(),key_list);
+    if (pc_key!=0)
     {
-        case MODIFIER_NONE:
-            return key;
-        case MODIFIER_ALPHA_LOWER:
-            return key_lower[key];
-        case MODIFIER_ALPHA_UPPER:
-            return key_upper[key];
-        case MODIFIER_SHIFT_NONE:
-            return key_shifted[key];
-        default:
-            return key;
+        //Return remapped key - must be running on PC
+        return pc_key;
+    }
+    else
+    {
+        //No remapped key found or running on calculator
+        switch(modifier)
+        {
+            case MODIFIER_NONE:
+                return key;
+            case MODIFIER_ALPHA_LOWER:
+                return key_lower[key];
+            case MODIFIER_ALPHA_UPPER:
+                return key_upper[key];
+            case MODIFIER_SHIFT_NONE:
+                return key_shifted[key];
+            default:
+                return key;
+        }
     }
 }
 
-int getkey_text(bool wait, int *modifier)
+int getkey_text(bool wait, int *modifier,struct KeyRemap *key_list)
 {
     int key=getkey_wrapper(wait);
     if ((key==VKEY_ALPHA)||(key==VKEY_SHIFT))
@@ -882,7 +675,7 @@ int getkey_text(bool wait, int *modifier)
         //Non-modifier key pressed
         int key_modifier=current_modifier(*modifier);
         *modifier=use_modifier(*modifier);
-        int modified_key=modify_keypress(key_modifier,key);
+        int modified_key=modify_keypress(key_modifier,key,key_list);
         return modified_key;
     }
 }

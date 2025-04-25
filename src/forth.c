@@ -9,6 +9,7 @@
 #include "forth-engine.h"
 #include "getkey.h"
 #include "graphics.h"
+#include "key-remap.h"
 #include "text.h"
 #include "manager.h"
 #include "mem.h"
@@ -430,7 +431,6 @@ static int process_source(struct ForthEngine *engine,const char *source)
                         word_type=FORTH_TYPE_NOT_FOUND;
                     }
                 }
-               
             }
             else
             {
@@ -522,6 +522,31 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         pos.y+=CONS_ROW_HEIGHT;
         pos.x=text_x;
     }
+
+    //If full screen, fill remaining space with key legend
+    if (window_state==WINDOW_WHOLE)
+    {
+        const struct KeyText
+        {
+            const char *key;
+            const char *remapped_key;
+            const color_t color;
+        }key_texts[]={
+        {"radian  ","!",COL_ALPHA},
+        {"theta   ","@",COL_ALPHA},
+        {"cos     ",":",FORTH_COL_FG},
+        {"tan     ",";",FORTH_COL_FG},
+        {"i       ","<",COL_SHIFT},
+        {"pi      ",">",COL_SHIFT}};
+
+        for (int i=0;i<ARRAY_SIZE(key_texts);i++)
+        {
+            pos.y+=CONS_ROW_HEIGHT;
+            pos.x=text_x;
+            pos=draw_text(key_texts[i].key,pos,key_texts[i].color,-1,false,FONT_5x8);
+            draw_text(key_texts[i].remapped_key,pos,FORTH_STACK_FG,-1,false,FONT_5x8);
+        }
+    }
 }
 
 int forth(int command_ID, struct WindowInfo *windows, int selected_window)
@@ -610,14 +635,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Init Forth window
         forth->draw_stack=true;
 
-        //Init Forth engine pointers (these values don't change when program is reloaded)
-        forth->engine.stack_base=(uintptr_t)FORTH_STACK_ADDRESS;
-        forth->engine.stack=(int32_t *)(FORTH_STACK_ADDRESS+FORTH_STACK_SIZE-FORTH_CELL_SIZE);
-        forth->engine.rstack_base=(uintptr_t)FORTH_RSTACK_ADDRESS;
-        forth->engine.rstack=(int32_t *)(FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE-FORTH_CELL_SIZE);
-
-        //Init Forth engine
-        forth->engine.state=0;
+        //Init Forth engine 
+        forth_init_engine(&forth->engine,
+            (uintptr_t)FORTH_STACK_ADDRESS,
+            (uintptr_t)FORTH_RSTACK_ADDRESS,
+            FORTH_STACK_ELEMENTS,
+            FORTH_RSTACK_ELEMENTS,
+            FORTH_DATA_SIZE);
     }
     else
     {
@@ -634,13 +658,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         memcpy(FORTH_RSTACK_ADDRESS,forth->rstack_copy,FORTH_RSTACK_SIZE);
     }
 
-    //Compatibility functions
-    forth_engine_console=console;
-    forth->engine.print=forth_print;
-    forth->engine.max_spaces=FORTH_MAX_SPACES;
+    //Compatibility layer settings
+    forth_print_console=console;
 
-    //Reset pointers in Forth object
-    forth->engine.data=forth->data;
+    //Reset pointers in Forth engine
+    forth_reload_engine(&forth->engine,forth->data,forth_print,FORTH_MAX_SPACES);
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);
@@ -648,7 +670,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Set position based on split location
     init_position(console,pos,window.split_state);
 
-    //Display stack if split vertically or no split
+    //Display stack if split vertically or no split but not if split horizontally
     bool draw_stack;
     int stack_x,stack_y;
     int stack_text_x;
@@ -709,10 +731,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         
         //Get key
         int old_modifier=console->modifier;
-        int key=getkey_text(true,&console->modifier);
+        int key=getkey_text(true,&console->modifier,forth_keys);
 
         //Remap keys for characters not on keypad
-        if (key==VKEY_COS) key=VKEY_COLON;
+        if (key==VKEY_RADIAN) key=VKEY_EXCLAMATION;
+        else if (key==VKEY_THETA) key=VKEY_AT;
+        else if (key==VKEY_COS) key=VKEY_COLON;
         else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
         else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
         else if (key==VKEY_PI) key=VKEY_GREATER_THAN;

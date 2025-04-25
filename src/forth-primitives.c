@@ -9,9 +9,22 @@
 //==========
 
 //STORE
-void prim_body_store(struct ForthEngine *engine){}
-int prim_immediate_store(struct ForthEngine *engine){}
-int prim_compile_store(struct ForthEngine *engine){}
+void prim_body_store(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch arguments
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    //Mask address
+    address&=engine->data_mask_32;
+    //Write value to address
+    *(int32_t*)(engine->data+address)=value;
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
 int prim_optimize_store(struct ForthEngine *engine){}
 
 //C_STORE
@@ -241,9 +254,19 @@ int prim_compile_question_dupe(struct ForthEngine *engine){}
 int prim_optimize_question_dupe(struct ForthEngine *engine){}
 
 //FETCH
-void prim_body_fetch(struct ForthEngine *engine){}
-int prim_immediate_fetch(struct ForthEngine *engine){}
-int prim_compile_fetch(struct ForthEngine *engine){}
+void prim_body_fetch(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch arguments
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    //Mask address
+    address&=engine->data_mask_32;
+    //Read from address
+    int32_t value=*(int32_t*)(engine->data+address);
+    //Write value to stack
+    *(uint32_t*)((engine->stack_base)|lower)=value;
+}
 int prim_optimize_fetch(struct ForthEngine *engine){}
 
 //C_FETCH
@@ -292,10 +315,16 @@ int prim_compile_aligned(struct ForthEngine *engine){}
 int prim_optimize_aligned(struct ForthEngine *engine){}
 
 //ALLOT
-void prim_body_allot(struct ForthEngine *engine){}
-int prim_immediate_allot(struct ForthEngine *engine){}
-int prim_compile_allot(struct ForthEngine *engine){}
-int prim_optimize_allot(struct ForthEngine *engine){}
+void prim_body_allot(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    //Fetch amount of bytes to allot
+    int32_t allot_count=*engine->stack;
+    engine->data_ptr=(engine->data_ptr+allot_count)&(engine->data_mask);
+}
 
 //AND
 void prim_body_and(struct ForthEngine *engine)
@@ -449,10 +478,14 @@ int prim_compile_find(struct ForthEngine *engine){}
 int prim_optimize_find(struct ForthEngine *engine){}
 
 //HERE
-void prim_body_here(struct ForthEngine *engine){}
-int prim_immediate_here(struct ForthEngine *engine){}
-int prim_compile_here(struct ForthEngine *engine){}
-int prim_optimize_here(struct ForthEngine *engine){}
+void prim_body_here(struct ForthEngine *engine)
+{
+    //Write stack count
+    *engine->stack=engine->data_ptr;
+    //Advance stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
 
 //I
 void prim_body_i(struct ForthEngine *engine){}
@@ -956,9 +989,24 @@ int prim_compile_unused(struct ForthEngine *engine){}
 int prim_optimize_unused(struct ForthEngine *engine){}
 
 //WITHIN
-void prim_body_within(struct ForthEngine *engine){}
-int prim_immediate_within(struct ForthEngine *engine){}
-int prim_compile_within(struct ForthEngine *engine){}
+void prim_body_within(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch values from stack
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    int32_t max=*(int32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    int32_t min=*(int32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
+    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    //Write value to stack
+    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
+    if ((value>=min)&&(value<=max)) *(int32_t*)((engine->stack_base)|lower)=FORTH_TRUE;
+    else *(int32_t*)((engine->stack_base)|lower)=FORTH_FALSE;
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
 int prim_optimize_within(struct ForthEngine *engine){}
 
 //BACKSLASH
@@ -1014,7 +1062,7 @@ int prim_optimize_compare(struct ForthEngine *engine){}
 //=======
 const struct ForthPrimitive forth_primitives[]=
 {
-    //{"!",1,&prim_immediate_store,&prim_compile_store,&prim_body_store,&prim_optimize_store},
+    {"!",1,NULL,NULL,&prim_body_store,&prim_optimize_store},
     //{"C!",2,&prim_immediate_c_store,&prim_compile_c_store,&prim_body_c_store,&prim_optimize_c_store},
     //{"W!",2,&prim_immediate_w_store,&prim_compile_w_store,&prim_body_w_store,&prim_optimize_w_store},
     //{"'",1,&prim_immediate_tick,&prim_compile_tick,&prim_body_tick,&prim_optimize_tick},
@@ -1039,7 +1087,7 @@ const struct ForthPrimitive forth_primitives[]=
     {">",1,NULL,NULL,&prim_body_greater_than,&prim_optimize_greater_than},
     //{">NUMBER",7,&prim_immediate_to_number,&prim_compile_to_number,&prim_body_to_number,&prim_optimize_to_number},
     //{"?DUP",4,&prim_immediate_question_dupe,&prim_compile_question_dupe,&prim_body_question_dupe,&prim_optimize_question_dupe},
-    //{"@",1,&prim_immediate_fetch,&prim_compile_fetch,&prim_body_fetch,&prim_optimize_fetch},
+    {"@",1,NULL,NULL,&prim_body_fetch,&prim_optimize_fetch},
     //{"C@",2,&prim_immediate_c_fetch,&prim_compile_c_fetch,&prim_body_c_fetch,&prim_optimize_c_fetch},
     //{"W@",2,&prim_immediate_w_fetch,&prim_compile_w_fetch,&prim_body_w_fetch,&prim_optimize_w_fetch},
     //{"QUIT",4,&prim_immediate_quit,&prim_compile_quit,&prim_body_quit,&prim_optimize_quit},
@@ -1047,16 +1095,16 @@ const struct ForthPrimitive forth_primitives[]=
     //{"ACCEPT",6,&prim_immediate_accept,&prim_compile_accept,&prim_body_accept,&prim_optimize_accept},
     //{"ALIGN",5,&prim_immediate_align,&prim_compile_align,&prim_body_align,&prim_optimize_align},
     //{"ALIGNED",7,&prim_immediate_aligned,&prim_compile_aligned,&prim_body_aligned,&prim_optimize_aligned},
-    //{"ALLOT",5,&prim_immediate_allot,&prim_compile_allot,&prim_body_allot,&prim_optimize_allot},
+    {"ALLOT",5,NULL,NULL,&prim_body_allot,NULL},
     {"AND",3,NULL,NULL,&prim_body_and,&prim_optimize_and},
-    //{"BASE",4,&prim_immediate_base,&prim_compile_base,&prim_body_base,&prim_optimize_base},
     //{"BEGIN",5,&prim_immediate_begin,&prim_compile_begin,&prim_body_begin,&prim_optimize_begin},
     {"BL",2,NULL,NULL,&prim_body_b_l,NULL},
     {"CELLS",5,NULL,NULL,&prim_body_cells,NULL},
     //{"CHAR",4,&prim_immediate_char,&prim_compile_char,&prim_body_char,&prim_optimize_char},
     //{"CONSTANT",8,&prim_immediate_constant,&prim_compile_constant,&prim_body_constant,&prim_optimize_constant},
+    //Shortcut for CONSTANT
+    //{"CONST",8,&prim_immediate_const,&prim_compile_const,&prim_body_const,&prim_optimize_const},
     {"CR",2,NULL,NULL,&prim_body_c_r,NULL},
-    //{"DECIMAL",7,&prim_immediate_decimal,&prim_compile_decimal,&prim_body_decimal,&prim_optimize_decimal},
     {"DEPTH",5,NULL,NULL,&prim_body_depth,NULL},
     //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do,&prim_optimize_do},
     {"DROP",4,NULL,NULL,&prim_body_drop,&prim_optimize_drop},
@@ -1065,7 +1113,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"EMIT",4,NULL,NULL,&prim_body_emit,NULL},
     //{"EXIT",4,&prim_immediate_exit,&prim_compile_exit,&prim_body_exit,&prim_optimize_exit},
     //{"FILL",4,&prim_immediate_fill,&prim_compile_fill,&prim_body_fill,&prim_optimize_fill},
-    //{"HERE",4,&prim_immediate_here,&prim_compile_here,&prim_body_here,&prim_optimize_here},
+    {"HERE",4,NULL,NULL,&prim_body_here,NULL},
     //{"I",1,&prim_immediate_i,&prim_compile_i,&prim_body_i,&prim_optimize_i},
     //{"IF",2,&prim_immediate_if,&prim_compile_if,&prim_body_if,&prim_optimize_if},
     //{"IMMEDIATE",9,&prim_immediate_immediate,&prim_compile_immediate,&prim_body_immediate,&prim_optimize_immediate},
@@ -1108,8 +1156,10 @@ const struct ForthPrimitive forth_primitives[]=
     {"<>",2,NULL,NULL,&prim_body_not_equals,&prim_optimize_not_equals},
     //{"AGAIN",5,&prim_immediate_again,&prim_compile_again,&prim_body_again,&prim_optimize_again},
     //{"CASE",4,&prim_immediate_case,&prim_compile_case,&prim_body_case,&prim_optimize_case},
+    //{"ENDCASE",7,&prim_immediate_endcase,&prim_compile_endcase,&prim_body_endcase,&prim_optimize_endcase},
+    //{"OF",2,&prim_immediate_of,&prim_compile_of,&prim_body_of,&prim_optimize_of},
+    //{"ENDOF",5,&prim_immediate_endof,&prim_compile_endof,&prim_body_endof,&prim_optimize_endof},
     {"FALSE",5,NULL,NULL,&prim_body_false,&prim_optimize_false},
-    //{"HEX",3,&prim_immediate_hex,&prim_compile_hex,&prim_body_hex,&prim_optimize_hex},
     {"NIP",3,NULL,NULL,&prim_body_nip,&prim_optimize_nip},
     //{"PICK",4,&prim_immediate_pick,&prim_compile_pick,&prim_body_pick,&prim_optimize_pick},
     //{"ROLL",4,&prim_immediate_roll,&prim_compile_roll,&prim_body_roll,&prim_optimize_roll},
@@ -1117,7 +1167,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"TRUE",4,NULL,NULL,&prim_body_true,&prim_optimize_true},
     {"TUCK",4,NULL,NULL,&prim_body_tuck,&prim_optimize_tuck},
     //{"UNUSED",6,&prim_immediate_unused,&prim_compile_unused,&prim_body_unused,&prim_optimize_unused},
-    //{"WITHIN",6,&prim_immediate_within,&prim_compile_within,&prim_body_within,&prim_optimize_within},
+    {"WITHIN",6,NULL,NULL,&prim_body_within,&prim_optimize_within},
     //{"\\",1,&prim_immediate_backslash,&prim_compile_backslash,&prim_body_backslash,&prim_optimize_backslash},
     //{".S",2,&prim_immediate_dot_s,&prim_compile_dot_s,&prim_body_dot_s,&prim_optimize_dot_s},
     //{"?",1,&prim_immediate_question,&prim_compile_question,&prim_body_question,&prim_optimize_question},

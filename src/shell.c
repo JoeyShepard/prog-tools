@@ -1269,7 +1269,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
         
         //Get key
         int old_modifier=console->modifier;
-        int key=getkey_text(true,&console->modifier);
+        int key=getkey_text(true,&console->modifier,NULL);
 
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;

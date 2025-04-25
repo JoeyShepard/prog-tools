@@ -37,6 +37,15 @@
     //Compatibility functions take color as int32_t to pass transparency as 0xFFFFFFFF
     #define COL_TRANS       -1  
 
+    //Key remapping for PC so typing is easier
+    struct KeyRemap
+    {
+        int key;
+        int modifier;
+        int new_key;
+    };
+
+    //Global variables
     extern uint8_t *heap;
     extern uint8_t *xram;
     extern uint8_t *yram;
@@ -44,11 +53,13 @@
     extern uint8_t *xram_base;
     extern uint8_t *yram_base;
 
-    //Functions on both PC and CG50
+    //Functions common to PC and CG50 (some are empty)
     void setup(int scale_factor,int tick_ms);
     void delay();
     void wrapper_exit();
     void wrapper_screenshot();
+    int wrapper_pc_key();
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *keys);
     char *wrapper_normalize_path(const char *path,int local_path_max);
 
     #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
@@ -148,7 +159,7 @@
         //structs
         typedef struct
         {
-            uint time	:16;	/* Time of event, unique over short periods */
+            uint time	:16;/* Time of event, unique over short periods */
 
             uint		:2;	/* Reserved for future use */
 

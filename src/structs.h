@@ -25,25 +25,4 @@
         int tab_index;
     };
 
-    struct ForthEngine
-    {
-        //Data stack
-        uintptr_t stack_base;
-        int32_t *stack;
-
-        //Return stack
-        uintptr_t rstack_base;
-        int32_t *rstack;
-
-        //Data area - like dictionary but no definitions stored there
-        uint8_t *data;
-
-        //Compilation flags
-        uint8_t state;
-
-        //Compatibility functions - set at initialization so engine can adapt to different systems
-        void (*print)(const char *text);
-        int32_t max_spaces;
-    };
-
 #endif

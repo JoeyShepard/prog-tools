@@ -116,7 +116,7 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
         }
         redraw=true;
         
-        int key=getkey_text(true,&modifier);
+        int key=getkey_text(true,&modifier,NULL);
 
         //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
         switch (key)

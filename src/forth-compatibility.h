@@ -2,12 +2,19 @@
 
 #ifndef __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY
     #define __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY
-
+    
+    #include "compatibility.h"
     #include "structs.h"
 
-    #define FORTH_MAX_SPACES    1500    //Max for SPACES primitive
+    #define FORTH_WORD_MAX          16      //Max size of word in source
+    
+    //Element count must be power of 2!
+    #define FORTH_STACK_ELEMENTS    256
+    #define FORTH_RSTACK_ELEMENTS   256
+    #define FORTH_COMPAT_STACKS     xram    //Pointer to memory where stack and rstack are stored
+    #define FORTH_MAX_SPACES        1500    //Max for SPACES primitive
 
-    extern struct ConsoleInfo *forth_engine_console;
+    extern struct ConsoleInfo *forth_print_console;
 
     void forth_print(const char *text);
 

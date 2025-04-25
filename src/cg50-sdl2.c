@@ -56,6 +56,17 @@
         //Empty function for compatibility
     }
 
+    int wrapper_pc_key()
+    {
+        return 0;
+    }
+
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *key_list)
+    {
+        //No keys to remap on calculator
+        return 0;
+    }
+
     char *wrapper_normalize_path(const char *path,int local_path_max)
     {
         //Silence unused variable warning
@@ -76,7 +87,9 @@
     int global_scale_factor;
     int global_delay_ms;
     #define KEYS_SIZE 100
-    unsigned int keys[KEYS_SIZE];
+    int keys[KEYS_SIZE];
+    int pc_keys[KEYS_SIZE];
+    int pc_scancode;
     int keys_start=0,keys_end=0;
     uint8_t *heap;
     uint8_t *xram;
@@ -214,6 +227,7 @@
                     break;
                 case SDL_KEYDOWN:
                     keys[keys_end]=wrapper_convert_key(event.key.keysym.scancode);
+                    pc_keys[keys_end]=event.key.keysym.scancode;
                     keys_end=(keys_end+1)%KEYS_SIZE;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -281,6 +295,9 @@
         //Draw to texture
         renderer=SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
         texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB565,SDL_TEXTUREACCESS_STREAMING,DWIDTH,DHEIGHT);
+
+        //Scancode of last key pressed
+        pc_scancode=0;
     }
 
     void delay()
@@ -311,6 +328,52 @@
         FILE *fptr=fopen("screenshot/screenshot.raw","w");
         fwrite(screen,2,DWIDTH*DHEIGHT,fptr);
         fclose(fptr);
+    }
+
+    int wrapper_pc_key()
+    {
+        //Return PC scancode of last returned by getkey_opt
+        return pc_scancode;
+    }
+
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
+    {
+
+        printf("%d %d\n",modifier,key);
+
+        if (conversions==NULL)
+        {
+            //No list of conversions
+            return 0;
+        }
+        
+        while (1)
+        {
+            if ((conversions->key==0)&&(conversions->modifier==0))
+            {
+                //End of list - no conversion found
+                return 0;
+            }
+            else if ((conversions->key==key)&&(conversions->modifier==modifier))
+            {
+                printf("Found: %d\n",conversions->new_key);
+
+                //Key conversion found
+                return conversions->new_key;
+            }
+            conversions++;
+        }
+    }
+
+    char *wrapper_normalize_path(const char *path,int local_path_max)
+    {
+        char result_path[PATH_MAX+1];
+        char *ptr=realpath(path,result_path);
+        if (ptr==NULL) return NULL;
+        if (strlen(result_path)>local_path_max-1) return NULL;
+        char *return_path=malloc(local_path_max);
+        strcpy(return_path,result_path);
+        return return_path;
     }
 
     //Replacements for gint functions
@@ -356,6 +419,7 @@
                 {
                     ret_val.type=KEYEV_DOWN;
                     ret_val.key=keys[keys_start];
+                    pc_scancode=pc_keys[keys_start];
                     keys_start=(keys_start+1)%KEYS_SIZE;
                     return ret_val;
                 }
@@ -368,6 +432,7 @@
             {
                 ret_val.type=KEYEV_DOWN;
                 ret_val.key=keys[keys_start];
+                pc_scancode=pc_keys[keys_start];
                 keys_start=(keys_start+1)%KEYS_SIZE;
             }
             else ret_val.type=KEYEV_NONE;
@@ -386,15 +451,5 @@
         //Empty function for compatibility
     }
 
-    char *wrapper_normalize_path(const char *path,int local_path_max)
-    {
-        char result_path[PATH_MAX+1];
-        char *ptr=realpath(path,result_path);
-        if (ptr==NULL) return NULL;
-        if (strlen(result_path)>local_path_max-1) return NULL;
-        char *return_path=malloc(local_path_max);
-        strcpy(return_path,result_path);
-        return return_path;
-    }
 #endif
 
