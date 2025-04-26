@@ -338,15 +338,11 @@
 
     int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
     {
-
-        printf("%d %d\n",modifier,key);
-
         if (conversions==NULL)
         {
             //No list of conversions
             return 0;
         }
-        
         while (1)
         {
             if ((conversions->key==0)&&(conversions->modifier==0))
@@ -356,8 +352,6 @@
             }
             else if ((conversions->key==key)&&(conversions->modifier==modifier))
             {
-                printf("Found: %d\n",conversions->new_key);
-
                 //Key conversion found
                 return conversions->new_key;
             }

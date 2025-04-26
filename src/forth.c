@@ -514,7 +514,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
 
         //Color every other row of stack values slightly darker
         int32_t color;
-        if ((i&1)==0) color=COL_TRANS;
+        if ((i&1)==0) color=FORTH_STACK_BG;
         else color=FORTH_STACK_BG2;
         pos=draw_text(text_buffer,pos,FORTH_STACK_FG,color,false,FONT_5x8);
 
@@ -523,9 +523,16 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         pos.x=text_x;
     }
 
-    //If full screen, fill remaining space with key legend
+    //Bottom line of last stack value is one pixel too tall so overwrite to match the others.
+    draw_line_horz(x,x+FORTH_STACK_WIDTH-1,pos.y,FORTH_STACK_BG);
+
+    //If full screen, fill remaining space with key legend and typing suggestion
     if (window_state==WINDOW_WHOLE)
     {
+        //Small gap after stack display so easier to see
+        pos.y+=FORTH_LEGEND_OFFSET1;
+        
+        //Key legend
         const struct KeyText
         {
             const char *key;
@@ -534,6 +541,8 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         }key_texts[]={
         {"radian  ","!",COL_ALPHA},
         {"theta   ","@",COL_ALPHA},
+        {"ln      ","'",FORTH_COL_FG},
+        {"sin     ","?",FORTH_COL_FG},
         {"cos     ",":",FORTH_COL_FG},
         {"tan     ",";",FORTH_COL_FG},
         {"i       ","<",COL_SHIFT},
@@ -541,11 +550,25 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
 
         for (int i=0;i<ARRAY_SIZE(key_texts);i++)
         {
-            pos.y+=CONS_ROW_HEIGHT;
-            pos.x=text_x;
             pos=draw_text(key_texts[i].key,pos,key_texts[i].color,-1,false,FONT_5x8);
             draw_text(key_texts[i].remapped_key,pos,FORTH_STACK_FG,-1,false,FONT_5x8);
+            pos.y+=CONS_ROW_HEIGHT;
+            pos.x=text_x;
         }
+
+        //Typing suggestion
+        pos.y+=FORTH_LEGEND_OFFSET2;
+        pos=draw_char(CHAR_RIGHT_ARROW,pos,FORTH_COL_FG,-1,false,FONT_5x8);
+        draw_text(" for word",pos,FORTH_COL_FG,-1,false,FONT_5x8);
+        pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
+        pos.x=text_x;
+        draw_text("ACCEPTy",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
+        pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
+        pos.x=text_x;
+        draw_text("ALIGN",pos,FORTH_COL_PRIMITIVE,-1,false,FONT_5x8);
+        pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
+        pos.x=text_x;
+        draw_text("ALIGNED",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
     }
 }
 
@@ -736,10 +759,16 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Remap keys for characters not on keypad
         if (key==VKEY_RADIAN) key=VKEY_EXCLAMATION;
         else if (key==VKEY_THETA) key=VKEY_AT;
+        else if (key==VKEY_LN) key=VKEY_APOSTROPHE;
+        else if (key==VKEY_SIN) key=VKEY_QUESTION;
         else if (key==VKEY_COS) key=VKEY_COLON;
         else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
         else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
         else if (key==VKEY_PI) key=VKEY_GREATER_THAN;
+        
+        //Remap existing keys on keypad for convenience
+        if (key==VKEY_XOT) key=VKEY_x;
+        else if (key==VKEY_NEG) key=VKEY_SPACE;
 
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;
@@ -782,14 +811,19 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
                     add_input_text(cancel_text,FORTH_COL_FG,FORTH_COL_BG,false,console);
 
-                    //Fallthrough
-                case VKEY_EXE:
-                    //Color input before copying to console since secondaries previously not colored if cursor is on them
-                    if (key==VKEY_EXE) 
+                    //Copy input text to console
+                    for (int i=0;i<console->input.len;i++)
                     {
-                        //If VKEY_EXIT, colored above before ^C added
-                        color_input(console,true);
+                        console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
+                    console->reset_input=true;
+                    break;
+                case VKEY_EXE:
+                    //Only process if text exists
+                    if (console->input.len==console->input.start) break;
+
+                    //Color input before copying to console since secondaries previously not colored if cursor is on them
+                    color_input(console,true);
 
                     //Copy input text to console
                     for (int i=0;i<console->input.len;i++)
@@ -798,27 +832,23 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
                     console->reset_input=true;
 
-                    //Process input if EXE pressed (just copy input if ESC)
-                    if (key==VKEY_EXE)
-                    {
-                        //Add input to history
-                        add_history(console);
-                        
-                        //Process input
-                        char input_buffer[FORTH_INPUT_MAX];
-                        copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
-                        console_text_default(" ",console);
-                        process_source(&forth->engine,input_buffer);
+                    //Add input to history
+                    add_history(console);
+                    
+                    //Process input
+                    char input_buffer[FORTH_INPUT_MAX];
+                    copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
+                    console_text_default(" ",console);
+                    process_source(&forth->engine,input_buffer);
 
-                        /*
-                        int return_code=
-                        if (return_code!=COMMAND_NONE)
-                        {
-                            //Return to window manager to process any return code such as closing console
-                            return return_code;
-                        }
-                        */
+                    /*
+                    int return_code=
+                    if (return_code!=COMMAND_NONE)
+                    {
+                        //Return to window manager to process any return code such as closing console
+                        return return_code;
                     }
+                    */
                     console_char('\n',0,0,console);
                     break;
                 case VKEY_UP:

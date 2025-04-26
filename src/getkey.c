@@ -489,6 +489,8 @@ const int vkey_printable[]={
     '>',    //VKEY_GREATER_THAN,
     '@',    //VKEY_AT,
     '!',    //VKEY_EXCLAMATION,
+    '\'',   //VKEY_APOSTROPHE
+    '?',    //VKEY_QUESTION
 };
 
 

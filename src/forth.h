@@ -70,6 +70,10 @@
     //Small adjustments to align stack display and console
     #define FORTH_STACK_CONSOLE_X_OFFSET    1
     #define FORTH_STACK_WIDTH_OFFSET        1
+    //Small adjustments to align key legend below stack display
+    #define FORTH_LEGEND_OFFSET1            4
+    #define FORTH_LEGEND_OFFSET2            7
+    #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
 
     //Forth memory

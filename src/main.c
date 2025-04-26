@@ -20,6 +20,12 @@ shift+enter for new line in Forth
 forth variables are IDs 0-255 so faster (not locals)
 - words and create are 256 and up
 in Forth console, cursor in last column is one pixel too wide
+default forth data size should be smaller
+sign extend for c@ and w@
+key modifier in cursor?
+command suggestion in status area
+recheck syntax highlighter for : since colors primatives as secondary name
+stagger key legend to take up less room
 */
 
 

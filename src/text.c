@@ -10,10 +10,11 @@
 static uint8_t font_5x8[]=
 {
     //Custom characters
-    0xFF,0xFF,0xFF,0xFF,0xFF,             // solid block cursor
+    8,8,0x3E,0x1C,8,                      // Right arrow symbol from keypad   
+    0xFF,0xFF,0xFF,0xFF,0xFF,             // Solid block cursor
 
     //Normal characters
-    0,0,0,0,0,                            // space
+    0,0,0,0,0,                            // Space
     0x0,0x6F,0x6F,0x0,0x0,                // !
     5,3,0,5,3,                            // "
     0x14,0x3E,0x14,0x3E,0x14,             // #

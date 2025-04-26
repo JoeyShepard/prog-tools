@@ -13,14 +13,14 @@ rename sdl2
 vsplit vim src/cg50-sdl2.c
 
 window vim src/getkey.h
-rename key
+rename keys
 vsplit vim src/getkey.c
 
 window vim src/structs.h
 rename structs
 
 window vim src/text.h
-rename txt
+rename text
 vsplit vim src/text.c
 
 window vim src/mem.h

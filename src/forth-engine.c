@@ -35,13 +35,20 @@ void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(
 //Called when program first starts and when user resets environment but not on program switch
 void forth_reset_engine(struct ForthEngine *engine)
 {
-    //Reset stack pointers
-    engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
-    engine->rstack=(int32_t*)(engine->rstack_base+(engine->rstack_count-1)*FORTH_CELL_SIZE);
-
     //Reset engine variables
     engine->state=false;
     engine->data_ptr=0;
+
+    //Reset stack pointers
+    forth_reset_engine_stacks(engine);
+}
+
+//Called when program first starts and when user resets environment but not on program switch
+void forth_reset_engine_stacks(struct ForthEngine *engine)
+{
+    //Reset stack pointers
+    engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
+    engine->rstack=(int32_t*)(engine->rstack_base+(engine->rstack_count-1)*FORTH_CELL_SIZE);
 }
 
 int forth_stack_count(struct ForthEngine *engine)

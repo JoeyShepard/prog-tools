@@ -6,17 +6,18 @@
     #include "structs.h"
 
     //Custom characters - same numbering for all fonts
-    #define CUSTOM_CURSOR           31  //solid cursor
+    #define CHAR_RIGHT_ARROW        30  //Right arrow symbol from keypad
+    #define CHAR_CUSTOM_CURSOR      31  //solid cursor
 
-    #define CHAR_PRINTABLE_MIN      31  //First printable character
+    #define CHAR_PRINTABLE_MIN      30  //First printable character
     #define CHAR_PRINTABLE_MAX      126 //Last printable character
 
     #define TEXT_INT32_SIZE         12  //max 10 digits, 1 for - sign, 1 for terminator
     #define TEXT_HEX32_SIZE         9   //max 8 digits, 1 for terminator
     #define TEXT_INT32_COMMAS_SIZE  15  //max 10 digits, max 3 commas, 1 for - sign, 1 for terminator 
-    #define TEXT_INT32_HUMAN_SIZE   6   //max len of: 999,0.99k 9.99K, 99.9K, 999K, 9.99M
+    #define TEXT_INT32_HUMAN_SIZE   6   //max len of: 999, 0.99k, 9.99K, 99.9K, 999K, 9.99M
 
-    #define FONT_HORZ_SPACING       1   //space between letters
+    #define FONT_HORZ_SPACING       1   //Count of pixels between letters
 
     enum FontSizes
     {

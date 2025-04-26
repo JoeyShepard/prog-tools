@@ -67,6 +67,7 @@
         uint32_t stack_count,uint32_t rstack_count,uint32_t data_size);
     void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),int32_t max_spaces);
     void forth_reset_engine(struct ForthEngine *engine);
+    void forth_reset_engine_stacks(struct ForthEngine *engine);
     int forth_stack_count(struct ForthEngine *engine);
     void forth_push(struct ForthEngine *engine,int32_t value);
     
