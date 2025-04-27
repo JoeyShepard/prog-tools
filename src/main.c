@@ -26,6 +26,10 @@ key modifier in cursor?
 command suggestion in status area
 recheck syntax highlighter for : since colors primatives as secondary name
 stagger key legend to take up less room
+console - only copy to history if different from last
+
+buffer stack_base in primitives? need to check disassembly
+
 */
 
 

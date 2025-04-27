@@ -5,7 +5,7 @@
 
 //Called only once when program first starts
 void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t rstack_base,
-    uint32_t stack_count,uint32_t rstack_count,uint32_t data_size)
+    uint32_t stack_count,uint32_t rstack_count,uint32_t data_size,color_t color_primitive)
 {
     //Init Forth engine pointers (these values never change)
     engine->stack_base=stack_base;
@@ -20,15 +20,20 @@ void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t
     engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
     engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
 
+    //Set output colors if used
+    engine->color_primitive=color_primitive;
+
     //Reset stack pointers and compilation variables
     forth_reset_engine(engine);
 }
 
 //Called when program first starts and on program switch
-void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),int32_t max_spaces)
+void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),
+    void (*print_color)(const char *text,color_t color),int32_t max_spaces)
 {
     engine->data=data;
-    engine->print=forth_print;
+    engine->print=print;
+    engine->print_color=print_color;
     engine->max_spaces=max_spaces;
 }
 

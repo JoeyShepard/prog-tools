@@ -562,7 +562,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         draw_text(" for word",pos,FORTH_COL_FG,-1,false,FONT_5x8);
         pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
         pos.x=text_x;
-        draw_text("ACCEPTy",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
+        draw_text("ACCEPT",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
         pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
         pos.x=text_x;
         draw_text("ALIGN",pos,FORTH_COL_PRIMITIVE,-1,false,FONT_5x8);
@@ -664,7 +664,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             (uintptr_t)FORTH_RSTACK_ADDRESS,
             FORTH_STACK_ELEMENTS,
             FORTH_RSTACK_ELEMENTS,
-            FORTH_DATA_SIZE);
+            FORTH_DATA_SIZE,
+            FORTH_COL_PRIMITIVE);
     }
     else
     {
@@ -685,7 +686,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     forth_print_console=console;
 
     //Reset pointers in Forth engine
-    forth_reload_engine(&forth->engine,forth->data,forth_print,FORTH_MAX_SPACES);
+    forth_reload_engine(&forth->engine,forth->data,forth_print,forth_print_color,FORTH_MAX_SPACES);
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);

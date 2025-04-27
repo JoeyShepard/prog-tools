@@ -58,14 +58,17 @@
 
         //Compatibility functions - set at initialization so engine can adapt to different systems
         void (*print)(const char *text);
+        void (*print_color)(const char *text,color_t color);
         int32_t max_spaces;
+        color_t color_primitive;
     };
 
     //Functions
     //=========
     void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t rstack_base,
-        uint32_t stack_count,uint32_t rstack_count,uint32_t data_size);
-    void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),int32_t max_spaces);
+        uint32_t stack_count,uint32_t rstack_count,uint32_t data_size,color_t color);
+    void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),
+        void (*print_color)(const char *text,color_t color),int32_t max_spaces);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);
     int forth_stack_count(struct ForthEngine *engine);
