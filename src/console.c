@@ -132,6 +132,11 @@ void console_char(char character, color_t fg, color_t bg, struct ConsoleInfo *co
     if (console->buffer_index==CONS_BUFFER_SIZE) console->buffer_index=0;
 }
 
+void console_char_default(char character, struct ConsoleInfo *console)
+{
+    console_char(character,console->text_col_fg,console->text_col_bg,console);
+}
+
 void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
     while (*text)
@@ -426,7 +431,7 @@ void add_history(struct ConsoleInfo *console)
         console->history_count++;
 }
 
-void history_key(struct ConsoleInfo *console,int key)
+void console_key(struct ConsoleInfo *console,int key)
 {
     switch(key)
     {

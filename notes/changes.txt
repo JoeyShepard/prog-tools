@@ -1,0 +1,17 @@
+differences from other forths
+- no recurse word needed
+- no unloop needed
+- redefined words also apply to compiled words
+- dictionary is data only - no word definitions or headers
+- stacks and dictionary wrap - no under/overflow checking
+- no combined primitives like 1+ or 0= unless needed
+- compiled words can't access outer interpretter
+- alignment behavior
+- no base - either decimal or 0x for hex
+  - no hex or decimal words
+- state returns state not address of state
+- no \ on keypad so use (
+- dictionary size is power of 2 so negative addresses work
+- if/do/begin typed so cant mix up
+- >NUMBER takes different number and type of arguments and works with negatives
+- KEY takes argument for waiting or not waiting

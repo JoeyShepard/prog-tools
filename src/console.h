@@ -31,9 +31,9 @@
     //==========
     struct ConsoleChar
     {
-        char character;
         color_t fg;
         color_t bg;
+        char character;
     };
 
     struct ConsoleInput
@@ -93,6 +93,7 @@
     void init_history(struct ConsoleInfo *console);
     void init_position(struct ConsoleInfo *console,struct Point pos,int split_state);
     void console_char(char character, color_t fg, color_t bg, struct ConsoleInfo *console);
+    void console_char_default(char character, struct ConsoleInfo *console);
     void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console);
     void console_text_default(const char *text, struct ConsoleInfo *console);
     void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
@@ -101,7 +102,7 @@
     void draw_console(struct ConsoleInfo *console);
     void reset_console(struct ConsoleInfo *console);
     void add_history(struct ConsoleInfo *console);
-    void history_key(struct ConsoleInfo *console,int key);
+    void console_key(struct ConsoleInfo *console,int key);
     void copy_console_text(struct ConsoleInput *input,char *input_buffer,int input_size,int offset);
     int console_strlen(struct ConsoleChar *text);
     void input_deep_copy(struct ConsoleInput *dest,struct ConsoleInput *source,int elements);

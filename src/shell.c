@@ -1349,7 +1349,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                     //DEL with alpha active - treat as DEL so don't need to remove alpha to delete
                     //Fallthrough!
                 case VKEY_DEL:
-                    history_key(console,key);
+                    console_key(console,key);
                     break;
                 default:
                     //Check for sys_keys like MENU, OFF, etc

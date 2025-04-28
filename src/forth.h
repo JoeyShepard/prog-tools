@@ -59,7 +59,7 @@
     #define FORTH_HIST_COUNT    10
 
     //Forth stack display
-    #define FORTH_STACK_CHAR_WIDTH          10
+    #define FORTH_STACK_CHAR_WIDTH          10  //Width of stack display in characters
     #define FORTH_STACK_FONT_WIDTH          5   //5x8 font
     #define FORTH_STACK_WIDTH               ((FORTH_STACK_FONT_WIDTH+FONT_HORZ_SPACING)*FORTH_STACK_CHAR_WIDTH+FONT_HORZ_SPACING)
     #define FORTH_STACK_FG                  COL_WHITE
@@ -83,9 +83,9 @@
     //=====
     enum ForthParse
     {
-        FORTH_PARSE_NONE,
         FORTH_PARSE_WORD
     };
+
     enum ForthCharClass
     {
         FORTH_CHAR_MINUS,
@@ -113,12 +113,13 @@
         FORTH_TYPE_OTHER,
     };
 
-    //Not different from enum ForthEngineErrors
-    enum ForthErrors
+    //Note different from enum ForthEngineErrors
+    enum ForthCompileErrors
     {
         FORTH_ERROR_NONE,
         FORTH_ERROR_TOO_LONG,
         FORTH_ERROR_INTERNAL,
+        FORTH_ERROR_ENGINE
     };
 
     //structs

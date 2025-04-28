@@ -207,6 +207,7 @@
     extern const int key_printable_upper[];
     extern const int key_printable_lower[];
     extern const int vkey_printable[];
+    extern const int vkey_printable_len;
 
     //Functions
     int getkey_wrapper(bool wait);              

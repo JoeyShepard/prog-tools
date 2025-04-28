@@ -129,6 +129,12 @@ static uint8_t *find_secondary(const char *word)
 
 static uint32_t next_word(struct ConsoleInfo *console,uint32_t *start)
 {
+    enum ForthParse
+    {
+        FORTH_PARSE_NONE,
+        FORTH_PARSE_WORD
+    };
+
     int parse_state=FORTH_PARSE_NONE;
     uint32_t len=0;
     for (uint32_t i=*start;i<console->input.len;i++)
@@ -158,6 +164,12 @@ static uint32_t next_word(struct ConsoleInfo *console,uint32_t *start)
 
 static uint32_t next_word_source(const char *source,uint32_t *start)
 {
+    enum ForthParse
+    {
+        FORTH_PARSE_NONE,
+        FORTH_PARSE_WORD
+    };
+
     int parse_state=FORTH_PARSE_NONE;
     uint32_t len=0;
     uint32_t index=*start;
@@ -438,6 +450,10 @@ static int process_source(struct ForthEngine *engine,const char *source)
                 //TODO: error!
             }
 
+            //Advance past word in source
+            start+=word_len;
+
+            //Handle word depending on state
             if (engine->state==0)
             {
                 //Interpret mode
@@ -453,7 +469,15 @@ static int process_source(struct ForthEngine *engine,const char *source)
                     if (immediate!=NULL)
                     {
                         //Primitive has special immediate behavior
-                        immediate(engine);
+                        engine->source=source;
+                        engine->source_index=&start;
+                        int result=immediate(engine);
+                        if (result!=FORTH_ENGINE_ERROR_NONE)
+                        {
+                            //Error in word - return to caller
+                            engine->error=result;
+                            return FORTH_ERROR_ENGINE;
+                        }
                     }
                     else
                     {
@@ -466,9 +490,6 @@ static int process_source(struct ForthEngine *engine,const char *source)
             {
                 //Compile mode
             }
-
-            //Advance past word in source
-            start+=word_len;
         }
     }while(word_len>0);
 
@@ -665,6 +686,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             FORTH_STACK_ELEMENTS,
             FORTH_RSTACK_ELEMENTS,
             FORTH_DATA_SIZE,
+            forth_print,
+            forth_print_color,
+            forth_accept,
+            forth_getkey,
+            forth_printable,
+            FORTH_MAX_SPACES,
+            CONS_WHOLE_WIDTH-FORTH_STACK_CHAR_WIDTH,
             FORTH_COL_PRIMITIVE);
     }
     else
@@ -683,10 +711,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     }
 
     //Compatibility layer settings
-    forth_print_console=console;
+    forth_console=console;
 
     //Reset pointers in Forth engine
-    forth_reload_engine(&forth->engine,forth->data,forth_print,forth_print_color,FORTH_MAX_SPACES);
+    forth_reload_engine(&forth->engine,forth->data);
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);
@@ -757,20 +785,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         int old_modifier=console->modifier;
         int key=getkey_text(true,&console->modifier,forth_keys);
 
-        //Remap keys for characters not on keypad
-        if (key==VKEY_RADIAN) key=VKEY_EXCLAMATION;
-        else if (key==VKEY_THETA) key=VKEY_AT;
-        else if (key==VKEY_LN) key=VKEY_APOSTROPHE;
-        else if (key==VKEY_SIN) key=VKEY_QUESTION;
-        else if (key==VKEY_COS) key=VKEY_COLON;
-        else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
-        else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
-        else if (key==VKEY_PI) key=VKEY_GREATER_THAN;
+        //Remap keys for Forth
+        key=forth_key_remap(key);
         
-        //Remap existing keys on keypad for convenience
-        if (key==VKEY_XOT) key=VKEY_x;
-        else if (key==VKEY_NEG) key=VKEY_SPACE;
-
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;
         else redraw_modifier=false;
@@ -842,6 +859,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     console_text_default(" ",console);
                     process_source(&forth->engine,input_buffer);
 
+                    //Check engine state and error if in compile state or word not complete like [
+
                     /*
                     int return_code=
                     if (return_code!=COMMAND_NONE)
@@ -862,7 +881,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //DEL with alpha active - treat as DEL so don't need to remove alpha to delete
                     //Fallthrough!
                 case VKEY_DEL:
-                    history_key(console,key);
+                    console_key(console,key);
                     break;
                 default:
                     //Check for system keys like MENU, OFF, etc

@@ -30,7 +30,8 @@
     
     enum ForthEngineErrors
     {
-        FORTH_RUN_ERROR_NONE
+        FORTH_ENGINE_ERROR_NONE,
+        FORTH_ENGINE_ERROR_IMMED_ONLY
     };
 
     struct ForthEngine
@@ -46,29 +47,49 @@
         uint32_t rstack_count;
 
         //Data area - like dictionary but no definitions stored there
-        uint8_t *data;
+        uint8_t *data;          //Pointer to memory occupied by data area
         uint32_t data_size;
-        uint32_t data_ptr;
+        uint32_t data_ptr;      //Index into memory pointed to be data
         uint32_t data_mask;
         uint32_t data_mask_16;
         uint32_t data_mask_32;
 
-        //Compilation flags
+        //Compilation
         bool state;
+        const char *source;
+        int32_t *source_index;
+        int error;
 
         //Compatibility functions - set at initialization so engine can adapt to different systems
         void (*print)(const char *text);
         void (*print_color)(const char *text,color_t color);
-        int32_t max_spaces;
+        int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask);
+        int32_t (*getkey)(bool blocking);
+        int32_t (*printable)(int32_t key);
+        int max_spaces;
         color_t color_primitive;
+        int screen_width;
     };
 
     //Functions
     //=========
-    void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t rstack_base,
-        uint32_t stack_count,uint32_t rstack_count,uint32_t data_size,color_t color);
-    void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),
-        void (*print_color)(const char *text,color_t color),int32_t max_spaces);
+    void forth_init_engine(struct ForthEngine *engine,
+        //Stacks
+        uintptr_t stack_base,uintptr_t rstack_base,
+        uint32_t stack_count,uint32_t rstack_count,
+        //Data area
+        uint32_t data_size,
+        //Function pointers
+        void (*print)(const char *text),
+        void (*print_color)(const char *text,color_t color),
+        int32_t (*forth_accept)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
+        int32_t (*getkey)(bool blocking),
+        int32_t (*printable)(int32_t key),
+        //Console
+        int max_spaces,
+        int screen_width,
+        color_t color_primitive);
+    void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);
     int forth_stack_count(struct ForthEngine *engine);

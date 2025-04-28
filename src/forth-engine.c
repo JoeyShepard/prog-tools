@@ -4,8 +4,22 @@
 #include "structs.h"
 
 //Called only once when program first starts
-void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t rstack_base,
-    uint32_t stack_count,uint32_t rstack_count,uint32_t data_size,color_t color_primitive)
+void forth_init_engine(struct ForthEngine *engine,
+    //Stacks
+    uintptr_t stack_base,uintptr_t rstack_base,
+    uint32_t stack_count,uint32_t rstack_count,
+    //Data area
+    uint32_t data_size,
+    //Function pointers
+    void (*print)(const char *text),
+    void (*print_color)(const char *text,color_t color),
+    int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
+    int32_t (*getkey)(bool blocking),
+    int32_t (*printable)(int32_t key),
+    //Console
+    int max_spaces,
+    int screen_width,
+    color_t color_primitive)
 {
     //Init Forth engine pointers (these values never change)
     engine->stack_base=stack_base;
@@ -20,21 +34,24 @@ void forth_init_engine(struct ForthEngine *engine,uintptr_t stack_base,uintptr_t
     engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
     engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
 
-    //Set output colors if used
+    //Compatiblity parameters that can be adjusted to work on other systems
+    engine->print=print;
+    engine->print_color=print_color;
+    engine->input=input;
+    engine->getkey=getkey;
+    engine->printable=printable;
+    engine->max_spaces=max_spaces;
+    engine->screen_width=screen_width;
     engine->color_primitive=color_primitive;
 
     //Reset stack pointers and compilation variables
     forth_reset_engine(engine);
 }
 
-//Called when program first starts and on program switch
-void forth_reload_engine(struct ForthEngine *engine,uint8_t *data,void (*print)(const char *text),
-    void (*print_color)(const char *text,color_t color),int32_t max_spaces)
+//Called on program switch
+void forth_reload_engine(struct ForthEngine *engine,uint8_t *data)
 {
     engine->data=data;
-    engine->print=print;
-    engine->print_color=print_color;
-    engine->max_spaces=max_spaces;
 }
 
 //Called when program first starts and when user resets environment but not on program switch
@@ -42,7 +59,10 @@ void forth_reset_engine(struct ForthEngine *engine)
 {
     //Reset engine variables
     engine->state=false;
+    engine->source=NULL;
+    engine->source_index=NULL;
     engine->data_ptr=0;
+    engine->error=FORTH_ENGINE_ERROR_NONE;
 
     //Reset stack pointers
     forth_reset_engine_stacks(engine);
