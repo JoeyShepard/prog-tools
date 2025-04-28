@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "console.h"
 #include "forth-compatibility.h"
 #include "key-remap.h"
