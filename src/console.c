@@ -31,6 +31,7 @@ void init_console(
 
     //Input
     console->input.text=input_text;
+    console->input.visible=true;
     console->input_copy.text=input_copy_text;
     console->input_text_max=input_text_max;
     console->input_col_fg=input_col_fg;
@@ -209,57 +210,79 @@ void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_wi
     int char_index=0;
     bool cursor_drawn=false;
     bool invert;
-    for (int row=0;row<input_height;row++)
+    char character;
+    int color_fg, color_bg;
+
+    static int debug_count=0;
+    debug_count++;
+    printf("input line %d\n",debug_count);
+
+    if (console->input.visible==true)
     {
-        for (int col=0;col<console_width;col++)
+        for (int row=0;row<input_height;row++)
         {
-            char character;
-            int color_fg, color_bg;
-            if (console->input.text[char_index].character!=0)
+            for (int col=0;col<console_width;col++)
             {
-                //Draw character of input
-                character=console->input.text[char_index].character;
-                color_fg=console->input.text[char_index].fg;
-                color_bg=console->input.text[char_index].bg;
-                if (char_index==console->input.cursor)
+                if (console->input.text[char_index].character!=0)
                 {
-                    //Cursor character - invert
-                    invert=true;
-                    cursor_drawn=true;
-                }
-                else invert=false;
-                char_index++;
-            }
-            else
-            {
-                character=' ';
-                color_fg=console->input_col_fg;
-                color_bg=console->input_col_bg;
-                if (cursor_drawn==false)
-                {
-                    //Cursor not drawn yet - draw cursor
-                    invert=true;
-                    cursor_drawn=true;
+                    //Draw character of input
+                    character=console->input.text[char_index].character;
+                    color_fg=console->input.text[char_index].fg;
+                    color_bg=console->input.text[char_index].bg;
+                    if (char_index==console->input.cursor)
+                    {
+                        //Cursor character - invert
+                        invert=true;
+                        cursor_drawn=true;
+                    }
+                    else invert=false;
+                    char_index++;
                 }
                 else
                 {
-                    //Draw spaces for rest of line
-                    invert=false;
+                    character='|';
+                    color_fg=console->input_col_fg;
+                    color_bg=console->input_col_bg;
+                    if (cursor_drawn==false)
+                    {
+                        //Cursor not drawn yet - draw cursor
+                        invert=true;
+                        cursor_drawn=true;
+                    }
+                    else
+                    {
+                        //Draw spaces for rest of line
+                        invert=false;
+                    }
                 }
+                pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
             }
-            pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
+            pos.x=starting_x;
+            pos.y+=CONS_ROW_HEIGHT;
         }
-        pos.x=starting_x;
-        pos.y+=CONS_ROW_HEIGHT;
     }
+    //TODO: remove
+    /*
+    else
+    {
+        //Input line is visible - print blank line
+        for (int col=0;col<console_width;col++)
+            pos=draw_char('*',pos,console->input_col_fg,console->input_col_bg,false,FONT_5x8);
+    }
+    */
 }
 
 void draw_console(struct ConsoleInfo *console)
 {
     //Adjust console_height to make room for input line
-    int input_height=((console->input.len)/console->width)+1;
+    int input_height;
+    if (console->input.visible==true) input_height=((console->input.len)/console->width)+1;
+    else input_height=0;
     int new_height=console->height;
     new_height-=(input_height-1);
+
+    //TODO: test
+    new_height-=2;
 
     //Find starting point in circular screen buffer for printing characters
     int line_length=0;
@@ -401,9 +424,12 @@ void draw_console(struct ConsoleInfo *console)
             text_pos.y+=CONS_ROW_HEIGHT;
             if ((buffer_start==console->buffer_index)&&(input_drawn==false))
             {
-                //Draw input line
-                draw_input_line(console,text_pos,console->width,input_height);
-                text_pos.y+=CONS_ROW_HEIGHT*input_height;
+                if (console->input.visible==true)
+                {
+                    //Draw input line
+                    draw_input_line(console,text_pos,console->width,input_height);
+                    text_pos.y+=CONS_ROW_HEIGHT*input_height;
+                }
                 input_drawn=true;
             }
         }

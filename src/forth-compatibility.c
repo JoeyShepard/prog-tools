@@ -62,6 +62,7 @@ int32_t forth_accept(int32_t text_address,char *text_base,int32_t max_chars,uint
     input_line->len=0;
     input_line->start=0;
     input_line->cursor=0;
+    input_line->visible=true;
      
     //Input loop
     int32_t char_count=0;
@@ -164,4 +165,21 @@ int32_t forth_printable(int32_t key)
         //Return printable equivalent to key
         return vkey_printable[key];
     }
+}
+
+void forth_update_screen()
+{
+    draw_console(forth_console);
+    dupdate();
+}
+
+void forth_update_modifiers()
+{
+    draw_modifier(forth_console->modifier);
+    dupdate();
+}
+
+void forth_clear_console()
+{
+    reset_console(forth_console); 
 }

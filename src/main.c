@@ -31,6 +31,8 @@ buffer stack_base in primitives? need to check disassembly
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY
 compare signs of comments in standard to primitives
+- actually, can mostly disregard if maskign
+EXE in forth prompt causes redraw when line empty
 */
 
 

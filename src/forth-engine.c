@@ -6,19 +6,25 @@
 //Called only once when program first starts
 void forth_init_engine(struct ForthEngine *engine,
     //Stacks
-    uintptr_t stack_base,uintptr_t rstack_base,
-    uint32_t stack_count,uint32_t rstack_count,
+    uintptr_t stack_base,
+    uintptr_t rstack_base,
+    uint32_t stack_count,
+    uint32_t rstack_count,
     //Data area
     uint32_t data_size,
-    //Function pointers
+    //Compatibility function pointers
     void (*print)(const char *text),
     void (*print_color)(const char *text,color_t color),
     int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
     int32_t (*getkey)(bool blocking),
     int32_t (*printable)(int32_t key),
+    void (*update_screen)(),
+    void (*update_modifiers)(),
+    void (*clear_console)(),
     //Console
     int max_spaces,
     int screen_width,
+    int screen_height,
     color_t color_primitive)
 {
     //Init Forth engine pointers (these values never change)
@@ -40,8 +46,12 @@ void forth_init_engine(struct ForthEngine *engine,
     engine->input=input;
     engine->getkey=getkey;
     engine->printable=printable;
+    engine->update_screen=update_screen;
+    engine->update_modifiers=update_modifiers;
+    engine->clear_console=clear_console;
     engine->max_spaces=max_spaces;
     engine->screen_width=screen_width;
+    engine->screen_height=screen_height;
     engine->color_primitive=color_primitive;
 
     //Reset stack pointers and compilation variables
@@ -59,6 +69,7 @@ void forth_reset_engine(struct ForthEngine *engine)
 {
     //Reset engine variables
     engine->state=false;
+    engine->in_bracket=false;
     engine->source=NULL;
     engine->source_index=NULL;
     engine->data_ptr=0;

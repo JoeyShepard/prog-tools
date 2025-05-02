@@ -49,13 +49,14 @@
         //Data area - like dictionary but no definitions stored there
         uint8_t *data;          //Pointer to memory occupied by data area
         uint32_t data_size;
-        uint32_t data_ptr;      //Index into memory pointed to be data
+        uint32_t data_ptr;      //Index into memory pointed to be *data
         uint32_t data_mask;
         uint32_t data_mask_16;
         uint32_t data_mask_32;
 
         //Compilation
         bool state;
+        bool in_bracket;
         const char *source;
         int32_t *source_index;
         int error;
@@ -66,17 +67,25 @@
         int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask);
         int32_t (*getkey)(bool blocking);
         int32_t (*printable)(int32_t key);
+        void (*update_screen)();
+        void (*update_modifiers)();
+        void (*clear_console)();
+
+        //Compatibility parameters
         int max_spaces;
         color_t color_primitive;
         int screen_width;
+        int screen_height;
     };
 
     //Functions
     //=========
     void forth_init_engine(struct ForthEngine *engine,
         //Stacks
-        uintptr_t stack_base,uintptr_t rstack_base,
-        uint32_t stack_count,uint32_t rstack_count,
+        uintptr_t stack_base,
+        uintptr_t rstack_base,
+        uint32_t stack_count,
+        uint32_t rstack_count,
         //Data area
         uint32_t data_size,
         //Function pointers
@@ -85,9 +94,13 @@
         int32_t (*forth_accept)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
         int32_t (*getkey)(bool blocking),
         int32_t (*printable)(int32_t key),
+        void (*update_screen)(),
+        void (*update_modifiers)(),
+        void (*clear_console)(),
         //Console
         int max_spaces,
         int screen_width,
+        int screen_height,
         color_t color_primitive);
     void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
     void forth_reset_engine(struct ForthEngine *engine);

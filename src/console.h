@@ -42,6 +42,7 @@
         int len;                    //Cached length to speed up processing
         int start;
         int cursor;
+        bool visible;
     };
 
     struct ConsoleInfo

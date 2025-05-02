@@ -691,8 +691,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             forth_accept,
             forth_getkey,
             forth_printable,
+            forth_update_screen,
+            forth_update_modifiers,
+            forth_clear_console,
             FORTH_MAX_SPACES,
             CONS_WHOLE_WIDTH-FORTH_STACK_CHAR_WIDTH,
+            CONS_WHOLE_HEIGHT,
             FORTH_COL_PRIMITIVE);
     }
     else
@@ -853,11 +857,21 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Add input to history
                     add_history(console);
                     
+                    START HERE
+                    - cant just hide input line like this
+                    - problem seems to be no \n before input line
+                    - problem still exists when not even calling draw_input_line
+                    
+                    //Hide input line since program may output to console
+                    console_text_default("-",console);
+                    console->input.visible=false;
+                    draw_console(console);
+                    dupdate();
                     //Process input
                     char input_buffer[FORTH_INPUT_MAX];
                     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
-                    console_text_default(" ",console);
                     process_source(&forth->engine,input_buffer);
+                    console->input.visible=true;
 
                     //Check engine state and error if in compile state or word not complete like [
 
