@@ -10,16 +10,40 @@ struct ConsoleInfo *forth_console;
   
 void forth_print(const char *text)
 {
+    //Input line expects preceding \n so remove before printing and add back after
+    if (forth_console->text_len>0)
+    {
+        //Forth interpretter always adds " \n" but check in case this code adapted to other system
+        forth_console->buffer_index--;
+        if (forth_console->buffer_index==-1) forth_console->buffer_index=CONS_BUFFER_SIZE-1;
+    }
+    
+    //Print text
     console_text_default(text,forth_console);
+    
+    //Add new line back in
+    console_text_default("\n",forth_console);
 }
 
 void forth_print_color(const char *text,color_t color)
 {
+    //Input line expects preceding \n so remove before printing and add back after
+    if (forth_console->text_len>0)
+    {
+        //Forth interpretter always adds " \n" but check in case this code adapted to other system
+        forth_console->buffer_index--;
+        if (forth_console->buffer_index==-1) forth_console->buffer_index=CONS_BUFFER_SIZE-1;
+    }
+
+    //Print text
     console_text(text,color,forth_console->text_col_bg,forth_console);
+    
+    //Add new line back in
+    console_text_default("\n",forth_console);
 }
 
 //Function must perform wrapping on any characters written!
-int32_t forth_accept(int32_t text_address,char *text_base,int32_t max_chars,uint32_t data_mask)
+int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint32_t data_mask)
 {
     //text_address  offset relative to beginning of data area where target text begins
     //text_base     beginning of memory where text is found. mask writes to wrap around here.
@@ -35,9 +59,6 @@ int32_t forth_accept(int32_t text_address,char *text_base,int32_t max_chars,uint
 
     //Return value
     int32_t bytes_written;
-
-    //Input must start on a new line
-    console_text_default("\n",forth_console);
 
     //Save state for input line for Forth console and reuse for input here
     struct ConsoleInput input_copy=forth_console->input;
@@ -140,6 +161,10 @@ int32_t forth_accept(int32_t text_address,char *text_base,int32_t max_chars,uint
 
     //All exit paths MUST restore Forth console input so jump here to return
     restore_exit:
+        //Input must start on a new line
+        console_text_default("\n",forth_console);
+
+        //Restore Forth console
         free(text_buffer);
         forth_console->input=input_copy;
         forth_console->input_text_max=input_text_max_copy;

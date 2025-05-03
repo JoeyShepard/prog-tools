@@ -23,7 +23,7 @@
 
     void forth_print(const char *text);
     void forth_print_color(const char *text,color_t color);
-    int32_t forth_accept(int32_t text_address,char *text_base,int32_t max_chars,uint32_t data_mask);
+    int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint32_t data_mask);
     int32_t forth_getkey(bool blocking);
     int32_t forth_printable(int32_t key);
     void forth_update_screen();

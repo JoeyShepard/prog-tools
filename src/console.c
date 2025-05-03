@@ -213,10 +213,6 @@ void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_wi
     char character;
     int color_fg, color_bg;
 
-    static int debug_count=0;
-    debug_count++;
-    printf("input line %d\n",debug_count);
-
     if (console->input.visible==true)
     {
         for (int row=0;row<input_height;row++)
@@ -240,7 +236,7 @@ void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_wi
                 }
                 else
                 {
-                    character='|';
+                    character=' ';
                     color_fg=console->input_col_fg;
                     color_bg=console->input_col_bg;
                     if (cursor_drawn==false)
@@ -265,9 +261,9 @@ void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_wi
     /*
     else
     {
-        //Input line is visible - print blank line
+        //Input line is invisible - print blank line
         for (int col=0;col<console_width;col++)
-            pos=draw_char('*',pos,console->input_col_fg,console->input_col_bg,false,FONT_5x8);
+            pos=draw_char(' ',pos,console->input_col_fg,console->input_col_bg,false,FONT_5x8);
     }
     */
 }
@@ -280,9 +276,6 @@ void draw_console(struct ConsoleInfo *console)
     else input_height=0;
     int new_height=console->height;
     new_height-=(input_height-1);
-
-    //TODO: test
-    new_height-=2;
 
     //Find starting point in circular screen buffer for printing characters
     int line_length=0;
@@ -424,12 +417,9 @@ void draw_console(struct ConsoleInfo *console)
             text_pos.y+=CONS_ROW_HEIGHT;
             if ((buffer_start==console->buffer_index)&&(input_drawn==false))
             {
-                if (console->input.visible==true)
-                {
-                    //Draw input line
-                    draw_input_line(console,text_pos,console->width,input_height);
-                    text_pos.y+=CONS_ROW_HEIGHT*input_height;
-                }
+                //Draw input line
+                draw_input_line(console,text_pos,console->width,input_height);
+                text_pos.y+=CONS_ROW_HEIGHT*input_height;
                 input_drawn=true;
             }
         }
