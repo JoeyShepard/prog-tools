@@ -275,10 +275,11 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                                 uint8_t *split_ptr=heap;
                                 for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
                                 {
-                                    if (split_ptr[HEAP_TAB]==windows[selected_window].tab_index)
+                                    struct HeapInfo *heap_info=(struct HeapInfo *)split_ptr;
+                                    if (heap_info->tab==windows[selected_window].tab_index)
                                     {
                                         //Swap split IDs for heap memory
-                                        split_ptr[HEAP_SPLIT]^=1;
+                                        heap_info->split^=1;
                                     }
                                     split_ptr+=*(uint32_t *)split_ptr;
                                 }

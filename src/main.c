@@ -1,11 +1,7 @@
-#include <stdbool.h>
-#include <stdint.h>
 #include "compatibility.h"
-#include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
 #include "mem.h"
-#include "text.h"
 
 //TODO
 //====
@@ -14,6 +10,7 @@ remove headers
 TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
+- yes, change mem.c to return values not addresses
 copy of forth struct needs to be stored in XRAM
 shift+enter for new line in Forth
 forth variables are IDs 0-255 so faster (not locals)
@@ -33,6 +30,9 @@ compare signs of comments in standard to primitives
 - actually, can mostly disregard if maskign
 EXE in forth prompt causes redraw when line empty
 console assumes input less than size of screen
+fix debug_heap
+exit program after start so other pane updates for memory then back?
+convert size_t in mem to uint32_t
 */
 
 

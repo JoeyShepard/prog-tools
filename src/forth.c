@@ -620,7 +620,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
     uint8_t *forth_definitions;
-    uint8_t *forth_code;
+    uint8_t *forth_word_IDs;
 
     if (command_ID==COMMAND_START) 
     {
@@ -635,10 +635,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth words
-        forth_definitions=add_object(sizeof(struct ForthWordHeader),heap_ptr);
+        forth_definitions=add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
 
         //Make sure allocation succeeded
-        if (forth==NULL)
+        if (forth_definitions==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
@@ -646,6 +646,37 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //First definition is empty marking end of definitions
         ((struct ForthWordHeader *)forth_definitions)->size=0;
+
+        //Allocate space for list of word IDs
+        forth_word_IDs=add_object(FORTH_MEM_WORD_IDS,heap_ptr);
+
+        //Make sure allocation succeeded
+        if (forth_word_IDs==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+
+        //TODO: delete
+        //Test memory functions
+        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
+        *(uint32_t*)forth_definitions=0x12345678;
+        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
+        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
+        *(uint32_t*)forth_word_IDs=0x76543210;
+        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+        uint32_t test_size=256;
+        printf("Expanding definitions by %d bytes\n",test_size);
+        int ret_val=expand_object(test_size,FORTH_ID_DEFINITIONS,heap_ptr);
+        printf("Return value %d\n",ret_val);
+        printf("Refreshing Word IDs address\n");
+        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
+        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
+        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
+        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+
 
         //Init console
         console=&forth->console;
@@ -706,8 +737,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         console=&forth->console;
         reset_console_pointers(console);
 
-        //Restore pointer to Forth definitions
+        //Restore pointers to word definitions and ID list
         forth_definitions=object_address(FORTH_ID_DEFINITIONS,heap_ptr);
+        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
 
         //Restore stack memory
         memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);

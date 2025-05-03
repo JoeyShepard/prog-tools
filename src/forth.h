@@ -48,7 +48,10 @@
     //Heap memory
     #define FORTH_ID_CONSOLE        0
     #define FORTH_ID_DEFINITIONS    1
-    #define FORTH_ID_CODE           2
+    #define FORTH_ID_WORD_IDS       2
+    #define FORTH_MEM_DEFINITIONS   1024    //For both of these, allocate this amount initially then add this     
+    #define FORTH_MEM_WORD_IDS      256     //much when memory runs out. Exact amount not important - prevents
+                                            //copying whole dictionary every time new word added.
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
@@ -75,9 +78,9 @@
     #define FORTH_LEGEND_OFFSET2            7
     #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
-
     //Forth memory
     #define FORTH_DATA_SIZE     0x10000
+
 
     //enums
     //=====
@@ -126,6 +129,8 @@
     struct ForthWordHeader
     {
         uint32_t size;
+        uint32_t ID;
+        uint8_t word_type;
         uint8_t name_len;
         //Flexible Array Member - memory allocated after struct holds name
         char name[];

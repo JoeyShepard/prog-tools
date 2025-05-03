@@ -48,8 +48,9 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
     {
         for (int split=0;split<SPLIT_COUNT;split++)
         {
-            uint32_t current_tab=split_ptr[HEAP_TAB]; 
-            uint32_t current_split=split_ptr[HEAP_SPLIT]; 
+            struct HeapInfo *heap_info=(struct HeapInfo *)split_ptr;
+            uint32_t current_tab=heap_info->tab;
+            uint32_t current_split=heap_info->split;
             split_mem[current_tab][current_split]=*(uint32_t *)split_ptr;
             split_ptr+=*(uint32_t *)split_ptr;
         }

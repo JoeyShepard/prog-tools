@@ -48,18 +48,17 @@ uint8_t *write_heap_u8(uint8_t val,uint8_t *heap_ptr)
 
 uint8_t *new_split_mem(uint8_t tab, uint8_t split, uint8_t *heap_ptr)
 {
-    //HEAP_NEXT: Linked list - distance to next tab/split pair
-    heap_ptr=write_heap_u32(HEAP_DATA_SIZE,heap_ptr);
-    //HEAP_TAB
-    heap_ptr=write_heap_u8(tab,heap_ptr);
-    //HEAP_SPLIT
-    heap_ptr=write_heap_u8(split,heap_ptr);
-    //Alignment
-    heap_ptr+=2;
-    //HEAP_OBJECTS: Linked list - distance to next object or 0 for end of list
-    heap_ptr=write_heap_u32(0,heap_ptr);
+    struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
+    //Size of new memory record being created (struct size excludes objects[] so uint32_t for size of objects[0])
+    const uint32_t record_size=(int)(sizeof(struct HeapInfo)+sizeof(uint32_t));
+    //next: linked list - distance to next tab/split pair
+    heap_info->next=record_size;
+    heap_info->tab=tab;
+    heap_info->split=split;
+    //objects[]: linked list - distance to next object or 0 for end of list
+    heap_info->objects[0]=0;
 
-    return heap_ptr;
+    return heap_ptr+record_size;
 }
 
 void init_heap()
@@ -71,14 +70,6 @@ void init_heap()
         for (int j=0;j<SPLIT_COUNT;j++)
         heap_ptr=new_split_mem(i,j,heap_ptr);
     }
-
-    //Debug
-    /*
-    debug_heap(0);
-    select_heap(2,1);
-    debug_heap(0);
-    */
-
 }
 
 //Move heap for selected tab/split to top so it can access free memory
@@ -91,7 +82,8 @@ void select_heap(int tab, int split)
     uint32_t *heap_end;
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
     {
-        if ((heap_ptr[HEAP_TAB]==tab)&&(heap_ptr[HEAP_SPLIT]==split))
+        struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
+        if ((heap_info->tab==tab)&&(heap_info->split==split))
         {
             //Selected heap found - record start and address
             obj_start=(uint32_t *)heap_ptr;
@@ -103,17 +95,17 @@ void select_heap(int tab, int split)
     //First word past end of data. Note no ending 0!
     heap_end=(uint32_t *)heap_ptr;
 
-    uint32_t *xram_ptr=(uint32_t *)xram;
+    uint32_t *yram_ptr=(uint32_t *)yram;
     uint32_t copy_count;
     while (obj_end!=heap_end)
     {
         //Copy chunk of next object to buffer
-        if ((uintptr_t)(heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
-        else copy_count=XRAM_SIZE/sizeof(uint32_t);
+        if ((uintptr_t)(heap_end-obj_end)<YRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
+        else copy_count=YRAM_SIZE/sizeof(uint32_t);
 
         for (uint32_t i=0;i<copy_count;i++)
         {
-            xram_ptr[i]=obj_end[i];
+            yram_ptr[i]=obj_end[i];
         }
         obj_end+=copy_count;
 
@@ -126,7 +118,7 @@ void select_heap(int tab, int split)
         //Copy next object in buffer to replace selected object
         for (uint32_t i=0;i<copy_count;i++)
         {
-            obj_start[i]=xram_ptr[i];
+            obj_start[i]=yram_ptr[i];
         }
         obj_start+=copy_count;
     }
@@ -135,6 +127,7 @@ void select_heap(int tab, int split)
 uint32_t heap_left()
 {
     uint8_t *heap_ptr=get_split_heap();
+    //TODO: struct HeapInfo
     heap_ptr+=*(uint32_t *)heap_ptr;
     return (uint32_t)(heap+HEAP_SIZE-heap_ptr);
 }
@@ -171,7 +164,7 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
     *(uint32_t *)heap_ptr+=size;
 
     //Point past header data to beginning of object list
-    heap_ptr+=HEAP_OBJECTS;
+    heap_ptr+=sizeof(struct HeapInfo);
 
     //Skip over each object until end marked by 0
     while(*(uint32_t *)heap_ptr)
@@ -187,10 +180,11 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
     return heap_ptr+sizeof(uint32_t);
 }
 
-uint8_t *object_address(int ID, uint8_t *heap_ptr)
+//Base address function for object functions below
+static uint8_t *object_base_address(int ID, uint8_t *heap_ptr)
 {
     //Point past header data to beginning of object list
-    heap_ptr+=HEAP_OBJECTS;
+    heap_ptr+=sizeof(struct HeapInfo);
 
     //Skip over each object that comes before
     for (int i=0;i<ID;i++)
@@ -208,6 +202,57 @@ uint8_t *object_address(int ID, uint8_t *heap_ptr)
         heap_ptr+=obj_size;
     }
 
-    //Return address of newly added object skipping uint32 holding its size
-    return heap_ptr+sizeof(uint32_t);
+    //Return base address of object STARTING AT uint32 holding its size
+    return heap_ptr;
 }
+
+uint8_t *object_address(int ID, uint8_t *heap_ptr)
+{
+    //Return base address of object SKIPPING uint32 holding its size
+    return object_base_address(ID,heap_ptr)+sizeof(uint32_t);
+}
+
+size_t object_size(int ID, uint8_t *heap_ptr)
+{
+    return *(uint32_t *)object_base_address(ID,heap_ptr);
+}
+
+int expand_object(size_t size,int ID,uint8_t *heap_ptr)
+{
+    if (size%sizeof(uint32_t))
+    {
+        //Object size must be aligned
+        return ERROR_UNALIGNED_WRITE;
+    }
+
+    if (heap_left()<size)
+    {
+        //Out of heap memory
+        return ERROR_OUT_OF_MEMORY;
+    }
+    
+    struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
+
+    printf("Expanding object %d by %ld bytes:\n",ID,size);
+    printf("- split base: %p\n",heap_ptr);
+    printf("- split size: %d\n",heap_info->next);
+    printf("- object size: %ld\n",object_size(ID,heap_ptr));
+    printf("Expanding...\n");
+    //Memory range overlaps - memmove instead of memcpy
+    uint8_t *object=object_base_address(ID,heap_ptr);
+    uint8_t *src=object+object_size(ID,heap_ptr);
+    memmove(src+size,src,size);
+    heap_info->next+=size;
+    *(uint32_t *)object+=size;
+    printf("- split size: %d\n",heap_info->next);
+    printf("- object size: %d\n",*(uint32_t *)object);
+    printf("\n");
+    
+    return ERROR_NONE;
+}
+
+int shrink_object(size_t size,int ID, uint8_t *heap_ptr)
+{
+    return ERROR_NONE;
+}
+

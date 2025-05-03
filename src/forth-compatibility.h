@@ -19,7 +19,7 @@
     #define FORTH_DUMP_BYTES        8       //Bytes for DUMP to show per line
     #define FORTH_SCREEN_WIDTH      CONS_WHOLE_WIDTH    //Width in characters of screen for WORDS
     //TODO: input can't be larger than screen yet
-    //max 54 chars wide and 11 lines tall but text MUST be on at least first line
+    //max 54 chars wide and 11 lines tall but there MUST be text on at least first line
     #define FORTH_ACCEPT_MAX        500     //Max length in characters of buffer for ACCEPT
 
     extern struct ConsoleInfo *forth_console;

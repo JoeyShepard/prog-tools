@@ -19,6 +19,8 @@
 
     void debug_heap(int level)
     {
+        //TODO: rewrite with struct HeapInfo
+        /*
         uint8_t *ptr=heap;
       
         printf("Debugging heap:\n");
@@ -56,6 +58,7 @@
             ptr+=size;
         }
         printf("Heap end\n");
+        */
     }
 
 #endif
