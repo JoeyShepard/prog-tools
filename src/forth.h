@@ -153,6 +153,7 @@
         //Copy of both stacks. Copied to XRAM at runtime.
         alignas(uint32_t) uint8_t stack_copy[FORTH_STACK_SIZE];
         alignas(uint32_t) uint8_t rstack_copy[FORTH_RSTACK_SIZE];
+        alignas(uint32_t) uint8_t locals_copy[FORTH_LOCALS_SIZE];
 
         //Data for Forth Engine
         struct ForthEngine engine;

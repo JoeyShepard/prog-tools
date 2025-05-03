@@ -8,8 +8,8 @@
 
     //Elements common to calculator and PC versions
     #define HEAP_SIZE       0x200000
-    #define XRAM_SIZE       0x2000
-    #define YRAM_SIZE       0x2000
+    #define XRAM_SIZE       0x2000  //8K
+    #define YRAM_SIZE       0x2000  //8K
 
     #define COL_MAX         0x1F
     #define COL_1_4         0x8

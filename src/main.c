@@ -11,7 +11,6 @@
 //====
 /*
 remove headers
-draw_char can draw out of bounds!
 TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
@@ -33,6 +32,7 @@ ON should break ACCEPT and KEY
 compare signs of comments in standard to primitives
 - actually, can mostly disregard if maskign
 EXE in forth prompt causes redraw when line empty
+console assumes input less than size of screen
 */
 
 

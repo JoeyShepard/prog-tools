@@ -167,8 +167,8 @@ struct Point draw_char(char text, struct Point pos, int32_t fg, int32_t bg, bool
 
 struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font)
 { 
-    //Copy of pointer to video memory
-     uint16_t *screen=vram_buffer;
+    //Exit early and don't draw spacing-wide vertical column if no characters to draw
+    if (*text==0) return pos;
 
     //Look up values for selected font
     uint8_t *data=font_data(font);
@@ -178,16 +178,20 @@ struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t b
     }
     int width=font_width(font);
     int height=font_height(font);
-    
-    //Spacing could vary by font but ok to set manually for now
-    int horz_spacing=1;
-    int vert_spacing=1;
-    
+
     //Don't draw outside bounds of screen
-    if ((pos.x>=DWIDTH)||(pos.y>=DHEIGHT)||(pos.y+height>=DHEIGHT)) 
+    //Also checked during drawing below for text extending off right side of screen
+    if ((pos.x<0)||(pos.y<0)||(pos.x>=DWIDTH)||(pos.y>=DHEIGHT)||(pos.y+height>=DHEIGHT)) 
     {
         return pos;
     }
+
+    //Copy of pointer to video memory
+     uint16_t *screen=vram_buffer;
+
+    //Spacing could vary by font but ok to set manually for now
+    int horz_spacing=1;
+    int vert_spacing=1;
 
     //Calculate offset into screen buffer
     screen+=pos.x;
@@ -200,9 +204,6 @@ struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t b
         fg=bg;
         bg=swap_temp;
     }
-
-    //Exit early and don't draw spacing-wide vertical column if no characters to draw
-    if (*text==0) return pos;
 
     //Draw one spacing-wide vertical column before first character
     for (int j=0;j<height+vert_spacing*2;j++)

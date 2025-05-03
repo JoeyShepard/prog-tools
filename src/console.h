@@ -40,7 +40,6 @@
     {
         struct ConsoleChar *text;   //Zero-terminated string
         int len;                    //Cached length to speed up processing
-        int start;
         int cursor;
         bool visible;
     };
@@ -97,9 +96,9 @@
     void console_char_default(char character, struct ConsoleInfo *console);
     void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console);
     void console_text_default(const char *text, struct ConsoleInfo *console);
-    void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
-    void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console);
-    void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_width,int input_height);
+    void add_input_text(const char *text,color_t fg,color_t bg,struct ConsoleInfo *console);
+    void add_input_char(char character,color_t fg,color_t bg,struct ConsoleInfo *console);
+    struct Point draw_input_line(struct ConsoleInfo *console,struct Point pos,int *col,int *row);
     void draw_console(struct ConsoleInfo *console);
     void reset_console(struct ConsoleInfo *console);
     void add_history(struct ConsoleInfo *console);

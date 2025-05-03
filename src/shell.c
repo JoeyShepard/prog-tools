@@ -1236,17 +1236,16 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
     bool redraw_modifier=true;
     while (1)
     {
-        //Set text for input line
+        //Print prompt for input
         if (console->reset_input)
         {
             console->input.text[0].character=0;
-            console->input.start=0;
             console->input.cursor=0;
             console->input.len=0;
-            add_input_text("CG50",SHELL_COL_HOST,SHELL_COL_BG,true,console);
-            add_input_char(':',SHELL_COL_FG,SHELL_COL_BG,true,console);
-            add_input_text(shell->path,SHELL_COL_DIR,SHELL_COL_BG,true,console);
-            add_input_char(' ',SHELL_COL_FG,SHELL_COL_BG,true,console);
+            console_text("CG50",SHELL_COL_HOST,SHELL_COL_BG,console);
+            console_text_default(":",console);
+            console_text(shell->path,SHELL_COL_DIR,SHELL_COL_BG,console);
+            console_text_default(" ",console);
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -1280,7 +1279,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
         if (character!=0)
         {
             //Printable character - add to input line
-            add_input_char(character,SHELL_COL_FG,SHELL_COL_BG,false,console);
+            add_input_char(character,SHELL_COL_FG,SHELL_COL_BG,console);
         }
         else
         {
@@ -1293,7 +1292,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                 case VKEY_EXIT:
                     //Clear line but do not exit program
                     //Handle here so not picked up by sys_key_handler below which would exit program
-                    if (console->input.len==console->input.start)
+                    if (console->input.len==0)
                     {
                         //No input on line - don't cancel
                         break;
@@ -1307,7 +1306,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                         console->input.len=SHELL_INPUT_MAX-strlen(cancel_text)-1;
                         console->input.cursor=SHELL_INPUT_MAX-strlen(cancel_text)-1;
                     }
-                    add_input_text(cancel_text,SHELL_COL_FG,SHELL_COL_BG,false,console);
+                    add_input_text(cancel_text,SHELL_COL_FG,SHELL_COL_BG,console);
 
                     //Fallthrough
                 case VKEY_EXE:
@@ -1327,7 +1326,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                         
                         //Process input
                         char input_buffer[SHELL_INPUT_MAX];
-                        copy_console_text(&console->input,input_buffer,SHELL_INPUT_MAX,console->input.start);
+                        copy_console_text(&console->input,input_buffer,SHELL_INPUT_MAX,0);
                         //gint_world_switch here necessary since process_input accesses file system
                         //so need to pass arguments as void pointer to structure
                         struct ProcessInput temp_args={input_buffer,console,shell->path};

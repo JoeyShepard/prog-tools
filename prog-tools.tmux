@@ -10,7 +10,7 @@ rename run
 
 window vim src/compatibility.h
 rename sdl2
-vsplit vim src/cg50-sdl2.c
+vsplit vim src/compatibility.c
 
 window vim src/getkey.h
 rename keys

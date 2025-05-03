@@ -11,7 +11,7 @@ include(Fxconv)
 find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
-  src/cg50-sdl2.c
+  src/compatibility.c
   src/console.c
   src/debug.c
   src/dummy.c

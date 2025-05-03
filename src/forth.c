@@ -197,7 +197,7 @@ static uint32_t next_word_source(const char *source,uint32_t *start)
 
 static void color_input(struct ConsoleInfo *console,bool color_highlighted)
 {
-    int32_t start=console->input.start;
+    int32_t start=0;
     int32_t word_len=0;
     bool in_quote=false;
     bool in_word=false;
@@ -624,7 +624,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
     if (command_ID==COMMAND_START) 
     {
-        //Allocate memory for console and Forth systems
+        //Allocate memory for console and Forth system
         forth=(struct ForthInfo *)add_object(sizeof(struct ForthInfo),heap_ptr);
 
         //Make sure allocation succeeded
@@ -752,10 +752,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (console->reset_input)
         {
             console->input.text[0].character=0;
-            console->input.start=0;
             console->input.cursor=0;
             console->input.len=0;
-            add_input_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,true,console);
+            
+            //add_input_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,true,console);
+            console_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,console);
+
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -801,7 +803,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (character!=0)
         {
             //Printable character - add to input line
-            add_input_char(character,FORTH_COL_FG,FORTH_COL_BG,false,console);
+            add_input_char(character,FORTH_COL_FG,FORTH_COL_BG,console);
         }
         else
         {
@@ -814,7 +816,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                 case VKEY_EXIT:
                     //Clear line but do not exit program
                     //Handle here so not picked up by sys_key_handler below which would exit program
-                    if (console->input.len==console->input.start)
+                    if (console->input.len==0)
                     {
                         //No input on line - don't cancel
                         break;
@@ -831,7 +833,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         console->input.len=FORTH_INPUT_MAX-strlen(cancel_text)-1;
                         console->input.cursor=FORTH_INPUT_MAX-strlen(cancel_text)-1;
                     }
-                    add_input_text(cancel_text,FORTH_COL_FG,FORTH_COL_BG,false,console);
+                    add_input_text(cancel_text,FORTH_COL_FG,FORTH_COL_BG,console);
 
                     //Copy input text to console
                     for (int i=0;i<console->input.len;i++)
@@ -839,10 +841,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
                     console->reset_input=true;
+                    
+                    //Newline after cancelled input
+                    console_text_default(" \n",console);
                     break;
                 case VKEY_EXE:
                     //Only process if text exists
-                    if (console->input.len==console->input.start) break;
+                    if (console->input.len==0) break;
 
                     //Color input before copying to console since secondaries previously not colored if cursor is on them
                     color_input(console,true);
@@ -858,14 +863,14 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     add_history(console);
                     
                     //Hide input line since program may output to console
-                    console_text_default(" \n",console);
-                    //console->input.visible=false;
+                    console_text_default(" ",console);
+                    console->input.visible=false;
                     draw_console(console);
                     dupdate();
 
                     //Process input
                     char input_buffer[FORTH_INPUT_MAX];
-                    copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,console->input.start);
+                    copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
                     process_source(&forth->engine,input_buffer);
                     console->input.visible=true;
 
@@ -879,6 +884,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         return return_code;
                     }
                     */
+
+                    console_text_default("\n",console);
+                    
                     break;
                 case VKEY_UP:
                 case VKEY_DOWN:

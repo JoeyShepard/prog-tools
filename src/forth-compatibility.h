@@ -12,12 +12,15 @@
     //Element count must be power of 2!
     #define FORTH_STACK_ELEMENTS    256
     #define FORTH_RSTACK_ELEMENTS   256
-    #define FORTH_COMPAT_STACKS     xram    //Pointer to memory where stack and rstack are stored
+    #define FORTH_LOCALS_ELEMENTS   512
+    #define FORTH_COMPAT_STACKS     xram    //Pointer to memory where stacks are stored
     #define FORTH_MAX_SPACES        1500    //Max for SPACES primitive
     #define FORTH_DUMP_MAX_LINES    20      //Max lines for DUMP
     #define FORTH_DUMP_BYTES        8       //Bytes for DUMP to show per line
     #define FORTH_SCREEN_WIDTH      CONS_WHOLE_WIDTH    //Width in characters of screen for WORDS
-    #define FORTH_ACCEPT_MAX        1000    //Max length in characters of buffer for ACCEPT
+    //TODO: input can't be larger than screen yet
+    //max 54 chars wide and 11 lines tall but text MUST be on at least first line
+    #define FORTH_ACCEPT_MAX        500     //Max length in characters of buffer for ACCEPT
 
     extern struct ConsoleInfo *forth_console;
 

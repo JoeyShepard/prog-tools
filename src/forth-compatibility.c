@@ -10,39 +10,15 @@ struct ConsoleInfo *forth_console;
   
 void forth_print(const char *text)
 {
-    //Input line expects preceding \n so remove before printing and add back after
-    if (forth_console->text_len>0)
-    {
-        //Forth interpretter always adds " \n" but check in case this code adapted to other system
-        forth_console->buffer_index--;
-        if (forth_console->buffer_index==-1) forth_console->buffer_index=CONS_BUFFER_SIZE-1;
-    }
-    
-    //Print text
     console_text_default(text,forth_console);
-    
-    //Add new line back in
-    console_text_default("\n",forth_console);
 }
 
 void forth_print_color(const char *text,color_t color)
 {
-    //Input line expects preceding \n so remove before printing and add back after
-    if (forth_console->text_len>0)
-    {
-        //Forth interpretter always adds " \n" but check in case this code adapted to other system
-        forth_console->buffer_index--;
-        if (forth_console->buffer_index==-1) forth_console->buffer_index=CONS_BUFFER_SIZE-1;
-    }
-
-    //Print text
     console_text(text,color,forth_console->text_col_bg,forth_console);
-    
-    //Add new line back in
-    console_text_default("\n",forth_console);
 }
 
-//Function must perform wrapping on any characters written!
+//Function must perform address wrapping on any characters written!
 int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint32_t data_mask)
 {
     //text_address  offset relative to beginning of data area where target text begins
@@ -81,7 +57,6 @@ int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint3
     input_line->text=text_buffer;
     input_line->text[0].character=0;
     input_line->len=0;
-    input_line->start=0;
     input_line->cursor=0;
     input_line->visible=true;
      
@@ -117,7 +92,7 @@ int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint3
         if (character!=0)
         {
             //Printable character - add to input line
-            add_input_char(character,forth_console->input_col_fg,forth_console->input_col_bg,false,forth_console);
+            add_input_char(character,forth_console->input_col_fg,forth_console->input_col_bg,forth_console);
         }   
         else
         {
@@ -161,9 +136,6 @@ int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint3
 
     //All exit paths MUST restore Forth console input so jump here to return
     restore_exit:
-        //Input must start on a new line
-        console_text_default("\n",forth_console);
-
         //Restore Forth console
         free(text_buffer);
         forth_console->input=input_copy;

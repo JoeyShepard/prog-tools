@@ -13,12 +13,15 @@
     //Primitves assume stacks are aligned to their sizes, so calculated size here must be power of two
     #define FORTH_STACK_SIZE        (FORTH_CELL_SIZE*FORTH_STACK_ELEMENTS)
     #define FORTH_RSTACK_SIZE       (FORTH_CELL_SIZE*FORTH_RSTACK_ELEMENTS)
+    #define FORTH_LOCALS_SIZE       (FORTH_CELL_SIZE*FORTH_LOCALS_ELEMENTS)
 
     #define FORTH_STACK_OFFSET      0
     #define FORTH_STACK_ADDRESS     (FORTH_COMPAT_STACKS+FORTH_STACK_OFFSET)
     #define FORTH_STACK_END         (FORTH_STACK_ADDRESS+FORTH_STACK_SIZE)
     #define FORTH_RSTACK_ADDRESS    FORTH_STACK_END
     #define FORTH_RSTACK_END        (FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE)
+    #define FORTH_LOCALS_ADDRESS    FORTH_RSTACK_END
+    #define FORTH_LOCALS_END        (FORTH_LOCALS_ADDRESS+FORTH_LOCALS_SIZE)
 
     //Masks for wrapping stack addresses
     #define FORTH_STACK_MASK        (FORTH_STACK_SIZE-1)

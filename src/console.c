@@ -152,7 +152,7 @@ void console_text_default(const char *text, struct ConsoleInfo *console)
     console_text(text,console->text_col_fg,console->text_col_bg,console);
 }
 
-void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
+void add_input_text(const char *text,color_t fg,color_t bg,struct ConsoleInfo *console)
 {
     int text_len=strlen(text);
     if (console->input.len+text_len>=console->input_text_max-1)
@@ -161,17 +161,9 @@ void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,str
         text_len=console->input_text_max-1-console->input.len;
     }
 
+    //Add text to input
     int text_index;
-    if (add_to_start)
-    {
-        //Add text to display text at the beginning
-        text_index=console->input.len;
-    }
-    else
-    {
-        //Add text to input
-        text_index=console->input.cursor;
-    }
+    text_index=console->input.cursor;
 
     //Move existing text right if inserting text in middle of string
     for (int i=console->input.len;i>=text_index;i--)
@@ -187,27 +179,20 @@ void add_input_text(const char *text,color_t fg,color_t bg,bool add_to_start,str
         console->input.text[text_index+i].bg=bg;
     }
 
-    if (add_to_start)
-    {
-        //Text added to display text at beginning
-        console->input.start+=text_len;
-    }
     console->input.cursor+=text_len;
     console->input.len+=text_len;
 }
 
-void add_input_char(char character,color_t fg,color_t bg,bool add_to_start,struct ConsoleInfo *console)
+void add_input_char(char character,color_t fg,color_t bg,struct ConsoleInfo *console)
 {
     char buffer[2];
     buffer[0]=character;
     buffer[1]=0;
-    add_input_text(buffer,fg,bg,add_to_start,console);
+    add_input_text(buffer,fg,bg,console);
 }
 
-void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_width,int input_height)
+struct Point draw_input_line(struct ConsoleInfo *console,struct Point pos,int *col,int *row)
 {
-    int starting_x=pos.x;
-    int char_index=0;
     bool cursor_drawn=false;
     bool invert;
     char character;
@@ -215,67 +200,92 @@ void draw_input_line(struct ConsoleInfo *console,struct Point pos,int console_wi
 
     if (console->input.visible==true)
     {
-        for (int row=0;row<input_height;row++)
+        for (int char_index=0;char_index<console->input.len+1;char_index++)
         {
-            for (int col=0;col<console_width;col++)
+            if (char_index==console->input.len)
             {
-                if (console->input.text[char_index].character!=0)
-                {
-                    //Draw character of input
-                    character=console->input.text[char_index].character;
-                    color_fg=console->input.text[char_index].fg;
-                    color_bg=console->input.text[char_index].bg;
-                    if (char_index==console->input.cursor)
-                    {
-                        //Cursor character - invert
-                        invert=true;
-                        cursor_drawn=true;
-                    }
-                    else invert=false;
-                    char_index++;
-                }
-                else
-                {
-                    character=' ';
-                    color_fg=console->input_col_fg;
-                    color_bg=console->input_col_bg;
-                    if (cursor_drawn==false)
-                    {
-                        //Cursor not drawn yet - draw cursor
-                        invert=true;
-                        cursor_drawn=true;
-                    }
-                    else
-                    {
-                        //Draw spaces for rest of line
-                        invert=false;
-                    }
-                }
-                pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
+                //Space character after all input. Needed when cursor is at end of input.
+                character=' ';
+                color_fg=console->input_col_fg;
+                color_bg=console->input_col_bg;
             }
-            pos.x=starting_x;
-            pos.y+=CONS_ROW_HEIGHT;
+            else
+            {
+                //Draw character of input
+                character=console->input.text[char_index].character;
+                color_fg=console->input.text[char_index].fg;
+                color_bg=console->input.text[char_index].bg;
+            }
+
+            if (char_index==console->input.cursor)
+            {
+                //Cursor character - invert
+                invert=true;
+                cursor_drawn=true;
+            }
+            else invert=false;
+
+            //Print character
+            pos=draw_char(character,pos,color_fg,color_bg,invert,FONT_5x8);
+
+            //Advance to next column and wrap text if necessary
+            *col=*col+1;
+            if (*col==console->width)
+            {
+                *col=0;
+                *row=*row+1;
+                pos.x=console->x;
+                pos.y+=CONS_ROW_HEIGHT;
+            }
         }
     }
-    //TODO: remove
-    /*
-    else
-    {
-        //Input line is invisible - print blank line
-        for (int col=0;col<console_width;col++)
-            pos=draw_char(' ',pos,console->input_col_fg,console->input_col_bg,false,FONT_5x8);
-    }
-    */
+    return pos;
 }
 
 void draw_console(struct ConsoleInfo *console)
 {
-    //Adjust console_height to make room for input line
+    //If input line visible, loop backwards through screen buffer to find length of last line 
+    //printed since needed to calculate how many lines input line needs
     int input_height;
-    if (console->input.visible==true) input_height=((console->input.len)/console->width)+1;
+    int last_line_length;
+    if (console->input.visible==true)
+    {
+        //Loop backwards through screen buffer
+        int line_length=0;
+        int buffer_counter=console->buffer_index;
+        bool newline_found=false;
+        for (int i=0;i<console->text_len;i++)
+        {
+            buffer_counter--;
+            if (buffer_counter<0)
+            {
+                //Wrap index - buffer is circular
+                buffer_counter+=CONS_BUFFER_SIZE;
+            }
+
+            if (console->text[buffer_counter].character=='\n')
+            {
+                //Newline character - done searching
+                last_line_length=line_length%console->width;
+                newline_found=true;
+                break;
+            }
+            else line_length++;
+        }
+
+        if (newline_found==false)
+        {
+            //No newline in console output - calculate last line length from count of overflow characters
+            last_line_length=(console->overflow_count+line_length)%console->width;
+        }
+        
+        //Calculate extra lines for input
+        input_height=((last_line_length+console->input.len)/console->width);
+    }
     else input_height=0;
-    int new_height=console->height;
-    new_height-=(input_height-1);
+
+    //Adjust console_height to make room for input line based on calculation above
+    int new_height=console->height-input_height;
 
     //Find starting point in circular screen buffer for printing characters
     int line_length=0;
@@ -284,12 +294,12 @@ void draw_console(struct ConsoleInfo *console)
     int buffer_start=buffer_counter;
     for (int i=0;i<console->text_len;i++)
     {
-        //Loop backwords through screen buffer until enough lines are generated to fill screen
+        //Loop backwards through screen buffer until enough lines are generated to fill screen
         buffer_counter--;
         if (buffer_counter<0)
         {
             //Wrap index - buffer is circular
-            buffer_counter=CONS_BUFFER_SIZE-1;
+            buffer_counter+=CONS_BUFFER_SIZE;
         }
 
         if (console->text[buffer_counter].character=='\n')
@@ -374,53 +384,61 @@ void draw_console(struct ConsoleInfo *console)
     int blank_count=0;
     int row=0,col=0;
     bool input_drawn=false;
-    while(row<new_height-1)
+
+    //TODO: remove
+    static int flip=0;
+    flip^=2;
+
+    while(row<console->height)
     {
-        if ((blank_count>0)||((buffer_start==console->buffer_index)&&(draw_once==false)))
+        bool console_done=((buffer_start==console->buffer_index)&&(draw_once==false));
+        if ((console_done)&&(input_drawn==false))
         {
-            //Draw blanks if no more text
-            text_pos=draw_char(' ',text_pos,0,console->input_col_bg,false,FONT_5x8);
-            if (blank_count>0) blank_count--;
+            //Draw input line
+            text_pos=draw_input_line(console,text_pos,&col,&row);
+            input_drawn=true;
         }
         else
         {
-            char character=console->text[buffer_start].character;
-            if (character=='\n')
+            if ((console_done)||(blank_count>0))
             {
-                //Newline character - fill rest of line with blanks
-                blank_count=console->width-col;
-                //Draw one character less so no blank character for newline
-                col--;
+                //Draw blanks if no more text
+                text_pos=draw_char(' ',text_pos,console->input_col_fg,console->input_col_bg,false,FONT_5x8);
+                if (blank_count>0) blank_count--;
             }
             else
             {
-                //Draw character
-                color_t fg=console->text[buffer_start].fg;
-                color_t bg=console->text[buffer_start].bg;
-                text_pos=draw_char(character,text_pos,fg,bg,false,FONT_5x8);
+                char character=console->text[buffer_start].character;
+                if (character=='\n')
+                {
+                    //Newline character - fill rest of line with blanks
+                    blank_count=console->width-col;
+                    //Draw one character less so no blank character for newline
+                    col--;
+                }
+                else
+                {
+                    //Draw character of input
+                    color_t fg=console->text[buffer_start].fg;
+                    color_t bg=console->text[buffer_start].bg;
+                    text_pos=draw_char(character,text_pos,fg,bg,false,FONT_5x8);
+                }
+
+                //Advance to next character in buffer
+                buffer_start++;
+                if (buffer_start==CONS_BUFFER_SIZE) buffer_start=0;
+                draw_once=false;
             }
 
-            //Advance to next character in buffer
-            buffer_start++;
-            if (buffer_start==CONS_BUFFER_SIZE) buffer_start=0;
-            draw_once=false;
-        }
-
-        //Advance to next character on screen
-        col++;
-        if (col==console->width)
-        {
-            //Reached end of line on screen - go to next line
-            col=0;
-            row++;
-            text_pos.x=console->x;
-            text_pos.y+=CONS_ROW_HEIGHT;
-            if ((buffer_start==console->buffer_index)&&(input_drawn==false))
+            //Advance to next character on screen
+            col++;
+            if (col==console->width)
             {
-                //Draw input line
-                draw_input_line(console,text_pos,console->width,input_height);
-                text_pos.y+=CONS_ROW_HEIGHT*input_height;
-                input_drawn=true;
+                //Reached end of line on screen - go to next line
+                col=0;
+                row++;
+                text_pos.x=console->x;
+                text_pos.y+=CONS_ROW_HEIGHT;
             }
         }
     }
@@ -432,7 +450,6 @@ void reset_console(struct ConsoleInfo *console)
     console->buffer_index=0;
     console->text_len=0;
     console->input.text[0].character=0;
-    console->input.start=0;
     console->input.cursor=0;
     console->input.len=0;
 }
@@ -517,7 +534,7 @@ void console_key(struct ConsoleInfo *console,int key)
             break;
         case VKEY_LEFT:
             //Move cursor left
-            if (console->input.cursor>console->input.start)
+            if (console->input.cursor>0)
                 console->input.cursor--; 
             break;
         case VKEY_RIGHT:
@@ -527,7 +544,7 @@ void console_key(struct ConsoleInfo *console,int key)
             break;
         case VKEY_SHIFT_LEFT:
             //Move cursor to beginning of input
-            console->input.cursor=console->input.start;
+            console->input.cursor=0;
             break;
         case VKEY_SHIFT_RIGHT:
             //Move cursor to end of input
@@ -537,7 +554,7 @@ void console_key(struct ConsoleInfo *console,int key)
             //DEL with alpha active - treat as DEL so don't need to remove alpha to delete
             //Fallthrough!
         case VKEY_DEL:
-            if (console->input.cursor>console->input.start)
+            if (console->input.cursor>0)
             {
                 console->input.cursor--;
                 for (int i=console->input.cursor;i<console->input.len;i++)
@@ -581,5 +598,4 @@ void input_deep_copy(struct ConsoleInput *dest,struct ConsoleInput *source,int e
     *dest=*source;
     dest->text=text_ptr;
     memcpy(dest->text,source->text,elements*sizeof(struct ConsoleChar));
-    
 }
