@@ -33,6 +33,7 @@ console assumes input less than size of screen
 fix debug_heap
 exit program after start so other pane updates for memory then back?
 convert size_t in mem to uint32_t
+optimize ERASE etc - don't need to mask every cycle
 */
 
 
