@@ -634,7 +634,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
-        //Allocate space for Forth words
+        //Allocate space for Forth word definitions
         forth_definitions=add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
 
         //Make sure allocation succeeded
@@ -676,6 +676,27 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
         printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
         printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+        test_size=768;
+        printf("Reducing definitions by %d bytes\n",test_size);
+        ret_val=reduce_object(test_size,FORTH_ID_DEFINITIONS,heap_ptr);
+        printf("Return value %d\n",ret_val);
+        printf("Refreshing Word IDs address\n");
+        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
+        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
+        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
+        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+        test_size=128;
+        printf("Reducing Word IDs by %d bytes\n",test_size);
+        ret_val=reduce_object(test_size,FORTH_ID_WORD_IDS,heap_ptr);
+        printf("Return value %d\n",ret_val);
+        printf("Refreshing Word IDs address\n");
+        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
+        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
+        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
+        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+
 
 
         //Init console
@@ -823,7 +844,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         int old_modifier=console->modifier;
         int key=getkey_text(true,&console->modifier,forth_keys);
 
-        //Remap keys for Forth
+        //Remap keys on keypad for Forth. Also, recognize PC keyboard keys for testing.
         key=forth_key_remap(key);
         
         //Redraw modifiers (shift, alpha) next time through if they have changed

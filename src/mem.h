@@ -26,6 +26,6 @@
     uint8_t *object_address(int ID, uint8_t *heap_ptr);
     size_t object_size(int ID, uint8_t *heap_ptr);
     int expand_object(size_t size,int ID, uint8_t *heap_ptr);
-    int shrink_object(size_t size,int ID, uint8_t *heap_ptr);
+    int reduce_object(size_t size,int ID, uint8_t *heap_ptr);
 
 #endif
