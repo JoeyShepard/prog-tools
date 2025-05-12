@@ -1,0 +1,42 @@
+#!/bin/bash
+
+tmux new-session -d -x 132 -y 48 'vim src/main.c'
+tmux rename-window -t 0 main
+
+tmux new-window
+tmux rename-window -t 1 run
+
+tmux new-window 'vim src/compatibility.h'
+tmux rename-window -t 2 sdl2
+tmux split-window -v vim src/compatibility.c
+
+tmux new-window 'vim src/getkey.h'
+tmux rename-window -t 3 keys
+tmux split-window -v vim src/getkey.c
+
+tmux new-window 'vim src/structs.h'
+tmux rename-window -t 4 structs
+
+tmux new-window 'vim src/text.h'
+tmux rename-window -t 5 text
+tmux split-window -v vim src/text.c
+
+tmux new-window 'vim src/mem.h'
+tmux rename-window -t 6 mem
+tmux split-window -v vim src/mem.c
+
+tmux new-window 'vim src/forth-engine.h'
+tmux rename-window -t 7 engine
+tmux split-window -v vim src/forth-engine.c
+
+tmux new-window 'vim src/forth-primitives.h'
+tmux rename-window -t 8 prim
+tmux split-window -v vim src/forth-primitives.c
+
+tmux new-window 'vim src/forth.h'
+tmux rename-window -t 9 forth
+tmux split-window -v vim src/forth.c
+
+tmux rename-session prog-tools
+tmux select-window -t 0
+tmux attach-session -d

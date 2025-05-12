@@ -15,9 +15,6 @@
     #define FORTH_COL_FG        COL_WHITE
     #define FORTH_COL_BG        COL_BLACK
    
-    #define FORTH_COL_ERR_FG    FORTH_COL_FG
-    #define FORTH_COL_ERR_BG    FORTH_COL_BG
-
     //#define FORTH_COL_LIGHT
     #ifdef FORTH_COL_LIGHT
         #define FORTH_COL_NUMBER    C_RGB(COL_MID,COL_MAX,COL_MID)  //Green 
@@ -49,9 +46,10 @@
     #define FORTH_ID_CONSOLE        0
     #define FORTH_ID_DEFINITIONS    1
     #define FORTH_ID_WORD_IDS       2
-    #define FORTH_MEM_DEFINITIONS   1024    //For both of these, allocate this amount initially then add this     
-    #define FORTH_MEM_WORD_IDS      256     //much when memory runs out. Exact amount not important - prevents
-                                            //copying whole dictionary every time new word added.
+    #define FORTH_ID_CONTROL_STACK  3
+    #define FORTH_MEM_DEFINITIONS   1024    //For these three, allocate this amount initially then add this     
+    #define FORTH_MEM_WORD_IDS      512     //much when memory runs out. Exact amount not important - prevents
+    #define FORTH_MEM_CONTROL_STACK 512     //copying whole dictionary every time new word added.
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
@@ -79,16 +77,13 @@
     #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
     //Forth memory
-    #define FORTH_DATA_SIZE     0x10000
+    #define FORTH_DATA_SIZE                 0x10000
 
+    //Forth primitives
+    #define FORTH_PRIM_NOT_FOUND            -1
 
     //enums
     //=====
-    enum ForthParse
-    {
-        FORTH_PARSE_WORD
-    };
-
     enum ForthCharClass
     {
         FORTH_CHAR_MINUS,
@@ -105,7 +100,7 @@
         //Full types
         FORTH_TYPE_NUMBER,
         FORTH_TYPE_HEX,
-        FORTH_TYPE_PRIMATIVE,
+        FORTH_TYPE_PRIMITIVE,
         FORTH_TYPE_SECONDARY,
         FORTH_TYPE_NOT_FOUND,
         //Partial types used only for parsing
@@ -117,24 +112,26 @@
     };
 
     //Note different from enum ForthEngineErrors
-    enum ForthCompileErrors
+    enum ForthCompileError
     {
         FORTH_ERROR_NONE,
         FORTH_ERROR_TOO_LONG,
         FORTH_ERROR_INTERNAL,
-        FORTH_ERROR_ENGINE
+        FORTH_ERROR_ENGINE,
+        FORTH_ERROR_NOT_FOUND,
+        FORTH_ERROR_COLON_NO_WORD,
+        FORTH_ERROR_COLON_NAME,
     };
 
-    //structs
-    struct ForthWordHeader
+    enum ForthControlType
     {
-        uint32_t size;
-        uint32_t ID;
-        uint8_t word_type;
-        uint8_t name_len;
-        //Flexible Array Member - memory allocated after struct holds name
-        char name[];
+        FORTH_CONTROL_IF,
+        FORTH_CONTROL_ELSE,
     };
+
+
+    //structs
+    //=======
 
     //Custom struct to save data the program uses to heap
     struct ForthInfo
@@ -162,6 +159,20 @@
 
         //Data for Forth Engine
         struct ForthEngine engine;
+    };
+
+    struct ForthControlStackInfo
+    {
+        uint32_t index;
+        uint8_t type;
+    };
+
+    struct DefinitionsInfo
+    {
+        uint32_t bytes_left;
+        uint32_t index; 
+        //Flexible Array Member - memory allocated after struct holds definition data
+        uint32_t data[];
     };
 
     //Functions

@@ -118,13 +118,21 @@ static int find_primitive(const char *word)
             if (!strcasecmp(forth_primitives[i].name,word)) return i;
         }
     }
-    return -1;
+    return FORTH_PRIM_NOT_FOUND;
 }
 
 static uint8_t *find_secondary(const char *word)
 {
     if (!strcmp(word,"foo")) return (uint8_t *)1;
     else return NULL;
+}
+
+//Don't combine with classify_word! Need result of find_primitive or find_secondary in some cases
+static int classify_other(const char *word)
+{
+    if (find_primitive(word)!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
+    else if (find_secondary(word)!=NULL) return FORTH_TYPE_SECONDARY;
+    else return FORTH_TYPE_NOT_FOUND;
 }
 
 static uint32_t next_word(struct ConsoleInfo *console,uint32_t *start)
@@ -197,8 +205,8 @@ static uint32_t next_word_source(const char *source,uint32_t *start)
 
 static void color_input(struct ConsoleInfo *console,bool color_highlighted)
 {
-    int32_t start=0;
-    int32_t word_len=0;
+    uint32_t start=0;
+    uint32_t word_len=0;
     bool in_quote=false;
     bool in_word=false;
     bool colon_last=false;
@@ -231,7 +239,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
             {
                 //Copy word to buffer for classification
                 char word_buffer[FORTH_WORD_MAX+1];
-                for (int32_t j=start;j<start+word_len;j++)
+                for (uint32_t j=start;j<start+word_len;j++)
                 {
                     word_buffer[j-start]=console->input.text[j].character;
                     word_buffer[j-start+1]=0;
@@ -277,7 +285,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
                             word_color=FORTH_COL_ERROR;
                         }
                     }
-                    else if (find_primitive(word_buffer)!=-1)
+                    else if (find_primitive(word_buffer)!=FORTH_PRIM_NOT_FOUND)
                     {
                         //Always color primitives
                         if (colon_last)
@@ -354,10 +362,144 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
     }
 }
 
-static int process_source(struct ForthEngine *engine,const char *source)
+static int32_t int32_text(const char *word_buffer)
+{
+    int32_t num=0;
+    bool negative=false;
+    if (*word_buffer=='-')
+    {
+        negative=true;
+        word_buffer++;
+    }
+    while (*word_buffer)
+    {
+        num*=10;
+        num+=*word_buffer-'0';
+        word_buffer++;
+    }
+    if (negative) num*=-1;
+
+    return num;
+}
+
+static int32_t hex32_text(const char *word_buffer)
+{
+    int32_t num=0;
+    bool negative=false;
+    if (*word_buffer=='-')
+    {
+        negative=true;
+        word_buffer++;
+    }
+    
+    //Skip over 0x prefix
+    word_buffer+=2;
+
+    while (*word_buffer)
+    {
+        num*=0x10;
+        if ((*word_buffer>='0')&&(*word_buffer<='9'))
+            num+=*word_buffer-'0';
+        else if ((*word_buffer>='a')&&(*word_buffer<='f'))
+            num+=*word_buffer-'a'+10;
+        else if ((*word_buffer>='A')&&(*word_buffer<='F'))
+            num+=*word_buffer-'A'+10;
+        word_buffer++;
+    }
+    if (negative) num*=-1;
+
+    return num;
+}
+
+static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,const char **error_word)
+{
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len=next_word_source(source,start);
+    if (word_len>FORTH_WORD_MAX)
+    {
+        //Error - word of source is longer than allowed
+        //Point to word for error message in caller
+        *error_word=source+*start;
+        return FORTH_ERROR_TOO_LONG;
+    }
+    else if (word_len==0)
+    {
+        //Error - no word name after :
+        return FORTH_ERROR_COLON_NO_WORD;
+    }
+    //Make sure name of new word is not primitive or number
+    strncpy(word_buffer,source+*start,word_len);
+    word_buffer[word_len]=0;
+    int word_type=classify_word(word_buffer);
+    if (word_type==FORTH_TYPE_OTHER)
+        word_type=classify_other(word_buffer);
+
+    
+    //TODO: switch from classify_other to find_secondary
+
+    if ((word_type!=FORTH_TYPE_SECONDARY)&&(word_type!=FORTH_TYPE_NOT_FOUND))
+    {
+        //Error - name of new word can't be number or primitive
+        *error_word=source+*start;
+        return FORTH_ERROR_COLON_NAME;
+    }
+    //Advance past name of new word
+    *start+=word_len;
+
+    printf("New definition: %s\n",word_buffer);
+
+    engine->state=FORTH_STATE_COMPILE;
+
+    return FORTH_ERROR_NONE;
+}
+
+
+static int32_t action_char_common(const char *source,uint32_t *start)
+{
+    //Find next word in source
+    uint32_t word_len=next_word_source(source,start);
+    if (word_len==0)
+    {
+        //Word not found
+        return 0;
+    }
+    else
+    {
+        //Return first character of word
+        uint8_t ret_val=*(uint8_t*)(source+*start);
+        //Advance to next word
+        *start+=word_len;
+        return ret_val;
+    }
+}
+
+
+static void action_paren(const char *source,uint32_t *start)
+{
+    while(1)
+    {
+        char character=source[*start];
+        *start=*start+1;
+        if (character==')')
+        {
+            //Matching ) found - comment ended
+            return;
+        }
+        else if (character==0)
+        {
+            //Reached end of zero terminated string with no matching ) but no error
+            //since using ( here like \ since no \ on calculator keypad
+            return;
+        }
+    }
+}
+
+static int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
+                            struct DefinitionsInfo *definitions,uint8_t *word_IDs,uint8_t *control_stack)
 {
     uint32_t word_len;
     uint32_t start=0;
+    uint32_t control_stack_index=0;
     do
     {
         //Get next word of source
@@ -366,6 +508,8 @@ static int process_source(struct ForthEngine *engine,const char *source)
         if (word_len>FORTH_WORD_MAX)
         {
             //Error - word of source is longer than allowed
+            //Point to word for error message in caller
+            *error_word=source+start;
             return FORTH_ERROR_TOO_LONG;
         }
         else if (word_len>0)
@@ -383,51 +527,22 @@ static int process_source(struct ForthEngine *engine,const char *source)
             if (word_type==FORTH_TYPE_NUMBER)
             {
                 //Number
-                bool negative=false;
-                char *num_ptr=word_buffer;
-                if (*num_ptr=='-')
-                {
-                    negative=true;
-                    num_ptr++;
-                }
-                while (*num_ptr)
-                {
-                    num*=10;
-                    num+=*num_ptr-'0';
-                    num_ptr++;
-                }
-                if (negative) num*=-1;
+                num=int32_text(word_buffer);
             }
             else if (word_type==FORTH_TYPE_HEX)
             {
                 //Hex
-                bool negative=false;
-                char *num_ptr=word_buffer;
-                if (*num_ptr=='-')
-                {
-                    negative=true;
-                    num_ptr++;
-                }
-                while (*num_ptr)
-                {
-                    num*=0x10;
-                    if ((*num_ptr>='0')&&(*num_ptr<='9'))
-                        num+=*num_ptr-'0';
-                    else if ((*num_ptr>='a')&&(*num_ptr<='f'))
-                        num+=*num_ptr-'a'+10;
-                    else if ((*num_ptr>='A')&&(*num_ptr<='F'))
-                        num+=*num_ptr-'A'+10;
-                    num_ptr++;
-                }
-                if (negative) num*=-1;
+                num=hex32_text(word_buffer);
             } 
             else if (word_type==FORTH_TYPE_OTHER)
             {
+                //Determine whether primitive, secondary, or unknown
+                //Can't replace with class_other since primitive_ID and secondary_ptr used below
                 primitive_ID=find_primitive(word_buffer);
                 if (primitive_ID!=-1)
                 {
                     //Word is primitive
-                    word_type=FORTH_TYPE_PRIMATIVE;
+                    word_type=FORTH_TYPE_PRIMITIVE;
                 }
                 else
                 {
@@ -454,7 +569,7 @@ static int process_source(struct ForthEngine *engine,const char *source)
             start+=word_len;
 
             //Handle word depending on state
-            if (engine->state==0)
+            if (engine->state==FORTH_STATE_INTERPRET)
             {
                 //Interpret mode
                 if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
@@ -462,33 +577,110 @@ static int process_source(struct ForthEngine *engine,const char *source)
                     //Number or hex - push to stack
                     forth_push(engine,num);
                 }
-                else if (word_type==FORTH_TYPE_PRIMATIVE)
+                else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
                     //Primitive
                     int (*immediate)(struct ForthEngine *engine)=forth_primitives[primitive_ID].immediate;
                     if (immediate!=NULL)
                     {
                         //Primitive has special immediate behavior
-                        engine->source=source;
-                        engine->source_index=&start;
+                        engine->word_action=FORTH_ACTION_NONE;
                         int result=immediate(engine);
                         if (result!=FORTH_ENGINE_ERROR_NONE)
                         {
-                            //Error in word - return to caller
+                            //Error in word
                             engine->error=result;
+                            //Set pointer to word in case used in error message
+                            *error_word=source+start-word_len;
                             return FORTH_ERROR_ENGINE;
+                        }
+
+                        //Process outer interpreter action requested by word if present
+                        //This keeps platform specific code out of primitives for portability
+                        switch (engine->word_action)
+                        {
+                            case FORTH_ACTION_COLON:
+                                int result=action_colon(engine,source,&start,error_word);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            case FORTH_ACTION_CHAR:
+                                forth_push(engine,action_char_common(source,&start));
+                                break;
+                            case FORTH_ACTION_PAREN:
+                                action_paren(source,&start);
+                                break;
                         }
                     }
                     else
                     {
                         //No special immediate behavior - execute body
-                        forth_primitives[primitive_ID].body(engine);
+                        void (*body)(struct ForthEngine *engine)=forth_primitives[primitive_ID].body;
+                        if (body!=NULL) body(engine);
                     }
                 }
+                else if (word_type==FORTH_TYPE_NOT_FOUND)
+                {
+                    //Error - word not found
+                    //Point to unknown word for error message in caller
+                    *error_word=source+start-word_len;
+                    return FORTH_ERROR_NOT_FOUND;
+                }
             }
-            else
+            else if (engine->state==FORTH_STATE_COMPILE)
             {
                 //Compile mode
+                if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
+                {
+                    //Number or hex - compile to dictionary
+                    printf("Compile number: %d\n",num);
+                }
+                else if (word_type==FORTH_TYPE_PRIMITIVE)
+                {
+                    //Primitive
+                    int (*compile)(struct ForthEngine *engine)=forth_primitives[primitive_ID].compile;
+                    if (compile!=NULL)
+                    {
+                        //Primitive has special compile behavior
+                        //TODO: do any compile functions return error? moved compiling functions here
+                        engine->word_action=FORTH_ACTION_NONE;
+                        int result=compile(engine);
+                        if (result!=FORTH_ENGINE_ERROR_NONE)
+                        {
+                            //Error in word
+                            engine->error=result;
+                            //Set pointer to word in case used in error message
+                            *error_word=source+start-word_len;
+                            return FORTH_ERROR_ENGINE;
+                        }
+
+                        //Process outer interreter action requested by word if present
+                        //This keeps platform specific code out of the primitives for portability
+                        switch (engine->word_action)
+                        {
+                            case FORTH_ACTION_PAREN:
+                                action_paren(source,&start);
+                                break;
+                            case FORTH_ACTION_SEMICOLON:
+                                engine->state=FORTH_STATE_INTERPRET;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        //No special compile behavior - compile address
+                        //forth_primitives[primitive_ID].body;
+                        printf("Compile primitive: %s\n",word_buffer);
+                    }
+                }
+                else if (word_type==FORTH_TYPE_SECONDARY)
+                {
+                    //Compile pointer to pointer to secondary
+                    printf("Compile secondary\n");
+                }
+                else if (word_type==FORTH_TYPE_NOT_FOUND)
+                {
+                    printf("Compile empty word for %s\n",word_buffer);
+                }
             }
         }
     }while(word_len>0);
@@ -534,7 +726,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         }
 
         //Color every other row of stack values slightly darker
-        int32_t color;
+        color_t color;
         if ((i&1)==0) color=FORTH_STACK_BG;
         else color=FORTH_STACK_BG2;
         pos=draw_text(text_buffer,pos,FORTH_STACK_FG,color,false,FONT_5x8);
@@ -619,8 +811,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Pointers to data on heap
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
-    uint8_t *forth_definitions;
+    struct DefinitionsInfo *forth_definitions;
     uint8_t *forth_word_IDs;
+    uint8_t *forth_control_stack;
 
     if (command_ID==COMMAND_START) 
     {
@@ -635,7 +828,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth word definitions
-        forth_definitions=add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
+        forth_definitions=(struct DefinitionsInfo *)add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_definitions==NULL)
@@ -644,8 +837,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
-        //First definition is empty marking end of definitions
-        ((struct ForthWordHeader *)forth_definitions)->size=0;
+        //Initialize empty definition list
+        forth_definitions->index=0;
+        forth_definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct DefinitionsInfo);
 
         //Allocate space for list of word IDs
         forth_word_IDs=add_object(FORTH_MEM_WORD_IDS,heap_ptr);
@@ -657,47 +851,18 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
+        //First definition is empty marking end of definitions
+        ((struct ForthWordHeader *)forth_word_IDs)->size=0;
 
-        //TODO: delete
-        //Test memory functions
-        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
-        *(uint32_t*)forth_definitions=0x12345678;
-        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
-        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
-        *(uint32_t*)forth_word_IDs=0x76543210;
-        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
-        uint32_t test_size=256;
-        printf("Expanding definitions by %d bytes\n",test_size);
-        int ret_val=expand_object(test_size,FORTH_ID_DEFINITIONS,heap_ptr);
-        printf("Return value %d\n",ret_val);
-        printf("Refreshing Word IDs address\n");
-        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
-        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
-        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
-        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
-        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
-        test_size=768;
-        printf("Reducing definitions by %d bytes\n",test_size);
-        ret_val=reduce_object(test_size,FORTH_ID_DEFINITIONS,heap_ptr);
-        printf("Return value %d\n",ret_val);
-        printf("Refreshing Word IDs address\n");
-        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
-        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
-        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
-        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
-        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
-        test_size=128;
-        printf("Reducing Word IDs by %d bytes\n",test_size);
-        ret_val=reduce_object(test_size,FORTH_ID_WORD_IDS,heap_ptr);
-        printf("Return value %d\n",ret_val);
-        printf("Refreshing Word IDs address\n");
-        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
-        printf("Definitions size: %ld\n",object_size(FORTH_ID_DEFINITIONS,heap_ptr));
-        printf("Definitions test val: %X (expected 0x12345678)\n",*(uint32_t*)forth_definitions);
-        printf("Word IDs size: %ld\n",object_size(FORTH_ID_WORD_IDS,heap_ptr));
-        printf("Word IDs test val: %X (expected 0x76543210)\n",*(uint32_t*)forth_word_IDs);
+        //Allocate space for control stack
+        forth_control_stack=add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
 
-
+        //Make sure allocation succeeded
+        if (forth_control_stack==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
 
         //Init console
         console=&forth->console;
@@ -759,7 +924,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         reset_console_pointers(console);
 
         //Restore pointers to word definitions and ID list
-        forth_definitions=object_address(FORTH_ID_DEFINITIONS,heap_ptr);
+        forth_definitions=(struct DefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
         forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
 
         //Restore stack memory
@@ -924,21 +1089,80 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Process input
                     char input_buffer[FORTH_INPUT_MAX];
                     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
-                    process_source(&forth->engine,input_buffer);
+                    const char *error_word;
+                    int process_result=process_source(&forth->engine,input_buffer,&error_word,
+                        forth_definitions,forth_word_IDs,forth_control_stack);
                     console->input.visible=true;
-
-                    //Check engine state and error if in compile state or word not complete like [
-
-                    /*
-                    int return_code=
-                    if (return_code!=COMMAND_NONE)
-                    {
-                        //Return to window manager to process any return code such as closing console
-                        return return_code;
-                    }
-                    */
-
                     console_text_default("\n",console);
+
+                    //Process errors from processing source
+                    switch (process_result)
+                    {
+                        case FORTH_ERROR_NONE:
+                            //No error - nothing to do
+                            break;
+                        case FORTH_ERROR_TOO_LONG:
+                        case FORTH_ERROR_NOT_FOUND:
+                        case FORTH_ERROR_COLON_NAME:
+                            //All of these errors share code for printing out word that caused error
+                            if (process_result==FORTH_ERROR_TOO_LONG)
+                                console_text_default("Word too long: ",console);
+                            else if (process_result==FORTH_ERROR_NOT_FOUND)
+                                console_text_default("Undefined word: ",console);
+                            else if (process_result==FORTH_ERROR_COLON_NAME)
+                                console_text_default("Invalid name for word definition: ",console);
+                            uint32_t start=0;
+                            uint32_t word_len=next_word_source(error_word,&start);
+                            for (uint32_t i=0;i<word_len;i++)
+                                console_char_default(error_word[i],console);
+                            console_text_default("\n",console);
+                            break;
+                        case FORTH_ERROR_ENGINE:
+                            //Error set in Forth engine - ie inside of primitive
+                            switch (forth->engine.error)
+                            {
+                                case FORTH_ENGINE_ERROR_NONE:
+                                    //Should never happen but just in case
+                                    console_text_default("Engine error but code not set\n",console);
+                                    break;
+                                case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
+                                case FORTH_ENGINE_ERROR_COMPILE_ONLY:
+                                    if (forth->engine.error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
+                                        console_text_default("Word is interpret only: ",console);
+                                    else if (forth->engine.error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
+                                        console_text_default("Word is compile only: ",console);
+                                    //All of these errors share code for printing out word that caused error
+                                    uint32_t start=0;
+                                    uint32_t word_len=next_word_source(error_word,&start);
+                                    for (uint32_t i=0;i<word_len;i++)
+                                        console_char_default(error_word[i],console);
+                                    console_text_default("\n",console);
+                                    break;
+                                default:
+                                    //No error message for error - should never reach here unless forgot to add error message
+                                    console_text_default("Unhandled engine error: ",console);
+                                    char num_buffer[TEXT_INT32_SIZE];
+                                    text_int32(forth->engine.error,num_buffer);
+                                    console_text_default(num_buffer,console);
+                                    console_text_default("\n",console);
+                                    break;
+                            }
+                            break;
+                        case FORTH_ERROR_COLON_NO_WORD:
+                            console_text_default("No name for word definition\n",console);
+                            break;
+                        default:
+                            //No error message for error - should never reach here unless forgot to add error message
+                            console_text_default("Unhandled error: ",console);
+                            char num_buffer[TEXT_INT32_SIZE];
+                            text_int32(process_result,num_buffer);
+                            console_text_default(num_buffer,console);
+                            console_text_default("\n",console);
+                            break;
+                    }
+
+                    //TODO
+                    //Error if still in compile state or after [
                     
                     break;
                 case VKEY_UP:

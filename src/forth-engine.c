@@ -22,9 +22,9 @@ void forth_init_engine(struct ForthEngine *engine,
     void (*update_modifiers)(),
     void (*clear_console)(),
     //Console
-    int max_spaces,
-    int screen_width,
-    int screen_height,
+    int32_t max_spaces,
+    int16_t screen_width,
+    int16_t screen_height,
     color_t color_primitive)
 {
     //Init Forth engine pointers (these values never change)
@@ -40,7 +40,7 @@ void forth_init_engine(struct ForthEngine *engine,
     engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
     engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
 
-    //Compatiblity parameters that can be adjusted to work on other systems
+    //Compatiblity parameters that can be adjusted to work on other platforms
     engine->print=print;
     engine->print_color=print_color;
     engine->input=input;
@@ -70,9 +70,7 @@ void forth_reset_engine(struct ForthEngine *engine)
     //Reset engine variables
     engine->state=false;
     engine->in_bracket=false;
-    engine->source=NULL;
-    engine->source_index=NULL;
-    engine->data_ptr=0;
+    engine->data_index=0;
     engine->error=FORTH_ENGINE_ERROR_NONE;
 
     //Reset stack pointers
@@ -87,7 +85,7 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
     engine->rstack=(int32_t*)(engine->rstack_base+(engine->rstack_count-1)*FORTH_CELL_SIZE);
 }
 
-int forth_stack_count(struct ForthEngine *engine)
+int32_t forth_stack_count(struct ForthEngine *engine)
 {
     return FORTH_STACK_ELEMENTS-((uintptr_t)(engine->stack)-(uintptr_t)(engine->stack_base))/FORTH_CELL_SIZE-1;
 }

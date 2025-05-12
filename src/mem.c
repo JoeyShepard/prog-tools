@@ -233,20 +233,12 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
 
-    printf("Expanding object %d by %ld bytes:\n",ID,size);
-    printf("- split base: %p\n",heap_ptr);
-    printf("- split size: %d\n",heap_info->next);
-    printf("- object size: %ld\n",object_size(ID,heap_ptr));
-    printf("Expanding...\n");
     //Memory range overlaps - memmove instead of memcpy
     uint8_t *object=object_base_address(ID,heap_ptr);
     uint8_t *src=object+object_size(ID,heap_ptr);
     memmove(src+size,src,size);
     heap_info->next+=size;
     *(uint32_t *)object+=size;
-    printf("- split size: %d\n",heap_info->next);
-    printf("- object size: %d\n",*(uint32_t *)object);
-    printf("\n");
     
     return ERROR_NONE;
 }
@@ -260,21 +252,12 @@ int reduce_object(size_t size,int ID, uint8_t *heap_ptr)
     }
 
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
-
-    printf("Reducing object %d by %ld bytes:\n",ID,size);
-    printf("- split base: %p\n",heap_ptr);
-    printf("- split size: %d\n",heap_info->next);
-    printf("- object size: %ld\n",object_size(ID,heap_ptr));
-    printf("Reducing...\n");
     //Memory range overlaps - memmove instead of memcpy
     uint8_t *object=object_base_address(ID,heap_ptr);
     uint8_t *src=object+object_size(ID,heap_ptr);
     memmove(src-size,src,size);
     heap_info->next-=size;
     *(uint32_t *)object-=size;
-    printf("- split size: %d\n",heap_info->next);
-    printf("- object size: %d\n",*(uint32_t *)object);
-    printf("\n");
     
     return ERROR_NONE;
 }
