@@ -42,48 +42,48 @@ static int classify_char(char c)
 
 static int classify_word(const char *word)
 {
-    int text_type=FORTH_TYPE_NONE;
+    int text_type=FORTH_PARSE_NONE;
     while(*word)
     {
         int char_class=classify_char(*word);
         switch(text_type)
         {
-            case FORTH_TYPE_NONE:
-                if (char_class==FORTH_CHAR_MINUS) text_type=FORTH_TYPE_MINUS;
-                else if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_0;
-                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
-                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_OTHER;
-                else if (char_class==FORTH_CHAR_G_Z) text_type=FORTH_TYPE_OTHER;
-                else if (char_class==FORTH_CHAR_x) text_type=FORTH_TYPE_OTHER;
-                else if (char_class==FORTH_CHAR_OTHER) text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_NONE:
+                if (char_class==FORTH_CHAR_MINUS) text_type=FORTH_PARSE_MINUS;
+                else if (char_class==FORTH_CHAR_0) text_type=FORTH_PARSE_0;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_PARSE_NUMBER;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_PARSE_OTHER;
+                else if (char_class==FORTH_CHAR_G_Z) text_type=FORTH_PARSE_OTHER;
+                else if (char_class==FORTH_CHAR_x) text_type=FORTH_PARSE_OTHER;
+                else if (char_class==FORTH_CHAR_OTHER) text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_NUMBER:
-                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_NUMBER;
-                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
-                else text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_NUMBER:
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_PARSE_NUMBER;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_PARSE_NUMBER;
+                else text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_HEX: 
-                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_HEX;
-                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_HEX;
-                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_HEX;
-                else text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_HEX: 
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_PARSE_HEX;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_PARSE_HEX;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_PARSE_HEX;
+                else text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_MINUS:
-                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_0;
-                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_NUMBER;
-                else text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_MINUS:
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_PARSE_0;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_PARSE_NUMBER;
+                else text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_0:        
-                if (char_class==FORTH_CHAR_x) text_type=FORTH_TYPE_0x;
-                else text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_0:        
+                if (char_class==FORTH_CHAR_x) text_type=FORTH_PARSE_0x;
+                else text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_0x:       
-                if (char_class==FORTH_CHAR_0) text_type=FORTH_TYPE_HEX;
-                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_TYPE_HEX;
-                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_TYPE_HEX;
-                else text_type=FORTH_TYPE_OTHER;
+            case FORTH_PARSE_0x:
+                if (char_class==FORTH_CHAR_0) text_type=FORTH_PARSE_HEX;
+                else if (char_class==FORTH_CHAR_1_9) text_type=FORTH_PARSE_HEX;
+                else if (char_class==FORTH_CHAR_A_F) text_type=FORTH_PARSE_HEX;
+                else text_type=FORTH_PARSE_OTHER;
                 break;
-            case FORTH_TYPE_OTHER:       
+            case FORTH_PARSE_OTHER:       
                 //No changes - always stays same type
                 break;
         }
@@ -92,16 +92,17 @@ static int classify_word(const char *word)
 
     switch (text_type)
     {
-        case FORTH_TYPE_NUMBER:
-        case FORTH_TYPE_HEX:
-        case FORTH_TYPE_NONE:
-        case FORTH_TYPE_OTHER:
-            return text_type;
-        case FORTH_TYPE_MINUS:
-        case FORTH_TYPE_0x:
-            return FORTH_TYPE_OTHER;
-        case FORTH_TYPE_0:
+        case FORTH_PARSE_NUMBER:
+        case FORTH_PARSE_0:
             return FORTH_TYPE_NUMBER;
+        case FORTH_PARSE_HEX:
+            return FORTH_TYPE_HEX;
+        case FORTH_PARSE_NONE:
+            return FORTH_TYPE_NONE;
+        case FORTH_PARSE_OTHER:
+        case FORTH_PARSE_MINUS:
+        case FORTH_PARSE_0x:
+            return FORTH_TYPE_OTHER;
         default:
             //Should not be possible but just in case
             return FORTH_TYPE_NONE;
@@ -121,18 +122,46 @@ static int find_primitive(const char *word)
     return FORTH_PRIM_NOT_FOUND;
 }
 
-static uint8_t *find_secondary(const char *word)
+static struct ForthWordHeader *find_secondary(const char *word,struct ForthWordIDsInfo *word_IDs)
 {
-    if (!strcmp(word,"foo")) return (uint8_t *)1;
-    else return NULL;
+    struct ForthWordHeader *secondary=(struct ForthWordHeader *)word_IDs->data;
+    while(1)
+    {
+        if (secondary->header_size==0)
+        {
+            //Zero-length header indicates end of list - done searching
+            return NULL;
+        }
+        else if (!strcasecmp(word,secondary->name))
+        {
+            //Word found - return pointer to header
+            return secondary;
+        }
+        else
+        {
+            //No match - advance to next header and keep searching
+            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+        }
+    }
 }
 
 //Don't combine with classify_word! Need result of find_primitive or find_secondary in some cases
-static int classify_other(const char *word)
+static int classify_other(const char *word,int *primitive_ID,
+                            struct ForthWordHeader **secondary_ptr,struct ForthWordIDsInfo *word_IDs)
 {
-    if (find_primitive(word)!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
-    else if (find_secondary(word)!=NULL) return FORTH_TYPE_SECONDARY;
-    else return FORTH_TYPE_NOT_FOUND;
+    //Default return value in case word is primitive
+    *secondary_ptr=NULL;
+
+    //Word is primitive?
+    *primitive_ID=find_primitive(word);
+    if (*primitive_ID!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
+
+    //Word is secondary?
+    *secondary_ptr=find_secondary(word,word_IDs);
+    if (*secondary_ptr!=NULL) return FORTH_TYPE_SECONDARY;
+    
+    //Word not primitve or secondary - not found
+    return FORTH_TYPE_NOT_FOUND;
 }
 
 static uint32_t next_word(struct ConsoleInfo *console,uint32_t *start)
@@ -203,7 +232,7 @@ static uint32_t next_word_source(const char *source,uint32_t *start)
     return len;
 }
 
-static void color_input(struct ConsoleInfo *console,bool color_highlighted)
+static void color_input(struct ConsoleInfo *console,bool color_highlighted,struct ForthWordIDsInfo *word_IDs)
 {
     uint32_t start=0;
     uint32_t word_len=0;
@@ -321,7 +350,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted)
                         }
                         else 
                         {
-                            if (find_secondary(word_buffer)!=NULL)
+                            if (find_secondary(word_buffer,word_IDs)!=NULL)
                             {
                                 //Secondary found
                                 word_color=FORTH_COL_SECONDARY;
@@ -411,7 +440,27 @@ static int32_t hex32_text(const char *word_buffer)
     return num;
 }
 
-static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,const char **error_word)
+//Function pointer here should be 32 bit on calculator so write_dict_u32 would work but adding this for testing on x86.
+static int write_dict_primitive(void (*word)(),struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
+                                struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+{
+
+}
+
+static int write_dict_u32(uint32_t value,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
+                            struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+{
+
+}
+
+static uint32_t align4(uint32_t value)
+{
+    return value+((4-value%4)%4);
+}
+
+static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,const char **error_word,
+                        struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
+                        struct ForthControlElement **control_stack,uint8_t *heap_ptr)
 {
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len=next_word_source(source,start);
@@ -423,7 +472,7 @@ static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
-    {
+        {
         //Error - no word name after :
         return FORTH_ERROR_COLON_NO_WORD;
     }
@@ -431,28 +480,96 @@ static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *
     strncpy(word_buffer,source+*start,word_len);
     word_buffer[word_len]=0;
     int word_type=classify_word(word_buffer);
+    int primitive_ID;
+    struct ForthWordHeader *secondary_ptr;
     if (word_type==FORTH_TYPE_OTHER)
-        word_type=classify_other(word_buffer);
-
-    
-    //TODO: switch from classify_other to find_secondary
-
+        word_type=classify_other(word_buffer,&primitive_ID,&secondary_ptr,*word_IDs);
     if ((word_type!=FORTH_TYPE_SECONDARY)&&(word_type!=FORTH_TYPE_NOT_FOUND))
     {
         //Error - name of new word can't be number or primitive
         *error_word=source+*start;
         return FORTH_ERROR_COLON_NAME;
     }
+
     //Advance past name of new word
     *start+=word_len;
 
-    printf("New definition: %s\n",word_buffer);
+    if (word_type==FORTH_TYPE_SECONDARY)
+    {
+        //TODO
+        //Word already exists - delete existing word and update pointers
+    }
 
+    //Expand word ID memory for new word if necessary
+    struct ForthWordHeader *new_secondary=(struct ForthWordHeader *)((*word_IDs)->data+(*word_IDs)->index);
+    //Need enough space for current header and empty header following
+    if ((*word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
+    {
+
+        printf("Expanding word ID memory\n");
+
+        //Not enough memory to add new word ID - expand memory
+        int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,heap_ptr);
+        if (result!=ERROR_NONE)
+        {
+            //Error while allocating memory
+            if (result==ERROR_OUT_OF_MEMORY)
+                return FORTH_ERROR_OUT_OF_MEMORY;
+            else
+            {
+                //Some other type of allocation error like alignment
+                return FORTH_ERROR_MEMORY_OTHER;
+            }
+        }
+
+        //Update count of bytes left
+        (*word_IDs)->bytes_left+=FORTH_MEM_WORD_IDS;
+
+        //Update control stack address since shifted by expand_object above
+        *control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+    }
+
+    //Write new word info to header
+    new_secondary->address=(void(*)())(definitions->data+definitions->index);
+    new_secondary->offset=definitions->index;
+    new_secondary->definition_size=0;
+    new_secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);
+    new_secondary->ID=definitions->ID;
+    definitions->ID++;
+    new_secondary->type=FORTH_SECONDARY_WORD;
+    new_secondary->name_len=word_len;
+    strcpy(new_secondary->name,word_buffer);
+
+    //Write next header with length 0 to indicate end of header list
+    new_secondary=(struct ForthWordHeader *)((uint8_t *)new_secondary+new_secondary->header_size);
+    new_secondary->header_size=0;
+
+    printf("New definition: %s\n",word_buffer);
+    printf("- test value: 0x%X\n",**(uint32_t **)control_stack);
+    printf("- bytes left: %d\n",(*word_IDs)->bytes_left);
+
+    //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
 
     return FORTH_ERROR_NONE;
 }
 
+static int action_semicolon(struct ForthEngine *engine,struct ForthDefinitionsInfo *definitions,
+                            struct ForthWordIDsInfo **word_IDs,struct ForthControlElement **control_stack,
+                            uint8_t *heap_ptr)
+{
+    //TODO: add return word
+
+    //Point to next header which has 0 length header size to indicate end of header list
+    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*word_IDs)->data+(*word_IDs)->index);
+    (*word_IDs)->index+=secondary->header_size;
+    (*word_IDs)->bytes_left-=secondary->header_size;
+
+    //Set compile state back to interpret
+    engine->state=FORTH_STATE_INTERPRET;
+
+    return FORTH_ERROR_NONE;
+}
 
 static int32_t action_char_common(const char *source,uint32_t *start)
 {
@@ -472,7 +589,6 @@ static int32_t action_char_common(const char *source,uint32_t *start)
         return ret_val;
     }
 }
-
 
 static void action_paren(const char *source,uint32_t *start)
 {
@@ -494,8 +610,94 @@ static void action_paren(const char *source,uint32_t *start)
     }
 }
 
+static void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
+{
+    enum SearchModes
+    {
+        SEARCH_PRIMITIVES,
+        SEARCH_SECONDARIES
+    };
+    if (engine->print_color!=NULL)
+    {
+        //First, try to print in color if the color print function is defined
+        engine->print_color("\n",0);
+        bool first_word=true;
+        int line_characters=0;
+        int search_mode=SEARCH_PRIMITIVES;
+        int primitive_index=0;
+        int word_len;
+        const char *word_name;
+        color_t word_color;
+        bool looping=true;
+        struct ForthWordHeader *secondary=(struct ForthWordHeader *)(word_IDs->data);
+        while (looping)
+        {
+            switch (search_mode)
+            {
+                case SEARCH_PRIMITIVES:
+                    word_len=forth_primitives[primitive_index].len;
+                    word_name=forth_primitives[primitive_index].name;
+                    word_color=FORTH_COL_PRIMITIVE;
+                    primitive_index++;
+                    if (primitive_index==forth_primitives_len)
+                    {
+                        //Done outputting primitives - switch to secondaries
+                        search_mode=SEARCH_SECONDARIES;
+                    }
+                    break;
+                case SEARCH_SECONDARIES:
+                    if (secondary->header_size==0)
+                    {
+                        //Empty header reached - done looping
+                        looping=false;
+                    }
+                    else
+                    {
+                        word_len=secondary->name_len;
+                        word_name=secondary->name;
+                        word_color=FORTH_COL_SECONDARY;
+                        secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+                    }
+                    break;
+            }
+            
+            if (looping)
+            {
+                if ((engine->screen_width>0)&&(line_characters+word_len+1>=engine->screen_width))
+                {
+                    engine->print_color("\n",0);
+                    line_characters=0;
+                }
+                else
+                {
+                    if (first_word==false)
+                    {
+                        engine->print_color(" ",0);
+                        line_characters++;
+                    }
+                }
+                first_word=false;
+
+                engine->print_color(word_name,word_color);
+                line_characters+=word_len;
+            }
+        }
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+    else if (engine->print!=NULL)
+    {
+        //TODO: after code for printing in color is done
+    }
+    else
+    {
+        //No way to print
+    }
+}
+
 static int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
-                            struct DefinitionsInfo *definitions,uint8_t *word_IDs,uint8_t *control_stack)
+                            struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo* word_IDs,
+                            struct ForthControlElement *control_stack,uint8_t *heap_ptr)
 {
     uint32_t word_len;
     uint32_t start=0;
@@ -522,7 +724,7 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
             //Classify word
             int32_t num=0;
             int primitive_ID;
-            uint8_t *secondary_ptr;
+            struct ForthWordHeader *secondary_ptr;
             int word_type=classify_word(word_buffer);
             if (word_type==FORTH_TYPE_NUMBER)
             {
@@ -546,7 +748,7 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                 }
                 else
                 {
-                    secondary_ptr=find_secondary(word_buffer);
+                    secondary_ptr=find_secondary(word_buffer,word_IDs);
                     if (secondary_ptr!=NULL)
                     {
                         //Word is secondary
@@ -600,7 +802,8 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                         switch (engine->word_action)
                         {
                             case FORTH_ACTION_COLON:
-                                int result=action_colon(engine,source,&start,error_word);
+                                int result=action_colon(engine,source,&start,error_word,
+                                                        definitions,&word_IDs,&control_stack,heap_ptr);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             case FORTH_ACTION_CHAR:
@@ -608,6 +811,9 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                                 break;
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
+                                break;
+                            case FORTH_ACTION_WORDS:
+                                action_words(engine,word_IDs);
                                 break;
                         }
                     }
@@ -661,7 +867,7 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                                 action_paren(source,&start);
                                 break;
                             case FORTH_ACTION_SEMICOLON:
-                                engine->state=FORTH_STATE_INTERPRET;
+                                action_semicolon(engine,definitions,&word_IDs,&control_stack,heap_ptr);
                                 break;
                         }
                     }
@@ -811,9 +1017,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Pointers to data on heap
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
-    struct DefinitionsInfo *forth_definitions;
-    uint8_t *forth_word_IDs;
-    uint8_t *forth_control_stack;
+    struct ForthDefinitionsInfo *forth_definitions;
+    struct ForthWordIDsInfo *forth_word_IDs;
+    struct ForthControlElement *forth_control_stack;
 
     if (command_ID==COMMAND_START) 
     {
@@ -828,7 +1034,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth word definitions
-        forth_definitions=(struct DefinitionsInfo *)add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
+        forth_definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_definitions==NULL)
@@ -839,10 +1045,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Initialize empty definition list
         forth_definitions->index=0;
-        forth_definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct DefinitionsInfo);
+        forth_definitions->ID=0;
+        forth_definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct ForthDefinitionsInfo);
 
         //Allocate space for list of word IDs
-        forth_word_IDs=add_object(FORTH_MEM_WORD_IDS,heap_ptr);
+        forth_word_IDs=(struct ForthWordIDsInfo *)add_object(FORTH_MEM_WORD_IDS,heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_word_IDs==NULL)
@@ -851,11 +1058,15 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
+        //Initialize empty word ID list
+        forth_word_IDs->index=0;
+        forth_word_IDs->bytes_left=FORTH_MEM_WORD_IDS-sizeof(struct ForthWordIDsInfo);
+
         //First definition is empty marking end of definitions
-        ((struct ForthWordHeader *)forth_word_IDs)->size=0;
+        ((struct ForthWordHeader *)forth_word_IDs)->header_size=0;
 
         //Allocate space for control stack
-        forth_control_stack=add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
+        forth_control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_control_stack==NULL)
@@ -863,6 +1074,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
+
+        //TODO: remove
+        *(uint32_t *)forth_control_stack=0x12345678;
+
 
         //Init console
         console=&forth->console;
@@ -913,8 +1128,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             forth_clear_console,
             FORTH_MAX_SPACES,
             CONS_WHOLE_WIDTH-FORTH_STACK_CHAR_WIDTH,
-            CONS_WHOLE_HEIGHT,
-            FORTH_COL_PRIMITIVE);
+            CONS_WHOLE_HEIGHT);
     }
     else
     {
@@ -924,8 +1138,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         reset_console_pointers(console);
 
         //Restore pointers to word definitions and ID list
-        forth_definitions=(struct DefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
-        forth_word_IDs=object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        forth_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
+        forth_word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+
+        //TODO: update address members in forth_word_IDs
 
         //Restore stack memory
         memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);
@@ -964,6 +1181,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Main loop
     bool redraw_screen=true;
     bool redraw_modifier=true;
+    int return_command;
     while (1)
     {
         //Set text for input line
@@ -972,10 +1190,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             console->input.text[0].character=0;
             console->input.cursor=0;
             console->input.len=0;
-            
-            //add_input_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,true,console);
             console_text(FORTH_PROMPT,FORTH_COL_FG,FORTH_COL_BG,console);
-
             console->input_copied=false;
         }
         console->reset_input=false;
@@ -986,7 +1201,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (redraw_screen)
         {
             //Color code input
-            color_input(console,false);
+            color_input(console,false,forth_word_IDs);
 
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console);
@@ -1016,6 +1231,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (old_modifier!=console->modifier) redraw_modifier=true;
         else redraw_modifier=false;
 
+        //Whether to save to memory and exit Forth - may be key or command so handle outside of key loop
+        bool save_exit=false;
+
         //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
         char character=vkey_printable[key];
         if (character!=0)
@@ -1025,11 +1243,14 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
         else
         {
+
+            //Process keys
             switch (key)
             {
                 case VKEY_QUIT: //Shift+EXIT
                     //Exit and return to window manager
-                    return COMMAND_EXIT;
+                    return_command=COMMAND_EXIT;
+                    save_exit=true;
                     break;
                 case VKEY_EXIT:
                     //Clear line but do not exit program
@@ -1041,7 +1262,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
                     
                     //Color line before ^C added
-                    color_input(console,true);
+                    color_input(console,true,forth_word_IDs);
 
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
@@ -1068,7 +1289,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     if (console->input.len==0) break;
 
                     //Color input before copying to console since secondaries previously not colored if cursor is on them
-                    color_input(console,true);
+                    color_input(console,true,forth_word_IDs);
 
                     //Copy input text to console
                     for (int i=0;i<console->input.len;i++)
@@ -1091,9 +1312,15 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
                     const char *error_word;
                     int process_result=process_source(&forth->engine,input_buffer,&error_word,
-                        forth_definitions,forth_word_IDs,forth_control_stack);
-                    console->input.visible=true;
+                        forth_definitions,forth_word_IDs,forth_control_stack,heap_ptr);
+
+                    //Reacquire pointers since they may have changed in process_result above
+                    forth_word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,heap_ptr);
+                    forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+
+                    //Show input line again
                     console_text_default("\n",console);
+                    console->input.visible=true;
 
                     //Process errors from processing source
                     switch (process_result)
@@ -1151,6 +1378,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         case FORTH_ERROR_COLON_NO_WORD:
                             console_text_default("No name for word definition\n",console);
                             break;
+                        case FORTH_ERROR_OUT_OF_MEMORY:
+                            console_text_default("Out of memory\n",console);
+                            break;
+                        case FORTH_ERROR_MEMORY_OTHER:
+                            console_text_default("Memory allocation error such as alignment\n",console);
+                            break;
                         default:
                             //No error message for error - should never reach here unless forgot to add error message
                             console_text_default("Unhandled error: ",console);
@@ -1179,15 +1412,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     break;
                 default:
                     //Check for system keys like MENU, OFF, etc
-                    int return_command=sys_key_handler(key);
+                    return_command=sys_key_handler(key);
                     if (return_command!=COMMAND_NONE)
                     {
-                        //System key - save Forth stack memory before returning
-                        memcpy(forth->stack_copy,FORTH_STACK_ADDRESS,FORTH_STACK_SIZE);
-                        memcpy(forth->rstack_copy,FORTH_RSTACK_ADDRESS,FORTH_RSTACK_SIZE);
-
-                        //Return to window manager to handle system key
-                        return return_command;
+                        //System key - set flag to save and exit so window manager can process key
+                        save_exit=true;
                     }
                     else
                     {
@@ -1195,6 +1424,17 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         redraw_screen=false;
                     }
             }
+        }
+
+        //If key or command set exit flag, save stack to memory and exit
+        if (save_exit)
+        {
+            //Save Forth stack memory before returning
+            memcpy(forth->stack_copy,FORTH_STACK_ADDRESS,FORTH_STACK_SIZE);
+            memcpy(forth->rstack_copy,FORTH_RSTACK_ADDRESS,FORTH_RSTACK_SIZE);
+
+            //Return to window manager to handle exit function which may be system key (switch window, etc)
+            return return_command;
         }
     }
 

@@ -38,7 +38,8 @@
         FORTH_ACTION_COLON,
         FORTH_ACTION_SEMICOLON,
         FORTH_ACTION_CHAR,
-        FORTH_ACTION_PAREN
+        FORTH_ACTION_PAREN,
+        FORTH_ACTION_WORDS
     };
 
     enum ForthEngineErrors
@@ -54,10 +55,27 @@
         FORTH_STATE_COMPILE
     };
 
+    enum ForthObjectType
+    {
+        FORTH_TYPE_NUMBER,
+        FORTH_TYPE_HEX,
+        FORTH_TYPE_OTHER,
+        FORTH_TYPE_PRIMITIVE,
+        FORTH_TYPE_SECONDARY,
+        FORTH_TYPE_NOT_FOUND,
+        FORTH_TYPE_NONE
+    };
+
+    enum ForthSecondaryType
+    {
+        FORTH_SECONDARY_WORD
+    };
+
     struct ForthWordHeader
     {
-        void (*word)();
-        uint32_t size;          //Size of word definition
+        void (*address)();      //Target address within definitions memory
+        uint32_t offset;        //Offset into definitions of target address
+        uint32_t definition_size;
         uint16_t header_size;   //Size of this header entry - ie sizeof(ForthWordHeader)+sizeof(name[])
         uint16_t ID;            //ID assigned to each user-defined word
         uint8_t type;           //User-defined word, variable, constant, etc
@@ -89,8 +107,6 @@
         //Compilation
         bool state;
         bool in_bracket;
-        //Only for WORDS - compiling is separate from engine
-        uint8_t *word_IDs;
         int word_action;
 
         //Errors - compilation or state error
@@ -108,7 +124,6 @@
 
         //Compatibility parameters
         int32_t max_spaces;
-        color_t color_primitive;
         int32_t screen_width;
         int32_t screen_height;
     };
@@ -135,8 +150,7 @@
         //Console
         int32_t max_spaces,
         int16_t screen_width,
-        int16_t screen_height,
-        color_t color_primitive);
+        int16_t screen_height);
     void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);

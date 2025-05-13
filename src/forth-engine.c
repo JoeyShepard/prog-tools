@@ -24,8 +24,7 @@ void forth_init_engine(struct ForthEngine *engine,
     //Console
     int32_t max_spaces,
     int16_t screen_width,
-    int16_t screen_height,
-    color_t color_primitive)
+    int16_t screen_height)
 {
     //Init Forth engine pointers (these values never change)
     engine->stack_base=stack_base;
@@ -52,7 +51,6 @@ void forth_init_engine(struct ForthEngine *engine,
     engine->max_spaces=max_spaces;
     engine->screen_width=screen_width;
     engine->screen_height=screen_height;
-    engine->color_primitive=color_primitive;
 
     //Reset stack pointers and compilation variables
     forth_reset_engine(engine);

@@ -1945,46 +1945,14 @@ int prim_optimize_see(struct ForthEngine *engine)
 //WORDS
 int prim_immediate_words(struct ForthEngine *engine)
 {
-    if (engine->print_color!=NULL)
-    {
-        //First, try to print in color if the color print function is defined
-        engine->print_color("\n",0);
-        bool first_word=true;
-        int line_characters=0;
-        for (int32_t i=0;i<forth_primitives_len;i++)
-        {
-            if ((engine->screen_width>0)&&(line_characters+forth_primitives[i].len+1>=engine->screen_width))
-            {
-                engine->print_color("\n",0);
-                line_characters=0;
-            }
-            else
-            {
-                if (first_word==false)
-                {
-                    engine->print_color(" ",0);
-                    line_characters++;
-                }
-            }
-            first_word=false;
-
-            engine->print_color(forth_primitives[i].name,engine->color_primitive);
-            line_characters+=forth_primitives[i].len;
-        }
-        //Update screen
-        if (engine->update_screen!=NULL) engine->update_screen();
-    }
-    else if (engine->print!=NULL)
-    {
-        //TODO: after code for printing in color is done
-    }
-    else
-    {
-        //No way to print
-    }
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_WORDS;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_words(struct ForthEngine *engine){}
+int prim_compile_words(struct ForthEngine *engine)
+{
+    //TODO
+}
 
 //BYE
 void prim_body_bye(struct ForthEngine *engine){}

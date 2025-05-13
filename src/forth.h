@@ -48,7 +48,7 @@
     #define FORTH_ID_WORD_IDS       2
     #define FORTH_ID_CONTROL_STACK  3
     #define FORTH_MEM_DEFINITIONS   1024    //For these three, allocate this amount initially then add this     
-    #define FORTH_MEM_WORD_IDS      512     //much when memory runs out. Exact amount not important - prevents
+    #define FORTH_MEM_WORD_IDS      1024    //much when memory runs out. Exact amount not important - prevents
     #define FORTH_MEM_CONTROL_STACK 512     //copying whole dictionary every time new word added.
 
     //Console
@@ -98,17 +98,17 @@
     enum ForthTextType
     {
         //Full types
-        FORTH_TYPE_NUMBER,
-        FORTH_TYPE_HEX,
-        FORTH_TYPE_PRIMITIVE,
-        FORTH_TYPE_SECONDARY,
-        FORTH_TYPE_NOT_FOUND,
+        FORTH_PARSE_NUMBER,
+        FORTH_PARSE_HEX,
+        FORTH_PARSE_PRIMITIVE,
+        FORTH_PARSE_SECONDARY,
+        FORTH_PARSE_NOT_FOUND,
         //Partial types used only for parsing
-        FORTH_TYPE_NONE,
-        FORTH_TYPE_MINUS,
-        FORTH_TYPE_0,
-        FORTH_TYPE_0x,
-        FORTH_TYPE_OTHER,
+        FORTH_PARSE_NONE,
+        FORTH_PARSE_MINUS,
+        FORTH_PARSE_0,
+        FORTH_PARSE_0x,
+        FORTH_PARSE_OTHER,
     };
 
     //Note different from enum ForthEngineErrors
@@ -121,6 +121,8 @@
         FORTH_ERROR_NOT_FOUND,
         FORTH_ERROR_COLON_NO_WORD,
         FORTH_ERROR_COLON_NAME,
+        FORTH_ERROR_OUT_OF_MEMORY,
+        FORTH_ERROR_MEMORY_OTHER,
     };
 
     enum ForthControlType
@@ -161,18 +163,28 @@
         struct ForthEngine engine;
     };
 
-    struct ForthControlStackInfo
+
+    struct ForthDefinitionsInfo
+    {
+        uint32_t index; 
+        uint32_t ID;
+        uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds definition data
+        uint8_t data[];
+    };
+
+    struct ForthWordIDsInfo
+    {
+        uint32_t index;
+        uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds word ID data
+        uint8_t data[];
+    };
+
+    struct ForthControlElement
     {
         uint32_t index;
         uint8_t type;
-    };
-
-    struct DefinitionsInfo
-    {
-        uint32_t bytes_left;
-        uint32_t index; 
-        //Flexible Array Member - memory allocated after struct holds definition data
-        uint32_t data[];
     };
 
     //Functions

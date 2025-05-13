@@ -9,7 +9,7 @@
 
     #define FORTH_WORD_MAX          16      //Max size of word in source
     
-    //Element count must be power of 2!
+    //Element counts must be power of 2!
     #define FORTH_STACK_ELEMENTS    256
     #define FORTH_RSTACK_ELEMENTS   256
     #define FORTH_LOCALS_ELEMENTS   512

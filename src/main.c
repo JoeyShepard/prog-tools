@@ -22,6 +22,7 @@ key modifier in cursor?
 recheck syntax highlighter for : since colors primitives as secondary name
 - letter after char
 - comments
+- color primitives red if compile only etc
 stagger key legend to take up less room
 console - only copy to history if different from last
 buffer stack_base in primitives? need to check disassembly
@@ -40,7 +41,8 @@ optimize ERASE etc - don't need to mask every cycle
 change int32_t back to int in some cases
 - changed several to try to be consistent but went too far. int ok sometimes.
 changed window manager copy to use YRAM since Forth uses XRAM but not necessary. change back to XRAM
-words that fetch another word like : and char aren't checked for length!
+ctrl+c could overwrite input instead of inserting
+factor forth.c? other larger files?
 */
 
 
