@@ -71,19 +71,6 @@
         FORTH_SECONDARY_WORD
     };
 
-    struct ForthWordHeader
-    {
-        void (*address)();      //Target address within definitions memory
-        uint32_t offset;        //Offset into definitions of target address
-        uint32_t definition_size;
-        uint16_t header_size;   //Size of this header entry - ie sizeof(ForthWordHeader)+sizeof(name[])
-        uint16_t ID;            //ID assigned to each user-defined word
-        uint8_t type;           //User-defined word, variable, constant, etc
-        uint8_t name_len;
-        //Flexible Array Member - memory allocated after struct holds name
-        char name[];
-    };
-
     struct ForthEngine
     {
         //Data stack
@@ -109,6 +96,11 @@
         bool in_bracket;
         int word_action;
 
+        //Execution
+        bool executing;
+        void (**address)(struct ForthEngine *engine);
+        uint32_t word_index;
+
         //Errors - compilation or state error
         int32_t error;
 
@@ -126,6 +118,19 @@
         int32_t max_spaces;
         int32_t screen_width;
         int32_t screen_height;
+    };
+
+    struct ForthWordHeader
+    {
+        void (**address)(struct ForthEngine *engine);   //Target address within definitions memory
+        uint32_t offset;                                //Offset into definitions of target address
+        uint32_t definition_size;
+        uint16_t header_size;               //Size of this header entry - ie sizeof(ForthWordHeader)+sizeof(name[])
+        uint16_t ID;                        //ID assigned to each user-defined word
+        uint8_t type;                       //User-defined word, variable, constant, etc
+        uint8_t name_len;
+        //Flexible Array Member - memory allocated after struct holds name
+        char name[];
     };
 
     //Functions
@@ -154,6 +159,7 @@
     void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);
+    void forth_engine_pre_exec(struct ForthEngine *engine);
     int32_t forth_stack_count(struct ForthEngine *engine);
     void forth_push(struct ForthEngine *engine,int32_t value);
     

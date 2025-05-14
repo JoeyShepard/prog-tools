@@ -83,6 +83,16 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
     engine->rstack=(int32_t*)(engine->rstack_base+(engine->rstack_count-1)*FORTH_CELL_SIZE);
 }
 
+//Called before executing word
+void forth_engine_pre_exec(struct ForthEngine *engine)
+{
+    //Word may request caller perform action
+    engine->word_action=FORTH_ACTION_NONE;
+
+    //Index to identify values on R stack
+    engine->word_index=0;
+}
+
 int32_t forth_stack_count(struct ForthEngine *engine)
 {
     return FORTH_STACK_ELEMENTS-((uintptr_t)(engine->stack)-(uintptr_t)(engine->stack_base))/FORTH_CELL_SIZE-1;

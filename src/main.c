@@ -43,6 +43,8 @@ change int32_t back to int in some cases
 changed window manager copy to use YRAM since Forth uses XRAM but not necessary. change back to XRAM
 ctrl+c could overwrite input instead of inserting
 factor forth.c? other larger files?
+tab for autocomplete in forth like gforth?
+if adding undefined words to word_IDs, need way to undefine if ; left off
 */
 
 

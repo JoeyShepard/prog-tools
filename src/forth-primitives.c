@@ -18,6 +18,12 @@ void prim_secondary(struct ForthEngine *engine)
 {
 }
 
+//Done executing primitive
+void prim_done(struct ForthEngine *engine)
+{
+    engine->executing=false;
+}
+
 
 //Primitives visible to user
 //==========================

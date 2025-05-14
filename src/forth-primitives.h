@@ -21,4 +21,9 @@
     extern const struct ForthPrimitive forth_primitives[];
     extern const int forth_primitives_len;
 
+    //Primitives visible externally
+    void prim_push(struct ForthEngine *engine);
+    void prim_secondary(struct ForthEngine *engine);
+    void prim_done(struct ForthEngine *engine);
+
 #endif
