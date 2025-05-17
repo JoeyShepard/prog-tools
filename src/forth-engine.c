@@ -7,7 +7,7 @@
 void forth_init_engine(struct ForthEngine *engine,
     //Stacks
     uintptr_t stack_base,
-    uintptr_t rstack_base,
+    struct ForthRStackElement *rstack_base,
     uint32_t stack_count,
     uint32_t rstack_count,
     //Data area
@@ -80,10 +80,10 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
 {
     //Reset stack pointers
     engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
-    engine->rstack=(int32_t*)(engine->rstack_base+(engine->rstack_count-1)*FORTH_CELL_SIZE);
+    engine->rstack=engine->rstack_base+engine->rstack_count-1;
 }
 
-//Called before executing word
+//Called before executing word in outer interpreter (ie process_source in forth.c)
 void forth_engine_pre_exec(struct ForthEngine *engine)
 {
     //Word may request caller perform action
@@ -104,3 +104,22 @@ void forth_push(struct ForthEngine *engine,int32_t value)
     uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
+
+void forth_rstack_push(uint32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine)
+{
+    if (engine->rstack<engine->rstack_base)
+    {
+        //Out of R-stack memory - abort
+        engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+        engine->executing=false;
+    }
+
+    //Push new values to R-stack
+    engine->rstack->value=value;
+    engine->rstack->type=type;
+    engine->rstack->index=index;
+
+    //Decrease R-stack pointer to next element
+    engine->rstack--;
+}
+

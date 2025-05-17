@@ -95,17 +95,17 @@ void select_heap(int tab, int split)
     //First word past end of data. Note no ending 0!
     heap_end=(uint32_t *)heap_ptr;
 
-    uint32_t *yram_ptr=(uint32_t *)yram;
+    uint32_t *xram_ptr=(uint32_t *)xram;
     uint32_t copy_count;
     while (obj_end!=heap_end)
     {
         //Copy chunk of next object to buffer
-        if ((uintptr_t)(heap_end-obj_end)<YRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
-        else copy_count=YRAM_SIZE/sizeof(uint32_t);
+        if ((uintptr_t)(heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
+        else copy_count=XRAM_SIZE/sizeof(uint32_t);
 
         for (uint32_t i=0;i<copy_count;i++)
         {
-            yram_ptr[i]=obj_end[i];
+            xram_ptr[i]=obj_end[i];
         }
         obj_end+=copy_count;
 
@@ -118,7 +118,7 @@ void select_heap(int tab, int split)
         //Copy next object in buffer to replace selected object
         for (uint32_t i=0;i<copy_count;i++)
         {
-            obj_start[i]=yram_ptr[i];
+            obj_start[i]=xram_ptr[i];
         }
         obj_start+=copy_count;
     }

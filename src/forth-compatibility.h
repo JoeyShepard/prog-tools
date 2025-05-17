@@ -10,9 +10,9 @@
     #define FORTH_WORD_MAX          16      //Max size of word in source
     
     //Element counts must be power of 2!
-    #define FORTH_STACK_ELEMENTS    256
-    #define FORTH_RSTACK_ELEMENTS   256
-    #define FORTH_LOCALS_ELEMENTS   512
+    #define FORTH_STACK_ELEMENTS    256     //int32_t                   1K
+    #define FORTH_RSTACK_ELEMENTS   256     //struct ForthRStackElement 2k
+    #define FORTH_LOCALS_ELEMENTS   512     //int32_t                   2k
     #define FORTH_COMPAT_STACKS     xram    //Pointer to memory where stacks are stored
     #define FORTH_MAX_SPACES        1500    //Max for SPACES primitive
     #define FORTH_DUMP_MAX_LINES    20      //Max lines for DUMP

@@ -9,17 +9,61 @@
 //=========================================
 
 //Push next cell in dictionary to stack
-void prim_push(struct ForthEngine *engine)
+void prim_hidden_push(struct ForthEngine *engine)
 {
+    //Fetch number which is stored after pointer to current word
+    int32_t num=*(int32_t *)(engine->address+1);
+
+    //Increment thread pointer to account for number
+    engine->address=(void (**)(struct ForthEngine *engine))(((int32_t *)engine->address)+1);
+
+    //Push number to stack
+    *engine->stack=num;
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //Call next cell in dictionary as user-defined word
-void prim_secondary(struct ForthEngine *engine)
+void prim_hidden_secondary(struct ForthEngine *engine)
 {
+    //Fetch offset into list of word headers where address of secondary is stored. Offset is after pointer to current word.
+    uint32_t offset=*(uint32_t *)(engine->address+1);
+
+    printf("Secondary primitive\n");
+    printf("- offset: %d\n",offset);
+
+    printf("- before skip: %p\n",engine->address);
+
+    //Increment thread pointer to account for number
+    engine->address=(void (**)(struct ForthEngine *engine))(((struct ForthRStackElement *)engine->address)+1);
+
+    printf("- after skip: %p\n",engine->address);
+
+    //Push current thread pointer address to R-stack
+    forth_rstack_push((uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies),
+                        FORTH_RSTACK_RETURN,engine->word_index,engine);
+
+    //TODO: forth_rstack_push may set executing to false. any problem with code below in that case?
+
+
+    printf("- current address: %p\n",engine->address);
+
+    //Set new execution address to address of secondary stored in word header list
+    engine->address=*(void (***)(struct ForthEngine *engine))(engine->word_headers+offset);
+
+    printf("- new address: %p\n",engine->address);
+
+    //Account for interpreter advancing execution address
+    engine->address--;
+
+    printf("- adjusted address: %p\n",engine->address);
+
+    //Increase word index so tagged R-stack addresses can be linked to word they belong to
+    engine->word_index++;
 }
 
 //Done executing primitive
-void prim_done(struct ForthEngine *engine)
+void prim_hidden_done(struct ForthEngine *engine)
 {
     engine->executing=false;
 }

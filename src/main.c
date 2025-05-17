@@ -40,11 +40,12 @@ convert size_t in mem to uint32_t
 optimize ERASE etc - don't need to mask every cycle
 change int32_t back to int in some cases
 - changed several to try to be consistent but went too far. int ok sometimes.
-changed window manager copy to use YRAM since Forth uses XRAM but not necessary. change back to XRAM
 ctrl+c could overwrite input instead of inserting
 factor forth.c? other larger files?
 tab for autocomplete in forth like gforth?
 if adding undefined words to word_IDs, need way to undefine if ; left off
+move more from forth.h to compatibility
+handle unfinished word for all compile errors
 */
 
 

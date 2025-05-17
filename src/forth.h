@@ -163,7 +163,6 @@
         struct ForthEngine engine;
     };
 
-
     struct ForthDefinitionsInfo
     {
         uint32_t index; 
