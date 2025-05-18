@@ -577,9 +577,6 @@ static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *
     //Need enough space for current header and empty header following
     if ((*word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
     {
-
-        printf("Expanding word ID memory\n");
-
         //Not enough memory to add new word ID - expand memory
         int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,heap_ptr);
         if (result!=ERROR_NONE)
@@ -777,31 +774,27 @@ static void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *wor
 static int execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *word,struct ForthWordIDsInfo *word_IDs,
                                 struct ForthDefinitionsInfo *definitions)
 {
+    //Prepare engine to run secondary
     forth_engine_pre_exec(engine);
     engine->executing=true;
     engine->address=word->address;
     engine->word_headers=word_IDs->data;
     engine->word_bodies=definitions->data;
 
-    printf("Within execute_secondary:\n");
-    printf("- prim_hidden_secondary: %p",&prim_hidden_secondary);
-    for (int i=0;i<128;i++)
-    {
-        if (i%8==0) printf("\n- %p: ",engine->word_bodies+i);
-        printf("%.02X ",engine->word_bodies[i]);
-    }
-    printf("\n");
+    //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
+    forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
+    
+    //Execute primitives
     while(engine->executing)
     {
-
-        printf("Within execute_secondary:\n");
-        printf("- address: %p\n",engine->address);
-        printf("- *address: %p\n",*engine->address);
-        printf("- **address: %p\n",**engine->address);
-
         (*engine->address)(engine);
         engine->address++;
     }
+    
+    //Flag error if any
+    if (engine->error!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
+    else return FORTH_ERROR_NONE;
+    
 }
 
 static int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
@@ -920,12 +913,10 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
                     //Secondary
+                    int result=execute_secondary(engine,secondary_ptr,word_IDs,definitions);
 
-                    printf("Executing secondary\n");
-
-                    execute_secondary(engine,secondary_ptr,word_IDs,definitions);
-
-                    //TODO: check for engine error like out of R stack mem
+                    //Abort if error occured while running secondary
+                    if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
                 {
@@ -991,14 +982,6 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                     //Compile pointer to pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,definitions,&word_IDs,&control_stack,heap_ptr);
                     if (result!=FORTH_ERROR_NONE) return result;
-
-                    printf("Compiling secondary: %s\n",secondary_ptr->name);
-                    printf("- address of secondary_ptr: %p\n",&secondary_ptr);
-                    printf("- address of secondary_ptr->address: %p\n",&secondary_ptr->address);
-                    printf("- address of word_IDs->data: %p\n",word_IDs->data);
-                    printf("- offset: %ld\n",(uintptr_t)&secondary_ptr->address-(uintptr_t)word_IDs->data);
-                    printf("- secondary_ptr->address: %p\n",secondary_ptr->address);
-
                     result=write_definition_u32((uintptr_t)&secondary_ptr->address-(uintptr_t)word_IDs->data,
                                                 definitions,&word_IDs,&control_stack,heap_ptr);
                     if (result!=FORTH_ERROR_NONE) return result;
@@ -1484,6 +1467,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                     for (uint32_t i=0;i<word_len;i++)
                                         console_char_default(error_word[i],console);
                                     console_text_default("\n",console);
+                                    break;
+                                case FORTH_ENGINE_ERROR_RSTACK_FULL:
+                                    console_text_default("Out of R-stack space - aborting\n",console);
                                     break;
                                 default:
                                     //No error message for error - should never reach here unless forgot to add error message

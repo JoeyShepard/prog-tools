@@ -76,7 +76,8 @@
 
     enum ForthRStackType
     {
-        FORTH_RSTACK_RETURN
+        FORTH_RSTACK_DONE,      //Pushed by top-level secondary. Stop executing when returning from this. 
+        FORTH_RSTACK_RETURN     //Return address to return to calling secondary.
     };
 
     struct ForthRStackElement
@@ -180,6 +181,6 @@
     void forth_engine_pre_exec(struct ForthEngine *engine);
     int32_t forth_stack_count(struct ForthEngine *engine);
     void forth_push(struct ForthEngine *engine,int32_t value);
-    void forth_rstack_push(uint32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine);
+    void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine);
     
 #endif

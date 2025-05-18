@@ -29,15 +29,11 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     //Fetch offset into list of word headers where address of secondary is stored. Offset is after pointer to current word.
     uint32_t offset=*(uint32_t *)(engine->address+1);
 
-    printf("Secondary primitive\n");
-    printf("- offset: %d\n",offset);
-
-    printf("- before skip: %p\n",engine->address);
-
     //Increment thread pointer to account for number
-    engine->address=(void (**)(struct ForthEngine *engine))(((struct ForthRStackElement *)engine->address)+1);
+    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
 
-    printf("- after skip: %p\n",engine->address);
+    //Increase word index so tagged R-stack addresses can be linked to word they belong to
+    engine->word_index++;
 
     //Push current thread pointer address to R-stack
     forth_rstack_push((uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies),
@@ -45,27 +41,45 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 
     //TODO: forth_rstack_push may set executing to false. any problem with code below in that case?
 
-
-    printf("- current address: %p\n",engine->address);
-
     //Set new execution address to address of secondary stored in word header list
     engine->address=*(void (***)(struct ForthEngine *engine))(engine->word_headers+offset);
-
-    printf("- new address: %p\n",engine->address);
 
     //Account for interpreter advancing execution address
     engine->address--;
 
-    printf("- adjusted address: %p\n",engine->address);
-
-    //Increase word index so tagged R-stack addresses can be linked to word they belong to
-    engine->word_index++;
 }
 
 //Done executing primitive
 void prim_hidden_done(struct ForthEngine *engine)
 {
-    engine->executing=false;
+    //Pop all R-stack values for word including return address
+    while (1)
+    {
+        //Pop R-stack value
+        engine->rstack++;
+
+        //No need to check index since FORTH_RSTACK_RETURN only exists once per word
+        if (engine->rstack->type==FORTH_RSTACK_RETURN)
+        {
+            //Return to calling word
+            engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
+
+            //Done searching
+            break;
+        }
+        else if (engine->rstack->type==FORTH_RSTACK_DONE)
+        {
+            //Returning from top-level word - stop executing
+            engine->executing=false;
+
+            //Done searching
+            break;
+        }
+        else
+        {
+            //Found loop counter or something else - keep searching
+        }
+    }
 }
 
 
@@ -2251,7 +2265,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"PRINTABLE",9,NULL,NULL,&prim_body_printable,NULL},
 
     //help
-    //output number to memory (opposite of >number. number> ? text> ?)
+    //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
     //. for unsigned (u. and u.r?) and hex since no BASE
     //adjust size of data area
