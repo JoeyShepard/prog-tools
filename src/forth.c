@@ -801,6 +801,10 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                             struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo *word_IDs,
                             struct ForthControlElement *control_stack,uint8_t *heap_ptr)
 {
+    //Primitive like BYE may set flag to request that caller close program
+    engine->exit_program=false;
+
+    //Loop through words in source
     uint32_t word_len;
     uint32_t start=0;
     uint32_t control_stack_index=0;
@@ -925,6 +929,9 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                     *error_word=source+start-word_len;
                     return FORTH_ERROR_NOT_FOUND;
                 }
+
+                //Return if word like BYE requested program exit
+                if (engine->exit_program) return FORTH_ERROR_NONE;
             }
             else if (engine->state==FORTH_STATE_COMPILE)
             {
@@ -1334,7 +1341,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (old_modifier!=console->modifier) redraw_modifier=true;
         else redraw_modifier=false;
 
-        //Whether to save to memory and exit Forth - may be key or command so handle outside of key loop
+        //Whether to save to memory and exit Forth - may be set by key or command so handle outside of key loop
         bool save_exit=false;
 
         //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
@@ -1346,7 +1353,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
         else
         {
-
             //Process keys
             switch (key)
             {
@@ -1416,6 +1422,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     const char *error_word;
                     int process_result=process_source(&forth->engine,input_buffer,&error_word,
                         forth_definitions,forth_word_IDs,forth_control_stack,heap_ptr);
+
+                    //Exit if word like BYE requested program exit
+                    if (forth->engine.exit_program)
+                    {
+                        return_command=COMMAND_EXIT;
+                        save_exit=forth->engine.exit_program;
+                    }
 
                     //Reacquire pointers since they may have changed in process_result above
                     forth_word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,heap_ptr);
@@ -1514,7 +1527,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Back to interpret mode
                         forth->engine.state=FORTH_STATE_INTERPRET;
                     }
-                    
                     break;
                 case VKEY_UP:
                 case VKEY_DOWN:
@@ -1543,7 +1555,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
             }
         }
-
         //If key or command set exit flag, save stack to memory and exit
         if (save_exit)
         {

@@ -41,7 +41,8 @@
         FORTH_ACTION_SEMICOLON,
         FORTH_ACTION_CHAR,
         FORTH_ACTION_PAREN,
-        FORTH_ACTION_WORDS
+        FORTH_ACTION_WORDS,
+        FORTH_ACTION_BYE
     };
 
     enum ForthEngineErrors
@@ -114,6 +115,7 @@
 
         //Execution
         bool executing;
+        bool exit_program;
         void (**address)(struct ForthEngine *engine);
         uint32_t word_index;
         uint8_t *word_headers;
@@ -122,7 +124,7 @@
         //Errors - compilation or state error
         int32_t error;
 
-        //Compatibility functions - set at initialization so engine can adapt to different systems
+        //Compatibility functions - set at initialization so engine can adapt to different platforms
         void (*print)(const char *text);
         void (*print_color)(const char *text,color_t color);
         int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask);
@@ -132,7 +134,7 @@
         void (*update_modifiers)();
         void (*clear_console)();
 
-        //Compatibility parameters
+        //Compatibility parameters - adjused in forth-compatibility.h for each platform
         int32_t max_spaces;
         int32_t screen_width;
         int32_t screen_height;

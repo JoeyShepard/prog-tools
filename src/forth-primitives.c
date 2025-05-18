@@ -2019,13 +2019,11 @@ int prim_compile_words(struct ForthEngine *engine)
 }
 
 //BYE
-void prim_body_bye(struct ForthEngine *engine){}
-int prim_immediate_bye(struct ForthEngine *engine){}
-int prim_compile_bye(struct ForthEngine *engine){}
-int prim_optimize_bye(struct ForthEngine *engine)
+void prim_body_bye(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->exit_program=true;
+    engine->executing=false;
 }
 
 //COMPARE
@@ -2253,7 +2251,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"DUMP",4,NULL,NULL,&prim_body_dump,NULL},
     //{"SEE",3,&prim_immediate_see,&prim_compile_see,&prim_body_see,&prim_optimize_see},
     {"WORDS",5,&prim_immediate_words,&prim_compile_words,NULL,NULL},
-    //{"BYE",3,&prim_immediate_bye,&prim_compile_bye,&prim_body_bye,&prim_optimize_bye},
+    {"BYE",3,NULL,NULL,&prim_body_bye,NULL},
     //{"COMPARE",7,&prim_immediate_compare,&prim_compile_compare,&prim_body_compare,&prim_optimize_compare},
 
     //digit?
