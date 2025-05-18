@@ -42,7 +42,7 @@
         FORTH_ACTION_CHAR,
         FORTH_ACTION_PAREN,
         FORTH_ACTION_WORDS,
-        FORTH_ACTION_BYE
+        FORTH_ACTION_TICK
     };
 
     enum ForthEngineErrors

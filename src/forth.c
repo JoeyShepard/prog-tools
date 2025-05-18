@@ -531,9 +531,10 @@ static uint32_t align4(uint32_t value)
 }
 
 static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,const char **error_word,
-                        struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
+                        uint32_t prior_word_len,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
                         struct ForthControlElement **control_stack,uint8_t *heap_ptr)
 {
+    uint32_t prior_start=*start;
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len=next_word_source(source,start);
     if (word_len>FORTH_WORD_MAX)
@@ -544,9 +545,11 @@ static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
-        {
+    {
         //Error - no word name after :
-        return FORTH_ERROR_COLON_NO_WORD;
+        *error_word=source+prior_start-prior_word_len;
+        *start=prior_start;
+        return FORTH_ERROR_NO_WORD;
     }
     //Make sure name of new word is not primitive or number
     strncpy(word_buffer,source+*start,word_len);
@@ -560,7 +563,7 @@ static int action_colon(struct ForthEngine *engine,const char *source,uint32_t *
     {
         //Error - name of new word can't be number or primitive
         *error_word=source+*start;
-        return FORTH_ERROR_COLON_NAME;
+        return FORTH_ERROR_INVALID_NAME;
     }
 
     //Advance past name of new word
@@ -737,6 +740,7 @@ static void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *wor
                     break;
             }
             
+            //TODO: comments
             if (looping)
             {
                 if ((engine->screen_width>0)&&(line_characters+word_len+1>=engine->screen_width))
@@ -764,10 +768,70 @@ static void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *wor
     else if (engine->print!=NULL)
     {
         //TODO: after code for printing in color is done
+        //TODO: actually, use helper function that is passed both print functions
     }
     else
     {
         //No way to print
+    }
+}
+
+//TODO: combine beginning with action_colon? action_char?
+static int action_tick_common(const char *source,uint32_t *start,const char **error_word,uint32_t prior_word_len,
+                                    struct ForthWordIDsInfo *word_IDs,uint32_t *index)
+{
+    //Save index in case needed for error message
+    uint32_t prior_start=*start;
+
+    //Fetch next word in source
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len=next_word_source(source,start);
+    if (word_len>FORTH_WORD_MAX)
+    {
+        //Error - word of source is longer than allowed
+        //Point to word for error message in caller
+        *error_word=source+*start;
+        return FORTH_ERROR_TOO_LONG;
+    }
+    else if (word_len==0)
+    {
+        //Error - no word name after '
+        *error_word=source+prior_start-prior_word_len;
+        *start=prior_start;
+        return FORTH_ERROR_NO_WORD;
+    }
+    //Make sure name of new word is not primitive or number
+    strncpy(word_buffer,source+*start,word_len);
+    word_buffer[word_len]=0;
+    int word_type=classify_word(word_buffer);
+    int primitive_ID;
+    struct ForthWordHeader *secondary_ptr;
+    if (word_type==FORTH_TYPE_OTHER)
+        word_type=classify_other(word_buffer,&primitive_ID,&secondary_ptr,word_IDs);
+
+    if (word_type==FORTH_TYPE_PRIMITIVE)
+    {
+        //Advance past name of argument word
+        *start+=word_len;
+
+        //Return index of primitive
+        *index=primitive_ID;
+        return FORTH_ERROR_NONE;
+    }
+    else if (word_type==FORTH_TYPE_SECONDARY)
+    {
+        //Advance past name of argument word
+        *start+=word_len;
+
+        //Return index of secondary
+        *index=forth_primitives_len+secondary_ptr->ID;
+        return FORTH_ERROR_NONE;
+    }
+    else
+    {
+        //Error - can only get ID of primitive or secondary not number or anything else
+        *error_word=source+*start;
+        return FORTH_ERROR_INVALID_NAME;
     }
 }
 
@@ -805,7 +869,7 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
     engine->exit_program=false;
 
     //Loop through words in source
-    uint32_t word_len;
+    uint32_t word_len=0;
     uint32_t start=0;
     uint32_t control_stack_index=0;
     do
@@ -888,10 +952,12 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                         switch (engine->word_action)
                         {
                             case FORTH_ACTION_COLON:
-                                int result=action_colon(engine,source,&start,error_word,
-                                                        definitions,&word_IDs,&control_stack,heap_ptr);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
+                                {
+                                    int result=action_colon(engine,source,&start,error_word,word_len,
+                                                            definitions,&word_IDs,&control_stack,heap_ptr);
+                                    if (result!=FORTH_ERROR_NONE) return result;
+                                    break;
+                                }
                             case FORTH_ACTION_CHAR:
                                 forth_push(engine,action_char_common(source,&start));
                                 break;
@@ -901,6 +967,18 @@ static int process_source(struct ForthEngine *engine,const char *source,const ch
                             case FORTH_ACTION_WORDS:
                                 action_words(engine,word_IDs);
                                 break;
+                            case FORTH_ACTION_TICK:
+                                {
+                                    //Find ID or primitive and secondary if it exists
+                                    uint32_t index;
+                                    int result=action_tick_common(source,&start,error_word,word_len,
+                                                                    word_IDs,&index);
+                                    if (result!=FORTH_ERROR_NONE) return result;
+
+                                    //Push tick ID of word to stack
+                                    forth_push(engine,index);
+                                    break;
+                                }
                         }
                     }
                     else
@@ -1446,16 +1524,20 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             break;
                         case FORTH_ERROR_TOO_LONG:
                         case FORTH_ERROR_NOT_FOUND:
-                        case FORTH_ERROR_COLON_NAME:
+                        case FORTH_ERROR_INVALID_NAME:
+                        case FORTH_ERROR_NO_WORD:
                             //All of these errors share code for printing out word that caused error
                             if (process_result==FORTH_ERROR_TOO_LONG)
                                 console_text_default("Word too long: ",console);
                             else if (process_result==FORTH_ERROR_NOT_FOUND)
                                 console_text_default("Undefined word: ",console);
-                            else if (process_result==FORTH_ERROR_COLON_NAME)
-                                console_text_default("Invalid name for word definition: ",console);
+                            else if (process_result==FORTH_ERROR_INVALID_NAME)
+                                console_text_default("Invalid word for operation: ",console);
+                            else if (process_result==FORTH_ERROR_NO_WORD)
+                                console_text_default("Missing word after ",console);
                             uint32_t start=0;
                             uint32_t word_len=next_word_source(error_word,&start);
+
                             for (uint32_t i=0;i<word_len;i++)
                                 console_char_default(error_word[i],console);
                             console_text_default("\n",console);
@@ -1493,9 +1575,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                     console_text_default("\n",console);
                                     break;
                             }
-                            break;
-                        case FORTH_ERROR_COLON_NO_WORD:
-                            console_text_default("No name for word definition\n",console);
                             break;
                         case FORTH_ERROR_OUT_OF_MEMORY:
                             console_text_default("Out of memory\n",console);

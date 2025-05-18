@@ -158,13 +158,15 @@ int prim_optimize_w_store(struct ForthEngine *engine)
 }
 
 //TICK
-void prim_body_tick(struct ForthEngine *engine){}
-int prim_immediate_tick(struct ForthEngine *engine){}
-int prim_compile_tick(struct ForthEngine *engine){}
-int prim_optimize_tick(struct ForthEngine *engine)
+int prim_immediate_tick(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_TICK;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_tick(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //PAREN
@@ -828,6 +830,7 @@ void prim_body_cells(struct ForthEngine *engine)
 //CHAR
 int prim_immediate_char(struct ForthEngine *engine)
 {
+    //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_CHAR;
     return FORTH_ENGINE_ERROR_NONE;
 }
@@ -2021,7 +2024,6 @@ int prim_compile_words(struct ForthEngine *engine)
 //BYE
 void prim_body_bye(struct ForthEngine *engine)
 {
-    //Request outer interpreter perform function so no platform specific code in this file
     engine->exit_program=true;
     engine->executing=false;
 }
@@ -2130,7 +2132,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"!",1,NULL,NULL,&prim_body_store,&prim_optimize_store},
     {"C!",2,NULL,NULL,&prim_body_c_store,&prim_optimize_c_store},
     {"W!",2,NULL,NULL,&prim_body_w_store,&prim_optimize_w_store},
-    //{"'",1,&prim_immediate_tick,&prim_compile_tick,&prim_body_tick,&prim_optimize_tick},
+    {"'",1,&prim_immediate_tick,&prim_compile_tick,NULL,NULL},
     {"(",1,&prim_immediate_paren,&prim_compile_paren,NULL,NULL},
     {"*",1,NULL,NULL,&prim_body_star,&prim_optimize_star},
     {"*/",2,NULL,NULL,&prim_body_star_slash,&prim_optimize_star_slash},

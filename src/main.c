@@ -23,6 +23,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - letter after char
 - comments
 - color primitives red if compile only etc
+- tick on number
 stagger key legend to take up less room
 console - only copy to history if different from last
 buffer stack_base in primitives? need to check disassembly
