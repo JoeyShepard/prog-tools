@@ -14,9 +14,7 @@ static uint32_t align4(uint32_t value)
     return value+((4-value%4)%4);
 }
 
-int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,const char **error_word,
-                    uint32_t prior_word_len,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
-                    struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct CompileInfo *compile)
 {
     uint32_t prior_start=*start;
     char word_buffer[FORTH_WORD_MAX+1];
@@ -25,13 +23,13 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
     {
         //Error - word of source is longer than allowed
         //Point to word for error message in caller
-        *error_word=source+*start;
+        *compile->error_word=source+*start;
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
     {
         //Error - no word name after :
-        *error_word=source+prior_start-prior_word_len;
+        *compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
@@ -42,11 +40,11 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
     int primitive_ID;
     struct ForthWordHeader *secondary_ptr;
     if (word_type==FORTH_TYPE_OTHER)
-        word_type=classify_other(word_buffer,&primitive_ID,&secondary_ptr,*word_IDs);
+        word_type=classify_other(word_buffer,compile);
     if ((word_type!=FORTH_TYPE_SECONDARY)&&(word_type!=FORTH_TYPE_NOT_FOUND))
     {
         //Error - name of new word can't be number or primitive
-        *error_word=source+*start;
+        *compile->error_word=source+*start;
         return FORTH_ERROR_INVALID_NAME;
     }
 
@@ -59,13 +57,23 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
         //Word already exists - delete existing word and update pointers
     }
 
+    printf("Colon:\n");
+    printf("- definitions.data: %p (%ld)\n",compile->definitions->data,(uintptr_t)(*compile->word_IDs)-(uintptr_t)compile->definitions->data);
+    printf("  - bytes_left: %d\n",compile->definitions->bytes_left);
+    printf("- word_IDs.data:    %p (%ld)\n",(*compile->word_IDs)->data,(uintptr_t)(*compile->control_stack)-(uintptr_t)(*compile->word_IDs)->data);
+    printf("  - bytes_left: %d\n",(*compile->word_IDs)->bytes_left);
+    printf("- control_stack:    %p\n",*compile->control_stack);
+
     //Expand word ID memory for new word if necessary
-    struct ForthWordHeader *new_secondary=(struct ForthWordHeader *)((*word_IDs)->data+(*word_IDs)->index);
+    struct ForthWordHeader *new_secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
     //Need enough space for current header and empty header following
-    if ((*word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
+    if ((*compile->word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
     {
+        
+        printf("Allocating more word_IDs memory!\n");
+
         //Not enough memory to add new word ID - expand memory
-        int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,heap_ptr);
+        int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,compile->heap_ptr);
         if (result!=ERROR_NONE)
         {
             //Error while allocating memory
@@ -79,18 +87,18 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
         }
 
         //Update count of bytes left
-        (*word_IDs)->bytes_left+=FORTH_MEM_WORD_IDS;
+        (*compile->word_IDs)->bytes_left+=FORTH_MEM_WORD_IDS;
 
         //Update control stack address since shifted by expand_object above
-        *control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+        *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
     }
 
     //Write new word info to header
-    new_secondary->address=(void(**)())(definitions->data+definitions->index);
-    new_secondary->offset=definitions->index;
+    new_secondary->address=(void(**)())(compile->definitions->data+compile->definitions->index);
+    new_secondary->offset=compile->definitions->index;
     new_secondary->definition_size=0;
     new_secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);
-    new_secondary->ID=definitions->ID;
+    new_secondary->ID=compile->definitions->ID;
     new_secondary->type=FORTH_SECONDARY_WORD;
     new_secondary->name_len=word_len;
     strcpy(new_secondary->name,word_buffer);
@@ -100,8 +108,9 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
     new_secondary->header_size=0;
 
     printf("New definition: %s\n",word_buffer);
-    printf("- test value: 0x%X\n",**(uint32_t **)control_stack);
-    printf("- bytes left: %d\n",(*word_IDs)->bytes_left);
+    printf("- test value: 0x%X\n",**(uint32_t **)compile->control_stack);
+    printf("- bytes left: %d\n",(*compile->word_IDs)->bytes_left);
+    printf("\n");
 
     //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
@@ -109,21 +118,22 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,c
     return FORTH_ERROR_NONE;
 }
 
-int action_semicolon(struct ForthEngine *engine,struct ForthDefinitionsInfo *definitions,
-                        struct ForthWordIDsInfo **word_IDs,struct ForthControlElement **control_stack,
-                        uint8_t *heap_ptr)
+int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
 {
+
+    printf("Semicolon\n");
+
     //Add primitive to word to stop exectuing
-    int result=write_definition_primitive(&prim_hidden_done,definitions,word_IDs,control_stack,heap_ptr);
+    int result=write_definition_primitive(&prim_hidden_done,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Point to next header which has 0 length header size to indicate end of header list
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*word_IDs)->data+(*word_IDs)->index);
-    (*word_IDs)->index+=secondary->header_size;
-    (*word_IDs)->bytes_left-=secondary->header_size;
+    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
+    (*compile->word_IDs)->index+=secondary->header_size;
+    (*compile->word_IDs)->bytes_left-=secondary->header_size;
 
     //Advance to next ID in definitions
-    definitions->ID++;
+    compile->definitions->ID++;
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;
@@ -131,22 +141,29 @@ int action_semicolon(struct ForthEngine *engine,struct ForthDefinitionsInfo *def
     return FORTH_ERROR_NONE;
 }
 
-int32_t action_char_common(const char *source,uint32_t *start)
+int action_char_common(const char *source,uint32_t *start,int32_t *index,struct CompileInfo *compile)
 {
+    //Save index in case needed for error message
+    uint32_t prior_start=*start;
+
     //Find next word in source
     uint32_t word_len=next_word_source(source,start);
     if (word_len==0)
     {
-        //Word not found
-        return 0;
+        //No word after CHAR
+        *compile->error_word=source+prior_start-compile->word_len;
+        *start=prior_start;
+        return FORTH_ERROR_NO_WORD;
     }
     else
     {
         //Return first character of word
-        uint8_t ret_val=*(uint8_t*)(source+*start);
+        *index=*(uint8_t *)(source+*start);
+
         //Advance to next word
         *start+=word_len;
-        return ret_val;
+
+        return FORTH_ERROR_NONE;
     }
 }
 
@@ -170,7 +187,7 @@ void action_paren(const char *source,uint32_t *start)
     }
 }
 
-//Use print_color if it exists and print otherwise
+//Helper function - use print_color if it exists and print otherwise
 static void action_words_print(struct ForthEngine *engine,const char *text, color_t color)
 {
     if (engine->print_color!=NULL) engine->print_color(text,color);
@@ -264,9 +281,7 @@ void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
     if (engine->update_screen!=NULL) engine->update_screen();
 }
 
-//TODO: combine beginning with action_colon? action_char?
-int action_tick_common(const char *source,uint32_t *start,const char **error_word,uint32_t prior_word_len,
-                        struct ForthWordIDsInfo *word_IDs,uint32_t *index)
+int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct CompileInfo *compile)
 {
     //Save index in case needed for error message
     uint32_t prior_start=*start;
@@ -278,13 +293,13 @@ int action_tick_common(const char *source,uint32_t *start,const char **error_wor
     {
         //Error - word of source is longer than allowed
         //Point to word for error message in caller
-        *error_word=source+*start;
+        *compile->error_word=source+*start;
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
     {
         //Error - no word name after '
-        *error_word=source+prior_start-prior_word_len;
+        *compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
@@ -295,7 +310,7 @@ int action_tick_common(const char *source,uint32_t *start,const char **error_wor
     int primitive_ID;
     struct ForthWordHeader *secondary_ptr;
     if (word_type==FORTH_TYPE_OTHER)
-        word_type=classify_other(word_buffer,&primitive_ID,&secondary_ptr,word_IDs);
+        word_type=classify_other(word_buffer,compile);
 
     if (word_type==FORTH_TYPE_PRIMITIVE)
     {
@@ -303,7 +318,7 @@ int action_tick_common(const char *source,uint32_t *start,const char **error_wor
         *start+=word_len;
 
         //Return index of primitive
-        *index=primitive_ID;
+        *index=compile->primitive_ID;
         return FORTH_ERROR_NONE;
     }
     else if (word_type==FORTH_TYPE_SECONDARY)
@@ -312,13 +327,13 @@ int action_tick_common(const char *source,uint32_t *start,const char **error_wor
         *start+=word_len;
 
         //Return index of secondary
-        *index=forth_primitives_len+secondary_ptr->ID;
+        *index=forth_primitives_len+compile->secondary_ptr->ID;
         return FORTH_ERROR_NONE;
     }
     else
     {
         //Error - can only get ID of primitive or secondary not number or anything else
-        *error_word=source+*start;
+        *compile->error_word=source+*start;
         return FORTH_ERROR_INVALID_NAME;
     }
 }

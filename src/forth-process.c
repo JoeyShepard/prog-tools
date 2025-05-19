@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: remove
+#include "debug.h"
+
 #include "error.h"
 #include "forth.h"
 #include "forth-actions.h"
@@ -130,19 +133,18 @@ struct ForthWordHeader *find_secondary(const char *word,struct ForthWordIDsInfo 
     }
 }
 
-int classify_other(const char *word,int *primitive_ID,struct ForthWordHeader **secondary_ptr,
-                            struct ForthWordIDsInfo *word_IDs)
+int classify_other(const char *word,struct CompileInfo *compile)
 {
     //Default return value in case word is primitive
-    *secondary_ptr=NULL;
+    compile->secondary_ptr=NULL;
 
     //Word is primitive?
-    *primitive_ID=find_primitive(word);
-    if (*primitive_ID!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
+    compile->primitive_ID=find_primitive(word);
+    if (compile->primitive_ID!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
 
     //Word is secondary?
-    *secondary_ptr=find_secondary(word,word_IDs);
-    if (*secondary_ptr!=NULL) return FORTH_TYPE_SECONDARY;
+    compile->secondary_ptr=find_secondary(word,*compile->word_IDs);
+    if (compile->secondary_ptr!=NULL) return FORTH_TYPE_SECONDARY;
     
     //Word not primitve or secondary - not found
     return FORTH_TYPE_NOT_FOUND;
@@ -265,13 +267,19 @@ int32_t hex32_text(const char *word_buffer)
     return num;
 }
 
-int expand_definitions(uint32_t size,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
-                                struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+int expand_definitions(uint32_t size,struct CompileInfo *compile)
 {
-    if (definitions->bytes_left<size)
+    if (compile->definitions->bytes_left<size)
     {
+
+        printf("- expanding definitions (%d < %d)\n",compile->definitions->bytes_left,size);
+        printf("word_IDs\n");
+        debug_dump(*compile->word_IDs,64);
+        printf("control_stack\n");
+        debug_dump(*compile->control_stack,64);
+
         //Not enough memory left in dictionary - expand memory
-        int result=expand_object(FORTH_MEM_DEFINITIONS,FORTH_ID_DEFINITIONS,heap_ptr);
+        int result=expand_object(FORTH_MEM_DEFINITIONS,FORTH_ID_DEFINITIONS,compile->heap_ptr);
         if (result!=ERROR_NONE)
         {
             //Error while allocating memory
@@ -285,78 +293,86 @@ int expand_definitions(uint32_t size,struct ForthDefinitionsInfo *definitions,st
         }
 
         //Update count of bytes left
-        definitions->bytes_left+=FORTH_MEM_DEFINITIONS;
+        compile->definitions->bytes_left+=FORTH_MEM_DEFINITIONS;
 
         //Update pointers since shifted by expand_object above
-        *control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
-        *word_IDs=(struct ForthWordIDsInfo*)object_address(FORTH_ID_WORD_IDS,heap_ptr);
+        *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+        *compile->word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,compile->heap_ptr);
+
+        printf("word_IDs\n");
+        debug_dump(*compile->word_IDs,64);
+        printf("control_stack\n");
+        debug_dump(*compile->control_stack,64);
     }
     return FORTH_ERROR_NONE;
 }
 
 //Function pointer here should be 32 bit on calculator so write_dict_u32 would work but adding this for testing on x86.
-int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct ForthDefinitionsInfo *definitions,
-                                        struct ForthWordIDsInfo **word_IDs,struct ForthControlElement **control_stack,
-                                        uint8_t *heap_ptr)
+int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct CompileInfo *compile)
 {
     //Expand definitions memory if necessary
-    int result=expand_definitions(sizeof(word),definitions,word_IDs,control_stack,heap_ptr);
+
+    printf("- (write_def)\n");
+    
+    int result=expand_definitions(sizeof(word),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(definitions->data+definitions->index,&word,sizeof(word));
+    memcpy(compile->definitions->data+compile->definitions->index,&word,sizeof(word));
 
     //Update counts in definitions memory
-    definitions->index+=sizeof(word);
-    definitions->bytes_left-=sizeof(word);
+    compile->definitions->index+=sizeof(word);
+    compile->definitions->bytes_left-=sizeof(word);
 
     return FORTH_ERROR_NONE;
 }
 
-int write_definition_i32(int32_t value,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
-                                struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+int write_definition_i32(int32_t value,struct CompileInfo *compile)
 {
-
     //Expand definitions memory if necessary
-    int result=expand_definitions(sizeof(value),definitions,word_IDs,control_stack,heap_ptr);
+
+    printf("- (write_i32)\n");
+    
+    int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(definitions->data+definitions->index,&value,sizeof(value));
+    memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
 
     //Update counts in definitions memory
-    definitions->index+=sizeof(value);
-    definitions->bytes_left-=sizeof(value);
+    compile->definitions->index+=sizeof(value);
+    compile->definitions->bytes_left-=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
 
-int write_definition_u32(uint32_t value,struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo **word_IDs,
-                                struct ForthControlElement **control_stack,uint8_t *heap_ptr)
+int write_definition_u32(uint32_t value,struct CompileInfo *compile)
 {
     //Expand definitions memory if necessary
-    int result=expand_definitions(sizeof(value),definitions,word_IDs,control_stack,heap_ptr);
+
+    printf("- (write_u32)\n");
+    
+    int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(definitions->data+definitions->index,&value,sizeof(value));
+    memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
 
     //Update counts in definitions memory
-    definitions->index+=sizeof(value);
-    definitions->bytes_left-=sizeof(value);
+    compile->definitions->index+=sizeof(value);
+    compile->definitions->bytes_left-=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
 
-int execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *word,struct ForthWordIDsInfo *word_IDs,
-                                struct ForthDefinitionsInfo *definitions)
+int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
 {
     //Prepare engine to run secondary
     forth_engine_pre_exec(engine);
     engine->executing=true;
-    engine->address=word->address;
-    engine->word_headers=word_IDs->data;
-    engine->word_bodies=definitions->data;
+    engine->address=compile->secondary_ptr->address;
+    engine->word_headers=(*compile->word_IDs)->data;
+    engine->word_bodies=compile->definitions->data;
 
     //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
     forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
@@ -371,43 +387,48 @@ int execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *word,st
     //Flag error if any
     if (engine->error!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
     else return FORTH_ERROR_NONE;
-    
 }
 
 int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
                             struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo *word_IDs,
                             struct ForthControlElement *control_stack,uint8_t *heap_ptr)
 {
+    //Store informaton for compiling in struct so easier to pass to functions
+    struct CompileInfo compile;
+    compile.error_word=error_word;
+    compile.definitions=definitions;
+    compile.word_IDs=&word_IDs;
+    compile.control_stack=&control_stack;
+    compile.heap_ptr=heap_ptr;
+
     //Primitive like BYE may set flag to request that caller close program
     engine->exit_program=false;
 
     //Loop through words in source
-    uint32_t word_len=0;
+    compile.word_len=0;
     uint32_t start=0;
     uint32_t control_stack_index=0;
     do
     {
         //Get next word of source
-        word_len=next_word_source(source,&start);
+        compile.word_len=next_word_source(source,&start);
 
-        if (word_len>FORTH_WORD_MAX)
+        if (compile.word_len>FORTH_WORD_MAX)
         {
             //Error - word of source is longer than allowed
             //Point to word for error message in caller
             *error_word=source+start;
             return FORTH_ERROR_TOO_LONG;
         }
-        else if (word_len>0)
+        else if (compile.word_len>0)
         {
             //Word found
             char word_buffer[FORTH_WORD_MAX+1];
-            strncpy(word_buffer,source+start,word_len);
-            word_buffer[word_len]=0;
+            strncpy(word_buffer,source+start,compile.word_len);
+            word_buffer[compile.word_len]=0;
 
             //Classify word
             int32_t num=0;
-            int primitive_ID;
-            struct ForthWordHeader *secondary_ptr;
             int word_type=classify_word(word_buffer);
             if (word_type==FORTH_TYPE_NUMBER)
             {
@@ -422,7 +443,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
             else if (word_type==FORTH_TYPE_OTHER)
             {
                 //Determine whether primitive, secondary, or unknown
-                word_type=classify_other(word_buffer,&primitive_ID,&secondary_ptr,word_IDs);
+                word_type=classify_other(word_buffer,&compile);
             }
             else
             {
@@ -431,7 +452,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
             }
 
             //Advance past word in source
-            start+=word_len;
+            start+=compile.word_len;
 
             //Handle word depending on state
             if (engine->state==FORTH_STATE_INTERPRET)
@@ -445,18 +466,18 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
                     //Primitive
-                    int (*immediate)(struct ForthEngine *engine)=forth_primitives[primitive_ID].immediate;
-                    if (immediate!=NULL)
+                    int (*immediate_func)(struct ForthEngine *engine)=forth_primitives[compile.primitive_ID].immediate;
+                    if (immediate_func!=NULL)
                     {
                         //Primitive has special immediate behavior
                         forth_engine_pre_exec(engine);
-                        int result=immediate(engine);
+                        int result=immediate_func(engine);
                         if (result!=FORTH_ENGINE_ERROR_NONE)
                         {
                             //Error in word
                             engine->error=result;
                             //Set pointer to word in case used in error message
-                            *error_word=source+start-word_len;
+                            *compile.error_word=source+start-compile.word_len;
                             return FORTH_ERROR_ENGINE;
                         }
 
@@ -466,13 +487,15 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                         {
                             case FORTH_ACTION_COLON:
                                 {
-                                    int result=action_colon(engine,source,&start,error_word,word_len,definitions,
-                                                            &word_IDs,&control_stack,heap_ptr);
+                                    int result=action_colon(engine,source,&start,&compile);
                                     if (result!=FORTH_ERROR_NONE) return result;
                                     break;
                                 }
                             case FORTH_ACTION_CHAR:
-                                forth_push(engine,action_char_common(source,&start));
+                                int32_t index;
+                                int result=action_char_common(source,&start,&index,&compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                forth_push(engine,index);
                                 break;
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
@@ -484,8 +507,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                                 {
                                     //Find ID or primitive and secondary if it exists
                                     uint32_t index;
-                                    int result=action_tick_common(source,&start,error_word,word_len,
-                                                                    word_IDs,&index);
+                                    int result=action_tick_common(source,&start,&index,&compile);
                                     if (result!=FORTH_ERROR_NONE) return result;
 
                                     //Push tick ID of word to stack
@@ -497,18 +519,18 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     else
                     {
                         //No special immediate behavior - execute body
-                        void (*body)(struct ForthEngine *engine)=forth_primitives[primitive_ID].body;
-                        if (body!=NULL)
+                        void (*body_func)(struct ForthEngine *engine)=forth_primitives[compile.primitive_ID].body;
+                        if (body_func!=NULL)
                         {
                             forth_engine_pre_exec(engine);
-                            body(engine);
+                            body_func(engine);
                         }
                     }
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
                     //Secondary
-                    int result=execute_secondary(engine,secondary_ptr,word_IDs,definitions);
+                    int result=execute_secondary(engine,&compile);
 
                     //Abort if error occured while running secondary
                     if (result!=FORTH_ERROR_NONE) return result;
@@ -517,7 +539,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                 {
                     //Error - word not found
                     //Point to unknown word for error message in caller
-                    *error_word=source+start-word_len;
+                    *compile.error_word=source+start-compile.word_len;
                     return FORTH_ERROR_NOT_FOUND;
                 }
 
@@ -530,27 +552,27 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                 if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
                 {
                     //Number or hex - compile to dictionary
-                    int result=write_definition_primitive(&prim_hidden_push,definitions,&word_IDs,&control_stack,heap_ptr);
+                    int result=write_definition_primitive(&prim_hidden_push,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_i32(num,definitions,&word_IDs,&control_stack,heap_ptr);
+                    result=write_definition_i32(num,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
                     //Primitive
-                    int (*compile)(struct ForthEngine *engine)=forth_primitives[primitive_ID].compile;
-                    if (compile!=NULL)
+                    int (*compile_func)(struct ForthEngine *engine)=forth_primitives[compile.primitive_ID].compile;
+                    if (compile_func!=NULL)
                     {
                         //Primitive has special compile behavior
                         //TODO: do any compile functions return error? moved compiling functions here
                         forth_engine_pre_exec(engine);
-                        int result=compile(engine);
+                        int result=compile_func(engine);
                         if (result!=FORTH_ENGINE_ERROR_NONE)
                         {
                             //Error in word
                             engine->error=result;
                             //Set pointer to word in case used in error message
-                            *error_word=source+start-word_len;
+                            *error_word=source+start-compile.word_len;
                             return FORTH_ERROR_ENGINE;
                         }
 
@@ -562,7 +584,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                                 action_paren(source,&start);
                                 break;
                             case FORTH_ACTION_SEMICOLON:
-                                int result=action_semicolon(engine,definitions,&word_IDs,&control_stack,heap_ptr);
+                                int result=action_semicolon(engine,&compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                         }
@@ -570,18 +592,16 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     else
                     {
                         //No special compile behavior - compile address
-                        int result=write_definition_primitive(forth_primitives[primitive_ID].body,
-                            definitions,&word_IDs,&control_stack,heap_ptr);
+                        int result=write_definition_primitive(forth_primitives[compile.primitive_ID].body,&compile);
                         if (result!=FORTH_ERROR_NONE) return result;
                     }
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
                     //Compile pointer to pointer to secondary
-                    int result=write_definition_primitive(&prim_hidden_secondary,definitions,&word_IDs,&control_stack,heap_ptr);
+                    int result=write_definition_primitive(&prim_hidden_secondary,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32((uintptr_t)&secondary_ptr->address-(uintptr_t)word_IDs->data,
-                                                definitions,&word_IDs,&control_stack,heap_ptr);
+                    result=write_definition_u32((uintptr_t)&compile.secondary_ptr->address-(uintptr_t)(*compile.word_IDs)->data,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
@@ -590,7 +610,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                 }
             }
         }
-    }while(word_len>0);
+    }while(compile.word_len>0);
 
     return FORTH_ERROR_NONE;
 }

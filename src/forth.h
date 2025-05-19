@@ -44,8 +44,9 @@
     #define FORTH_ID_DEFINITIONS    1
     #define FORTH_ID_WORD_IDS       2
     #define FORTH_ID_CONTROL_STACK  3
-    #define FORTH_MEM_DEFINITIONS   1024    //For these three, allocate this amount initially then add this     
-    #define FORTH_MEM_WORD_IDS      1024    //much when memory runs out. Exact amount not important - prevents
+    //TODO: change both from 128 back to 1024
+    #define FORTH_MEM_DEFINITIONS   128    //For these three, allocate this amount initially then add this     
+    #define FORTH_MEM_WORD_IDS      128    //much when memory runs out. Exact amount not important - prevents
     #define FORTH_MEM_CONTROL_STACK 512     //copying whole dictionary every time new word added.
 
     //Console

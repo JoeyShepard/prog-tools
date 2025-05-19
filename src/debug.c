@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include <stdint.h>
+
 #include "compatibility.h"
 #include "debug.h"
 #include "manager.h"
@@ -59,6 +59,16 @@
         }
         printf("Heap end\n");
         */
+    }
+
+    void debug_dump(void *mem,uint32_t count)
+    {
+        for (uint32_t i=0;i<count;i++)
+        {
+            if (i%8==0) printf("%p: ",(mem+i));
+            printf("%.02X ",*(uint8_t *)(mem+i));
+            if (i%8==7) printf("\n");
+        }
     }
 
 #endif
