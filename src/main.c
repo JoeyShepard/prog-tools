@@ -13,8 +13,6 @@ error_exit in mem? maybe better to recover
 - yes, change mem.c to return values not addresses
 copy of forth struct needs to be stored in XRAM
 shift+enter for new line in Forth
-forth variables are IDs 0-255 so faster (not locals)
-- words and create are 256 and up
 in Forth console, cursor in last column is one pixel too wide
 default forth data size should be smaller
 sign extend for c@ and w@
@@ -24,6 +22,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - comments
 - color primitives red if compile only etc
 - tick on number
+- quoting words not working yet
 stagger key legend to take up less room
 console - only copy to history if different from last
 buffer stack_base in primitives? need to check disassembly
@@ -39,14 +38,14 @@ fix debug_heap
 exit program after start so other pane updates for memory then back?
 convert size_t in mem to uint32_t
 optimize ERASE etc - don't need to mask every cycle
+- also, no reason to wrap at end of memory
 change int32_t back to int in some cases
 - changed several to try to be consistent but went too far. int ok sometimes.
 ctrl+c could overwrite input instead of inserting
 factor forth.c? other larger files?
-tab for autocomplete in forth like gforth?
+- move actions into new file
 if adding undefined words to word_IDs, need way to undefine if ; left off
 move more from forth.h to compatibility
-handle unfinished word for all compile errors
 */
 
 

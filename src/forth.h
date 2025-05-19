@@ -4,12 +4,9 @@
     #include <stdalign.h>
     #include <stdint.h>
 
-    #include "compatibility.h"
     #include "console.h"
     #include "forth-compatibility.h"
-    #include "forth-primitives.h"
     #include "forth-engine.h"
-    #include "structs.h"
 
     //Colors
     #define FORTH_COL_FG        COL_WHITE
@@ -84,34 +81,8 @@
 
     //enums
     //=====
-    enum ForthCharClass
-    {
-        FORTH_CHAR_MINUS,
-        FORTH_CHAR_0,
-        FORTH_CHAR_1_9,
-        FORTH_CHAR_A_F,
-        FORTH_CHAR_G_Z,
-        FORTH_CHAR_x,
-        FORTH_CHAR_OTHER,
-    };
 
-    enum ForthTextType
-    {
-        //Full types
-        FORTH_PARSE_NUMBER,
-        FORTH_PARSE_HEX,
-        FORTH_PARSE_PRIMITIVE,
-        FORTH_PARSE_SECONDARY,
-        FORTH_PARSE_NOT_FOUND,
-        //Partial types used only for parsing
-        FORTH_PARSE_NONE,
-        FORTH_PARSE_MINUS,
-        FORTH_PARSE_0,
-        FORTH_PARSE_0x,
-        FORTH_PARSE_OTHER,
-    };
-
-    //Note different from enum ForthEngineErrors
+    //Note different from enum ForthEngineErrors!
     enum ForthCompileError
     {
         FORTH_ERROR_NONE,
@@ -123,12 +94,6 @@
         FORTH_ERROR_INVALID_NAME,
         FORTH_ERROR_OUT_OF_MEMORY,
         FORTH_ERROR_MEMORY_OTHER,
-    };
-
-    enum ForthControlType
-    {
-        FORTH_CONTROL_IF,
-        FORTH_CONTROL_ELSE,
     };
 
 

@@ -2018,7 +2018,7 @@ int prim_immediate_words(struct ForthEngine *engine)
 }
 int prim_compile_words(struct ForthEngine *engine)
 {
-    //TODO
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //BYE

@@ -1,4 +1,4 @@
-//Compatibility layer for Forth engine so engine can be reused on different systems
+//Compatibility layer for Forth engine so engine can be reused on different platforms
 
 #ifndef __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY
     #define __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY

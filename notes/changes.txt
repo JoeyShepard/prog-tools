@@ -15,3 +15,4 @@ differences from other forths
 - if/do/begin typed so cant mix up
 - >NUMBER takes different number and type of arguments and works with negatives
 - KEY takes argument for waiting or not waiting
+- no PICK or ROLL
