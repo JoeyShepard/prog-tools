@@ -43,7 +43,6 @@
     
     struct CompileInfo
     {
-        const char *source;
         const char **error_word;
         struct ForthDefinitionsInfo *definitions;
         struct ForthWordIDsInfo **word_IDs;
@@ -55,8 +54,7 @@
         struct ForthWordHeader *colon_word;
     };
 
-
-    //TODO: Alignment of multi-line declarations after adding CompileInfo struct
+    //TODO: Alignment of multi-line declarations after adding CompileInfo struct (what did I mean by this?)
     uint32_t align4(uint32_t value);
     int classify_char(char c);
     int classify_word(const char *word);

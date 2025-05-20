@@ -23,30 +23,49 @@ void prim_hidden_push(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//Call next cell in dictionary as user-defined word
+//Call secondary which may be user-defined word or variable
 void prim_hidden_secondary(struct ForthEngine *engine)
 {
     //Fetch offset into list of word headers where address of secondary is stored. Offset is after pointer to current word.
     uint32_t offset=*(uint32_t *)(engine->address+1);
 
-    //Increment thread pointer to account for number
+    //Increment thread pointer to account for fetched offset
     engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
 
-    //Increase word index so tagged R-stack addresses can be linked to word they belong to
-    engine->word_index++;
+    printf("Secondary\n");
+    printf("- offset: %d\n",offset);
 
-    //Push current thread pointer address to R-stack
-    forth_rstack_push((uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies),
-                        FORTH_RSTACK_RETURN,engine->word_index,engine);
+    //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
+    struct ForthWordHeader *secondary=(struct ForthWordHeader *)(engine->word_headers+offset);
 
-    //TODO: forth_rstack_push may set executing to false. any problem with code below in that case?
+    printf("- type: %d\n",secondary->type);
 
-    //Set new execution address to address of secondary stored in word header list
-    engine->address=*(void (***)(struct ForthEngine *engine))(engine->word_headers+offset);
+    if (secondary->type==FORTH_SECONDARY_WORD)
+    {
+        //Increase word index so tagged R-stack addresses can be linked to word they belong to
+        engine->word_index++;
 
-    //Account for interpreter advancing execution address
-    engine->address--;
+        //Push current thread pointer address to R-stack
+        forth_rstack_push((uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies),
+                            FORTH_RSTACK_RETURN,engine->word_index,engine);
 
+        //TODO: forth_rstack_push may set executing to false. any problem with code below in that case?
+
+        //Set new execution address to address of secondary stored in word header list
+        engine->address=secondary->address;
+
+        //Account for interpreter advancing execution address
+        engine->address--;
+    }
+    else if (secondary->type==FORTH_SECONDARY_UNDEFINED)
+    {
+        printf("- not found!\n");
+
+        //Error - word referenced in word but never defined
+        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=secondary->name;
+        engine->executing=false;
+    }
 }
 
 //Done executing primitive

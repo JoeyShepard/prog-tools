@@ -50,7 +50,8 @@
         FORTH_ENGINE_ERROR_NONE,
         FORTH_ENGINE_ERROR_INTERPRET_ONLY,
         FORTH_ENGINE_ERROR_COMPILE_ONLY,
-        FORTH_ENGINE_ERROR_RSTACK_FULL
+        FORTH_ENGINE_ERROR_RSTACK_FULL,
+        FORTH_ENGINE_ERROR_UNDEFINED
     };
 
     enum ForthState
@@ -72,7 +73,9 @@
 
     enum ForthSecondaryType
     {
-        FORTH_SECONDARY_WORD
+        FORTH_SECONDARY_WORD,
+        FORTH_SECONDARY_VARIABLE,
+        FORTH_SECONDARY_UNDEFINED
     };
 
     enum ForthRStackType
@@ -120,9 +123,10 @@
         uint32_t word_index;
         uint8_t *word_headers;
         uint8_t *word_bodies;
+        const char *error_word;
 
         //Errors - compilation or state error
-        int32_t error;
+        int error;
 
         //Compatibility functions - set at initialization so engine can adapt to different platforms
         void (*print)(const char *text);

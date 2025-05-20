@@ -347,22 +347,33 @@ int write_definition_u32(uint32_t value,struct CompileInfo *compile)
 
 int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
 {
-    //Prepare engine to run secondary
-    forth_engine_pre_exec(engine);
-    engine->executing=true;
-    engine->address=compile->secondary->address;
-    engine->word_headers=(*compile->word_IDs)->data;
-    engine->word_bodies=compile->definitions->data;
-
-    //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
-    forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
-    
-    //Execute primitives
-    while(engine->executing)
+    //Error if secondary has header but hasn't been defined
+    if (compile->secondary->type==FORTH_SECONDARY_WORD)
     {
-        (*engine->address)(engine);
-        engine->address++;
+        //Prepare engine to run secondary
+        forth_engine_pre_exec(engine);
+        engine->executing=true;
+        engine->address=compile->secondary->address;
+        engine->word_headers=(*compile->word_IDs)->data;
+        engine->word_bodies=compile->definitions->data;
+        engine->error=FORTH_ENGINE_ERROR_NONE;
+
+        //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
+        forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
+        
+        //Execute primitives
+        while(engine->executing)
+        {
+            (*engine->address)(engine);
+            engine->address++;
+        }
     }
+    else if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
+    {
+        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=compile->secondary->name;
+    }
+
     
     //Flag error if any
     if (engine->error!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
@@ -638,7 +649,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     //Compile pointer to pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32((uintptr_t)&compile.secondary->address-(uintptr_t)(*compile.word_IDs)->data,&compile);
+                    result=write_definition_u32((uintptr_t)compile.secondary-(uintptr_t)(*compile.word_IDs)->data,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
@@ -647,12 +658,18 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     printf("- index: %d\n",(*compile.word_IDs)->index);
                     printf("- bytes_left: %d\n",(*compile.word_IDs)->bytes_left);
 
+                    //Save copy of address of header where new word will be
+                    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile.word_IDs)->data+(*compile.word_IDs)->index);
+
                     //Unknown symbol - add word header but don't error
-                    int result=new_secondary(word_buffer,FORTH_TYPE_NOT_FOUND,&compile);
+                    int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
 
-                    //TODO: point header to code for undefined objects
-
+                    //Compile pointer to pointer to secondary
+                    result=write_definition_primitive(&prim_hidden_secondary,&compile);
+                    if (result!=FORTH_ERROR_NONE) return result;
+                    result=write_definition_u32((uintptr_t)secondary-(uintptr_t)(*compile.word_IDs)->data,&compile);
+                    if (result!=FORTH_ERROR_NONE) return result;
                 }
             }
         }

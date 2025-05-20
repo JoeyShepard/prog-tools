@@ -58,7 +58,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         printf("\n");
 
         //Create word header for new word
-        int result=new_secondary(word_buffer,FORTH_TYPE_SECONDARY,compile);
+        int result=new_secondary(word_buffer,FORTH_SECONDARY_WORD,compile);
         if (result!=FORTH_ERROR_NONE) return result;
 
         printf("Created new definition: %s\n",word_buffer);

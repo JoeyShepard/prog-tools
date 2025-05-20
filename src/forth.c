@@ -662,6 +662,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                 case FORTH_ENGINE_ERROR_RSTACK_FULL:
                                     console_text_default("Out of R-stack space - aborting\n",console);
                                     break;
+                                case FORTH_ENGINE_ERROR_UNDEFINED:
+                                    console_text_default("Word not defined: ",console);
+                                    console_text_default(forth->engine.error_word,console);
+                                    console_text_default("\n",console);
+                                    break;
                                 default:
                                     //No error message for error - should never reach here unless forgot to add error message
                                     console_text_default("Unhandled engine error: ",console);
