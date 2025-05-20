@@ -42,14 +42,10 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     //Save address of word header created by colon since other headers may be added before definition is closed
     compile->colon_word=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
 
-    printf("Colon:\n");
-
     if (word_type==FORTH_TYPE_SECONDARY)
     {
         //Word already exists - delete code for existing word and update pointers to code in other words
 
-        printf("- word exists: %s\n",word_buffer);        
-       
         //Copy code for definitions later in memory to overwrite current definition
         void *dest=compile->secondary->address;
         uint32_t deleted_size=compile->secondary->definition_size;
@@ -59,10 +55,6 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         compile->definitions->bytes_left+=compile->secondary->definition_size;
         //memmove since memory ranges overlap
         memmove(dest,src,move_size);
-
-        printf("- dest: %p\n",dest);
-        printf("- src: %p\n",src);
-        printf("- move_size: %d\n",move_size);
 
         //Adjust pointers to definition memory in all word headers to account for code shifted above
         struct ForthWordHeader *update_secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data);
@@ -86,20 +78,9 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     {
         //Word not found - create new header
 
-        printf("- address: %p\n",(*compile->word_IDs)->data+(*compile->word_IDs)->index);
-        printf("- index: %d\n",(*compile->word_IDs)->index);
-        printf("- bytes_left: %d\n",(*compile->word_IDs)->bytes_left);
-        printf("- definitions.ID: %d\n",compile->definitions->ID);
-        printf("\n");
-
         //Create word header for new word
         int result=new_secondary(word_buffer,FORTH_SECONDARY_WORD,compile);
         if (result!=FORTH_ERROR_NONE) return result;
-
-        printf("Created new definition: %s\n",word_buffer);
-        printf("- test value: 0x%X\n",**(uint32_t **)compile->control_stack);
-        printf("- bytes left: %d\n",(*compile->word_IDs)->bytes_left);
-        printf("\n");
     }
     else
     {
@@ -129,14 +110,9 @@ int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
     //Mark header for word and any other headers created in word as done
     while(secondary->last==false)
     {
-
-        printf("Marking %s as done\n",secondary->name);
-
         secondary->done=true;
         secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
     }
-
-    printf("Final word size: %d\n",compile->colon_word->definition_size);
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;

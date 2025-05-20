@@ -61,7 +61,6 @@ int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint3
     input_line->visible=true;
      
     //Input loop
-    int32_t char_count=0;
     bool redraw_console=true;
     bool redraw_modifier=false;
     while(1)
@@ -112,12 +111,12 @@ int32_t forth_input(int32_t text_address,char *text_base,int32_t max_chars,uint3
                     break;
                 case VKEY_EXE:
                     //Copy input to console
-                    for (int i=0;i<forth_console->input.len;i++)
+                    for (uint32_t i=0;i<forth_console->input.len;i++)
                     {
                         console_char(forth_console->input.text[i].character,forth_console->input.text[i].fg,forth_console->input.text[i].bg,forth_console);
                     }
                     //Write input to memory
-                    for (int i=0;i<forth_console->input.len;i++)
+                    for (uint32_t i=0;i<forth_console->input.len;i++)
                     {
                         //Mask address
                         text_address&=data_mask;

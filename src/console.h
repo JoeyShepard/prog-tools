@@ -39,8 +39,8 @@
     struct ConsoleInput
     {
         struct ConsoleChar *text;   //Zero-terminated string
-        int len;                    //Cached length to speed up processing
-        int cursor;
+        uint32_t len;               //Cached length to speed up processing
+        uint32_t cursor;
         bool visible;
     };
 
@@ -48,9 +48,9 @@
     {
         //Console output
         struct ConsoleChar text[CONS_BUFFER_SIZE];
-        int text_len;
+        uint32_t text_len;
         uint32_t overflow_count;
-        int buffer_index;
+        uint32_t buffer_index;
         color_t text_col_fg;
         color_t text_col_bg;
         int x;
@@ -64,7 +64,7 @@
         bool reset_input;
         int modifier;
         bool input_copied;
-        int input_text_max;
+        uint32_t input_text_max;
         color_t input_col_fg;
         color_t input_col_bg;
 

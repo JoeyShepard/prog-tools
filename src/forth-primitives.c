@@ -32,13 +32,8 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     //Increment thread pointer to account for fetched offset
     engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
 
-    printf("Secondary\n");
-    printf("- offset: %d\n",offset);
-
     //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
     struct ForthWordHeader *secondary=(struct ForthWordHeader *)(engine->word_headers+offset);
-
-    printf("- type: %d\n",secondary->type);
 
     //TODO: update function point when secondary is redefined? would eliminate if here but not sure if actually faster
     if (secondary->type==FORTH_SECONDARY_WORD)
@@ -60,8 +55,6 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     }
     else if (secondary->type==FORTH_SECONDARY_UNDEFINED)
     {
-        printf("- not found!\n");
-
         //Error - word referenced in word but never defined
         engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
         engine->error_word=secondary->name;
@@ -555,7 +548,7 @@ void prim_body_to_number(struct ForthEngine *engine)
     uintptr_t lower;
     //Fetch values from stack
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t count=*(uint32_t*)((engine->stack_base)|lower);
+    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     int32_t address=*(int32_t*)((engine->stack_base)|lower);
     //Limit count so it loops through memory at most once
@@ -564,7 +557,7 @@ void prim_body_to_number(struct ForthEngine *engine)
     int32_t result=0;
     bool negative=false;
     uint32_t unconverted_count=count;
-    for (int32_t i=0;i<count;i++)
+    for (uint32_t i=0;i<count;i++)
     {
         //Mask address
         address&=engine->data_mask; 
@@ -723,7 +716,7 @@ void prim_body_accept(struct ForthEngine *engine)
         int32_t count=*engine->stack;
         //Mask address
         address&=engine->data_mask;
-        int32_t bytes_written=engine->input(address,engine->data,count,engine->data_mask);
+        int32_t bytes_written=engine->input(address,(char *)engine->data,count,engine->data_mask);
         //Write result
         *(int32_t*)((engine->stack_base)|lower)=bytes_written;
     }
@@ -974,14 +967,14 @@ void prim_body_fill(struct ForthEngine *engine)
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t character=*(int32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t count=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
     int32_t address=*(int32_t*)((engine->stack_base)|lower);
     if (count>0)
     {
         //Limit count so it loops through memory at most once
         if (count>=engine->data_size) count=engine->data_size;
-        for (int32_t i=0;i<count;i++)
+        for (uint32_t i=0;i<count;i++)
         {
             //Write byte to masked address
             address&=engine->data_mask;
@@ -1521,7 +1514,7 @@ void prim_body_type(struct ForthEngine *engine)
     uintptr_t lower;
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t count=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     int32_t address=*(int32_t*)((engine->stack_base)|lower);
     //Print characters if print function exists
@@ -1529,7 +1522,7 @@ void prim_body_type(struct ForthEngine *engine)
     {
         //Limit count so it loops through memory at most once
         if (count>=engine->data_size) count=engine->data_size;
-        for (int32_t i=0;i<count;i++)
+        for (uint32_t i=0;i<count;i++)
         {
             //Mask address
             address&=engine->data_mask;
@@ -1556,7 +1549,7 @@ void prim_body_u_less_than(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
     uint32_t arg2=*engine->stack;
     //Write result (note true is 1 in C but -1 in FORTH)
     *(int32_t*)((engine->stack_base)|lower)=-(arg1<arg2);
@@ -1576,7 +1569,7 @@ void prim_body_u_greater_than(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
     uint32_t arg2=*engine->stack;
     //Write result (note true is 1 in C but -1 in FORTH)
     *(int32_t*)((engine->stack_base)|lower)=-(arg1>arg2);
@@ -1683,7 +1676,7 @@ void prim_body_dot_r(struct ForthEngine *engine)
     uintptr_t lower;
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t spaces=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
 
@@ -1696,7 +1689,7 @@ void prim_body_dot_r(struct ForthEngine *engine)
         if (strlen(text_buffer)>spaces) spaces=0;
         else spaces-=strlen(text_buffer);
         if (spaces>FORTH_MAX_SPACES) spaces=FORTH_MAX_SPACES;
-        for (int32_t i=0;i<spaces;i++)
+        for (uint32_t i=0;i<spaces;i++)
             engine->print(" ");
         //Output number
         engine->print(text_buffer);
@@ -2121,14 +2114,14 @@ void prim_body_erase(struct ForthEngine *engine)
     uintptr_t lower;
     //Fetch values from stack
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t count=*(int32_t*)((engine->stack_base)|lower);
+    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     int32_t address=*(int32_t*)((engine->stack_base)|lower);
     if (count>0)
     {
         //Limit count so it loops through memory at most once
         if (count>=engine->data_size) count=engine->data_size;
-        for (int32_t i=0;i<count;i++)
+        for (uint32_t i=0;i<count;i++)
         {
             //Write byte to masked address
             address&=engine->data_mask;

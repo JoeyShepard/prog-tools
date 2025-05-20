@@ -1300,7 +1300,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                     
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
-                    if (console->input.len>=SHELL_INPUT_MAX-(int)strlen(cancel_text))
+                    if (console->input.len>=SHELL_INPUT_MAX-(uint32_t)strlen(cancel_text))
                     {
                         //Not enough room to append ^C so drop characters from end of input to make room
                         console->input.len=SHELL_INPUT_MAX-strlen(cancel_text)-1;
@@ -1311,7 +1311,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Fallthrough
                 case VKEY_EXE:
                     //Copy input text to console
-                    for (int i=0;i<console->input.len;i++)
+                    for (uint32_t i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }

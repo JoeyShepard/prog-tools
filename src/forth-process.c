@@ -313,8 +313,6 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct C
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(word);
     
-    printf("Definition size: %d\n",compile->colon_word->definition_size);
-
     return FORTH_ERROR_NONE;
 }
 
@@ -665,10 +663,6 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
                 {
-                    printf("Compile empty word for %s\n",word_buffer);
-                    printf("- index: %d\n",(*compile.word_IDs)->index);
-                    printf("- bytes_left: %d\n",(*compile.word_IDs)->bytes_left);
-
                     //Save copy of address of header where new word will be
                     struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile.word_IDs)->data+(*compile.word_IDs)->index);
 

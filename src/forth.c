@@ -171,7 +171,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted,struc
         colon_current=false;
     
         //Apply color to word
-        for (int j=start;j<start+word_len;j++)
+        for (uint32_t j=start;j<start+word_len;j++)
         {
             console->input.text[j].fg=word_color;
         }
@@ -549,7 +549,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
-                    if (console->input.len>=FORTH_INPUT_MAX-(int)strlen(cancel_text))
+                    if (console->input.len>=FORTH_INPUT_MAX-(uint32_t)strlen(cancel_text))
                     {
                         //Not enough room to append ^C so drop characters from end of input to make room
                         console->input.len=FORTH_INPUT_MAX-strlen(cancel_text)-1;
@@ -558,7 +558,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     add_input_text(cancel_text,FORTH_COL_FG,FORTH_COL_BG,console);
 
                     //Copy input text to console
-                    for (int i=0;i<console->input.len;i++)
+                    for (uint32_t i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
@@ -575,7 +575,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     color_input(console,true,forth_word_IDs);
 
                     //Copy input text to console
-                    for (int i=0;i<console->input.len;i++)
+                    for (uint32_t i=0;i<console->input.len;i++)
                     {
                         console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
                     }
@@ -699,10 +699,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Definition left open - cancel word
                         struct ForthWordHeader *secondary=(struct ForthWordHeader *)(forth_word_IDs->data);
 
-                        printf("Definition left open\n");
-                        printf("- index: %d\n",forth_word_IDs->index);
-                        printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);
-
                         //Save copy of pointer to header for incomplete word for use in error message below
                         struct ForthWordHeader *secondary_copy=secondary;
 
@@ -741,19 +737,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
                         }
 
-                        printf("- rewinding definitions ID by %d\n",definition_count);
-                        printf("- restoring %d bytes\n",rewind_header_bytes);
-
                         //Restore header information to state before aborted word began
                         forth_word_IDs->index-=rewind_header_bytes;
                         forth_word_IDs->bytes_left+=rewind_header_bytes;
 
                         //Restore definition IDs
                         forth_definitions->ID-=definition_count;
-
-                        printf("- index: %d\n",forth_word_IDs->index);
-                        printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);
-                        printf("\n");
 
                         if (process_result==FORTH_ERROR_NONE)
                         {

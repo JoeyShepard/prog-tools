@@ -51,6 +51,7 @@ optimize ERASE etc - don't need to mask every cycle
 - also, no reason to wrap at end of memory
 change int32_t back to int in some cases
 - changed several to try to be consistent but went too far. int ok sometimes.
+- OTOH, changed a bunch of int later to int32_t or uint32_t to silence sh gcc warnings
 ctrl+c could overwrite input instead of inserting
 put primitives in alphabetical order for WORDs
 PRIMITIVES word since may scroll off screen

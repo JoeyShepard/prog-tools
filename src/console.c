@@ -193,14 +193,13 @@ void add_input_char(char character,color_t fg,color_t bg,struct ConsoleInfo *con
 
 struct Point draw_input_line(struct ConsoleInfo *console,struct Point pos,int *col,int *row)
 {
-    bool cursor_drawn=false;
     bool invert;
     char character;
     int color_fg, color_bg;
 
     if (console->input.visible==true)
     {
-        for (int char_index=0;char_index<console->input.len+1;char_index++)
+        for (uint32_t char_index=0;char_index<console->input.len+1;char_index++)
         {
             if (char_index==console->input.len)
             {
@@ -221,7 +220,6 @@ struct Point draw_input_line(struct ConsoleInfo *console,struct Point pos,int *c
             {
                 //Cursor character - invert
                 invert=true;
-                cursor_drawn=true;
             }
             else invert=false;
 
@@ -254,7 +252,7 @@ void draw_console(struct ConsoleInfo *console)
         int line_length=0;
         int buffer_counter=console->buffer_index;
         bool newline_found=false;
-        for (int i=0;i<console->text_len;i++)
+        for (uint32_t i=0;i<console->text_len;i++)
         {
             buffer_counter--;
             if (buffer_counter<0)
@@ -292,7 +290,7 @@ void draw_console(struct ConsoleInfo *console)
     int line_count=0;
     int buffer_counter=console->buffer_index;
     int buffer_start=buffer_counter;
-    for (int i=0;i<console->text_len;i++)
+    for (uint32_t i=0;i<console->text_len;i++)
     {
         //Loop backwards through screen buffer until enough lines are generated to fill screen
         buffer_counter--;

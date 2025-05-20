@@ -17,10 +17,12 @@ set(SOURCES
   src/dummy.c
   src/error.c
   src/exceptions.c
+  src/forth-actions.c
   src/forth.c
   src/forth-compatibility.c
   src/forth-engine.c
   src/forth-primitives.c
+  src/forth-process.c
   src/getkey.c
   src/graphics.c
   src/key-remap.c
