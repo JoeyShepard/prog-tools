@@ -346,7 +346,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth_word_IDs->index=0;
         forth_word_IDs->bytes_left=FORTH_MEM_WORD_IDS-sizeof(struct ForthWordIDsInfo);
 
-        //First definition is empty marking end of definitions
+        //First definition is empty definition marking end of definition list
         ((struct ForthWordHeader *)forth_word_IDs->data)->last=true;
 
         //Allocate space for control stack
@@ -703,33 +703,53 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         printf("- index: %d\n",forth_word_IDs->index);
                         printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);
 
-                        //Find first pending word header
-                        while(secondary->done==true)
-                        {
-                            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
-                        }
-
-                        printf("- first not done word found: %p\n",secondary);
-
                         //Save copy of pointer to header for incomplete word for use in error message below
                         struct ForthWordHeader *secondary_copy=secondary;
 
-                        //TODO: recover definitions ID?
-
-                        //Figure out how much memory to recover
-                        uint32_t rewind_bytes=0;
-                        while(secondary->last==false)
+                        //Finalize pending word headers by setting ->done to true. Also set ->last at end of list to mark end.
+                        uint32_t rewind_header_bytes=0;
+                        uint32_t definition_count=0;
+                        bool looping=true;
+                        while(looping==true)
                         {
-                            secondary->last=true;
-                            rewind_bytes+=secondary->header_size;
+                            //Check if at end of list first since ->done not valid unless ->last is false
+                            if (secondary->last==false)
+                            {
+                                //Still looping through headers
+                                if (secondary->done==false)
+                                {
+                                    //Reached unfinished header - mark as end of list of headers
+                                    //(Marking end only relevant to first header but doesn't hurt to mark all)
+                                    secondary->last=true;
+                                    rewind_header_bytes+=secondary->header_size;
+                                    definition_count++;
+                                }
+                                else
+                                {
+                                    //Header was not created while defining this word so nothing to do. This happens because
+                                    //the header refers to something else or the definition redefined an existing word that
+                                    //already had a header.
+                                }
+                            }
+                            else
+                            {
+                                //Reached end of list - done looping
+                                looping=false;
+                            }
+
+                            //Advance to next word header
                             secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
                         }
 
-                        printf("- restoring %d bytes\n",rewind_bytes);
+                        printf("- rewinding definitions ID by %d\n",definition_count);
+                        printf("- restoring %d bytes\n",rewind_header_bytes);
 
                         //Restore header information to state before aborted word began
-                        forth_word_IDs->index-=rewind_bytes;
-                        forth_word_IDs->bytes_left+=rewind_bytes;
+                        forth_word_IDs->index-=rewind_header_bytes;
+                        forth_word_IDs->bytes_left+=rewind_header_bytes;
+
+                        //Restore definition IDs
+                        forth_definitions->ID-=definition_count;
 
                         printf("- index: %d\n",forth_word_IDs->index);
                         printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);

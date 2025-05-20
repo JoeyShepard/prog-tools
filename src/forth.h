@@ -131,6 +131,7 @@
     struct ForthDefinitionsInfo
     {
         uint32_t index; 
+        //TODO: still needed? transitioned secondaries to pointer to word header
         uint32_t ID;
         uint32_t bytes_left;
         //Flexible Array Member - memory allocated after struct holds definition data

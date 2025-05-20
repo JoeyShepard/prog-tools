@@ -42,19 +42,54 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     //Save address of word header created by colon since other headers may be added before definition is closed
     compile->colon_word=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
 
+    printf("Colon:\n");
+
     if (word_type==FORTH_TYPE_SECONDARY)
     {
-        //Word already exists - delete existing word and update pointers to code
-        //TODO
+        //Word already exists - delete code for existing word and update pointers to code in other words
+
+        printf("- word exists: %s\n",word_buffer);        
+       
+        //Copy code for definitions later in memory to overwrite current definition
+        void *dest=compile->secondary->address;
+        uint32_t deleted_size=compile->secondary->definition_size;
+        void *src=dest+deleted_size;
+        uint32_t move_size=(uintptr_t)(compile->definitions->data+compile->definitions->index)-(uintptr_t)src;
+        compile->definitions->index-=compile->secondary->definition_size;
+        compile->definitions->bytes_left+=compile->secondary->definition_size;
+        //memmove since memory ranges overlap
+        memmove(dest,src,move_size);
+
+        printf("- dest: %p\n",dest);
+        printf("- src: %p\n",src);
+        printf("- move_size: %d\n",move_size);
+
+        //Adjust pointers to definition memory in all word headers to account for code shifted above
+        struct ForthWordHeader *update_secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data);
+        while (update_secondary->last==false)
+        {
+            if (update_secondary->address>(void(**)(struct ForthEngine *engine))dest)
+            {
+                //Code address is part of memory shifted by memmove. Adjust pointer.
+                update_secondary->address=(void(**)(struct ForthEngine *engine))((uint8_t *)update_secondary->address-deleted_size);
+            }
+            update_secondary=(struct ForthWordHeader *)((uint8_t *)update_secondary+update_secondary->header_size);
+        }
+
+        //Update existing word header with new details
+        compile->secondary->address=(void(**)(struct ForthEngine *engine))(compile->definitions->data+compile->definitions->index);
+        compile->secondary->offset=compile->definitions->index;
+        compile->secondary->definition_size=0;
+        compile->secondary->type=FORTH_SECONDARY_WORD;
     }
     else if (word_type==FORTH_TYPE_NOT_FOUND)
     {
         //Word not found - create new header
 
-        printf("Colon:\n");
         printf("- address: %p\n",(*compile->word_IDs)->data+(*compile->word_IDs)->index);
         printf("- index: %d\n",(*compile->word_IDs)->index);
         printf("- bytes_left: %d\n",(*compile->word_IDs)->bytes_left);
+        printf("- definitions.ID: %d\n",compile->definitions->ID);
         printf("\n");
 
         //Create word header for new word
@@ -86,6 +121,9 @@ int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Start at word defined by colon and mark all words as done
+    //(New word is either newly created in which case it and all headers after should be marked done OR the new word
+    //reuses an existing header since the word is being redefined in which case there may not be any new word headers and
+    //the search here may needlessly re-mark a lot of headers done. Redefining a word is relatively rare so leave as is.) 
     struct ForthWordHeader *secondary=compile->colon_word;
 
     //Mark header for word and any other headers created in word as done
@@ -97,6 +135,8 @@ int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
         secondary->done=true;
         secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
     }
+
+    printf("Final word size: %d\n",compile->colon_word->definition_size);
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;

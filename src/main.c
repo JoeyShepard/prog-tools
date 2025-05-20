@@ -6,6 +6,12 @@
 //TODO
 //====
 /*
+revisit casting rules esp for structs
+- seems char * is an exception
+  - char * is not the same as uint8_t *
+- might be good to post some examples and ask for help
+offsetof operator
+
 remove headers
 TODOs in all files
 rearrange struct orders for speed
@@ -54,6 +60,7 @@ individual primitives for local accesses
 - even 16 might be good - dont need 256
 i and j are function pointers
 WORDS - secondaries with header only should be yellow
+- add test for NULL for headers in primitives that use them
 */
 
 

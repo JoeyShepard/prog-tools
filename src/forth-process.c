@@ -310,6 +310,11 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct C
     compile->definitions->index+=sizeof(word);
     compile->definitions->bytes_left-=sizeof(word);
 
+    //Update size of definition in word header
+    compile->colon_word->definition_size+=sizeof(word);
+    
+    printf("Definition size: %d\n",compile->colon_word->definition_size);
+
     return FORTH_ERROR_NONE;
 }
 
@@ -326,6 +331,9 @@ int write_definition_i32(int32_t value,struct CompileInfo *compile)
     compile->definitions->index+=sizeof(value);
     compile->definitions->bytes_left-=sizeof(value);
 
+    //Update size of definition in word header
+    compile->colon_word->definition_size+=sizeof(value);
+
     return FORTH_ERROR_NONE;
 }
 
@@ -341,6 +349,9 @@ int write_definition_u32(uint32_t value,struct CompileInfo *compile)
     //Update counts in definitions memory
     compile->definitions->index+=sizeof(value);
     compile->definitions->bytes_left-=sizeof(value);
+
+    //Update size of definition in word header
+    compile->colon_word->definition_size+=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
@@ -412,7 +423,7 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *
     }
 
     //Write new word info to header
-    secondary->address=(void(**)())(compile->definitions->data+compile->definitions->index);
+    secondary->address=(void(**)(struct ForthEngine *engine))(compile->definitions->data+compile->definitions->index);
     secondary->offset=compile->definitions->index;
     secondary->definition_size=0;
     secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);

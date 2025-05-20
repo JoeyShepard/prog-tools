@@ -40,6 +40,7 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 
     printf("- type: %d\n",secondary->type);
 
+    //TODO: update function point when secondary is redefined? would eliminate if here but not sure if actually faster
     if (secondary->type==FORTH_SECONDARY_WORD)
     {
         //Increase word index so tagged R-stack addresses can be linked to word they belong to
