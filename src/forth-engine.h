@@ -149,6 +149,8 @@
         uint16_t ID;                        //ID assigned to each user-defined word
         uint8_t type;                       //User-defined word, variable, constant, etc
         uint8_t name_len;
+        bool last;                          //Whether this header is empty header marking end of list
+        bool done;                          //Whether word is done being processed. Used to rewind if error in word.
         //Flexible Array Member - memory allocated after struct holds name
         char name[];
     };

@@ -16,3 +16,6 @@ differences from other forths
 - >NUMBER takes different number and type of arguments and works with negatives
 - KEY takes argument for waiting or not waiting
 - no PICK or ROLL
+- no immediate
+  - not needed if make planned changes to STATE
+- lots of words interpret only like WORDS

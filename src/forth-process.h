@@ -50,13 +50,14 @@
         struct ForthControlElement **control_stack;
         uint8_t *heap_ptr;
         int primitive_ID;
-        struct ForthWordHeader *secondary_ptr;
-        uint32_t start;
+        struct ForthWordHeader *secondary;
         uint32_t word_len;
+        struct ForthWordHeader *colon_word;
     };
 
 
     //TODO: Alignment of multi-line declarations after adding CompileInfo struct
+    uint32_t align4(uint32_t value);
     int classify_char(char c);
     int classify_word(const char *word);
     int find_primitive(const char *word);
@@ -71,6 +72,7 @@
     int write_definition_i32(int32_t value,struct CompileInfo *compile);
     int write_definition_u32(uint32_t value,struct CompileInfo *compile);
     int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile);
+    int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *compile);
     int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
                                 struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo *word_IDs,
                                 struct ForthControlElement *control_stack,uint8_t *heap_ptr);

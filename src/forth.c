@@ -347,7 +347,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth_word_IDs->bytes_left=FORTH_MEM_WORD_IDS-sizeof(struct ForthWordIDsInfo);
 
         //First definition is empty marking end of definitions
-        ((struct ForthWordHeader *)forth_word_IDs)->header_size=0;
+        ((struct ForthWordHeader *)forth_word_IDs->data)->last=true;
 
         //Allocate space for control stack
         forth_control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
@@ -692,14 +692,49 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     if (forth->engine.state==FORTH_STATE_COMPILE)
                     {
                         //Definition left open - cancel word
-                        struct ForthWordHeader *secondary=(struct ForthWordHeader *)(forth_word_IDs->data+forth_word_IDs->index);
-                        //Header size 0 marks end of word list
-                        secondary->header_size=0;
+                        struct ForthWordHeader *secondary=(struct ForthWordHeader *)(forth_word_IDs->data);
+
+                        printf("Definition left open\n");
+                        printf("- index: %d\n",forth_word_IDs->index);
+                        printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);
+
+                        //Find first pending word header
+                        while(secondary->done==true)
+                        {
+                            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+                        }
+
+                        printf("- first not done word found: %p\n",secondary);
+
+                        //Save copy of pointer to header for incomplete word for use in error message below
+                        struct ForthWordHeader *secondary_copy=secondary;
+
+                        //TODO: recover definitions ID?
+
+                        //Figure out how much memory to recover
+                        uint32_t rewind_bytes=0;
+                        while(secondary->last==false)
+                        {
+                            secondary->last=true;
+                            rewind_bytes+=secondary->header_size;
+                            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+                        }
+
+                        printf("- restoring %d bytes\n",rewind_bytes);
+
+                        //Restore header information to state before aborted word began
+                        forth_word_IDs->index-=rewind_bytes;
+                        forth_word_IDs->bytes_left+=rewind_bytes;
+
+                        printf("- index: %d\n",forth_word_IDs->index);
+                        printf("- bytes_left: %d\n",forth_word_IDs->bytes_left);
+                        printf("\n");
+
                         if (process_result==FORTH_ERROR_NONE)
                         {
                             //Only warn of unterminated word if no other error
                             console_text_default("Unterminated word: ",console);
-                            console_text_default(secondary->name,console);
+                            console_text_default(secondary_copy->name,console);
                             console_text_default("\n",console);
                         }
                         //Back to interpret mode

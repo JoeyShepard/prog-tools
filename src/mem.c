@@ -233,13 +233,12 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
 
-    START HERE:
-    - calculation is not correct! move by size of whole heap not just object
-
     //Memory range overlaps - memmove instead of memcpy
     uint8_t *object=object_base_address(ID,heap_ptr);
     uint8_t *src=object+object_size(ID,heap_ptr);
-    memmove(src+size,src,size);
+    uint8_t *dest=src+size;
+    uint32_t copy_size=heap_info->next-(object-heap_ptr);
+    memmove(dest,src,copy_size);
     heap_info->next+=size;
     *(uint32_t *)object+=size;
     

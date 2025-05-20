@@ -1832,13 +1832,14 @@ int prim_optimize_tuck(struct ForthEngine *engine)
 }
 
 //UNUSED
-void prim_body_unused(struct ForthEngine *engine){}
-int prim_immediate_unused(struct ForthEngine *engine){}
-int prim_compile_unused(struct ForthEngine *engine){}
-int prim_optimize_unused(struct ForthEngine *engine)
+void prim_body_unused(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    uintptr_t lower;
+    //Write memory amount left
+    *engine->stack=engine->data_size-engine->data_index;
+    //Advance stack pointer
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //WITHIN
@@ -2241,12 +2242,10 @@ const struct ForthPrimitive forth_primitives[]=
     //{"ENDOF",5,&prim_immediate_endof,&prim_compile_endof,&prim_body_endof,&prim_optimize_endof},
     {"FALSE",5,NULL,NULL,&prim_body_false,&prim_optimize_false},
     {"NIP",3,NULL,NULL,&prim_body_nip,&prim_optimize_nip},
-    //{"PICK",4,&prim_immediate_pick,&prim_compile_pick,&prim_body_pick,&prim_optimize_pick},
-    //{"ROLL",4,&prim_immediate_roll,&prim_compile_roll,&prim_body_roll,&prim_optimize_roll},
     //{"S\"",3,&prim_immediate_s_backslash_quote,&prim_compile_s_backslash_quote,&prim_body_s_backslash_quote,&prim_optimize_s_backslash_quote},
     {"TRUE",4,NULL,NULL,&prim_body_true,&prim_optimize_true},
     {"TUCK",4,NULL,NULL,&prim_body_tuck,&prim_optimize_tuck},
-    //{"UNUSED",6,&prim_immediate_unused,&prim_compile_unused,&prim_body_unused,&prim_optimize_unused},
+    {"UNUSED",6,NULL,NULL,&prim_body_unused,NULL},
     {"WITHIN",6,NULL,NULL,&prim_body_within,&prim_optimize_within},
     {".S",2,NULL,NULL,&prim_body_dot_s,NULL},
     {"?",1,NULL,NULL,&prim_body_question,NULL},
@@ -2270,6 +2269,9 @@ const struct ForthPrimitive forth_primitives[]=
     //. for unsigned (u. and u.r?) and hex since no BASE
     //adjust size of data area
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
+    //cxt
+    //wxt
+    //primitives (like WORDS)
 
     //May add but not sure yet
     //cleave ??
@@ -2280,3 +2282,4 @@ const struct ForthPrimitive forth_primitives[]=
 
 //Can't determine length of array primitives in other files, so calculate here
 const int forth_primitives_len=(int)(ARRAY_SIZE(forth_primitives));
+

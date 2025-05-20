@@ -9,11 +9,6 @@
 #include "forth-primitives.h"
 #include "mem.h"
 
-static uint32_t align4(uint32_t value)
-{
-    return value+((4-value%4)%4);
-}
-
 int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct CompileInfo *compile)
 {
     uint32_t prior_start=*start;
@@ -33,84 +28,50 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
+
     //Make sure name of new word is not primitive or number
     strncpy(word_buffer,source+*start,word_len);
     word_buffer[word_len]=0;
     int word_type=classify_word(word_buffer);
-    int primitive_ID;
-    struct ForthWordHeader *secondary_ptr;
     if (word_type==FORTH_TYPE_OTHER)
         word_type=classify_other(word_buffer,compile);
-    if ((word_type!=FORTH_TYPE_SECONDARY)&&(word_type!=FORTH_TYPE_NOT_FOUND))
-    {
-        //Error - name of new word can't be number or primitive
-        *compile->error_word=source+*start;
-        return FORTH_ERROR_INVALID_NAME;
-    }
 
     //Advance past name of new word
     *start+=word_len;
 
+    //Save address of word header created by colon since other headers may be added before definition is closed
+    compile->colon_word=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
+
     if (word_type==FORTH_TYPE_SECONDARY)
     {
+        //Word already exists - delete existing word and update pointers to code
         //TODO
-        //Word already exists - delete existing word and update pointers
     }
-
-    printf("Colon:\n");
-    printf("- definitions.data: %p (%ld)\n",compile->definitions->data,(uintptr_t)(*compile->word_IDs)-(uintptr_t)compile->definitions->data);
-    printf("  - bytes_left: %d\n",compile->definitions->bytes_left);
-    printf("- word_IDs.data:    %p (%ld)\n",(*compile->word_IDs)->data,(uintptr_t)(*compile->control_stack)-(uintptr_t)(*compile->word_IDs)->data);
-    printf("  - bytes_left: %d\n",(*compile->word_IDs)->bytes_left);
-    printf("- control_stack:    %p\n",*compile->control_stack);
-
-    //Expand word ID memory for new word if necessary
-    struct ForthWordHeader *new_secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
-    //Need enough space for current header and empty header following
-    if ((*compile->word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
+    else if (word_type==FORTH_TYPE_NOT_FOUND)
     {
-        
-        printf("Allocating more word_IDs memory!\n");
+        //Word not found - create new header
 
-        //Not enough memory to add new word ID - expand memory
-        int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,compile->heap_ptr);
-        if (result!=ERROR_NONE)
-        {
-            //Error while allocating memory
-            if (result==ERROR_OUT_OF_MEMORY)
-                return FORTH_ERROR_OUT_OF_MEMORY;
-            else
-            {
-                //Some other type of allocation error like alignment
-                return FORTH_ERROR_MEMORY_OTHER;
-            }
-        }
+        printf("Colon:\n");
+        printf("- address: %p\n",(*compile->word_IDs)->data+(*compile->word_IDs)->index);
+        printf("- index: %d\n",(*compile->word_IDs)->index);
+        printf("- bytes_left: %d\n",(*compile->word_IDs)->bytes_left);
+        printf("\n");
 
-        //Update count of bytes left
-        (*compile->word_IDs)->bytes_left+=FORTH_MEM_WORD_IDS;
+        //Create word header for new word
+        int result=new_secondary(word_buffer,FORTH_TYPE_SECONDARY,compile);
+        if (result!=FORTH_ERROR_NONE) return result;
 
-        //Update control stack address since shifted by expand_object above
-        *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+        printf("Created new definition: %s\n",word_buffer);
+        printf("- test value: 0x%X\n",**(uint32_t **)compile->control_stack);
+        printf("- bytes left: %d\n",(*compile->word_IDs)->bytes_left);
+        printf("\n");
     }
-
-    //Write new word info to header
-    new_secondary->address=(void(**)())(compile->definitions->data+compile->definitions->index);
-    new_secondary->offset=compile->definitions->index;
-    new_secondary->definition_size=0;
-    new_secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);
-    new_secondary->ID=compile->definitions->ID;
-    new_secondary->type=FORTH_SECONDARY_WORD;
-    new_secondary->name_len=word_len;
-    strcpy(new_secondary->name,word_buffer);
-
-    //Write next header with length 0 to indicate end of header list
-    new_secondary=(struct ForthWordHeader *)((uint8_t *)new_secondary+new_secondary->header_size);
-    new_secondary->header_size=0;
-
-    printf("New definition: %s\n",word_buffer);
-    printf("- test value: 0x%X\n",**(uint32_t **)compile->control_stack);
-    printf("- bytes left: %d\n",(*compile->word_IDs)->bytes_left);
-    printf("\n");
+    else
+    {
+        //Error - name of defined word can't be number or primitive
+        *compile->error_word=source+*start;
+        return FORTH_ERROR_INVALID_NAME;
+    }
 
     //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
@@ -120,20 +81,22 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
 
 int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
 {
-
-    printf("Semicolon\n");
-
     //Add primitive to word to stop exectuing
     int result=write_definition_primitive(&prim_hidden_done,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
-    //Point to next header which has 0 length header size to indicate end of header list
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
-    (*compile->word_IDs)->index+=secondary->header_size;
-    (*compile->word_IDs)->bytes_left-=secondary->header_size;
+    //Start at word defined by colon and mark all words as done
+    struct ForthWordHeader *secondary=compile->colon_word;
 
-    //Advance to next ID in definitions
-    compile->definitions->ID++;
+    //Mark header for word and any other headers created in word as done
+    while(secondary->last==false)
+    {
+
+        printf("Marking %s as done\n",secondary->name);
+
+        secondary->done=true;
+        secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+    }
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;
@@ -235,7 +198,7 @@ void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
                 break;
             case SEARCH_SECONDARIES:
                 //Next, output secondaries
-                if (secondary->header_size==0)
+                if (secondary->last==true)
                 {
                     //Empty header reached - done looping
                     looping=false;
@@ -307,8 +270,6 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
     strncpy(word_buffer,source+*start,word_len);
     word_buffer[word_len]=0;
     int word_type=classify_word(word_buffer);
-    int primitive_ID;
-    struct ForthWordHeader *secondary_ptr;
     if (word_type==FORTH_TYPE_OTHER)
         word_type=classify_other(word_buffer,compile);
 
@@ -327,7 +288,7 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
         *start+=word_len;
 
         //Return index of secondary
-        *index=forth_primitives_len+compile->secondary_ptr->ID;
+        *index=forth_primitives_len+compile->secondary->ID;
         return FORTH_ERROR_NONE;
     }
     else
