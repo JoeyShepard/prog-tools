@@ -270,7 +270,7 @@ int32_t hex32_text(const char *word_buffer)
 
 int expand_definitions(uint32_t size,struct CompileInfo *compile)
 {
-    if (compile->definitions->bytes_left<size)
+    if ((*compile->definitions)->bytes_left<size)
     {
         //Not enough memory left in dictionary - expand memory
         int result=expand_object(FORTH_MEM_DEFINITIONS,FORTH_ID_DEFINITIONS,compile->heap_ptr);
@@ -287,7 +287,7 @@ int expand_definitions(uint32_t size,struct CompileInfo *compile)
         }
 
         //Update count of bytes left
-        compile->definitions->bytes_left+=FORTH_MEM_DEFINITIONS;
+        (*compile->definitions)->bytes_left+=FORTH_MEM_DEFINITIONS;
 
         //Update pointers since shifted by expand_object above
         *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
@@ -304,11 +304,11 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct C
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(compile->definitions->data+compile->definitions->index,&word,sizeof(word));
+    memcpy((*compile->definitions)->data+(*compile->definitions)->index,&word,sizeof(word));
 
     //Update counts in definitions memory
-    compile->definitions->index+=sizeof(word);
-    compile->definitions->bytes_left-=sizeof(word);
+    (*compile->definitions)->index+=sizeof(word);
+    (*compile->definitions)->bytes_left-=sizeof(word);
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(word);
@@ -323,11 +323,11 @@ int write_definition_i32(int32_t value,struct CompileInfo *compile)
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
+    memcpy((*compile->definitions)->data+(*compile->definitions)->index,&value,sizeof(value));
 
     //Update counts in definitions memory
-    compile->definitions->index+=sizeof(value);
-    compile->definitions->bytes_left-=sizeof(value);
+    (*compile->definitions)->index+=sizeof(value);
+    (*compile->definitions)->bytes_left-=sizeof(value);
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(value);
@@ -342,11 +342,11 @@ int write_definition_u32(uint32_t value,struct CompileInfo *compile)
     if (result!=FORTH_ERROR_NONE) return result;
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
-    memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
+    memcpy((*compile->definitions)->data+(*compile->definitions)->index,&value,sizeof(value));
 
     //Update counts in definitions memory
-    compile->definitions->index+=sizeof(value);
-    compile->definitions->bytes_left-=sizeof(value);
+    (*compile->definitions)->index+=sizeof(value);
+    (*compile->definitions)->bytes_left-=sizeof(value);
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(value);
@@ -364,7 +364,7 @@ int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
         engine->executing=true;
         engine->address=compile->secondary->address;
         engine->word_headers=(*compile->word_IDs)->data;
-        engine->word_bodies=compile->definitions->data;
+        engine->word_bodies=(*compile->definitions)->data;
         engine->error=FORTH_ENGINE_ERROR_NONE;
 
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
@@ -421,11 +421,11 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *
     }
 
     //Write new word info to header
-    secondary->address=(void(**)(struct ForthEngine *engine))(compile->definitions->data+compile->definitions->index);
-    secondary->offset=compile->definitions->index;
+    secondary->address=(void(**)(struct ForthEngine *engine))((*compile->definitions)->data+(*compile->definitions)->index);
+    secondary->offset=(*compile->definitions)->index;
     secondary->definition_size=0;
     secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);
-    secondary->ID=compile->definitions->ID;
+    secondary->ID=(*compile->definitions)->ID;
     secondary->type=word_type;
     secondary->name_len=word_len;
     secondary->last=false;
@@ -433,7 +433,7 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *
     strcpy(secondary->name,word_buffer);
 
     //Advance to next ID in definitions since current one was used above
-    compile->definitions->ID++;
+    (*compile->definitions)->ID++;
 
     //Advance index in preparation of next header
     (*compile->word_IDs)->index+=secondary->header_size;
@@ -453,7 +453,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
     //Store informaton for compiling in struct so easier to pass to functions
     struct CompileInfo compile;
     compile.error_word=error_word;
-    compile.definitions=definitions;
+    compile.definitions=&definitions;
     compile.word_IDs=&word_IDs;
     compile.control_stack=&control_stack;
     compile.heap_ptr=heap_ptr;

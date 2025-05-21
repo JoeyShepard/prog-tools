@@ -41,9 +41,11 @@
 
     //Heap memory
     #define FORTH_ID_CONSOLE        0
-    #define FORTH_ID_DEFINITIONS    1
-    #define FORTH_ID_WORD_IDS       2
-    #define FORTH_ID_CONTROL_STACK  3
+    #define FORTH_ID_DATA           1
+    #define FORTH_ID_DEFINITIONS    2
+    #define FORTH_ID_WORD_IDS       3
+    #define FORTH_ID_CONTROL_STACK  4
+    #define FORTH_MEM_DATA          0x2000  //Initial value - can change programmatically
     #define FORTH_MEM_DEFINITIONS   1024    //For these three, allocate this amount initially then add this     
     #define FORTH_MEM_WORD_IDS      1024    //much when memory runs out. Exact amount not important - prevents
     #define FORTH_MEM_CONTROL_STACK 512     //copying whole dictionary every time new word added.
@@ -74,7 +76,6 @@
     #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
     //Forth memory
-    #define FORTH_DATA_SIZE                 0x10000
 
     //Forth primitives
     #define FORTH_PRIM_NOT_FOUND            -1
@@ -114,10 +115,6 @@
 
         //Whether to draw stack in console
         bool draw_stack;
-
-        //Memory for Forth programs to use - must be aligned for int32_t access
-        //TODO: might be nice to have data size be adjustable
-        alignas(uint32_t) uint8_t data[FORTH_DATA_SIZE];
 
         //Copy of both stacks. Copied to XRAM at runtime.
         alignas(uint32_t) uint8_t stack_copy[FORTH_STACK_SIZE];

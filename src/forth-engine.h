@@ -99,7 +99,7 @@
         uint32_t stack_count;   //Count of elements allocated for stack
 
         //Return stack
-        struct ForthRStackElement *rstack_base; //Store base as uintptr_t to do wrapping calculation on pointer
+        struct ForthRStackElement *rstack_base;
         struct ForthRStackElement *rstack;      //Points to currently free stack element
         uint32_t rstack_count;                  //Count of elements allocated for stack
 

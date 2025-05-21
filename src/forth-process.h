@@ -44,7 +44,8 @@
     struct CompileInfo
     {
         const char **error_word;
-        struct ForthDefinitionsInfo *definitions;
+        uint8_t *data;
+        struct ForthDefinitionsInfo **definitions;
         struct ForthWordIDsInfo **word_IDs;
         struct ForthControlElement **control_stack;
         uint8_t *heap_ptr;

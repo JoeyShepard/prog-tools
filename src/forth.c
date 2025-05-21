@@ -301,6 +301,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //Pointers to data on heap
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
+    uint8_t *forth_data;
     struct ForthDefinitionsInfo *forth_definitions;
     struct ForthWordIDsInfo *forth_word_IDs;
     struct ForthControlElement *forth_control_stack;
@@ -317,8 +318,18 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
+        //Allocate space for Forth data memory
+        forth_data=add_object(FORTH_MEM_DATA,heap_ptr);
+
+        //Make sure allocation succeeded
+        if (forth_data==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
         //Allocate space for Forth word definitions
-        forth_definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DEFINITIONS,heap_ptr);
+        forth_definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_definitions==NULL)
@@ -346,7 +357,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth_word_IDs->index=0;
         forth_word_IDs->bytes_left=FORTH_MEM_WORD_IDS-sizeof(struct ForthWordIDsInfo);
 
-        //First definition is empty definition marking end of definition list
+        //First header is empty marking end of header list
         ((struct ForthWordHeader *)forth_word_IDs->data)->last=true;
 
         //Allocate space for control stack
@@ -401,7 +412,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             (struct ForthRStackElement *)FORTH_RSTACK_ADDRESS,
             FORTH_STACK_ELEMENTS,
             FORTH_RSTACK_ELEMENTS,
-            FORTH_DATA_SIZE,
+            FORTH_MEM_DATA,
             forth_print,
             forth_print_color,
             forth_input,
@@ -421,12 +432,21 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         console=&forth->console;
         reset_console_pointers(console);
 
-        //Restore pointers to word definitions and ID list
+        //Restore pointers to word definitions, ID list containing word headers, and control stack
+        forth_data=object_address(FORTH_ID_DATA,heap_ptr);
         forth_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
         forth_word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,heap_ptr);
         forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
 
-        //TODO: update address members in forth_word_IDs
+        //Recalculate code address pointers in word headers
+        struct ForthWordHeader *secondary=(struct ForthWordHeader *)(forth_word_IDs->data);
+        while (secondary->last==false)
+        {
+            secondary->address=(void (**)(struct ForthEngine *engine))(forth_definitions->data+secondary->offset);
+
+            //Advance to next word header
+            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+        }
 
         //Restore stack memory
         memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);
@@ -437,7 +457,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     forth_console=console;
 
     //Reset pointers in Forth engine
-    forth_reload_engine(&forth->engine,forth->data);
+    forth_reload_engine(&forth->engine,forth_data);
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);
@@ -605,6 +625,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
 
                     //Reacquire pointers since they may have changed in process_result above
+                    forth_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
                     forth_word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,heap_ptr);
                     forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
 
@@ -782,7 +803,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
             }
         }
-        //If key or command set exit flag, save stack to memory and exit
+        //If key or command sets exit flag, save stack to memory and exit
         if (save_exit)
         {
             //Save Forth stack memory before returning

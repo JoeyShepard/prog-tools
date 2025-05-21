@@ -2269,6 +2269,10 @@ const struct ForthPrimitive forth_primitives[]=
     //{"COMPARE",7,&prim_immediate_compare,&prim_compile_compare,&prim_body_compare,&prim_optimize_compare},
 
     //digit?
+    //:NONAME
+
+    START HERE:
+    - action to change data size
 
     //Words from here are not standard forth
     {"RESET",5,&prim_immediate_reset,&prim_compile_reset,NULL,NULL},
@@ -2285,6 +2289,7 @@ const struct ForthPrimitive forth_primitives[]=
     //cxt
     //wxt
     //primitives (like WORDS)
+    //also UNDEFINED
 
     //May add but not sure yet
     //cleave ??

@@ -50,9 +50,9 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         void *dest=compile->secondary->address;
         uint32_t deleted_size=compile->secondary->definition_size;
         void *src=dest+deleted_size;
-        uint32_t move_size=(uintptr_t)(compile->definitions->data+compile->definitions->index)-(uintptr_t)src;
-        compile->definitions->index-=compile->secondary->definition_size;
-        compile->definitions->bytes_left+=compile->secondary->definition_size;
+        uint32_t move_size=(uintptr_t)((*compile->definitions)->data+(*compile->definitions)->index)-(uintptr_t)src;
+        (*compile->definitions)->index-=compile->secondary->definition_size;
+        (*compile->definitions)->bytes_left+=compile->secondary->definition_size;
         //memmove since memory ranges overlap
         memmove(dest,src,move_size);
 
@@ -64,13 +64,14 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
             {
                 //Code address is part of memory shifted by memmove. Adjust pointer.
                 update_secondary->address=(void(**)(struct ForthEngine *engine))((uint8_t *)update_secondary->address-deleted_size);
+                update_secondary->offset-=deleted_size;
             }
             update_secondary=(struct ForthWordHeader *)((uint8_t *)update_secondary+update_secondary->header_size);
         }
 
         //Update existing word header with new details
-        compile->secondary->address=(void(**)(struct ForthEngine *engine))(compile->definitions->data+compile->definitions->index);
-        compile->secondary->offset=compile->definitions->index;
+        compile->secondary->address=(void(**)(struct ForthEngine *engine))((*compile->definitions)->data+(*compile->definitions)->index);
+        compile->secondary->offset=(*compile->definitions)->index;
         compile->secondary->definition_size=0;
         compile->secondary->type=FORTH_SECONDARY_WORD;
     }
