@@ -40,7 +40,8 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     *start+=word_len;
 
     //Save address of word header created by colon since other headers may be added before definition is closed
-    compile->colon_word=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
+    compile->colon_word=(*compile->words)->header+(*compile->words)->index;
+    compile->colon_word_index=(*compile->words)->index;
 
     if (word_type==FORTH_TYPE_SECONDARY)
     {
@@ -56,8 +57,9 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         //memmove since memory ranges overlap
         memmove(dest,src,move_size);
 
+        //TODO: combine with update_compile_pointers?
         //Adjust pointers to definition memory in all word headers to account for code shifted above
-        struct ForthWordHeader *update_secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data);
+        struct ForthWordHeader *update_secondary=(*compile->words)->header;
         while (update_secondary->last==false)
         {
             if (update_secondary->address>(void(**)(struct ForthEngine *engine))dest)
@@ -66,7 +68,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
                 update_secondary->address=(void(**)(struct ForthEngine *engine))((uint8_t *)update_secondary->address-deleted_size);
                 update_secondary->offset-=deleted_size;
             }
-            update_secondary=(struct ForthWordHeader *)((uint8_t *)update_secondary+update_secondary->header_size);
+            update_secondary++;
         }
 
         //Update existing word header with new details
@@ -112,7 +114,7 @@ int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
     while(secondary->last==false)
     {
         secondary->done=true;
-        secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+        secondary++;
     }
 
     //Set compile state back to interpret
@@ -174,7 +176,7 @@ static void action_words_print(struct ForthEngine *engine,const char *text, colo
     else if (engine->print!=NULL) engine->print(text);
 }
 
-void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
+void action_words(struct ForthEngine *engine,struct ForthWordHeaderInfo *words)
 {
     enum SearchModes
     {
@@ -196,7 +198,7 @@ void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
     const char *word_name;
     color_t word_color;
     bool looping=true;
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)(word_IDs->data);
+    struct ForthWordHeader *secondary=words->header;
     while (looping)
     {
         switch (search_mode)
@@ -226,7 +228,7 @@ void action_words(struct ForthEngine *engine,struct ForthWordIDsInfo *word_IDs)
                     word_len=secondary->name_len;
                     word_name=secondary->name;
                     word_color=FORTH_COL_SECONDARY;
-                    secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+                    secondary++;
                 }
                 break;
         }

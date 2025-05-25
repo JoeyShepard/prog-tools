@@ -43,12 +43,20 @@
     #define FORTH_ID_CONSOLE        0
     #define FORTH_ID_DATA           1
     #define FORTH_ID_DEFINITIONS    2
-    #define FORTH_ID_WORD_IDS       3
-    #define FORTH_ID_CONTROL_STACK  4
+    #define FORTH_ID_WORD_HEADERS   3
+    #define FORTH_ID_WORD_NAMES     4
+    #define FORTH_ID_CONTROL_STACK  5
     #define FORTH_MEM_DATA          0x2000  //Initial value - can change programmatically
-    #define FORTH_MEM_DEFINITIONS   1024    //For these three, allocate this amount initially then add this     
-    #define FORTH_MEM_WORD_IDS      1024    //much when memory runs out. Exact amount not important - prevents
-    #define FORTH_MEM_CONTROL_STACK 512     //copying whole dictionary every time new word added.
+
+    //#define FORTH_MEM_DEFINITIONS   1024    //For these four, allocate this amount initially then add this     
+    //#define FORTH_MEM_WORD_HEADERS  512     //much when memory runs out. Exact amount not important - prevents
+    //#define FORTH_MEM_WORD_NAMES    512     //copying whole dictionary every time new word added.
+
+    #define FORTH_MEM_DEFINITIONS   128     //For these four, allocate this amount initially then add this     
+    #define FORTH_MEM_WORD_HEADERS  128     //much when memory runs out. Exact amount not important - prevents
+    #define FORTH_MEM_WORD_NAMES    64      //copying whole dictionary every time new word added.
+
+    #define FORTH_MEM_CONTROL_STACK 512
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
@@ -128,19 +136,23 @@
     struct ForthDefinitionsInfo
     {
         uint32_t index; 
-        //TODO: still needed? transitioned secondaries to pointer to word header
-        uint32_t ID;
         uint32_t bytes_left;
         //Flexible Array Member - memory allocated after struct holds definition data
         uint8_t data[];
     };
 
-    struct ForthWordIDsInfo
+    struct ForthWordHeaderInfo
     {
         uint32_t index;
         uint32_t bytes_left;
-        //Flexible Array Member - memory allocated after struct holds word ID data
-        uint8_t data[];
+        struct ForthWordHeader header[];
+    };
+
+    struct ForthWordNameInfo
+    {
+        uint32_t index;
+        uint32_t bytes_left;
+        char names[];
     };
 
     struct ForthControlElement

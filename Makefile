@@ -1,12 +1,14 @@
 PROJECT = cg50-sdl2
+
+BUILD_DIR=sdl2
+SRC_DIR=src
+
 CC = gcc
 CFLAGS = -O3 $(shell sdl2-config --cflags)
 CFLAGS += -MMD -MP
 CFLAGS += -g
-#CFLAGS += -Wa,-aghlns=$<.lst
+CFLAGS += -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
 LIBS = -O3 $(shell sdl2-config --libs)
-BUILD_DIR=sdl2
-SRC_DIR=src
 C_FILES=$(wildcard $(SRC_DIR)/*.c)
 OBJS=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 DEPS=$(OBJS:.o=.d)

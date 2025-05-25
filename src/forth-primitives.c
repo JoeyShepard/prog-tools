@@ -26,16 +26,16 @@ void prim_hidden_push(struct ForthEngine *engine)
 //Call secondary which may be user-defined word or variable
 void prim_hidden_secondary(struct ForthEngine *engine)
 {
-    //Fetch offset into list of word headers where address of secondary is stored. Offset is after pointer to current word.
-    uint32_t offset=*(uint32_t *)(engine->address+1);
+    //Fetch index of word header in header list. Index is after pointer to current word.
+    uint32_t index=*(uint32_t *)(engine->address+1);
 
     //Increment thread pointer to account for fetched offset
     engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
 
     //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)(engine->word_headers+offset);
+    struct ForthWordHeader *secondary=&engine->word_headers[index];
 
-    //TODO: update function point when secondary is redefined? would eliminate if here but not sure if actually faster
+    //TODO: update function pointer when secondary is redefined? would eliminate if here but not sure if actually faster
     if (secondary->type==FORTH_SECONDARY_WORD)
     {
         //Increase word index so tagged R-stack addresses can be linked to word they belong to
@@ -50,6 +50,7 @@ void prim_hidden_secondary(struct ForthEngine *engine)
         //Set new execution address to address of secondary stored in word header list
         engine->address=secondary->address;
 
+        //TODO: recompute?
         //Account for interpreter advancing execution address
         engine->address--;
     }
@@ -2270,9 +2271,7 @@ const struct ForthPrimitive forth_primitives[]=
 
     //digit?
     //:NONAME
-
-    START HERE:
-    - action to change data size
+    //action to change data size
 
     //Words from here are not standard forth
     {"RESET",5,&prim_immediate_reset,&prim_compile_reset,NULL,NULL},
@@ -2284,12 +2283,12 @@ const struct ForthPrimitive forth_primitives[]=
     //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
     //. for unsigned (u. and u.r?) and hex since no BASE
-    //adjust size of data area
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
     //cxt
     //wxt
     //primitives (like WORDS)
     //also UNDEFINED
+    //COLD or equivalent
 
     //May add but not sure yet
     //cleave ??

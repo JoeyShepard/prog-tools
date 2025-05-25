@@ -1,6 +1,7 @@
 differences from other forths
 - no recurse word needed
 - no unloop needed
+- no stepping over return addresses
 - redefined words also apply to compiled words
 - dictionary is data only - no word definitions or headers
 - stacks and dictionary wrap - no under/overflow checking

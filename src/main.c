@@ -17,6 +17,7 @@ TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
 - yes, change mem.c to return values not addresses
+- or provide error function in forth-compatibility.c
 console assumes input less than size of screen
 fix debug_heap
 - changed something then commented out
@@ -26,6 +27,8 @@ convert size_t in mem to uint32_t
 
 Forth
 =====
+revisit stack bounds checks instead of masking now that no PICK or ROLL
+- check every so many instructions?
 copy of forth struct needs to be stored in XRAM
 shift+enter for new line in Forth
 in Forth console, cursor in last column is one pixel too wide
@@ -62,6 +65,28 @@ individual primitives for local accesses
 i and j are function pointers
 WORDS - secondaries with header only should be yellow
 - add test for NULL for headers in primitives that use them
+RECURSE? no problem if in definition but bad in [ ]
+
+Forth optimizing
+================
+compare various methods
+most used primitives in IRAM
+combined primitives
+constant folding
+peepholing
+- tail call recursion!
+- could render asm with fixed address for ie MOVE but no benefit on RISC
+copy primitive bodies to RAM
+no stack wrapping and check every 10 primitives for overflow
+assembly? doesnt seem worth it for this
+- might be ok since already have C version for x86
+- how to combined primitives? either or
+tests
+- fibonacci
+- N queens
+- compare to Basic and Python
+- https://github.com/ulixxe/forth_coremark
+- https://www.eembc.org/coremark/
 */
 
 
@@ -79,6 +104,7 @@ int main(void)                      //cg50 and PC
     //Setup - SDL2 on PC and timer on calculator
     setup(SCALE_FACTOR,TICK_MS);
 
+    //TODO: move to setup?
     //Initialize heap memory
     init_heap();
 

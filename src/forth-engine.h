@@ -91,6 +91,9 @@
         uint8_t index;
     };
 
+    //Declared here for struct ForthEngine and defined below
+    struct ForthWordHeader;
+
     struct ForthEngine
     {
         //Data stack
@@ -121,7 +124,7 @@
         bool exit_program;
         void (**address)(struct ForthEngine *engine);
         uint32_t word_index;
-        uint8_t *word_headers;
+        struct ForthWordHeader *word_headers;
         uint8_t *word_bodies;
         const char *error_word;
 
@@ -149,14 +152,13 @@
         void (**address)(struct ForthEngine *engine);   //Target address within definitions memory
         uint32_t offset;                                //Offset into definitions of target address
         uint32_t definition_size;
-        uint16_t header_size;               //Size of this header entry - ie sizeof(ForthWordHeader)+sizeof(name[])
+        uint32_t name_offset;
+        uint32_t name_len;
+        char *name;
         uint16_t ID;                        //ID assigned to each user-defined word
         uint8_t type;                       //User-defined word, variable, constant, etc
-        uint8_t name_len;
         bool last;                          //Whether this header is empty header marking end of list
         bool done;                          //Whether word is done being processed. Used to rewind if error in word.
-        //Flexible Array Member - memory allocated after struct holds name
-        char name[];
     };
 
 

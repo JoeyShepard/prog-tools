@@ -3,12 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: remove
+#include "debug.h"
+
 #include "error.h"
 #include "forth.h"
 #include "forth-actions.h"
 #include "forth-primitives.h"
 #include "forth-process.h"
 #include "mem.h"
+
 
 uint32_t align4(uint32_t value)
 {
@@ -111,9 +115,9 @@ int find_primitive(const char *word)
     return FORTH_PRIM_NOT_FOUND;
 }
 
-struct ForthWordHeader *find_secondary(const char *word,struct ForthWordIDsInfo *word_IDs)
+struct ForthWordHeader *find_secondary(const char *word,struct ForthWordHeaderInfo *words)
 {
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)word_IDs->data;
+    struct ForthWordHeader *secondary=words->header;
     while(1)
     {
         if (secondary->last==true)
@@ -129,7 +133,7 @@ struct ForthWordHeader *find_secondary(const char *word,struct ForthWordIDsInfo 
         else
         {
             //No match - advance to next header and keep searching
-            secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+            secondary++;
         }
     }
 }
@@ -144,7 +148,7 @@ int classify_other(const char *word,struct CompileInfo *compile)
     if (compile->primitive_ID!=FORTH_PRIM_NOT_FOUND) return FORTH_TYPE_PRIMITIVE;
 
     //Word is secondary?
-    compile->secondary=find_secondary(word,*compile->word_IDs);
+    compile->secondary=find_secondary(word,*compile->words);
     if (compile->secondary!=NULL) return FORTH_TYPE_SECONDARY;
     
     //Word not primitve or secondary - not found
@@ -290,8 +294,7 @@ int expand_definitions(uint32_t size,struct CompileInfo *compile)
         (*compile->definitions)->bytes_left+=FORTH_MEM_DEFINITIONS;
 
         //Update pointers since shifted by expand_object above
-        *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
-        *compile->word_IDs=(struct ForthWordIDsInfo *)object_address(FORTH_ID_WORD_IDS,compile->heap_ptr);
+        update_compile_pointers(compile);
     }
     return FORTH_ERROR_NONE;
 }
@@ -363,7 +366,7 @@ int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
         forth_engine_pre_exec(engine);
         engine->executing=true;
         engine->address=compile->secondary->address;
-        engine->word_headers=(*compile->word_IDs)->data;
+        engine->word_headers=(*compile->words)->header;
         engine->word_bodies=(*compile->definitions)->data;
         engine->error=FORTH_ENGINE_ERROR_NONE;
 
@@ -383,7 +386,6 @@ int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
         engine->error_word=compile->secondary->name;
     }
 
-    
     //Flag error if any
     if (engine->error!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
     else return FORTH_ERROR_NONE;
@@ -392,15 +394,14 @@ int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile)
 int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *compile)
 {
     //Pointer to new secondary
-    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile->word_IDs)->data+(*compile->word_IDs)->index);
-    
+    struct ForthWordHeader *secondary=&((*compile->words)->header[(*compile->words)->index]);
     uint32_t word_len=strlen(word_buffer);
 
     //Need enough space for current header and empty header following which marks end of list
-    if ((*compile->word_IDs)->bytes_left<sizeof(struct ForthWordHeader)*2+word_len+1)
+    if ((*compile->words)->bytes_left<sizeof(struct ForthWordHeader)*2)
     {
-        //Not enough memory to add new word ID - expand memory
-        int result=expand_object(FORTH_MEM_WORD_IDS,FORTH_ID_WORD_IDS,compile->heap_ptr);
+        //Not enough memory to add new word header - expand memory
+        int result=expand_object(FORTH_MEM_WORD_HEADERS,FORTH_ID_WORD_HEADERS,compile->heap_ptr);
         if (result!=ERROR_NONE)
         {
             //Error while allocating memory
@@ -414,47 +415,72 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *
         }
 
         //Update count of bytes left
-        (*compile->word_IDs)->bytes_left+=FORTH_MEM_WORD_IDS;
+        (*compile->words)->bytes_left+=FORTH_MEM_WORD_HEADERS;
 
-        //Update control stack address since shifted by expand_object above
-        *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+        //Update pointers since shifted by expand_object above
+        update_compile_pointers(compile);
     }
 
+    //Also need enough memory to hold name of new secondary
+    if ((*compile->word_names)->bytes_left<word_len+1)
+    {
+        //Not enough memory to add new word header - expand memory
+        int result=expand_object(FORTH_MEM_WORD_NAMES,FORTH_ID_WORD_NAMES,compile->heap_ptr);
+        if (result!=ERROR_NONE)
+        {
+            //Error while allocating memory
+            if (result==ERROR_OUT_OF_MEMORY)
+                return FORTH_ERROR_OUT_OF_MEMORY;
+            else
+            {
+                //Some other type of allocation error like alignment
+                return FORTH_ERROR_MEMORY_OTHER;
+            }
+        }
+
+        //Update count of bytes left
+        (*compile->word_names)->bytes_left+=FORTH_MEM_WORD_NAMES;
+
+        //Update pointers since shifted by expand_object above
+        update_compile_pointers(compile);
+    }
+    
     //Write new word info to header
     secondary->address=(void(**)(struct ForthEngine *engine))((*compile->definitions)->data+(*compile->definitions)->index);
     secondary->offset=(*compile->definitions)->index;
     secondary->definition_size=0;
-    secondary->header_size=align4(sizeof(struct ForthWordHeader)+word_len+1);
-    secondary->ID=(*compile->definitions)->ID;
-    secondary->type=word_type;
+    secondary->name_offset=(*compile->word_names)->index;
     secondary->name_len=word_len;
+    secondary->name=(*compile->word_names)->names+(*compile->word_names)->index;
+    strcpy(secondary->name,word_buffer);
+    (*compile->word_names)->index+=word_len+1;
+    (*compile->word_names)->bytes_left-=word_len+1;
+    secondary->ID=(*compile->words)->index;
+    secondary->type=word_type;
     secondary->last=false;
     secondary->done=false;
-    strcpy(secondary->name,word_buffer);
-
-    //Advance to next ID in definitions since current one was used above
-    (*compile->definitions)->ID++;
 
     //Advance index in preparation of next header
-    (*compile->word_IDs)->index+=secondary->header_size;
-    (*compile->word_IDs)->bytes_left-=secondary->header_size;
+    (*compile->words)->index++;
+    (*compile->words)->bytes_left-=sizeof(*secondary);
 
     //Write next header and set last to true to indicate end of list
-    secondary=(struct ForthWordHeader *)((uint8_t *)secondary+secondary->header_size);
+    secondary++;
     secondary->last=true;
 
     return FORTH_ERROR_NONE;
 }
 
 int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
-                            struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo *word_IDs,
-                            struct ForthControlElement *control_stack,uint8_t *heap_ptr)
+                            struct ForthDefinitionsInfo *definitions,struct ForthWordHeaderInfo *words,
+                            struct ForthWordNameInfo *word_names,struct ForthControlElement *control_stack,uint8_t *heap_ptr)
 {
     //Store informaton for compiling in struct so easier to pass to functions
     struct CompileInfo compile;
     compile.error_word=error_word;
     compile.definitions=&definitions;
-    compile.word_IDs=&word_IDs;
+    compile.words=&words;
+    compile.word_names=&word_names;
     compile.control_stack=&control_stack;
     compile.heap_ptr=heap_ptr;
 
@@ -558,7 +584,7 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                                 action_paren(source,&start);
                                 break;
                             case FORTH_ACTION_WORDS:
-                                action_words(engine,word_IDs);
+                                action_words(engine,words);
                                 break;
                             case FORTH_ACTION_TICK:
                                 {
@@ -658,13 +684,14 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     //Compile pointer to pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32((uintptr_t)compile.secondary-(uintptr_t)(*compile.word_IDs)->data,&compile);
+                    result=write_definition_u32(compile.secondary->ID,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
                 {
+
                     //Save copy of address of header where new word will be
-                    struct ForthWordHeader *secondary=(struct ForthWordHeader *)((*compile.word_IDs)->data+(*compile.word_IDs)->index);
+                    struct ForthWordHeader *secondary=(*compile.words)->header+(*compile.words)->index;
 
                     //Unknown symbol - add word header but don't error
                     int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,&compile);
@@ -673,13 +700,65 @@ int process_source(struct ForthEngine *engine,const char *source,const char **er
                     //Compile pointer to pointer to secondary
                     result=write_definition_primitive(&prim_hidden_secondary,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32((uintptr_t)secondary-(uintptr_t)(*compile.word_IDs)->data,&compile);
+                    result=write_definition_u32(secondary->ID,&compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
             }
         }
     }while(compile.word_len>0);
 
+
     return FORTH_ERROR_NONE;
+}
+
+void update_compile_pointers(struct CompileInfo *compile)
+{
+    //Fetch pointer to definitions but change below after updating word headers pointer
+    struct ForthDefinitionsInfo *new_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile->heap_ptr);
+
+    //Update pointer to word headers
+    *compile->words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,compile->heap_ptr);
+    if (*compile->definitions!=new_definitions)
+    {
+        //Update pointer to definitions
+        *compile->definitions=new_definitions;
+
+        //Pointer to execution address changed - reassign pointers
+        struct ForthWordHeader *secondary=(*compile->words)->header;
+
+        while(secondary->last==false)
+        {
+            //Recalculate execution pointer
+            secondary->address=(void (**)(struct ForthEngine *engine))((*compile->definitions)->data+secondary->offset);
+
+            //Advance to next word header
+            secondary++;
+        }
+    }
+
+    //Update colon word definition in case pointer to word headers changed
+    compile->colon_word=(*compile->words)->header+compile->colon_word_index;
+
+    //Update pointer to word names
+    struct ForthWordNameInfo *new_word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile->heap_ptr);
+    if (*compile->word_names!=new_word_names)
+    {
+        //Update pointer to word names
+        *compile->word_names=new_word_names;
+
+        //Pointer to word names changed - reassign pointers to names in word headers
+        struct ForthWordHeader *secondary=(*compile->words)->header;
+        while(secondary->last==false)
+        {
+            //Update pointer to name
+            secondary->name=(*compile->word_names)->names+secondary->name_offset;
+
+            //Advance to next word header
+            secondary++;
+        }
+    }
+
+    //Update pointer to control stack
+    *compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
 }
 

@@ -46,13 +46,15 @@
         const char **error_word;
         uint8_t *data;
         struct ForthDefinitionsInfo **definitions;
-        struct ForthWordIDsInfo **word_IDs;
+        struct ForthWordHeaderInfo **words;
+        struct ForthWordNameInfo **word_names;
         struct ForthControlElement **control_stack;
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;
         uint32_t word_len;
         struct ForthWordHeader *colon_word;
+        uint32_t colon_word_index;
     };
 
     //TODO: Alignment of multi-line declarations after adding CompileInfo struct (what did I mean by this?)
@@ -60,7 +62,7 @@
     int classify_char(char c);
     int classify_word(const char *word);
     int find_primitive(const char *word);
-    struct ForthWordHeader *find_secondary(const char *word,struct ForthWordIDsInfo *word_IDs);
+    struct ForthWordHeader *find_secondary(const char *word,struct ForthWordHeaderInfo *words);
     int classify_other(const char *word,struct CompileInfo *compile);
     uint32_t next_word(struct ConsoleInfo *console,uint32_t *start);
     uint32_t next_word_source(const char *source,uint32_t *start);
@@ -73,7 +75,9 @@
     int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile);
     int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *compile);
     int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
-                                struct ForthDefinitionsInfo *definitions,struct ForthWordIDsInfo *word_IDs,
-                                struct ForthControlElement *control_stack,uint8_t *heap_ptr);
+                                struct ForthDefinitionsInfo *definitions,struct ForthWordHeaderInfo *words,
+                                struct ForthWordNameInfo *word_names,struct ForthControlElement *control_stack,
+                                uint8_t *heap_ptr);
+    void update_compile_pointers(struct CompileInfo *compile);
 
 #endif
