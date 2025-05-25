@@ -12,7 +12,9 @@ revisit casting rules esp for structs
 - might be good to post some examples and ask for help
 offsetof operator
 
-remove headers
+move struct ForthCompilInfo to forth.h
+
+remove unnecessary headers
 TODOs in all files
 rearrange struct orders for speed
 error_exit in mem? maybe better to recover
@@ -24,6 +26,7 @@ fix debug_heap
 - may be ok not to fix if dont need again
 exit program after start so other pane updates for memory then back?
 convert size_t in mem to uint32_t
+assembler with built-in safety checks?
 
 Forth
 =====

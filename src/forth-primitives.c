@@ -1662,13 +1662,15 @@ int prim_optimize_bracket_tick(struct ForthEngine *engine)
 }
 
 //BRACKET_CHAR
-void prim_body_bracket_char(struct ForthEngine *engine){}
-int prim_immediate_bracket_char(struct ForthEngine *engine){}
-int prim_compile_bracket_char(struct ForthEngine *engine){}
-int prim_optimize_bracket_char(struct ForthEngine *engine)
+int prim_immediate_bracket_char(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+int prim_compile_bracket_char(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_CHAR;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //DOT_R
@@ -2246,7 +2248,7 @@ const struct ForthPrimitive forth_primitives[]=
     //{"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,&prim_body_left_bracket,&prim_optimize_left_bracket},
     //{"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,&prim_body_right_bracket,&prim_optimize_right_bracket},
     //{"[']",3,&prim_immediate_bracket_tick,&prim_compile_bracket_tick,&prim_body_bracket_tick,&prim_optimize_bracket_tick},
-    //{"[CHAR]",6,&prim_immediate_bracket_char,&prim_compile_bracket_char,&prim_body_bracket_char,&prim_optimize_bracket_char},
+    {"[CHAR]",6,&prim_immediate_bracket_char,&prim_compile_bracket_char,NULL,NULL},
     {".R",2,NULL,NULL,&prim_body_dot_r,NULL},
     {"<>",2,NULL,NULL,&prim_body_not_equals,&prim_optimize_not_equals},
     //{"AGAIN",5,&prim_immediate_again,&prim_compile_again,&prim_body_again,&prim_optimize_again},

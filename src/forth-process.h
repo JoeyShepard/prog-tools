@@ -41,43 +41,45 @@
     };
 
     
-    struct CompileInfo
+    struct ForthCompileInfo
     {
-        const char **error_word;
+        const char *error_word;
         uint8_t *data;
-        struct ForthDefinitionsInfo **definitions;
-        struct ForthWordHeaderInfo **words;
-        struct ForthWordNameInfo **word_names;
-        struct ForthControlElement **control_stack;
+        struct ForthDefinitionsInfo *definitions;
+        struct ForthWordHeaderInfo *words;
+        struct ForthWordNameInfo *word_names;
+        struct ForthControlElement *control_stack;
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;
         uint32_t word_len;
         struct ForthWordHeader *colon_word;
         uint32_t colon_word_index;
+        uint32_t delete_offset;
+        uint32_t delete_size;
+        uint32_t save_offset;
+        uint32_t save_definition_size;
+        uint8_t save_type;
     };
 
-    //TODO: Alignment of multi-line declarations after adding CompileInfo struct (what did I mean by this?)
+    //TODO: Alignment of multi-line declarations after adding ForthCompileInfo struct (what did I mean by this?)
     uint32_t align4(uint32_t value);
     int classify_char(char c);
     int classify_word(const char *word);
     int find_primitive(const char *word);
     struct ForthWordHeader *find_secondary(const char *word,struct ForthWordHeaderInfo *words);
-    int classify_other(const char *word,struct CompileInfo *compile);
+    int classify_other(const char *word,struct ForthCompileInfo *compile);
     uint32_t next_word(struct ConsoleInfo *console,uint32_t *start);
     uint32_t next_word_source(const char *source,uint32_t *start);
     int32_t int32_text(const char *word_buffer);
     int32_t hex32_text(const char *word_buffer);
-    int expand_definitions(uint32_t size,struct CompileInfo *compile);
-    int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct CompileInfo *compile);
-    int write_definition_i32(int32_t value,struct CompileInfo *compile);
-    int write_definition_u32(uint32_t value,struct CompileInfo *compile);
-    int execute_secondary(struct ForthEngine *engine,struct CompileInfo *compile);
-    int new_secondary(const char *word_buffer,uint8_t word_type,struct CompileInfo *compile);
-    int process_source(struct ForthEngine *engine,const char *source,const char **error_word,
-                                struct ForthDefinitionsInfo *definitions,struct ForthWordHeaderInfo *words,
-                                struct ForthWordNameInfo *word_names,struct ForthControlElement *control_stack,
-                                uint8_t *heap_ptr);
-    void update_compile_pointers(struct CompileInfo *compile);
+    int expand_definitions(uint32_t size,struct ForthCompileInfo *compile);
+    int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct ForthCompileInfo *compile);
+    int write_definition_i32(int32_t value,struct ForthCompileInfo *compile);
+    int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile);
+    int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile);
+    int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile);
+    int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile);
+    void update_compile_pointers(struct ForthCompileInfo *compile);
 
 #endif

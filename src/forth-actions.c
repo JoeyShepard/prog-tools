@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: remove
+#include "debug.h"
+
 #include "error.h"
 #include "forth.h"
 #include "forth-engine.h"
@@ -9,8 +12,13 @@
 #include "forth-primitives.h"
 #include "mem.h"
 
-int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct CompileInfo *compile)
+int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
+
+    printf("action_colon:\n");
+    printf("Debug a - action_colon:         %p\n",compile->words->header->address);
+    debug_words(compile);
+
     uint32_t prior_start=*start;
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len=next_word_source(source,start);
@@ -18,13 +26,13 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     {
         //Error - word of source is longer than allowed
         //Point to word for error message in caller
-        *compile->error_word=source+*start;
+        compile->error_word=source+*start;
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
     {
         //Error - no word name after :
-        *compile->error_word=source+prior_start-compile->word_len;
+        compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
@@ -39,66 +47,67 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     //Advance past name of new word
     *start+=word_len;
 
-    //Save address of word header created by colon since other headers may be added before definition is closed
-    compile->colon_word=(*compile->words)->header+(*compile->words)->index;
-    compile->colon_word_index=(*compile->words)->index;
 
     if (word_type==FORTH_TYPE_SECONDARY)
     {
-        //Word already exists - delete code for existing word and update pointers to code in other words
+        printf("- replacing existing word: %s\n",compile->secondary->name);
+        printf("  - base: %p\n",compile->secondary);
+        printf("  - offset: %d\n",compile->secondary->offset);
+        printf("  - definition_size: %d\n",compile->secondary->definition_size);
 
-        //Copy code for definitions later in memory to overwrite current definition
-        void *dest=compile->secondary->address;
-        uint32_t deleted_size=compile->secondary->definition_size;
-        void *src=dest+deleted_size;
-        uint32_t move_size=(uintptr_t)((*compile->definitions)->data+(*compile->definitions)->index)-(uintptr_t)src;
-        (*compile->definitions)->index-=compile->secondary->definition_size;
-        (*compile->definitions)->bytes_left+=compile->secondary->definition_size;
-        //memmove since memory ranges overlap
-        memmove(dest,src,move_size);
+        //Word already exists - mark existing code for this word for deletion in semicolon 
+        //(don't delete code here in case missing semicolon)
+        compile->delete_offset=compile->secondary->offset;
+        compile->delete_size=compile->secondary->definition_size;
 
-        //TODO: combine with update_compile_pointers?
-        //Adjust pointers to definition memory in all word headers to account for code shifted above
-        struct ForthWordHeader *update_secondary=(*compile->words)->header;
-        while (update_secondary->last==false)
-        {
-            if (update_secondary->address>(void(**)(struct ForthEngine *engine))dest)
-            {
-                //Code address is part of memory shifted by memmove. Adjust pointer.
-                update_secondary->address=(void(**)(struct ForthEngine *engine))((uint8_t *)update_secondary->address-deleted_size);
-                update_secondary->offset-=deleted_size;
-            }
-            update_secondary++;
-        }
+        //Save address of re-used word header for processing later
+        compile->colon_word=compile->secondary;
+        compile->colon_word_index=compile->secondary->ID;
+
+        //Save header info in case error and info needs to be restored
+        compile->save_offset=compile->secondary->offset;
+        compile->save_definition_size=compile->secondary->definition_size;
+        compile->save_type=compile->secondary->type;
 
         //Update existing word header with new details
-        compile->secondary->address=(void(**)(struct ForthEngine *engine))((*compile->definitions)->data+(*compile->definitions)->index);
-        compile->secondary->offset=(*compile->definitions)->index;
+        compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        compile->secondary->offset=compile->definitions->index;
         compile->secondary->definition_size=0;
         compile->secondary->type=FORTH_SECONDARY_WORD;
     }
     else if (word_type==FORTH_TYPE_NOT_FOUND)
     {
-        //Word not found - create new header
+        //Save address of word header created by colon since other headers may be added before definition is closed
+        compile->colon_word=compile->words->header+compile->words->index;
+        compile->colon_word_index=compile->words->index;
 
-        //Create word header for new word
+        //Word not found - create header for new word
         int result=new_secondary(word_buffer,FORTH_SECONDARY_WORD,compile);
         if (result!=FORTH_ERROR_NONE) return result;
+
+        //No definition deleted to make room for new word - let semicolon know nothing to delete
+        compile->delete_size=0;
     }
     else
     {
         //Error - name of defined word can't be number or primitive
-        *compile->error_word=source+*start;
+        compile->error_word=source+*start;
         return FORTH_ERROR_INVALID_NAME;
     }
+
+    printf("  - name: %s\n",compile->colon_word->name);
+    printf("  - colon_word: %p\n",compile->colon_word);
+    printf("  - colon_word->address: %p\n",compile->colon_word->address);
 
     //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
 
+    printf("Debug a - exiting action_colon: %p\n",compile->words->header->address);
+
     return FORTH_ERROR_NONE;
 }
 
-int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
+int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
     //Add primitive to word to stop exectuing
     int result=write_definition_primitive(&prim_hidden_done,compile);
@@ -117,13 +126,44 @@ int action_semicolon(struct ForthEngine *engine,struct CompileInfo *compile)
         secondary++;
     }
 
+    //Recover definition memory if word was redfined
+    if (compile->delete_size>0)
+    {
+        //Copy code for definitions later in memory to overwrite old definition
+        void *dest=compile->definitions->data+compile->delete_offset;
+        void *src=dest+compile->delete_size;
+        uint32_t move_size=(uintptr_t)(compile->definitions->data+compile->definitions->index)-(uintptr_t)src;
+        compile->definitions->index-=compile->delete_size;
+        compile->definitions->bytes_left+=compile->delete_size;
+        //memmove since memory ranges overlap
+        memmove(dest,src,move_size);
+
+        //Adjust pointers to definition memory in all word headers to account for code shifted above
+        struct ForthWordHeader *update_secondary=compile->words->header;
+        while (update_secondary->last==false)
+        {
+            if (update_secondary->address>(void(**)(struct ForthEngine *))dest)
+            {
+
+                printf("- updating execution address of %s\n",update_secondary->name);
+                printf("  - %p\n",update_secondary->address);
+                printf("  - %p\n",(void(**)(struct ForthEngine *))((uint8_t *)update_secondary->address-compile->delete_size));
+
+                //Code address is part of memory shifted by memmove. Adjust pointer.
+                update_secondary->address=(void(**)(struct ForthEngine *))((uint8_t *)update_secondary->address-compile->delete_size);
+                update_secondary->offset-=compile->delete_size;
+            }
+            update_secondary++;
+        }
+    }
+
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;
 
     return FORTH_ERROR_NONE;
 }
 
-int action_char_common(const char *source,uint32_t *start,int32_t *index,struct CompileInfo *compile)
+int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
     uint32_t prior_start=*start;
@@ -133,7 +173,7 @@ int action_char_common(const char *source,uint32_t *start,int32_t *index,struct 
     if (word_len==0)
     {
         //No word after CHAR
-        *compile->error_word=source+prior_start-compile->word_len;
+        compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
@@ -263,7 +303,7 @@ void action_words(struct ForthEngine *engine,struct ForthWordHeaderInfo *words)
     if (engine->update_screen!=NULL) engine->update_screen();
 }
 
-int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct CompileInfo *compile)
+int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
     uint32_t prior_start=*start;
@@ -275,13 +315,13 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
     {
         //Error - word of source is longer than allowed
         //Point to word for error message in caller
-        *compile->error_word=source+*start;
+        compile->error_word=source+*start;
         return FORTH_ERROR_TOO_LONG;
     }
     else if (word_len==0)
     {
         //Error - no word name after '
-        *compile->error_word=source+prior_start-compile->word_len;
+        compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
@@ -313,7 +353,7 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
     else
     {
         //Error - can only get ID of primitive or secondary not number or anything else
-        *compile->error_word=source+*start;
+        compile->error_word=source+*start;
         return FORTH_ERROR_INVALID_NAME;
     }
 }

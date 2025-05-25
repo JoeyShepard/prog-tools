@@ -2,6 +2,7 @@
 
 #include "compatibility.h"
 #include "debug.h"
+#include "forth-primitives.h"
 #include "manager.h"
 #include "mem.h"
 
@@ -63,12 +64,67 @@
 
     void debug_dump(void *mem,uint32_t count)
     {
+        const int col_count=8;
+        char chars[col_count];
+        int char_index=0;
+        chars[0]=0;
+
         for (uint32_t i=0;i<count;i++)
         {
             if (i%8==0) printf("%p: ",(mem+i));
-            printf("%.02X ",*(uint8_t *)(mem+i));
-            if (i%8==7) printf("\n");
+            uint8_t value=*(uint8_t *)(mem+i);
+            printf("%.02X ",value);
+            chars[char_index]=value;
+            if ((i%col_count==(col_count-1))||(i==count-1))
+            {
+                printf(" | ");
+                for (int j=0;j<char_index;j++)
+                {
+                    if ((chars[j]>=32)&&(chars[j]<=126)) printf("%c",chars[j]);
+                    else printf(".");
+                    if (j!=char_index-1) printf(".");
+                }
+                printf("\n");
+                char_index=0;
+            }
+            else char_index++;
         }
+    }
+
+    void debug_words(struct ForthCompileInfo *compile)
+    {
+        printf("Debug words\n");
+        struct ForthWordHeader *secondary=compile->words->header;
+        while (secondary->last==false)
+        {
+            printf("- target: %p - %s. base: %p\n",secondary->address,secondary->name,secondary);
+            secondary++;
+        }
+    }
+
+    void debug_primitive(void(*func)(struct ForthEngine *))
+    {
+        printf("debug_primitive (%p): ",func);
+        bool found=false;
+        for (int i=0;i<forth_primitives_len;i++)
+        {
+            if (func==forth_primitives[i].body)
+            {
+                printf("%s",forth_primitives[i].name);
+                found=true;
+                break;
+            }
+        }
+
+        if (found==false)
+        {
+            if (func==prim_hidden_push) printf("prim_hidden_push");
+            else if (func==prim_hidden_secondary) printf("prim_hidden_secondary");
+            else if (func==prim_hidden_done) printf("prim_hidden_done");
+            else printf("not found!"); 
+        }
+        
+        printf("\n");
     }
 
 #endif

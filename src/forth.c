@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "error.h"
+#include "debug.h"
 #include "forth.h"
 #include "forth-process.h"
 #include "getkey.h"
@@ -302,10 +303,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
     uint8_t *forth_data;
-    struct ForthDefinitionsInfo *forth_definitions;
-    struct ForthWordHeaderInfo *forth_words;
-    struct ForthWordNameInfo *forth_word_names;
-    struct ForthControlElement *forth_control_stack;
+    struct ForthCompileInfo compile;
 
     if (command_ID==COMMAND_START) 
     {
@@ -330,62 +328,62 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth word definitions
-        forth_definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,heap_ptr);
+        compile.definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,heap_ptr);
 
         //Make sure allocation succeeded
-        if (forth_definitions==NULL)
+        if (compile.definitions==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
 
         //Initialize empty definition list
-        forth_definitions->index=0;
-        forth_definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct ForthDefinitionsInfo);
+        compile.definitions->index=0;
+        compile.definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct ForthDefinitionsInfo);
 
         //Allocate space for Forth word headers
-        forth_words=(struct ForthWordHeaderInfo *)add_object(FORTH_MEM_WORD_HEADERS,heap_ptr);
+        compile.words=(struct ForthWordHeaderInfo *)add_object(FORTH_MEM_WORD_HEADERS,heap_ptr);
 
         //Make sure allocation succeeded
-        if (forth_words==NULL)
+        if (compile.words==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
 
         //Initialize empty Forth word header list
-        forth_words->index=0;
-        forth_words->bytes_left=FORTH_MEM_WORD_HEADERS-sizeof(struct ForthWordHeader);
+        compile.words->index=0;
+        compile.words->bytes_left=FORTH_MEM_WORD_HEADERS-sizeof(struct ForthWordHeader);
 
         //First header is empty marking end of header list
-        forth_words->header[0].last=true;
+        compile.words->header[0].last=true;
 
         //Allocate space for Forth word names 
-        forth_word_names=(struct ForthWordNameInfo *)add_object(FORTH_MEM_WORD_NAMES,heap_ptr);
+        compile.word_names=(struct ForthWordNameInfo *)add_object(FORTH_MEM_WORD_NAMES,heap_ptr);
 
         //Make sure allocation succeeded
-        if (forth_word_names==NULL)
+        if (compile.word_names==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
 
         //Initialize empty Forth word names
-        forth_word_names->index=0;
-        forth_word_names->bytes_left=FORTH_MEM_WORD_NAMES;
+        compile.word_names->index=0;
+        compile.word_names->bytes_left=FORTH_MEM_WORD_NAMES;
 
         //Allocate space for control stack
-        forth_control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
+        compile.control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
 
         //Make sure allocation succeeded
-        if (forth_control_stack==NULL)
+        if (compile.control_stack==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
 
         //TODO: remove
-        *(uint32_t *)forth_control_stack=0x12345678;
+        *(uint32_t *)compile.control_stack=0x12345678;
 
 
         //Init console
@@ -448,20 +446,20 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Restore pointers to word definitions, list of word headers, and control stack
         forth_data=object_address(FORTH_ID_DATA,heap_ptr);
-        forth_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
-        forth_words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,heap_ptr);
-        forth_word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,heap_ptr);
-        forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+        compile.definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
+        compile.words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,heap_ptr);
+        compile.word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,heap_ptr);
+        compile.control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
 
         //Recalculate pointers in word header
-        struct ForthWordHeader *secondary=forth_words->header;
+        struct ForthWordHeader *secondary=compile.words->header;
         while (secondary->last==false)
         {
             //Recalculate execution pointer
-            secondary->address=(void (**)(struct ForthEngine *engine))(forth_definitions->data+secondary->offset);
+            secondary->address=(void (**)(struct ForthEngine *engine))(compile.definitions->data+secondary->offset);
 
             //Recalculate word name pointer
-            secondary->name=forth_word_names->names+secondary->name_offset;
+            secondary->name=compile.word_names->names+secondary->name_offset;
 
             //Advance to next word header
             secondary++;
@@ -501,6 +499,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     }
     else draw_stack=false;
 
+
+    //TODO: delete
+    //Was working
+    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
+    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
+
+
     //Main loop
     bool redraw_screen=true;
     bool redraw_modifier=true;
@@ -524,7 +529,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if (redraw_screen)
         {
             //Color code input
-            color_input(console,false,forth_words);
+            color_input(console,false,compile.words);
 
             //Always redraw screen whether START, RESUME, or REDRAW
             draw_console(console);
@@ -543,22 +548,39 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         if ((redraw_screen)||(redraw_modifier)) dupdate();
         redraw_screen=true;
         
-        //Get key
-        int old_modifier=console->modifier;
-        int key=getkey_text(true,&console->modifier,forth_keys);
-
-        //Remap keys on keypad for Forth. Also, recognize PC keyboard keys for testing.
-        key=forth_key_remap(key);
-        
-        //Redraw modifiers (shift, alpha) next time through if they have changed
-        if (old_modifier!=console->modifier) redraw_modifier=true;
-        else redraw_modifier=false;
-
         //Whether to save to memory and exit Forth - may be set by key or command so handle outside of key loop
         bool save_exit=false;
 
-        //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
-        char character=vkey_printable[key];
+        //TODO: comments
+        //Get key
+        int old_modifier=console->modifier;
+        int key;
+        char character;
+        if (*debug_keys)
+        {
+            if (*debug_keys=='\n')
+            {
+                key=VKEY_EXE;
+                character=0;
+            }
+            else character=*debug_keys;
+            debug_keys++;
+        }
+        else
+        {
+            key=getkey_text(true,&console->modifier,forth_keys);
+        
+            //Remap keys on keypad for Forth. Also, recognize PC keyboard keys for testing.
+            key=forth_key_remap(key);
+            
+            //Redraw modifiers (shift, alpha) next time through if they have changed
+            if (old_modifier!=console->modifier) redraw_modifier=true;
+            else redraw_modifier=false;
+
+            //Look for keys before sys_key_handler below in case need to handle any sys_keys differently
+            character=vkey_printable[key];
+        }
+
         if (character!=0)
         {
             //Printable character - add to input line
@@ -584,7 +606,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
                     
                     //Color line before ^C added
-                    color_input(console,true,forth_words);
+                    color_input(console,true,compile.words);
 
                     //Append ^C to show input cancelled
                     const char *cancel_text="^C";
@@ -611,7 +633,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     if (console->input.len==0) break;
 
                     //Color input before copying to console since secondaries previously not colored if cursor is on them
-                    color_input(console,true,forth_words);
+                    color_input(console,true,compile.words);
 
                     //Copy input text to console
                     for (uint32_t i=0;i<console->input.len;i++)
@@ -632,9 +654,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Process input
                     char input_buffer[FORTH_INPUT_MAX];
                     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
-                    const char *error_word;
-                    int process_result=process_source(&forth->engine,input_buffer,&error_word,
-                        forth_definitions,forth_words,forth_word_names,forth_control_stack,heap_ptr);
+                    compile.heap_ptr=heap_ptr;
+                    int process_result=process_source(&forth->engine,input_buffer,&compile);
 
                     //Exit if word like BYE requested program exit
                     if (forth->engine.exit_program)
@@ -642,12 +663,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         return_command=COMMAND_EXIT;
                         save_exit=forth->engine.exit_program;
                     }
-
-                    //Reacquire pointers since they may have changed in process_result above
-                    forth_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
-                    forth_words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,heap_ptr);
-                    forth_word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,heap_ptr);
-                    forth_control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
 
                     //Show input line again
                     console_text_default("\n",console);
@@ -673,10 +688,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             else if (process_result==FORTH_ERROR_NO_WORD)
                                 console_text_default("Missing word after ",console);
                             uint32_t start=0;
-                            uint32_t word_len=next_word_source(error_word,&start);
+                            uint32_t word_len=next_word_source(compile.error_word,&start);
 
                             for (uint32_t i=0;i<word_len;i++)
-                                console_char_default(error_word[i],console);
+                                console_char_default(compile.error_word[i],console);
                             console_text_default("\n",console);
                             break;
                         case FORTH_ERROR_ENGINE:
@@ -695,9 +710,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                         console_text_default("Word is compile only: ",console);
                                     //All of these errors share code for printing out word that caused error
                                     uint32_t start=0;
-                                    uint32_t word_len=next_word_source(error_word,&start);
+                                    uint32_t word_len=next_word_source(compile.error_word,&start);
                                     for (uint32_t i=0;i<word_len;i++)
-                                        console_char_default(error_word[i],console);
+                                        console_char_default(compile.error_word[i],console);
                                     console_text_default("\n",console);
                                     break;
                                 case FORTH_ENGINE_ERROR_RSTACK_FULL:
@@ -738,12 +753,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     if (forth->engine.state==FORTH_STATE_COMPILE)
                     {
                         //Definition left open - cancel word
-                        struct ForthWordHeader *secondary=forth_words->header;
+                        struct ForthWordHeader *secondary=compile.words->header;
 
                         //Save copy of pointer to header for incomplete word for use in error message below
                         struct ForthWordHeader *secondary_copy=secondary;
 
-                        //Finalize pending word headers by setting ->done to true. Also set ->last at end of list to mark end.
+                        //Cancel new words headers and recover memory
                         uint32_t rewind_header_bytes=0;
                         uint32_t rewind_name_bytes=0;
                         uint32_t header_count=0;
@@ -756,6 +771,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                 //Still looping through headers
                                 if (secondary->done==false)
                                 {
+                                    printf("Unterminated: deleting %s\n",secondary->name);
+
                                     //Reached unfinished header - mark as end of list of headers
                                     //(Marking end only useful for first marked header but doesn't hurt to mark all)
                                     secondary->last=true;
@@ -780,11 +797,43 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             secondary++;
                         }
 
+                        printf("Unterminated word\n");
+                        printf("- words index: %d\n",compile.words->index);
+                        printf("- words bytes_left: %d\n",compile.words->bytes_left);
+                        printf("- word names index: %d\n",compile.word_names->index);
+                        printf("- word names bytes_left: %d\n",compile.word_names->bytes_left);
+                        printf("Adjusting...\n");
+
                         //Restore header information to state before aborted word began
-                        forth_words->index-=header_count;
-                        forth_words->bytes_left+=rewind_header_bytes;
-                        forth_word_names->index-=rewind_name_bytes;
-                        forth_word_names->bytes_left+=rewind_name_bytes;
+                        compile.words->index-=header_count;
+                        compile.words->bytes_left+=rewind_header_bytes;
+                        compile.word_names->index-=rewind_name_bytes;
+                        compile.word_names->bytes_left+=rewind_name_bytes;
+
+                        printf("- words index: %d\n",compile.words->index);
+                        printf("- words bytes_left: %d\n",compile.words->bytes_left);
+                        printf("- word names index: %d\n",compile.word_names->index);
+                        printf("- word names bytes_left: %d\n",compile.word_names->bytes_left);
+                        printf("- delete_size: %d\n",compile.delete_size);
+
+                        //Restore target address pointer of word if it existed before
+                        if (compile.delete_size!=0)
+                        {
+                            printf("- colon_word: %p\n",compile.colon_word);
+                            printf("  - name: %s\n",compile.colon_word->name);
+                            printf("  - address: %p\n",compile.colon_word->address);
+                            printf("  - save_offset: %d\n",compile.save_offset);
+
+                            compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
+                            compile.colon_word->offset=compile.save_offset;
+                            compile.colon_word->definition_size=compile.save_definition_size;
+                            compile.colon_word->type=compile.save_type;
+                            
+                            printf("  - new address: %p\n",compile.colon_word->address);
+                            printf("  - new definition_size: %d\n",compile.colon_word->definition_size);
+                            printf("  - new type: %d\n",compile.colon_word->type);
+                            printf("  - new offset: %d\n",compile.colon_word->offset);
+                        }
 
                         if (process_result==FORTH_ERROR_NONE)
                         {
@@ -793,6 +842,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             console_text_default(secondary_copy->name,console);
                             console_text_default("\n",console);
                         }
+
                         //Back to interpret mode
                         forth->engine.state=FORTH_STATE_INTERPRET;
                     }
