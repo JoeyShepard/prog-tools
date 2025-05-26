@@ -467,8 +467,16 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     printf("- name: %s\n",word_buffer);
 
     //Write new word info to header
-    secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
-    secondary->offset=compile->definitions->index;
+    if (word_type==FORTH_SECONDARY_WORD)
+    {
+        secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        secondary->offset=compile->definitions->index;
+    }
+    else
+    {
+        secondary->address=0;
+        secondary->offset=0;
+    }
     secondary->definition_size=0;
     secondary->name_offset=compile->word_names->index;
     secondary->name_len=word_len;

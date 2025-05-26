@@ -47,7 +47,6 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     //Advance past name of new word
     *start+=word_len;
 
-
     if (word_type==FORTH_TYPE_SECONDARY)
     {
         printf("- replacing existing word: %s\n",compile->secondary->name);
@@ -63,6 +62,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         //Save address of re-used word header for processing later
         compile->colon_word=compile->secondary;
         compile->colon_word_index=compile->secondary->ID;
+        compile->colon_word_exists=true;
 
         //Save header info in case error and info needs to be restored
         compile->save_offset=compile->secondary->offset;
@@ -86,7 +86,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         if (result!=FORTH_ERROR_NONE) return result;
 
         //No definition deleted to make room for new word - let semicolon know nothing to delete
-        compile->delete_size=0;
+        compile->colon_word_exists=false;
     }
     else
     {
@@ -98,6 +98,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     printf("  - name: %s\n",compile->colon_word->name);
     printf("  - colon_word: %p\n",compile->colon_word);
     printf("  - colon_word->address: %p\n",compile->colon_word->address);
+    printf("  - colon_word->name: %s\n",compile->colon_word->name);
 
     //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
@@ -127,7 +128,7 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
     }
 
     //Recover definition memory if word was redfined
-    if (compile->delete_size>0)
+    if (compile->colon_word_exists==true)
     {
         //Copy code for definitions later in memory to overwrite old definition
         void *dest=compile->definitions->data+compile->delete_offset;

@@ -501,10 +501,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
 
     //TODO: delete
-    //Was working
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
-    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
-
+    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
+    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
 
     //Main loop
     bool redraw_screen=true;
@@ -755,9 +754,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Definition left open - cancel word
                         struct ForthWordHeader *secondary=compile.words->header;
 
-                        //Save copy of pointer to header for incomplete word for use in error message below
-                        struct ForthWordHeader *secondary_copy=secondary;
-
                         //Cancel new words headers and recover memory
                         uint32_t rewind_header_bytes=0;
                         uint32_t rewind_name_bytes=0;
@@ -817,14 +813,16 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         printf("- delete_size: %d\n",compile.delete_size);
 
                         //Restore target address pointer of word if it existed before
-                        if (compile.delete_size!=0)
+                        if (compile.colon_word_exists==true)
                         {
                             printf("- colon_word: %p\n",compile.colon_word);
                             printf("  - name: %s\n",compile.colon_word->name);
                             printf("  - address: %p\n",compile.colon_word->address);
                             printf("  - save_offset: %d\n",compile.save_offset);
 
-                            compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
+                            if (compile.save_type==FORTH_SECONDARY_WORD) 
+                                compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
+                            else compile.colon_word->address=NULL;
                             compile.colon_word->offset=compile.save_offset;
                             compile.colon_word->definition_size=compile.save_definition_size;
                             compile.colon_word->type=compile.save_type;
@@ -839,7 +837,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         {
                             //Only warn of unterminated word if no other error
                             console_text_default("Unterminated word: ",console);
-                            console_text_default(secondary_copy->name,console);
+                            console_text_default(compile.colon_word->name,console);
                             console_text_default("\n",console);
                         }
 

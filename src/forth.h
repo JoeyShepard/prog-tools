@@ -48,6 +48,7 @@
     #define FORTH_ID_CONTROL_STACK  5
     #define FORTH_MEM_DATA          0x2000  //Initial value - can change programmatically
 
+    //TODO: restore
     //#define FORTH_MEM_DEFINITIONS   1024    //For these four, allocate this amount initially then add this     
     //#define FORTH_MEM_WORD_HEADERS  512     //much when memory runs out. Exact amount not important - prevents
     //#define FORTH_MEM_WORD_NAMES    512     //copying whole dictionary every time new word added.

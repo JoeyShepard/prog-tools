@@ -55,6 +55,7 @@
         uint32_t word_len;
         struct ForthWordHeader *colon_word;
         uint32_t colon_word_index;
+        bool colon_word_exists;
         uint32_t delete_offset;
         uint32_t delete_size;
         uint32_t save_offset;
