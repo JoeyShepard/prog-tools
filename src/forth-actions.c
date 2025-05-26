@@ -83,11 +83,6 @@ static int action_source_pre(const char *source,uint32_t *start,char *word_buffe
 //TODO: rearrange functions here to match alphabetical order in header
 int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
-
-    printf("action_colon:\n");
-    printf("Debug a - action_colon:         %p\n",compile->words->header->address);
-    debug_words(compile);
-
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
     int word_type;
@@ -96,11 +91,6 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     
     if (word_type==FORTH_TYPE_SECONDARY)
     {
-        printf("- replacing existing word: %s\n",compile->secondary->name);
-        printf("  - base: %p\n",compile->secondary);
-        printf("  - offset: %d\n",compile->secondary->offset);
-        printf("  - definition_size: %d\n",compile->secondary->definition_size);
-
         //Word already exists - mark existing code for this word for deletion in semicolon 
         //(don't delete code here in case missing semicolon)
         compile->delete_offset=compile->secondary->offset;
@@ -136,15 +126,8 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         compile->colon_word_exists=false;
     }
 
-    printf("  - name: %s\n",compile->colon_word->name);
-    printf("  - colon_word: %p\n",compile->colon_word);
-    printf("  - colon_word->address: %p\n",compile->colon_word->address);
-    printf("  - colon_word->name: %s\n",compile->colon_word->name);
-
     //Set compile state to compiling
     engine->state=FORTH_STATE_COMPILE;
-
-    printf("Debug a - exiting action_colon: %p\n",compile->words->header->address);
 
     return FORTH_ERROR_NONE;
 }
@@ -218,16 +201,12 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
         secondary++;
     }
 
-    printf("semicolon\n");
-
     //Recover definition memory if word was redfined
     if ((compile->colon_word_exists==true)&&(compile->delete_size!=0))
     {
         //Compact memory of old definition
         action_compact(compile->delete_offset,compile->delete_size,compile);
     }
-
-    debug_dump(compile->colon_word->address,48);
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;

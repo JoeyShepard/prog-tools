@@ -30,6 +30,7 @@ assembler with built-in safety checks?
 
 Forth
 =====
+move : and ;?
 revisit stack bounds checks instead of masking now that no PICK or ROLL
 - check every so many instructions?
 copy of forth struct needs to be stored in XRAM

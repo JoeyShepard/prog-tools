@@ -389,7 +389,7 @@ void draw_console(struct ConsoleInfo *console)
 
     while(row<console->height)
     {
-        bool console_done=((buffer_start==console->buffer_index)&&(draw_once==false));
+        bool console_done=((buffer_start==(int)console->buffer_index)&&(draw_once==false));
         if ((console_done)&&(input_drawn==false))
         {
             //Draw input line
@@ -555,7 +555,7 @@ void console_key(struct ConsoleInfo *console,int key)
             if (console->input.cursor>0)
             {
                 console->input.cursor--;
-                for (int i=console->input.cursor;i<console->input.len;i++)
+                for (uint32_t i=console->input.cursor;i<console->input.len;i++)
                 {
                     console->input.text[i]=console->input.text[i+1];
                 }

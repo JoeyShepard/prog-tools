@@ -281,9 +281,6 @@ int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
 {
     if (compile->definitions->bytes_left<size)
     {
-
-        printf("***EXPANDING DEFINITIONS***\n");
-
         //Not enough memory left in dictionary - expand memory
         int result=expand_object(FORTH_MEM_DEFINITIONS,FORTH_ID_DEFINITIONS,compile->heap_ptr);
         if (result!=ERROR_NONE)
@@ -348,9 +345,6 @@ int write_definition_i32(int32_t value,struct ForthCompileInfo *compile)
 
 int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
 {
-    printf("write_u32\n");
-    printf("- %d\n",value);
-    
     //Expand definitions memory if necessary
     int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
@@ -370,11 +364,6 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
 
 int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
-    
-    printf("execute_secondary\n");
-    printf("- %s\n",compile->secondary->name);
-    printf("- %p\n",compile->secondary->address);
-
     //Error if secondary has header but hasn't been defined
     if (compile->secondary->type==FORTH_SECONDARY_WORD)
     {
@@ -392,10 +381,6 @@ int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compil
         //Execute primitives
         while(engine->executing)
         {
-
-            debug_primitive(engine->address,compile);
-            debug_dump(engine->address,48);
-
             (*engine->address)(engine);
             engine->address++;
         }
@@ -417,16 +402,9 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     struct ForthWordHeader *secondary=&(compile->words->header[compile->words->index]);
     uint32_t word_len=strlen(word_buffer);
 
-    printf("new_secondary\n");
-    printf("- header bytes left: %d\n",compile->words->bytes_left);
-    printf("- header bytes needed: %ld\n",sizeof(struct ForthWordHeader)*2);
-
     //Need enough space for current header and empty header following which marks end of list
     if (compile->words->bytes_left<sizeof(struct ForthWordHeader)*2)
     {
-
-        printf("***EXPANDING HEADER***\n");
-
         //Not enough memory to add new word header - expand memory
         int result=expand_object(FORTH_MEM_WORD_HEADERS,FORTH_ID_WORD_HEADERS,compile->heap_ptr);
         if (result!=ERROR_NONE)
@@ -451,9 +429,6 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     //Also need enough memory to hold name of new secondary
     if (compile->word_names->bytes_left<word_len+1)
     {
-        
-        printf("***EXPANDING NAMES***\n");
-
         //Not enough memory to add new word header - expand memory
         int result=expand_object(FORTH_MEM_WORD_NAMES,FORTH_ID_WORD_NAMES,compile->heap_ptr);
         if (result!=ERROR_NONE)
@@ -475,10 +450,6 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
         update_compile_pointers(compile);
     }
     
-    printf("new_secondary\n");
-    printf("- base: %p\n",secondary);
-    printf("- name: %s\n",word_buffer);
-
     //Write new word info to header
     if (word_type==FORTH_SECONDARY_WORD)
     {
@@ -733,8 +704,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     int result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
 
-                    printf("Writing definition ID: %d\n",compile->secondary->ID);
-
                     result=write_definition_u32(compile->secondary->ID,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
@@ -787,15 +756,8 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
         }
     }
 
-
-
-    printf("update_compile_pointers\n");
-    printf("- colon_word:     %p\n",compile->colon_word);
-
     //Update colon word definition in case pointer to word headers changed
     compile->colon_word=compile->words->header+compile->colon_word_index;
-
-    printf("- new colon_word: %p\n",compile->colon_word);
 
     //Update secondary member of compile used for defining new words in case pointer to word headers changed
     compile->secondary=compile->words->header+compile->secondary_index;

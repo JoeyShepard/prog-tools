@@ -504,7 +504,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
-    const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
+    //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
@@ -768,8 +769,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                 //Still looping through headers
                                 if (secondary->done==false)
                                 {
-                                    printf("Unterminated: deleting %s\n",secondary->name);
-
                                     //Reached unfinished header - mark as end of list of headers
                                     //(Marking end only useful for first marked header but doesn't hurt to mark all)
                                     secondary->last=true;
@@ -794,44 +793,21 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             secondary++;
                         }
 
-                        printf("Unterminated word\n");
-                        printf("- words index: %d\n",compile.words->index);
-                        printf("- words bytes_left: %d\n",compile.words->bytes_left);
-                        printf("- word names index: %d\n",compile.word_names->index);
-                        printf("- word names bytes_left: %d\n",compile.word_names->bytes_left);
-                        printf("Adjusting...\n");
-
                         //Restore header information to state before aborted word began
                         compile.words->index-=header_count;
                         compile.words->bytes_left+=rewind_header_bytes;
                         compile.word_names->index-=rewind_name_bytes;
                         compile.word_names->bytes_left+=rewind_name_bytes;
 
-                        printf("- words index: %d\n",compile.words->index);
-                        printf("- words bytes_left: %d\n",compile.words->bytes_left);
-                        printf("- word names index: %d\n",compile.word_names->index);
-                        printf("- word names bytes_left: %d\n",compile.word_names->bytes_left);
-                        printf("- delete_size: %d\n",compile.delete_size);
-
                         //Restore target address pointer of word if it existed before
                         if (compile.colon_word_exists==true)
                         {
-                            printf("- colon_word: %p\n",compile.colon_word);
-                            printf("  - name: %s\n",compile.colon_word->name);
-                            printf("  - address: %p\n",compile.colon_word->address);
-                            printf("  - save_offset: %d\n",compile.save_offset);
-
                             if (compile.save_type==FORTH_SECONDARY_WORD) 
                                 compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
                             else compile.colon_word->address=NULL;
                             compile.colon_word->offset=compile.save_offset;
                             compile.colon_word->definition_size=compile.save_definition_size;
                             compile.colon_word->type=compile.save_type;
-                            
-                            printf("  - new address: %p\n",compile.colon_word->address);
-                            printf("  - new definition_size: %d\n",compile.colon_word->definition_size);
-                            printf("  - new type: %d\n",compile.colon_word->type);
-                            printf("  - new offset: %d\n",compile.colon_word->offset);
                         }
 
                         if (process_result==FORTH_ERROR_NONE)
