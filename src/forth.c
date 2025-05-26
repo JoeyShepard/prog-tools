@@ -353,7 +353,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Initialize empty Forth word header list
         compile.words->index=0;
-        compile.words->bytes_left=FORTH_MEM_WORD_HEADERS-sizeof(struct ForthWordHeader);
+        compile.words->bytes_left=FORTH_MEM_WORD_HEADERS-sizeof(struct ForthWordHeaderInfo);
 
         //First header is empty marking end of header list
         compile.words->header[0].last=true;
@@ -370,7 +370,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //Initialize empty Forth word names
         compile.word_names->index=0;
-        compile.word_names->bytes_left=FORTH_MEM_WORD_NAMES;
+        compile.word_names->bytes_left=FORTH_MEM_WORD_NAMES-sizeof(struct ForthWordNameInfo);
 
         //Allocate space for control stack
         compile.control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
@@ -503,7 +503,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //TODO: delete
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
-    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
+    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
+    const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
 
     //Main loop
     bool redraw_screen=true;

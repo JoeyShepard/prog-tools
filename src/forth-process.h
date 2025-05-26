@@ -52,6 +52,7 @@
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;
+        uint32_t secondary_index;
         uint32_t word_len;
         struct ForthWordHeader *colon_word;
         uint32_t colon_word_index;

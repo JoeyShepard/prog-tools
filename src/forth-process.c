@@ -149,7 +149,12 @@ int classify_other(const char *word,struct ForthCompileInfo *compile)
 
     //Word is secondary?
     compile->secondary=find_secondary(word,compile->words);
-    if (compile->secondary!=NULL) return FORTH_TYPE_SECONDARY;
+    if (compile->secondary!=NULL)
+    {
+        //Copy of index in case memory allocation shifts secondary pointer
+        compile->secondary_index=compile->secondary->ID;
+        return FORTH_TYPE_SECONDARY;
+    }
     
     //Word not primitve or secondary - not found
     return FORTH_TYPE_NOT_FOUND;
@@ -343,6 +348,9 @@ int write_definition_i32(int32_t value,struct ForthCompileInfo *compile)
 
 int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
 {
+    printf("write_u32\n");
+    printf("- %d\n",value);
+    
     //Expand definitions memory if necessary
     int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
@@ -385,7 +393,8 @@ int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compil
         while(engine->executing)
         {
 
-            debug_primitive(*engine->address);
+            debug_primitive(engine->address,compile);
+            debug_dump(engine->address,48);
 
             (*engine->address)(engine);
             engine->address++;
@@ -407,6 +416,10 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     //Pointer to new secondary
     struct ForthWordHeader *secondary=&(compile->words->header[compile->words->index]);
     uint32_t word_len=strlen(word_buffer);
+
+    printf("new_secondary\n");
+    printf("- header bytes left: %d\n",compile->words->bytes_left);
+    printf("- header bytes needed: %ld\n",sizeof(struct ForthWordHeader)*2);
 
     //Need enough space for current header and empty header following which marks end of list
     if (compile->words->bytes_left<sizeof(struct ForthWordHeader)*2)
@@ -586,35 +599,41 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         //This keeps platform specific code out of primitives for portability
                         switch (engine->word_action)
                         {
-                            case FORTH_ACTION_COLON:
-                            {
-                                int result=action_colon(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
                             case FORTH_ACTION_CHAR:
                                 int32_t index;
                                 int result=action_char_common(source,&start,&index,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 forth_push(engine,index);
                                 break;
+                            case FORTH_ACTION_COLON:
+                            {
+                                int result=action_colon(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_CONSTANT:
+                            {
+                                int result=action_constant(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_TICK:
+                            {
+                                //Find ID or primitive and secondary if it exists
+                                uint32_t index;
+                                int result=action_tick_common(source,&start,&index,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Push tick ID of word to stack
+                                forth_push(engine,index);
+                                break;
+                            }
                             case FORTH_ACTION_WORDS:
                                 action_words(engine,compile->words);
                                 break;
-                            case FORTH_ACTION_TICK:
-                                {
-                                    //Find ID or primitive and secondary if it exists
-                                    uint32_t index;
-                                    int result=action_tick_common(source,&start,&index,compile);
-                                    if (result!=FORTH_ERROR_NONE) return result;
-
-                                    //Push tick ID of word to stack
-                                    forth_push(engine,index);
-                                    break;
-                                }
                         }
                     }
                     else
@@ -688,7 +707,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 result=write_definition_primitive(&prim_hidden_push,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
-                                result=write_definition_i32(num,compile);
+                                result=write_definition_i32(index,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
@@ -713,6 +732,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     //Compile pointer to pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
+
+                    printf("Writing definition ID: %d\n",compile->secondary->ID);
+
                     result=write_definition_u32(compile->secondary->ID,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
@@ -765,6 +787,8 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
         }
     }
 
+
+
     printf("update_compile_pointers\n");
     printf("- colon_word:     %p\n",compile->colon_word);
 
@@ -772,6 +796,9 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     compile->colon_word=compile->words->header+compile->colon_word_index;
 
     printf("- new colon_word: %p\n",compile->colon_word);
+
+    //Update secondary member of compile used for defining new words in case pointer to word headers changed
+    compile->secondary=compile->words->header+compile->secondary_index;
 
     //Update pointer to word names
     struct ForthWordNameInfo *new_word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile->heap_ptr);

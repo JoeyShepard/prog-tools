@@ -37,13 +37,14 @@
     enum ForthCompileActions
     {
         FORTH_ACTION_NONE,
-        FORTH_ACTION_COLON,
-        FORTH_ACTION_SEMICOLON,
-        FORTH_ACTION_CHAR,
         FORTH_ACTION_BRACKET_CHAR,
+        FORTH_ACTION_CHAR,
+        FORTH_ACTION_COLON,
+        FORTH_ACTION_CONSTANT,
         FORTH_ACTION_PAREN,
+        FORTH_ACTION_SEMICOLON,
+        FORTH_ACTION_TICK,
         FORTH_ACTION_WORDS,
-        FORTH_ACTION_TICK
     };
 
     enum ForthEngineErrors
@@ -192,6 +193,7 @@
     void forth_engine_pre_exec(struct ForthEngine *engine);
     int32_t forth_stack_count(struct ForthEngine *engine);
     void forth_push(struct ForthEngine *engine,int32_t value);
+    int32_t forth_pop(struct ForthEngine *engine);
     void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine);
     
 #endif

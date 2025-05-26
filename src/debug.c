@@ -89,6 +89,9 @@
             }
             else char_index++;
         }
+        printf("prim_hidden_push:      %p\n",&prim_hidden_push);
+        printf("prim_hidden_secondary: %p\n",&prim_hidden_secondary);
+        printf("prim_hidden_done:      %p\n",&prim_hidden_done);
     }
 
     void debug_words(struct ForthCompileInfo *compile)
@@ -102,13 +105,13 @@
         }
     }
 
-    void debug_primitive(void(*func)(struct ForthEngine *))
+    void debug_primitive(void(**func)(struct ForthEngine *),struct ForthCompileInfo *compile)
     {
-        printf("debug_primitive (%p): ",func);
+        printf("debug_primitive (%p): ",*func);
         bool found=false;
         for (int i=0;i<forth_primitives_len;i++)
         {
-            if (func==forth_primitives[i].body)
+            if (*func==forth_primitives[i].body)
             {
                 printf("%s",forth_primitives[i].name);
                 found=true;
@@ -118,9 +121,15 @@
 
         if (found==false)
         {
-            if (func==prim_hidden_push) printf("prim_hidden_push");
-            else if (func==prim_hidden_secondary) printf("prim_hidden_secondary");
-            else if (func==prim_hidden_done) printf("prim_hidden_done");
+            if (*func==prim_hidden_push) printf("prim_hidden_push");
+            else if (*func==prim_hidden_secondary)
+            {
+                printf("prim_hidden_secondary\n");
+                uint32_t index=*(uint32_t *)(func+1);
+                printf("- index: %d\n",index);
+                printf("- %s",compile->words->header[index].name);
+            }
+            else if (*func==prim_hidden_done) printf("prim_hidden_done");
             else printf("not found!"); 
         }
         

@@ -105,6 +105,13 @@ void forth_push(struct ForthEngine *engine,int32_t value)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
+int32_t forth_pop(struct ForthEngine *engine)
+{
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    return *engine->stack;
+}
+
 void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine)
 {
     if (engine->rstack<engine->rstack_base)

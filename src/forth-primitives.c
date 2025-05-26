@@ -854,13 +854,15 @@ int prim_compile_char(struct ForthEngine *engine)
 }
 
 //CONSTANT
-void prim_body_constant(struct ForthEngine *engine){}
-int prim_immediate_constant(struct ForthEngine *engine){}
-int prim_compile_constant(struct ForthEngine *engine){}
-int prim_optimize_constant(struct ForthEngine *engine)
+int prim_immediate_constant(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_CONSTANT;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_constant(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //C_R
@@ -1669,7 +1671,7 @@ int prim_immediate_bracket_char(struct ForthEngine *engine)
 int prim_compile_bracket_char(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_CHAR;
+    engine->word_action=FORTH_ACTION_BRACKET_CHAR;
     return FORTH_ENGINE_ERROR_NONE;
 }
 
@@ -2188,9 +2190,9 @@ const struct ForthPrimitive forth_primitives[]=
     {"BOUNDS",6,NULL,NULL,&prim_body_bounds,&prim_optimize_bounds},
     {"CELLS",5,NULL,NULL,&prim_body_cells,NULL},
     {"CHAR",4,&prim_immediate_char,&prim_compile_char,NULL,NULL},
-    //{"CONSTANT",8,&prim_immediate_constant,&prim_compile_constant,&prim_body_constant,&prim_optimize_constant},
+    {"CONSTANT",8,&prim_immediate_constant,&prim_compile_constant,NULL,NULL},
     //Shortcut for CONSTANT
-    //{"CONST",5,&prim_immediate_const,&prim_compile_const,&prim_body_const,&prim_optimize_const},
+    {"CONST",5,&prim_immediate_constant,&prim_compile_constant,NULL,NULL},
     {"CR",2,NULL,NULL,&prim_body_c_r,NULL},
     {"DEPTH",5,NULL,NULL,&prim_body_depth,NULL},
     //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do,&prim_optimize_do},

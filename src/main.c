@@ -45,6 +45,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - tick on number
 - quoting words not working yet
 - words with header but no definition should be yellow
+- red after const and var like ;
 stagger key legend to take up less room
 console - only copy to history if different from last
 buffer stack_base in primitives? need to check disassembly

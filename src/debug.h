@@ -10,6 +10,6 @@
     void debug_heap();
     void debug_dump(void *mem,uint32_t count);
     void debug_words(struct ForthCompileInfo *compile);
-    void debug_primitive(void(*func)(struct ForthEngine *));
+    void debug_primitive(void(**func)(struct ForthEngine *),struct ForthCompileInfo *compile);
 
 #endif

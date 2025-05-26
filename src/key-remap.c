@@ -120,14 +120,14 @@ struct KeyRemap forth_keys[]=
     {46,    MODIFIER_ALPHA_LOWER,   VKEY_EQUAL},        //=
     {46,    MODIFIER_ALPHA_UPPER,   VKEY_EQUAL},        //=
     {46,    MODIFIER_SHIFT_NONE,    VKEY_ADD},          //= -> +
-    {47,    MODIFIER_ALPHA_LOWER,   VKEY_LCBRACKET},    //[
-    {47,    MODIFIER_ALPHA_UPPER,   VKEY_LCBRACKET},    //[
-    {47,    MODIFIER_NONE,          VKEY_LCBRACKET},    //[
-    {47,    MODIFIER_SHIFT_NONE,    VKEY_LSBRACKET},    //[ -> {
-    {48,    MODIFIER_NONE,          VKEY_RCBRACKET},    //]
-    {48,    MODIFIER_ALPHA_LOWER,   VKEY_RCBRACKET},    //]
-    {48,    MODIFIER_ALPHA_UPPER,   VKEY_RCBRACKET},    //]
-    {48,    MODIFIER_SHIFT_NONE,    VKEY_RSBRACKET},    //] -> }
+    {47,    MODIFIER_ALPHA_LOWER,   VKEY_LSBRACKET},    //[
+    {47,    MODIFIER_ALPHA_UPPER,   VKEY_LSBRACKET},    //[
+    {47,    MODIFIER_NONE,          VKEY_LSBRACKET},    //[
+    {47,    MODIFIER_SHIFT_NONE,    VKEY_LCBRACKET},    //[ -> {
+    {48,    MODIFIER_NONE,          VKEY_RSBRACKET},    //]
+    {48,    MODIFIER_ALPHA_LOWER,   VKEY_RSBRACKET},    //]
+    {48,    MODIFIER_ALPHA_UPPER,   VKEY_RSBRACKET},    //]
+    {48,    MODIFIER_SHIFT_NONE,    VKEY_RCBRACKET},    //] -> }
     {51,    MODIFIER_NONE,          VKEY_SEMICOLON},    //;
     {51,    MODIFIER_ALPHA_LOWER,   VKEY_SEMICOLON},    //;
     {51,    MODIFIER_ALPHA_UPPER,   VKEY_SEMICOLON},    //;
