@@ -9,6 +9,7 @@
 #include "getkey.h"
 #include "graphics.h"
 #include "key-remap.h"
+#include "logging.h"
 #include "text.h"
 #include "manager.h"
 #include "mem.h"

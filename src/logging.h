@@ -32,6 +32,10 @@
         LOGGING_POINTS_COUNT
     };
 
+    //Functions for PC and CG50
+    bool log_enabled();
+
+    //Functions for PC only
     void init_logging(const char *new_path);
     void log_on(int point);
     void log_off(int point);

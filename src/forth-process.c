@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-//TODO: remove
-#include "debug.h"
-
 #include "error.h"
 #include "forth.h"
 #include "forth-actions.h"
@@ -638,7 +635,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             {
                                 bool first_word=true;
                                 int line_characters=0;
-                                action_primitives(engine,&first_word,&line_characters,true,compile);
+                                action_primitives(engine,&first_word,&line_characters,true);
                                 break;
                             }
                             case FORTH_ACTION_SECONDARIES:
@@ -676,7 +673,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             {
                                 bool first_word=true;
                                 int line_characters=0;
-                                action_primitives(engine,&first_word,&line_characters,false,compile);
+                                action_primitives(engine,&first_word,&line_characters,false);
                                 action_secondaries(engine,&first_word,&line_characters,true,false,compile);
                                 action_secondaries(engine,&first_word,&line_characters,false,true,compile);
                                 break;

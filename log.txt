@@ -2781,3 +2781,11 @@ execute_secondary
 - address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
 - prim_hidden_done (0x555cc3362170)
 
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================

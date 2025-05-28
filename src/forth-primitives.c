@@ -2453,6 +2453,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"WORDS",5,&prim_immediate_words,&prim_compile_words,NULL,NULL},
     {"BYE",3,NULL,NULL,&prim_body_bye,NULL},
     //{"COMPARE",7,&prim_immediate_compare,&prim_compile_compare,&prim_body_compare,&prim_optimize_compare},
+    
 
     //digit?
     //:NONAME
@@ -2468,6 +2469,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL,NULL},
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL,NULL},
 
+    //DEBUG that steps through word
     //action to change data size
     //help
     //output number to memory (opposite of >number. number> ? >text ?)

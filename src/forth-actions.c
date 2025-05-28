@@ -423,7 +423,7 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
     return FORTH_ERROR_NONE;
 }
 
-void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw,struct ForthCompileInfo *compile)
+void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw)
 {
     enum SearchModes
     {
