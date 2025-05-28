@@ -6,8 +6,8 @@
 //Called only once when program first starts
 void forth_init_engine(struct ForthEngine *engine,
     //Stacks
-    uintptr_t stack_base,
-    struct ForthRStackElement *rstack_base,
+    void *stack_base,
+    void *rstack_base,
     uint32_t stack_count,
     uint32_t rstack_count,
     //Data area
@@ -27,8 +27,8 @@ void forth_init_engine(struct ForthEngine *engine,
     int16_t screen_height)
 {
     //Init Forth engine pointers (these values never change)
-    engine->stack_base=stack_base;
-    engine->rstack_base=rstack_base;
+    engine->stack_base=(uintptr_t)stack_base;
+    engine->rstack_base=(struct ForthRStackElement *)rstack_base;
 
     //Init Forth engine parameters
     engine->stack_count=stack_count;
@@ -84,6 +84,7 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
 }
 
 //Called before executing word in outer interpreter (ie process_source in forth.c)
+//TODO: anything else to add? see how used in forth.c
 void forth_engine_pre_exec(struct ForthEngine *engine)
 {
     //Word may request caller perform action

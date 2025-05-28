@@ -131,7 +131,8 @@
         alignas(uint32_t) uint8_t locals_copy[FORTH_LOCALS_SIZE];
 
         //Data for Forth Engine
-        struct ForthEngine engine;
+        struct ForthEngine *engine;
+        struct ForthEngine engine_copy;
     };
 
     struct ForthDefinitionsInfo
@@ -161,6 +162,30 @@
         uint32_t index;
         uint8_t type;
     };
+
+    struct ForthCompileInfo
+    {
+        const char *error_word;
+        uint8_t *data;
+        struct ForthDefinitionsInfo *definitions;
+        struct ForthWordHeaderInfo *words;
+        struct ForthWordNameInfo *word_names;
+        struct ForthControlElement *control_stack;
+        uint8_t *heap_ptr;
+        int primitive_ID;
+        struct ForthWordHeader *secondary;
+        uint32_t secondary_index;
+        uint32_t word_len;
+        struct ForthWordHeader *colon_word;
+        uint32_t colon_word_index;
+        bool colon_word_exists;
+        uint32_t delete_offset;
+        uint32_t delete_size;
+        uint32_t save_offset;
+        uint32_t save_definition_size;
+        uint8_t save_type;
+    };
+
 
     //Functions
     //=========

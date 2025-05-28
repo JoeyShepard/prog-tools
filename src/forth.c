@@ -208,7 +208,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         if (index<stack_count)
         {
             //Stack value to print
-            text_hex32(*(engine->stack+index+1),text_buffer+2,8);
+            text_hex32_padded(*(engine->stack+index+1),text_buffer+2,8);
         }
         else
         {
@@ -245,10 +245,10 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         }key_texts[]={
         {"radian  ","!",COL_ALPHA},
         {"theta   ","@",COL_ALPHA},
-        {"ln      ","'",FORTH_COL_FG},
-        {"sin     ","?",FORTH_COL_FG},
-        {"cos     ",":",FORTH_COL_FG},
-        {"tan     ",";",FORTH_COL_FG},
+        {"ln      ",":",FORTH_COL_FG},
+        {"sin     ",";",FORTH_COL_FG},
+        {"cos     ","'",FORTH_COL_FG},
+        {"tan     ","?",FORTH_COL_FG},
         {"i       ","<",COL_SHIFT},
         {"pi      ",">",COL_SHIFT}};
 
@@ -419,9 +419,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth->draw_stack=true;
 
         //Init Forth engine 
-        forth_init_engine(&forth->engine,
-            (uintptr_t)FORTH_STACK_ADDRESS,
-            (struct ForthRStackElement *)FORTH_RSTACK_ADDRESS,
+        forth->engine=(struct ForthEngine *)FORTH_ENGINE_ADDRESS;
+        forth_init_engine(forth->engine,
+            FORTH_STACK_ADDRESS,
+            FORTH_RSTACK_ADDRESS,
             FORTH_STACK_ELEMENTS,
             FORTH_RSTACK_ELEMENTS,
             FORTH_MEM_DATA,
@@ -443,6 +444,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth=(struct ForthInfo *)object_address(FORTH_ID_CONSOLE,heap_ptr);
         console=&forth->console;
         reset_console_pointers(console);
+
+        //Restore Forth engine 
+        *forth->engine=forth->engine_copy;
 
         //Restore pointers to word definitions, list of word headers, and control stack
         forth_data=object_address(FORTH_ID_DATA,heap_ptr);
@@ -474,7 +478,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     forth_console=console;
 
     //Reset pointers in Forth engine
-    forth_reload_engine(&forth->engine,forth_data);
+    forth_reload_engine(forth->engine,forth_data);
 
     //Redraw screen but only spare pixels on edges. Letters redrawn below.
     draw_rect(pos.x,pos.y,width,height,FORTH_COL_BG,FORTH_COL_BG);
@@ -505,7 +509,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
     //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
-    const char *debug_keys="";
+    //const char *debug_keys=": asdf a b c d e f ;\n: a b ;\n: b 1 ;\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\n";
+    const char *debug_keys=": x a 5 x.r ; var a 0x123 a ! : x a @ 5 x.r ; x";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
@@ -538,7 +544,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             //Redraw stack if visible
             if (draw_stack)
             {
-                draw_forth_stack(&forth->engine,stack_x,stack_y,stack_text_x,stack_text_y,height,window.split_state);
+                draw_forth_stack(forth->engine,stack_x,stack_y,stack_text_x,stack_text_y,height,window.split_state);
             }
                 
             //Return if Redraw only
@@ -656,13 +662,13 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     char input_buffer[FORTH_INPUT_MAX];
                     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
                     compile.heap_ptr=heap_ptr;
-                    int process_result=process_source(&forth->engine,input_buffer,&compile);
+                    int process_result=process_source(forth->engine,input_buffer,&compile);
 
                     //Exit if word like BYE requested program exit
-                    if (forth->engine.exit_program)
+                    if (forth->engine->exit_program)
                     {
                         return_command=COMMAND_EXIT;
-                        save_exit=forth->engine.exit_program;
+                        save_exit=forth->engine->exit_program;
                     }
 
                     //Show input line again
@@ -697,7 +703,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                             break;
                         case FORTH_ERROR_ENGINE:
                             //Error set in Forth engine - ie inside of primitive
-                            switch (forth->engine.error)
+                            switch (forth->engine->error)
                             {
                                 case FORTH_ENGINE_ERROR_NONE:
                                     //Should never happen but just in case
@@ -705,9 +711,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                     break;
                                 case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
                                 case FORTH_ENGINE_ERROR_COMPILE_ONLY:
-                                    if (forth->engine.error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
+                                    if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
                                         console_text_default("Word is interpret only: ",console);
-                                    else if (forth->engine.error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
+                                    else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
                                         console_text_default("Word is compile only: ",console);
                                     //All of these errors share code for printing out word that caused error
                                     uint32_t start=0;
@@ -721,14 +727,14 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                                     break;
                                 case FORTH_ENGINE_ERROR_UNDEFINED:
                                     console_text_default("Word not defined: ",console);
-                                    console_text_default(forth->engine.error_word,console);
+                                    console_text_default(forth->engine->error_word,console);
                                     console_text_default("\n",console);
                                     break;
                                 default:
                                     //No error message for error - should never reach here unless forgot to add error message
                                     console_text_default("Unhandled engine error: ",console);
                                     char num_buffer[TEXT_INT32_SIZE];
-                                    text_int32(forth->engine.error,num_buffer);
+                                    text_int32(forth->engine->error,num_buffer);
                                     console_text_default(num_buffer,console);
                                     console_text_default("\n",console);
                                     break;
@@ -751,7 +757,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
 
                     //Check compile state - definition can't be left open
-                    if (forth->engine.state==FORTH_STATE_COMPILE)
+                    if (forth->engine->state==FORTH_STATE_COMPILE)
                     {
                         //Definition left open - cancel word
                         struct ForthWordHeader *secondary=compile.words->header;
@@ -802,7 +808,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         //Restore target address pointer of word if it existed before
                         if (compile.colon_word_exists==true)
                         {
-                            if (compile.save_type==FORTH_SECONDARY_WORD) 
+                            if (compile.save_type!=FORTH_SECONDARY_UNDEFINED) 
                                 compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
                             else compile.colon_word->address=NULL;
                             compile.colon_word->offset=compile.save_offset;
@@ -819,7 +825,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                         }
 
                         //Back to interpret mode
-                        forth->engine.state=FORTH_STATE_INTERPRET;
+                        forth->engine->state=FORTH_STATE_INTERPRET;
                     }
                     break;
                 case VKEY_UP:
@@ -855,6 +861,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             //Save Forth stack memory before returning
             memcpy(forth->stack_copy,FORTH_STACK_ADDRESS,FORTH_STACK_SIZE);
             memcpy(forth->rstack_copy,FORTH_RSTACK_ADDRESS,FORTH_RSTACK_SIZE);
+
+            //Save Forth engine before returning
+            forth->engine_copy=*forth->engine;
 
             //Return to window manager to handle exit function which may be system key (switch window, etc)
             return return_command;

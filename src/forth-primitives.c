@@ -36,7 +36,14 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     struct ForthWordHeader *secondary=&engine->word_headers[index];
 
     //TODO: update function pointer when secondary is redefined? would eliminate if here but not sure if actually faster
-    if (secondary->type==FORTH_SECONDARY_WORD)
+    if (secondary->type==FORTH_SECONDARY_UNDEFINED)
+    {
+        //Error - word referenced in word but never defined
+        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=secondary->name;
+        engine->executing=false;
+    }
+    else
     {
         //Increase word index so tagged R-stack addresses can be linked to word they belong to
         engine->word_index++;
@@ -50,16 +57,8 @@ void prim_hidden_secondary(struct ForthEngine *engine)
         //Set new execution address to address of secondary stored in word header list
         engine->address=secondary->address;
 
-        //TODO: recompute?
         //Account for interpreter advancing execution address
         engine->address--;
-    }
-    else if (secondary->type==FORTH_SECONDARY_UNDEFINED)
-    {
-        //Error - word referenced in word but never defined
-        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
-        engine->error_word=secondary->name;
-        engine->executing=false;
     }
 }
 
@@ -396,6 +395,44 @@ void prim_body_dot(struct ForthEngine *engine)
         //Output number
         char text_buffer[TEXT_INT32_SIZE];
         text_int32(*engine->stack,text_buffer);
+        engine->print(text_buffer);
+        //Output space
+        engine->print(" ");
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+}
+
+//U_DOT
+void prim_body_u_dot(struct ForthEngine *engine)
+{
+    //Update stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->print!=NULL)
+    {
+        //Output number
+        char text_buffer[TEXT_UINT32_SIZE];
+        text_uint32(*engine->stack,text_buffer);
+        engine->print(text_buffer);
+        //Output space
+        engine->print(" ");
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+}
+
+//X_DOT
+void prim_body_x_dot(struct ForthEngine *engine)
+{
+    //Update stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->print!=NULL)
+    {
+        //Output number
+        char text_buffer[TEXT_HEX32_SIZE];
+        text_hex32(*engine->stack,text_buffer);
         engine->print(text_buffer);
         //Output space
         engine->print(" ");
@@ -875,6 +912,18 @@ void prim_body_c_r(struct ForthEngine *engine)
     }
 }
 
+//CONSTANT
+int prim_immediate_create(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_CREATE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_create(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
+}
+
 //DEPTH
 void prim_body_depth(struct ForthEngine *engine)
 {
@@ -1130,8 +1179,8 @@ void prim_body_l_shift(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
+    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
+    uint32_t arg2=*engine->stack;
     //Write result
     *(int32_t*)((engine->stack_base)|lower)=arg1<<arg2;
 }
@@ -1385,8 +1434,8 @@ void prim_body_r_shift(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
     //Fetch arguments
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
+    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
+    uint32_t arg2=*engine->stack;
     //Write result
     *(int32_t*)((engine->stack_base)|lower)=arg1>>arg2;
 }
@@ -1594,13 +1643,15 @@ int prim_optimize_until(struct ForthEngine *engine)
 }
 
 //VARIABLE
-void prim_body_variable(struct ForthEngine *engine){}
-int prim_immediate_variable(struct ForthEngine *engine){}
-int prim_compile_variable(struct ForthEngine *engine){}
-int prim_optimize_variable(struct ForthEngine *engine)
+int prim_immediate_variable(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_VARIABLE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_variable(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //WHILE
@@ -1654,13 +1705,15 @@ int prim_optimize_right_bracket(struct ForthEngine *engine)
 }
 
 //BRACKET_TICK
-void prim_body_bracket_tick(struct ForthEngine *engine){}
-int prim_immediate_bracket_tick(struct ForthEngine *engine){}
-int prim_compile_bracket_tick(struct ForthEngine *engine){}
-int prim_optimize_bracket_tick(struct ForthEngine *engine)
+int prim_compile_bracket_tick(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_BRACKET_TICK;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_immediate_bracket_tick(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
 
 //BRACKET_CHAR
@@ -1690,6 +1743,70 @@ void prim_body_dot_r(struct ForthEngine *engine)
         //Convert number to text
         char text_buffer[TEXT_INT32_SIZE];
         text_int32(value,text_buffer);
+        //Output leading spaces
+        if (strlen(text_buffer)>spaces) spaces=0;
+        else spaces-=strlen(text_buffer);
+        if (spaces>FORTH_MAX_SPACES) spaces=FORTH_MAX_SPACES;
+        for (uint32_t i=0;i<spaces;i++)
+            engine->print(" ");
+        //Output number
+        engine->print(text_buffer);
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+//U_DOT_R
+void prim_body_u_dot_r(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch arguments
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    uint32_t value=*(uint32_t*)((engine->stack_base)|lower);
+
+    if (engine->print!=NULL)
+    {
+        //Convert number to text
+        char text_buffer[TEXT_UINT32_SIZE];
+        text_uint32(value,text_buffer);
+        //Output leading spaces
+        if (strlen(text_buffer)>spaces) spaces=0;
+        else spaces-=strlen(text_buffer);
+        if (spaces>FORTH_MAX_SPACES) spaces=FORTH_MAX_SPACES;
+        for (uint32_t i=0;i<spaces;i++)
+            engine->print(" ");
+        //Output number
+        engine->print(text_buffer);
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+//X_DOT_R
+void prim_body_x_dot_r(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch arguments
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    uint32_t value=*(uint32_t*)((engine->stack_base)|lower);
+
+    if (engine->print!=NULL)
+    {
+        //Convert number to text
+        char text_buffer[TEXT_HEX32_SIZE];
+        text_hex32(value,text_buffer);
         //Output leading spaces
         if (strlen(text_buffer)>spaces) spaces=0;
         else spaces-=strlen(text_buffer);
@@ -1958,14 +2075,14 @@ void prim_body_dump(struct ForthEngine *engine)
                 //Print address
                 engine->print("\n");
                 char address_buffer[7]; //Six hex digits plus null terminator
-                text_hex32(address,address_buffer,6);
+                text_hex32_padded(address,address_buffer,6);
                 engine->print(address_buffer);
                 engine->print(":");
             }
             //Print byte
             uint8_t byte=*(engine->data+address);
             char text_buffer[3];    //Two hex digits per byte plus null terminator
-            text_hex32(byte,text_buffer,2);
+            text_hex32_padded(byte,text_buffer,2);
             engine->print(text_buffer);
             //Print characters for bytes
             byte_display[byte_index]=byte;
@@ -2144,6 +2261,72 @@ int prim_optimize_erase(struct ForthEngine *engine)
     return 0;
 }
 
+//CXT
+void prim_body_cxt(struct ForthEngine *engine)
+{
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    if (value&0x80) value|=0xFFFFFF00;
+    else value&=0xFF;
+    *(int32_t*)((engine->stack_base)|lower)=value;
+}
+int prim_optimize_cxt(struct ForthEngine *engine)
+{
+    engine=engine;
+    return 0;
+}
+
+//WXT
+void prim_body_wxt(struct ForthEngine *engine)
+{
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    if (value&0x8000) value|=0xFFFF0000;
+    else value&=0xFFFF;
+    *(int32_t*)((engine->stack_base)|lower)=value;
+}
+int prim_optimize_wxt(struct ForthEngine *engine)
+{
+    engine=engine;
+    return 0;
+}
+
+//PRIMITIVES
+int prim_immediate_primitives(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_PRIMITIVES;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_primitives(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
+}
+
+//SECONDARIES
+int prim_immediate_secondaries(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_SECONDARIES;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_secondaries(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
+}
+
+//UNDEFINED
+int prim_immediate_undefined(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_UNDEFINED;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_undefined(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
+}
+
 //Globals
 //=======
 const struct ForthPrimitive forth_primitives[]=
@@ -2163,6 +2346,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"W,",2,NULL,NULL,&prim_body_w_comma,&prim_optimize_w_comma},
     {"-",1,NULL,NULL,&prim_body_minus,&prim_optimize_minus},
     {".",1,NULL,NULL,&prim_body_dot,NULL},
+    {"U.",2,NULL,NULL,&prim_body_u_dot,NULL},
+    {"X.",2,NULL,NULL,&prim_body_x_dot,NULL},
     //{".\"",2,&prim_immediate_dot_quote,&prim_compile_dot_quote,&prim_body_dot_quote,&prim_optimize_dot_quote},
     {"/",1,NULL,NULL,&prim_body_slash,&prim_optimize_slash},
     {"/MOD",4,NULL,NULL,&prim_body_slash_mod,&prim_optimize_slash_mod},
@@ -2172,7 +2357,6 @@ const struct ForthPrimitive forth_primitives[]=
     {"=",1,NULL,NULL,&prim_body_equals,&prim_optimize_equals},
     {">",1,NULL,NULL,&prim_body_greater_than,&prim_optimize_greater_than},
     {">NUMBER",7,NULL,NULL,&prim_body_to_number,NULL},
-    //Shortcut for >NUMBER
     {">NUM",4,NULL,NULL,&prim_body_to_number,NULL},
     {"?DUP",4,NULL,NULL,&prim_body_question_dupe,&prim_optimize_question_dupe},
     {"@",1,NULL,NULL,&prim_body_fetch,&prim_optimize_fetch},
@@ -2191,9 +2375,9 @@ const struct ForthPrimitive forth_primitives[]=
     {"CELLS",5,NULL,NULL,&prim_body_cells,NULL},
     {"CHAR",4,&prim_immediate_char,&prim_compile_char,NULL,NULL},
     {"CONSTANT",8,&prim_immediate_constant,&prim_compile_constant,NULL,NULL},
-    //Shortcut for CONSTANT
     {"CONST",5,&prim_immediate_constant,&prim_compile_constant,NULL,NULL},
     {"CR",2,NULL,NULL,&prim_body_c_r,NULL},
+    {"CREATE",6,&prim_immediate_create,&prim_compile_create,NULL,NULL},
     {"DEPTH",5,NULL,NULL,&prim_body_depth,NULL},
     //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do,&prim_optimize_do},
     {"DROP",4,NULL,NULL,&prim_body_drop,&prim_optimize_drop},
@@ -2206,15 +2390,11 @@ const struct ForthPrimitive forth_primitives[]=
     {"HERE",4,NULL,NULL,&prim_body_here,NULL},
     //{"I",1,&prim_immediate_i,&prim_compile_i,&prim_body_i,&prim_optimize_i},
     //{"IF",2,&prim_immediate_if,&prim_compile_if,&prim_body_if,&prim_optimize_if},
-    //{"IMMEDIATE",9,&prim_immediate_immediate,&prim_compile_immediate,&prim_body_immediate,&prim_optimize_immediate},
-    //Shortcut for IMMEDIATE
-    //{"IMMED",5,&prim_immediate_immediate,&prim_compile_immediate,&prim_body_immediate,&prim_optimize_immediate},
     {"INVERT",6,NULL,NULL,&prim_body_invert,&prim_optimize_invert},
     //{"J",1,&prim_immediate_j,&prim_compile_j,&prim_body_j,&prim_optimize_j},
     {"KEY",3,NULL,NULL,&prim_body_key,NULL},
     //{"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,&prim_body_leave,&prim_optimize_leave},
     //{"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,&prim_body_literal,&prim_optimize_literal},
-    //Shortcut for LIT
     //{"LIT",3,&prim_immediate_literal,&prim_compile_literal,&prim_body_literal,&prim_optimize_literal},
     //{"LOOP",4,&prim_immediate_loop,&prim_compile_loop,&prim_body_loop,&prim_optimize_loop},
     {"LSHIFT",6,NULL,NULL,&prim_body_l_shift,&prim_optimize_l_shift},
@@ -2242,16 +2422,17 @@ const struct ForthPrimitive forth_primitives[]=
     {"U<",2,NULL,NULL,&prim_body_u_less_than,&prim_optimize_u_less_than},
     {"U>",2,NULL,NULL,&prim_body_u_greater_than,&prim_optimize_u_greater_than},
     //{"UNTIL",5,&prim_immediate_until,&prim_compile_until,&prim_body_until,&prim_optimize_until},
-    //{"VARIABLE",8,&prim_immediate_variable,&prim_compile_variable,&prim_body_variable,&prim_optimize_variable},
-    //Shortcut for VARIABLE
-    //{"VAR",3,&prim_immediate_variable,&prim_compile_variable,&prim_body_variable,&prim_optimize_variable},
+    {"VARIABLE",8,&prim_immediate_variable,&prim_compile_variable,NULL,NULL},
+    {"VAR",3,&prim_immediate_variable,&prim_compile_variable,NULL,NULL},
     //{"WHILE",5,&prim_immediate_while,&prim_compile_while,&prim_body_while,&prim_optimize_while},
     {"XOR",3,NULL,NULL,&prim_body_x_or,&prim_optimize_x_or},
     //{"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,&prim_body_left_bracket,&prim_optimize_left_bracket},
     //{"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,&prim_body_right_bracket,&prim_optimize_right_bracket},
-    //{"[']",3,&prim_immediate_bracket_tick,&prim_compile_bracket_tick,&prim_body_bracket_tick,&prim_optimize_bracket_tick},
+    {"[']",3,&prim_immediate_bracket_tick,&prim_compile_bracket_tick,NULL,NULL},
     {"[CHAR]",6,&prim_immediate_bracket_char,&prim_compile_bracket_char,NULL,NULL},
     {".R",2,NULL,NULL,&prim_body_dot_r,NULL},
+    {"U.R",3,NULL,NULL,&prim_body_u_dot_r,NULL},
+    {"X.R",3,NULL,NULL,&prim_body_x_dot_r,NULL},
     {"<>",2,NULL,NULL,&prim_body_not_equals,&prim_optimize_not_equals},
     //{"AGAIN",5,&prim_immediate_again,&prim_compile_again,&prim_body_again,&prim_optimize_again},
     //{"CASE",4,&prim_immediate_case,&prim_compile_case,&prim_body_case,&prim_optimize_case},
@@ -2275,23 +2456,25 @@ const struct ForthPrimitive forth_primitives[]=
 
     //digit?
     //:NONAME
-    //action to change data size
 
     //Words from here are not standard forth
     {"RESET",5,&prim_immediate_reset,&prim_compile_reset,NULL,NULL},
     {"WALIGN",6,NULL,NULL,&prim_body_walign,&prim_optimize_walign},
     {"WALIGNED",8,NULL,NULL,&prim_body_waligned,&prim_optimize_waligned},
     {"PRINTABLE",9,NULL,NULL,&prim_body_printable,NULL},
+    {"CXT",3,NULL,NULL,&prim_body_cxt,&prim_optimize_cxt},
+    {"WXT",3,NULL,NULL,&prim_body_wxt,&prim_optimize_wxt},
+    {"PRIMITIVES",10,&prim_immediate_primitives,&prim_compile_primitives,NULL,NULL},
+    {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL,NULL},
+    {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL,NULL},
 
+    //action to change data size
     //help
     //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
     //. for unsigned (u. and u.r?) and hex since no BASE
+    //- h.? x.?
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
-    //cxt
-    //wxt
-    //primitives (like WORDS)
-    //also UNDEFINED
     //COLD or equivalent
 
     //May add but not sure yet

@@ -158,15 +158,14 @@ int forth_key_remap(int key)
     //Remap keys for characters not on keypad
     if (key==VKEY_RADIAN) key=VKEY_EXCLAMATION;
     else if (key==VKEY_THETA) key=VKEY_AT;
-    else if (key==VKEY_LN) key=VKEY_APOSTROPHE;
-    else if (key==VKEY_SIN) key=VKEY_QUESTION;
-    else if (key==VKEY_COS) key=VKEY_COLON;
-    else if (key==VKEY_TAN) key=VKEY_SEMICOLON;
+    else if (key==VKEY_LN) key=VKEY_COLON;
+    else if (key==VKEY_SIN) key=VKEY_SEMICOLON;
+    else if (key==VKEY_COS) key=VKEY_APOSTROPHE;
+    else if (key==VKEY_TAN) key=VKEY_QUESTION;
     else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
     else if (key==VKEY_PI) key=VKEY_GREATER_THAN;
-
     //Remap existing keys on keypad for convenience
-    if (key==VKEY_XOT) key=VKEY_x;
+    else if (key==VKEY_XOT) key=VKEY_x;
     else if (key==VKEY_NEG) key=VKEY_SPACE;
 
     return key;

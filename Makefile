@@ -20,6 +20,11 @@ debug: $(BUILD_DIR)/$(PROJECT)
 	gdbserver localhost:2345 ./$(BUILD_DIR)/$(PROJECT) &
 	gdb ./$(BUILD_DIR)/$(PROJECT) -x gdb-options.txt
 
+log: $(BUILD_DIR)/$(PROJECT)
+	-./$(BUILD_DIR)/$(PROJECT)
+	cat log.txt
+	ls -l log.txt | awk '{print "Log file size: " $$5}'
+
 $(BUILD_DIR)/$(PROJECT): $(OBJS)
 	$(CC) -o $(BUILD_DIR)/$(PROJECT) $^ $(CLFAGS) $(LIBS)
 

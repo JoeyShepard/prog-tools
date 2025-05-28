@@ -196,7 +196,7 @@ const int key_shifted[]=
     VKEY_E_X,           //VKEY_LN       -> VKEY_E_X
     VKEY_ASIN,          //VKEY_SIN      -> VKEY_ASIN
     VKEY_ACOS,          //VKEY_COS      -> VKEY_ACOS
-    VKEY_ATAN,          //VKEY_TA       -> VKEY_ATAN
+    VKEY_ATAN,          //VKEY_TAN      -> VKEY_ATAN
     VKEY_A_LOCK,        //VKEY_ALPHA    -> VKEY_A_LOCK
     VKEY_SQRT,          //VKEY_SQUARE   -> VKEY_SQRT
     VKEY_X_ROOT,        //VKEY_POWER    -> VKEY_X_ROOT
@@ -705,6 +705,8 @@ int sys_key_handler(int key)
             return COMMAND_TAB1+key-VKEY_F1;
         case VKEY_ANGLE:
             //shift+XOT - switch selected window split
+            //Fallthrough!
+        case VKEY_FRAC:
             return COMMAND_SWAP;
             break;
         default:

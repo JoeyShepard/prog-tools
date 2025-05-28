@@ -17,13 +17,22 @@
     #define FORTH_RSTACK_SIZE       (FORTH_RSTACK_ELEMENT_SIZE*FORTH_RSTACK_ELEMENTS)
     #define FORTH_LOCALS_SIZE       (FORTH_CELL_SIZE*FORTH_LOCALS_ELEMENTS)
 
+    //Offset past FORTH_COMPAT_STACKS where stacks start
     #define FORTH_STACK_OFFSET      0
+    //Forth data stack
     #define FORTH_STACK_ADDRESS     (FORTH_COMPAT_STACKS+FORTH_STACK_OFFSET)
     #define FORTH_STACK_END         (FORTH_STACK_ADDRESS+FORTH_STACK_SIZE)
+    //Forth return stack
     #define FORTH_RSTACK_ADDRESS    FORTH_STACK_END
     #define FORTH_RSTACK_END        (FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE)
+    //Forth locals stack
     #define FORTH_LOCALS_ADDRESS    FORTH_RSTACK_END
     #define FORTH_LOCALS_END        (FORTH_LOCALS_ADDRESS+FORTH_LOCALS_SIZE)
+    //Forth engine memory - should be in fastest memory with stacks
+    struct ForthEngine; //Forward declaration
+    #define FORTH_ENGINE_ADDRESS    FORTH_LOCALS_END
+    #define FORTH_ENGINE_END        (FORTH_ENGINE_ADDRESS+sizeof(struct ForthEngine))
+    //MEMORY MAY BE UNALIGNED HERE! struct ForthEngine size divisible by largest member so probably fine but just in case
 
     //Masks for wrapping stack addresses
     #define FORTH_STACK_MASK        (FORTH_STACK_SIZE-1)
@@ -38,12 +47,18 @@
     {
         FORTH_ACTION_NONE,
         FORTH_ACTION_BRACKET_CHAR,
+        FORTH_ACTION_BRACKET_TICK,
         FORTH_ACTION_CHAR,
         FORTH_ACTION_COLON,
         FORTH_ACTION_CONSTANT,
+        FORTH_ACTION_CREATE,
         FORTH_ACTION_PAREN,
+        FORTH_ACTION_PRIMITIVES,
+        FORTH_ACTION_SECONDARIES,
         FORTH_ACTION_SEMICOLON,
         FORTH_ACTION_TICK,
+        FORTH_ACTION_UNDEFINED,
+        FORTH_ACTION_VARIABLE,
         FORTH_ACTION_WORDS,
     };
 
@@ -76,6 +91,8 @@
     enum ForthSecondaryType
     {
         FORTH_SECONDARY_WORD,
+        FORTH_SECONDARY_CONSTANT,
+        FORTH_SECONDARY_CREATE,
         FORTH_SECONDARY_VARIABLE,
         FORTH_SECONDARY_UNDEFINED
     };
@@ -116,19 +133,20 @@
         uint32_t data_mask_16;
         uint32_t data_mask_32;
 
-        //Compilation
-        bool state;
-        bool in_bracket;
-        int word_action;
-
+        //TODO: see assembly - may need to change order so SH4 doesn't try to load byte by byte
         //Execution
+        void (**address)(struct ForthEngine *engine);
         bool executing;
         bool exit_program;
-        void (**address)(struct ForthEngine *engine);
         uint32_t word_index;
         struct ForthWordHeader *word_headers;
         uint8_t *word_bodies;
         const char *error_word;
+
+        //Compilation
+        bool state;
+        bool in_bracket;
+        int word_action;
 
         //Errors - compilation or state error
         int error;
@@ -168,8 +186,8 @@
     //=========
     void forth_init_engine(struct ForthEngine *engine,
         //Stacks
-        uintptr_t stack_base,
-        struct ForthRStackElement *rstack_base,
+        void *stack_base,
+        void *rstack_base,
         uint32_t stack_count,
         uint32_t rstack_count,
         //Data area

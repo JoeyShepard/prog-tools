@@ -40,31 +40,6 @@
         FORTH_CONTROL_ELSE,
     };
 
-    
-    struct ForthCompileInfo
-    {
-        const char *error_word;
-        uint8_t *data;
-        struct ForthDefinitionsInfo *definitions;
-        struct ForthWordHeaderInfo *words;
-        struct ForthWordNameInfo *word_names;
-        struct ForthControlElement *control_stack;
-        uint8_t *heap_ptr;
-        int primitive_ID;
-        struct ForthWordHeader *secondary;
-        uint32_t secondary_index;
-        uint32_t word_len;
-        struct ForthWordHeader *colon_word;
-        uint32_t colon_word_index;
-        bool colon_word_exists;
-        uint32_t delete_offset;
-        uint32_t delete_size;
-        uint32_t save_offset;
-        uint32_t save_definition_size;
-        uint8_t save_type;
-    };
-
-    //TODO: Alignment of multi-line declarations after adding ForthCompileInfo struct (what did I mean by this?)
     uint32_t align4(uint32_t value);
     int classify_char(char c);
     int classify_word(const char *word);

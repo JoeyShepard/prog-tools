@@ -10,6 +10,7 @@
 static uint8_t font_5x8[]=
 {
     //Custom characters
+    0x10,0x20,0x40,0x7E,0x2,              // Root symbol
     8,8,0x3E,0x1C,8,                      // Right arrow symbol from keypad   
     0xFF,0xFF,0xFF,0xFF,0xFF,             // Solid block cursor
 
@@ -363,7 +364,31 @@ void text_int32(int32_t num, char *text)
     }
 }
 
-void text_hex32(uint32_t num, char *text, int digits)
+void text_uint32(uint32_t num, char *text)
+{
+    int32_t divider=1000000000;
+    bool digit_found=false;
+    *text=0;
+    while (divider)
+    {
+        if ((num/divider)||(digit_found))
+        {
+            *text='0'+num/divider;
+            text++;
+            *text=0;
+            num%=divider;
+            digit_found=true;
+        }
+        divider/=10;
+    }
+    if (digit_found==false)
+    {
+        *text='0';
+        *(text+1)=0;
+    }
+}
+
+void text_hex32_padded(uint32_t num, char *text, int digits)
 {
     for (int i=(digits-1);i>=0;i--)
     {
@@ -374,6 +399,33 @@ void text_hex32(uint32_t num, char *text, int digits)
         num/=0x10;
     }
     text[digits]=0;
+}
+
+void text_hex32(uint32_t num, char *text)
+{
+    uint32_t divider=0x10000000;
+    bool digit_found=false;
+    *text=0;
+    while (divider)
+    {
+        if ((num/divider)||(digit_found))
+        {
+            char digit=num/divider;
+            if (digit<10) digit+='0';
+            else digit+='A'-10;
+            *text=digit;
+            text++;
+            *text=0;
+            num%=divider;
+            digit_found=true;
+        }
+        divider/=0x10;
+    }
+    if (digit_found==false)
+    {
+        *text='0';
+        *(text+1)=0;
+    }
 }
 
 void text_int32_commas(int32_t num, char *text)

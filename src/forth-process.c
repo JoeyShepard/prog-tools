@@ -11,6 +11,7 @@
 #include "forth-actions.h"
 #include "forth-primitives.h"
 #include "forth-process.h"
+#include "logging.h"
 #include "mem.h"
 
 
@@ -279,8 +280,14 @@ int32_t hex32_text(const char *word_buffer)
 
 int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_EXPAND_DEFINITIONS,"expand_definitions");
+
     if (compile->definitions->bytes_left<size)
     {
+        //Logging
+        log_text("expanding\n");
+
         //Not enough memory left in dictionary - expand memory
         int result=expand_object(FORTH_MEM_DEFINITIONS,FORTH_ID_DEFINITIONS,compile->heap_ptr);
         if (result!=ERROR_NONE)
@@ -301,12 +308,23 @@ int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
         //Update pointers since shifted by expand_object above
         update_compile_pointers(compile);
     }
+    else
+    {
+        log_text("not expanding\n");
+    }
+
+    //Logging
+    log_pop();
+
     return FORTH_ERROR_NONE;
 }
 
 //Function pointer here should be 32 bit on calculator so write_dict_u32 would work but adding this for testing on x86.
 int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_WRITE_DEF_PRIM,"write_definition_primitive");
+
     //Expand definitions memory if necessary
     int result=expand_definitions(sizeof(word),compile);
     if (result!=FORTH_ERROR_NONE) return result;
@@ -320,6 +338,9 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct F
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(word);
+
+    //Logging
+    log_pop();
     
     return FORTH_ERROR_NONE;
 }
@@ -362,10 +383,17 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
+//TODO: move to forth-engine.c
 int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
+
     //Error if secondary has header but hasn't been defined
-    if (compile->secondary->type==FORTH_SECONDARY_WORD)
+    if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
+    {
+        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=compile->secondary->name;
+    }
+    else
     {
         //Prepare engine to run secondary
         forth_engine_pre_exec(engine);
@@ -378,17 +406,26 @@ int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compil
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
         forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
         
+        //Logging
+        log_push(LOGGING_FORTH_EXECUTE_SECONDARY,"execute_secondary");
+
         //Execute primitives
         while(engine->executing)
         {
+            //Logging
+            log_text("address: %p [",engine->address);
+            log_bytes(engine->address,32);
+            log_text_raw("]\n");
+            log_primitive(engine->address,compile); 
+            log_text_raw("\n");
+
+            //Jump to primitive function
             (*engine->address)(engine);
             engine->address++;
         }
-    }
-    else if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
-    {
-        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
-        engine->error_word=compile->secondary->name;
+
+        //Stop logging
+        log_pop();
     }
 
     //Flag error if any
@@ -451,15 +488,15 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     }
     
     //Write new word info to header
-    if (word_type==FORTH_SECONDARY_WORD)
-    {
-        secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
-        secondary->offset=compile->definitions->index;
-    }
-    else
+    if (word_type==FORTH_SECONDARY_UNDEFINED)
     {
         secondary->address=0;
         secondary->offset=0;
+    }
+    else
+    {
+        secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        secondary->offset=compile->definitions->index;
     }
     secondary->definition_size=0;
     secondary->name_offset=compile->word_names->index;
@@ -588,9 +625,29 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_CREATE:
+                            {
+                                int result=action_create(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_PRIMITIVES:
+                            {
+                                bool first_word=true;
+                                int line_characters=0;
+                                action_primitives(engine,&first_word,&line_characters,true,compile);
+                                break;
+                            }
+                            case FORTH_ACTION_SECONDARIES:
+                            {
+                                bool first_word=true;
+                                int line_characters=0;
+                                action_secondaries(engine,&first_word,&line_characters,true,true,compile);
+                                break;
+                            }
                             case FORTH_ACTION_TICK:
                             {
                                 //Find ID or primitive and secondary if it exists
@@ -602,9 +659,28 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 forth_push(engine,index);
                                 break;
                             }
-                            case FORTH_ACTION_WORDS:
-                                action_words(engine,compile->words);
+                            case FORTH_ACTION_UNDEFINED:
+                            {
+                                bool first_word=true;
+                                int line_characters=0;
+                                action_secondaries(engine,&first_word,&line_characters,false,true,compile);
                                 break;
+                            }
+                            case FORTH_ACTION_VARIABLE:
+                            {
+                                int result=action_variable(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_WORDS:
+                            {
+                                bool first_word=true;
+                                int line_characters=0;
+                                action_primitives(engine,&first_word,&line_characters,false,compile);
+                                action_secondaries(engine,&first_word,&line_characters,true,false,compile);
+                                action_secondaries(engine,&first_word,&line_characters,false,true,compile);
+                                break;
+                            }
                         }
                     }
                     else
@@ -650,6 +726,10 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
+                    //Logging
+                    log_push(LOGGING_FORTH_COMPILE_PRIMITIVE,"Compile primitive");
+                    log_text("name: %s\n",forth_primitives[compile->primitive_ID].name);
+                    
                     //Primitive
                     int (*compile_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].compile;
                     if (compile_func!=NULL)
@@ -673,8 +753,26 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         {
                             case FORTH_ACTION_BRACKET_CHAR:
                             {
+                                //Find value of first character in next word
                                 int32_t index;
                                 int result=action_char_common(source,&start,&index,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Write code to push value to stack
+                                result=write_definition_primitive(&prim_hidden_push,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=write_definition_i32(index,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_BRACKET_TICK:
+                            {
+                                //Find ID or primitive and secondary if it exists
+                                uint32_t index;
+                                int result=action_tick_common(source,&start,&index,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Write code to push value to stack
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 result=write_definition_primitive(&prim_hidden_push,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
@@ -693,26 +791,30 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     }
                     else
                     {
+                        //Logging
+                        log_text("body only\n"); 
+
                         //No special compile behavior - compile address
                         int result=write_definition_primitive(forth_primitives[compile->primitive_ID].body,compile);
                         if (result!=FORTH_ERROR_NONE) return result;
                     }
+
+                    //Stop logging
+                    log_pop();
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
                     //Compile pointer to pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-
                     result=write_definition_u32(compile->secondary->ID,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
                 {
-
-                    //Save copy of address of header where new word will be
-                    struct ForthWordHeader *secondary=compile->words->header+compile->words->index;
-
+                    //Save copy of index of header where new word will be
+                    uint16_t new_index=compile->words->index;
+                    
                     //Unknown symbol - add word header but don't error
                     int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
@@ -720,7 +822,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     //Compile pointer to pointer to secondary
                     result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32(secondary->ID,compile);
+                    result=write_definition_u32(new_index,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                 }
             }
@@ -733,6 +835,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
 
 void update_compile_pointers(struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_UPDATE_COMP_PTRS,"update_compile_pointers");
+
     //Fetch pointer to definitions but change below after updating word headers pointer
     struct ForthDefinitionsInfo *new_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile->heap_ptr);
 
@@ -783,5 +888,8 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
 
     //Update pointer to control stack
     compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+
+    //Logging
+    log_pop();
 }
 

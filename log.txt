@@ -1,0 +1,2783 @@
+
+
+RESTARTED LOGGING
+=================
+1 Should always show TEST
+6 Should always show TEST
+11 Should always show TEST
+12 A - should show
+- 13 under A 5==5
+14 - should show
+- 15 under B p==0x63df34375df0
+
+
+LOGGING RESTARTED
+=================
+1 Should always show TEST
+6 Should always show TEST
+11 Should always show TEST
+12 A - should show
+- 13 under A 5==5
+14 - should show
+- 15 under B p==0x6059b0afcdf0
+
+
+LOGGING RESTARTED
+=================
+1 Should always show TEST
+2 A - should show
+- 3 under A 5==5
+6 Should always show TEST
+11 Should always show TEST
+12 A - should show
+- 13 under A 5==5
+14 - should show
+- 15 under B p==0x583008a03df0
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+prim_hidden_push
+prim_hidden_done
+execute_secondary
+prim_hidden_secondary
+- index: 1
+- a
+'
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push
+- prim_hidden_done
+execute_secondary
+- prim_hidden_secondary
+- index: 1
+- a
+- '
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- - prim_hidden_push (0x56fecbfe0e60)
+- prim_hidden_done (0x56fecbfe0f10)
+execute_secondary
+- - prim_hidden_secondary (0x56fecbfe0e90)
+  - index: 1
+  - a
+- '
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- prim_hidden_push (0x55fe5581ae60)
+- prim_hidden_done (0x55fe5581af10)
+execute_secondary
+- prim_hidden_secondary (0x55fe5581ae90)
+  - index: 1
+  - a
+- ' ((nil))
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+address: 0x7e6992208ea0 [60 FFFFFFDE FFFFFFFE FFFFFFA4 FFFFFFB8 60 00 00 00 00 00 00 10 FFFFFFDF FFFFFFFE FFFFFFA4 ]
+- prim_hidden_push (0x60b8a4fede60)
+address: 0x7e6992208eac [10 FFFFFFDF FFFFFFFE FFFFFFA4 FFFFFFB8 60 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x60b8a4fedf10)
+execute_secondary
+address: 0x7e6992208e78 [FFFFFF90 FFFFFFDE FFFFFFFE FFFFFFA4 FFFFFFB8 60 00 00 01 00 00 00 FFFFFFF0 FFFFFFC1 FFFFFFFE FFFFFFA4 ]
+- prim_hidden_secondary (0x60b8a4fede90)
+  - index: 1
+  - a
+address: 0x7e6992208e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 ]
+- ' ((nil))
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7bc5c1c08ea0 [60 1E BC 8D 8D 5F 00 00 00 00 00 00 10 1F BC 8D ]
+- prim_hidden_push (0x5f8d8dbc1e60)
+
+- address: 0x7bc5c1c08eac [10 1F BC 8D 8D 5F 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5f8d8dbc1f10)
+
+execute_secondary
+- address: 0x7bc5c1c08e78 [90 1E BC 8D 8D 5F 00 00 01 00 00 00 F0 01 BC 8D ]
+- prim_hidden_secondary (0x5f8d8dbc1e90)
+  - index: 1
+  - a
+
+- address: 0x7bc5c1c08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x70df7a208ea0 [60 1E BE 57 5C 5C 00 00 00 00 00 00 10 1F BE 57 5C 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5c5c57be1e60)
+
+- address: 0x70df7a208eac [10 1F BE 57 5C 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5c5c57be1f10)
+
+execute_secondary
+- address: 0x70df7a208e78 [90 1E BE 57 5C 5C 00 00 01 00 00 00 F0 01 BE 57 5C 5C 00 00 60 1E BE 57 5C 5C 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5c5c57be1e90)
+  - index: 1
+  - a
+
+- address: 0x70df7a208e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 1E BE 57 5C 5C 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x71bb21208e78 [F0 01 07 5B 8C 55 00 00 10 1F 07 5B 8C 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- @ (0x558c5b0701f0)
+
+- address: 0x71bb21208e80 [10 1F 07 5B 8C 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x558c5b071f10)
+
+
+
+LOGGING RESTARTED
+=================
+- Heading A- 
+- sub A
+-   - Heading B- 
+- sub B
+  -     -     - Heading C  - 
+  - sub C
+
+
+LOGGING RESTARTED
+=================
+Heading A
+- sub A
+-   Heading B
+- sub B
+  -     -   Heading C
+  - sub C
+
+
+LOGGING RESTARTED
+=================
+Heading A
+! sub A
+  Heading B
+! sub B
+    Heading C
+  ! sub C
+
+
+LOGGING RESTARTED
+=================
+Heading A
+- sub A
+  Heading B
+- sub B
+    Heading C
+  - sub C
+  - sub C2
+  - sub B2
+  - sub A2
+  - sub none
+
+
+LOGGING RESTARTED
+=================
+Heading A
+- sub A
+  Heading B
+- sub B
+    Heading C
+  - sub C
+  - sub C2
+- sub B2
+- sub A2
+sub none
+
+
+LOGGING RESTARTED
+=================
+Heading A
+- sub A
+  Heading B
+  - sub B
+    Heading C
+    - sub C
+    - sub C2
+  - sub B2
+- sub A2
+sub none
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- - address: 0x78a53d208ea0 [- 60 - EE - B1 - D5 - 15 - 5E - 00 - 00 - 00 - 00 - 00 - 00 - 10 - EF - B1 - D5 - 15 - 5E - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - ]
+- - prim_hidden_push (0x5e15d5b1ee60)
+- 
+- - address: 0x78a53d208eac [- 10 - EF - B1 - D5 - 15 - 5E - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - ]
+- - prim_hidden_done (0x5e15d5b1ef10)
+- 
+execute_secondary
+- - address: 0x78a53d208e78 [- 90 - EE - B1 - D5 - 15 - 5E - 00 - 00 - 01 - 00 - 00 - 00 - F0 - D1 - B1 - D5 - 15 - 5E - 00 - 00 - 60 - EE - B1 - D5 - 15 - 5E - 00 - 00 - 05 - 00 - 00 - 00 - ]
+- - prim_hidden_secondary (0x5e15d5b1ee90)
+-   - index: 1
+-   - a
+- 
+- - address: 0x78a53d208e64 [- 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00 - 04 - 20 - 00 - 00 - 30 - 00 - 00 - 00 - 48 - 00 - 00 - 00 - 90 - EE - B1 - D5 - 15 - 5E - 00 - 00 - 01 - 00 - 00 - 00 - ]
+- - ' ((nil))
+- 
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- - address: 0x7e8806408ea0 [60 1E 42 5B 3C 57 00 00 00 00 00 00 10 1F 42 5B 3C 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 - ]
+- prim_hidden_push (0x573c5b421e60)
+- 
+- - address: 0x7e8806408eac [10 1F 42 5B 3C 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 - ]
+- prim_hidden_done (0x573c5b421f10)
+- 
+execute_secondary
+- - address: 0x7e8806408e78 [90 1E 42 5B 3C 57 00 00 01 00 00 00 F0 01 42 5B 3C 57 00 00 60 1E 42 5B 3C 57 00 00 05 00 00 00 - ]
+- prim_hidden_secondary (0x573c5b421e90)
+-   index: 1
+-   a
+- 
+- - address: 0x7e8806408e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 1E 42 5B 3C 57 00 00 01 00 00 00 - ]
+- ' ((nil))
+- 
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- - address: 0x76400c608ea0 [60 FE 46 36 16 5C 00 00 00 00 00 00 10 FF 46 36 16 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5c163646fe60)
+
+- - address: 0x76400c608eac [10 FF 46 36 16 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5c163646ff10)
+
+execute_secondary
+- - address: 0x76400c608e78 [90 FE 46 36 16 5C 00 00 01 00 00 00 F0 E1 46 36 16 5C 00 00 60 FE 46 36 16 5C 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5c163646fe90)
+-   index: 1
+-   a
+
+- - address: 0x76400c608e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 FE 46 36 16 5C 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7c2d79e08ea0 [60 AE 64 AC 39 57 00 00 00 00 00 00 10 AF 64 AC 39 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5739ac64ae60)
+
+- address: 0x7c2d79e08eac [10 AF 64 AC 39 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5739ac64af10)
+
+execute_secondary
+- address: 0x7c2d79e08e78 [90 AE 64 AC 39 57 00 00 01 00 00 00 F0 91 64 AC 39 57 00 00 60 AE 64 AC 39 57 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5739ac64ae90)
+-   index: 1
+-   a
+
+- address: 0x7c2d79e08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 AE 64 AC 39 57 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7d5c4be08ea0 [60 6E 50 71 B3 5C 00 00 00 00 00 00 10 6F 50 71 B3 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5cb371506e60)
+
+- address: 0x7d5c4be08eac [10 6F 50 71 B3 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5cb371506f10)
+
+execute_secondary
+- address: 0x7d5c4be08e78 [90 6E 50 71 B3 5C 00 00 01 00 00 00 F0 51 50 71 B3 5C 00 00 60 6E 50 71 B3 5C 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5cb371506e90)
+-   index: 1
+-   a
+
+- address: 0x7d5c4be08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 6E 50 71 B3 5C 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7a0c13a08ea0 [60 6E 5C 71 8A 5E 00 00 00 00 00 00 10 6F 5C 71 8A 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5e8a715c6e60)
+
+- address: 0x7a0c13a08eac [10 6F 5C 71 8A 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5e8a715c6f10)
+
+execute_secondary
+- address: 0x7a0c13a08e78 [90 6E 5C 71 8A 5E 00 00 01 00 00 00 F0 51 5C 71 8A 5E 00 00 60 6E 5C 71 8A 5E 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5e8a715c6e90)
+-   index: 1
+-   a
+
+- address: 0x7a0c13a08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 6E 5C 71 8A 5E 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7feec6808ea0 [60 3E 20 9F 89 61 00 00 00 00 00 00 10 3F 20 9F 89 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x61899f203e60)
+
+- address: 0x7feec6808eac [10 3F 20 9F 89 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x61899f203f10)
+
+execute_secondary
+- address: 0x7feec6808e78 [90 3E 20 9F 89 61 00 00 01 00 00 00 F0 21 20 9F 89 61 00 00 60 3E 20 9F 89 61 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x61899f203e90)
+-   index: 1
+-   a
+
+- address: 0x7feec6808e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 3E 20 9F 89 61 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7b99a3008ea0 [60 5E 76 15 0E 60 00 00 00 00 00 00 10 5F 76 15 0E 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x600e15765e60)
+
+- address: 0x7b99a3008eac [10 5F 76 15 0E 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x600e15765f10)
+
+execute_secondary
+- address: 0x7b99a3008e78 [90 5E 76 15 0E 60 00 00 01 00 00 00 F0 41 76 15 0E 60 00 00 60 5E 76 15 0E 60 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x600e15765e90)
+-   index: 1
+-   a
+
+- address: 0x7b99a3008e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 5E 76 15 0E 60 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x7ef798a08ea0 [60 4E B0 20 37 57 00 00 00 00 00 00 10 4F B0 20 37 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x573720b04e60)
+
+- address: 0x7ef798a08eac [10 4F B0 20 37 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x573720b04f10)
+
+execute_secondary
+- address: 0x7ef798a08e78 [90 4E B0 20 37 57 00 00 01 00 00 00 F0 31 B0 20 37 57 00 00 60 4E B0 20 37 57 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x573720b04e90)
+-   index: 1
+-   a
+
+- address: 0x7ef798a08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 4E B0 20 37 57 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x78ff59808ea0 [60 AE C2 23 37 5E 00 00 00 00 00 00 10 AF C2 23 37 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5e3723c2ae60)
+
+- address: 0x78ff59808eac [10 AF C2 23 37 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5e3723c2af10)
+
+execute_secondary
+- address: 0x78ff59808e78 [90 AE C2 23 37 5E 00 00 01 00 00 00 F0 91 C2 23 37 5E 00 00 60 AE C2 23 37 5E 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5e3723c2ae90)
+-   index: 1
+-   a
+
+- address: 0x78ff59808e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 AE C2 23 37 5E 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+execute_secondary
+- address: 0x731b88208ea0 [60 FE EC 6D 4C 60 00 00 00 00 00 00 10 FF EC 6D 4C 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x604c6decfe60)
+
+- address: 0x731b88208eac [10 FF EC 6D 4C 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x604c6decff10)
+
+execute_secondary
+- address: 0x731b88208e78 [90 FE EC 6D 4C 60 00 00 01 00 00 00 F0 E1 EC 6D 4C 60 00 00 60 FE EC 6D 4C 60 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x604c6decfe90)
+-   index: 1
+-   a
+
+- address: 0x731b88208e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 FE EC 6D 4C 60 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+Compile primitive
+- name: X.R
+Compile primitive
+- name: ;
+execute_secondary
+- address: 0x7ee357e08ea0 [60 8E 9D 79 7E 5F 00 00 00 00 00 00 10 8F 9D 79 7E 5F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5f7e799d8e60)
+
+- address: 0x7ee357e08eac [10 8F 9D 79 7E 5F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5f7e799d8f10)
+
+Compile primitive
+- name: @
+Compile primitive
+- name: X.R
+Compile primitive
+- name: ;
+execute_secondary
+- address: 0x7ee357e08e78 [90 8E 9D 79 7E 5F 00 00 01 00 00 00 F0 71 9D 79 7E 5F 00 00 60 8E 9D 79 7E 5F 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5f7e799d8e90)
+-   index: 1
+-   a
+
+- address: 0x7ee357e08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 8E 9D 79 7E 5F 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+
+  expand_definitions
+expand_definitions
+write_definition_primitive
+
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+
+    expand_definitions
+write_definition_primitive
+
+  expand_definitions
+expand_definitions
+write_definition_primitive
+
+  expand_definitions
+execute_secondary
+- address: 0x72c8af608ea0 [60 6E 6A B5 E4 61 00 00 00 00 00 00 10 6F 6A B5 E4 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x61e4b56a6e60)
+
+- address: 0x72c8af608eac [10 6F 6A B5 E4 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x61e4b56a6f10)
+
+write_definition_primitive
+
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+
+    expand_definitions
+write_definition_primitive
+
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+
+    expand_definitions
+execute_secondary
+- address: 0x72c8af608e78 [90 6E 6A B5 E4 61 00 00 01 00 00 00 F0 51 6A B5 E4 61 00 00 60 6E 6A B5 E4 61 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x61e4b56a6e90)
+-   index: 1
+-   a
+
+- address: 0x72c8af608e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 6E 6A B5 E4 61 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+write_definition_primitive
+  expand_definitions
+execute_secondary
+- address: 0x7a81c6608ea0 [60 0E 88 C8 57 5C 00 00 00 00 00 00 10 0F 88 C8 57 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5c57c8880e60)
+
+- address: 0x7a81c6608eac [10 0F 88 C8 57 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5c57c8880f10)
+
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+execute_secondary
+- address: 0x7a81c6608e78 [90 0E 88 C8 57 5C 00 00 01 00 00 00 F0 F1 87 C8 57 5C 00 00 60 0E 88 C8 57 5C 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5c57c8880e90)
+-   index: 1
+-   a
+
+- address: 0x7a81c6608e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 0E 88 C8 57 5C 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+  expand_definitions
+expand_definitions
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+    expand_definitions
+Compile primitive
+- name: ;
+    expand_definitions
+  expand_definitions
+expand_definitions
+  expand_definitions
+execute_secondary
+- address: 0x7982b1a08ea0 [60 BE D5 97 97 5C 00 00 00 00 00 00 10 BF D5 97 97 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5c9797d5be60)
+
+- address: 0x7982b1a08eac [10 BF D5 97 97 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5c9797d5bf10)
+
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: @
+- body only
+    expand_definitions
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+    expand_definitions
+Compile primitive
+- name: ;
+    expand_definitions
+execute_secondary
+- address: 0x7982b1a08e78 [90 BE D5 97 97 5C 00 00 01 00 00 00 F0 A1 D5 97 97 5C 00 00 60 BE D5 97 97 5C 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5c9797d5be90)
+-   index: 1
+-   a
+
+- address: 0x7982b1a08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 BE D5 97 97 5C 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+expand_definitions
+expand_definitions
+expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  expand_definitions
+Compile primitive
+- name: ;
+  expand_definitions
+expand_definitions
+expand_definitions
+expand_definitions
+execute_secondary
+- address: 0x7625bb608ea0 [60 DE 32 56 92 63 00 00 00 00 00 00 10 DF 32 56 92 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x63925632de60)
+
+- address: 0x7625bb608eac [10 DF 32 56 92 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x63925632df10)
+
+expand_definitions
+expand_definitions
+Compile primitive
+- name: @
+- body only
+  expand_definitions
+expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  expand_definitions
+Compile primitive
+- name: ;
+  expand_definitions
+execute_secondary
+- address: 0x7625bb608e78 [90 DE 32 56 92 63 00 00 01 00 00 00 F0 C1 32 56 92 63 00 00 60 DE 32 56 92 63 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x63925632de90)
+-   index: 1
+-   a
+
+- address: 0x7625bb608e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 DE 32 56 92 63 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+write_definition_primitive
+  expand_definitions
+execute_secondary
+- address: 0x782126008ea0 [60 FE 17 0C CE 56 00 00 00 00 00 00 10 FF 17 0C CE 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x56ce0c17fe60)
+
+- address: 0x782126008eac [10 FF 17 0C CE 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x56ce0c17ff10)
+
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+write_definition_primitive
+  expand_definitions
+expand_definitions
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+execute_secondary
+- address: 0x782126008e78 [90 FE 17 0C CE 56 00 00 01 00 00 00 F0 E1 17 0C CE 56 00 00 60 FE 17 0C CE 56 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x56ce0c17fe90)
+-   index: 1
+-   a
+
+- address: 0x782126008e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 FE 17 0C CE 56 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x737f42008ea0 [60 9E D0 FC 09 61 00 00 00 00 00 00 10 9F D0 FC 09 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x6109fcd09e60)
+
+- address: 0x737f42008eac [10 9F D0 FC 09 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x6109fcd09f10)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x737f42008e78 [90 9E D0 FC 09 61 00 00 01 00 00 00 F0 81 D0 FC 09 61 00 00 60 9E D0 FC 09 61 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x6109fcd09e90)
+-   index: 1
+-   a
+
+- address: 0x737f42008e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 9E D0 FC 09 61 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x7693b6208ea0 [60 AE 64 52 5A 60 00 00 00 00 00 00 10 AF 64 52 5A 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x605a5264ae60)
+
+- address: 0x7693b6208eac [10 AF 64 52 5A 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x605a5264af10)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x7693b6208e78 [90 AE 64 52 5A 60 00 00 01 00 00 00 F0 91 64 52 5A 60 00 00 60 AE 64 52 5A 60 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x605a5264ae90)
+-   index: 1
+-   a
+
+- address: 0x7693b6208e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 AE 64 52 5A 60 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x7d0d28e08ea0 [60 EE 3E CD CC 55 00 00 00 00 00 00 10 EF 3E CD CC 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x55cccd3eee60)
+
+- address: 0x7d0d28e08eac [10 EF 3E CD CC 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x55cccd3eef10)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x7d0d28e08e78 [90 EE 3E CD CC 55 00 00 01 00 00 00 F0 D1 3E CD CC 55 00 00 60 EE 3E CD CC 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x55cccd3eee90)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x7d0d28e08e64
+
+- address: 0x7d0d28e08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 90 EE 3E CD CC 55 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_compact
+- adjusting secondary
+-   address: 0x78f6cba08e78
+-   dest: 0x78f6cba08e78
+-   offset: (nil)
+-   not updating address
+- adjusting secondary
+-   address: 0x78f6cba08ea0
+-   dest: 0x78f6cba08e78
+-   offset: 0x28
+-   updating address
+-   new address: 0x78f6cba08ea0
+-   new offset: 0x28
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x78f6cba08ea0 [30 0F 27 AA CB 5B 00 00 00 00 00 00 E0 0F 27 AA CB 5B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5bcbaa270f30)
+
+- address: 0x78f6cba08eac [E0 0F 27 AA CB 5B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5bcbaa270fe0)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - adjusting secondary
+  -   address: 0x78f6cba08eb4
+  -   dest: 0x78f6cba08e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x78f6cba08e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   address: 0x78f6cba08ea0
+  -   dest: 0x78f6cba08e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x78f6cba08e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x78f6cba08e78 [60 0F 27 AA CB 5B 00 00 01 00 00 00 C0 F2 26 AA CB 5B 00 00 30 0F 27 AA CB 5B 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5bcbaa270f60)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x78f6cba08e64
+
+- address: 0x78f6cba08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 60 0F 27 AA CB 5B 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_compact
+- delete_size: 0
+- adjusting secondary
+-   name: x
+-   address: 0x740f37e08e78
+-   dest: 0x740f37e08e78
+-   offset: (nil)
+-   not updating address
+- adjusting secondary
+-   name: a
+-   address: 0x740f37e08ea0
+-   dest: 0x740f37e08e78
+-   offset: 0x28
+-   updating address
+-   new address: 0x740f37e08ea0
+-   new offset: 0x28
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x740f37e08ea0 [50 AF 99 B1 F8 64 00 00 00 00 00 00 00 B0 99 B1 F8 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x64f8b199af50)
+
+- address: 0x740f37e08eac [00 B0 99 B1 F8 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x64f8b199b000)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - delete_size: 60
+  - adjusting secondary
+  -   name: x
+  -   address: 0x740f37e08eb4
+  -   dest: 0x740f37e08e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x740f37e08e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   name: a
+  -   address: 0x740f37e08ea0
+  -   dest: 0x740f37e08e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x740f37e08e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x740f37e08e78 [80 AF 99 B1 F8 64 00 00 01 00 00 00 E0 92 99 B1 F8 64 00 00 50 AF 99 B1 F8 64 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x64f8b199af80)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x740f37e08e64
+
+- address: 0x740f37e08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 80 AF 99 B1 F8 64 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_prepare_word
+- name: a
+  action_compact
+  - delete_size: 0
+  - adjusting secondary
+  -   name: x
+  -   address: 0x771e8dc08e78
+  -   dest: 0x771e8dc08e78
+  -   offset: (nil)
+  -   not updating address
+  - adjusting secondary
+  -   name: a
+  -   address: 0x771e8dc08ea0
+  -   dest: 0x771e8dc08e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x771e8dc08ea0
+  -   new offset: 0x28
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x771e8dc08ea0 [30 8F 0B 79 67 57 00 00 00 00 00 00 E0 8F 0B 79 67 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5767790b8f30)
+
+- address: 0x771e8dc08eac [E0 8F 0B 79 67 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5767790b8fe0)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - delete_size: 60
+  - adjusting secondary
+  -   name: x
+  -   address: 0x771e8dc08eb4
+  -   dest: 0x771e8dc08e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x771e8dc08e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   name: a
+  -   address: 0x771e8dc08ea0
+  -   dest: 0x771e8dc08e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x771e8dc08e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x771e8dc08e78 [60 8F 0B 79 67 57 00 00 01 00 00 00 C0 72 0B 79 67 57 00 00 30 8F 0B 79 67 57 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x5767790b8f60)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x771e8dc08e64
+
+- address: 0x771e8dc08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 60 8F 0B 79 67 57 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_prepare_word
+- name: a
+  action_compact
+  - delete_size: 0
+  - adjusting secondary
+  -   name: x
+  -   address: 0x70ae40608e78
+  -   dest: 0x70ae40608e78
+  -   offset: (nil)
+  -   not updating address
+  - adjusting secondary
+  -   name: a
+  -   address: 0x70ae40608ea0
+  -   dest: 0x70ae40608e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x70ae40608ea0
+  -   new offset: 0x28
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+execute_secondary
+- address: 0x70ae40608ea0 [30 7F E2 34 87 61 00 00 00 00 00 00 E0 7F E2 34 87 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x618734e27f30)
+
+- address: 0x70ae40608eac [E0 7F E2 34 87 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x618734e27fe0)
+
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - delete_size: 60
+  - adjusting secondary
+  -   name: x
+  -   address: 0x70ae40608eb4
+  -   dest: 0x70ae40608e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x70ae40608e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   name: a
+  -   address: 0x70ae40608ea0
+  -   dest: 0x70ae40608e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x70ae40608e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x70ae40608e78 [60 7F E2 34 87 61 00 00 01 00 00 00 C0 62 E2 34 87 61 00 00 30 7F E2 34 87 61 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x618734e27f60)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x70ae40608e64
+
+- address: 0x70ae40608e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 60 7F E2 34 87 61 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - delete_size: 0
+    - adjusting secondary
+    -   name: x
+    -   address: 0x7eee58808e78
+    -   dest: 0x7eee58808e78
+    -   offset: (nil)
+    -   not updating address
+    - adjusting secondary
+    -   name: a
+    -   address: 0x7eee58808ea0
+    -   dest: 0x7eee58808e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x7eee58808ea0
+    -   new offset: 0x28
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - delete_size: 0
+    - adjusting secondary
+    -   name: x
+    -   address: 0x75566c408e78
+    -   dest: 0x75566c408e78
+    -   offset: (nil)
+    -   not updating address
+    - adjusting secondary
+    -   name: a
+    -   address: 0x75566c408ea0
+    -   dest: 0x75566c408e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x75566c408ea0
+    -   new offset: 0x28
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - delete_size: 0
+    - adjusting secondary
+    -   name: x
+    -   address: 0x7481f3408e78
+    -   dest: 0x7481f3408e78
+    -   offset: (nil)
+    -   not updating address
+    - adjusting secondary
+    -   name: a
+    -   address: 0x7481f3408ea0
+    -   dest: 0x7481f3408e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x7481f3408ea0
+    -   new offset: 0x28
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - delete_size: 0
+    - adjusting secondary
+    -   name: x
+    -   address: 0x770f26008e78
+    -   dest: 0x770f26008e78
+    -   offset: (nil)
+    -   not updating address
+    - adjusting secondary
+    -   name: a
+    -   address: 0x770f26008ea0
+    -   dest: 0x770f26008e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x770f26008ea0
+    -   new offset: 0x28
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x770f26008ea0 [E0 6F 36 B9 98 61 00 00 00 00 00 00 90 70 36 B9 98 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x6198b9366fe0)
+
+- address: 0x770f26008eac [90 70 36 B9 98 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x6198b9367090)
+
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - delete_size: 60
+  - adjusting secondary
+  -   name: x
+  -   address: 0x770f26008eb4
+  -   dest: 0x770f26008e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x770f26008e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   name: a
+  -   address: 0x770f26008ea0
+  -   dest: 0x770f26008e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x770f26008e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x770f26008e78 [10 70 36 B9 98 61 00 00 01 00 00 00 70 53 36 B9 98 61 00 00 E0 6F 36 B9 98 61 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x6198b9367010)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x770f26008e64
+
+- address: 0x770f26008e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 10 70 36 B9 98 61 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x709225808ea0 [00 10 A9 83 60 57 00 00 00 00 00 00 B0 10 A9 83 60 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x576083a91000)
+
+- address: 0x709225808eac [B0 10 A9 83 60 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x576083a910b0)
+
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  action_compact
+  - delete size: 60
+  - delete_size: 60
+  - adjusting secondary
+  -   name: x
+  -   address: 0x709225808eb4
+  -   dest: 0x709225808e78
+  -   offset: 0x3c
+  -   updating address
+  -   new address: 0x709225808e78
+  -   new offset: (nil)
+  - adjusting secondary
+  -   name: a
+  -   address: 0x709225808ea0
+  -   dest: 0x709225808e78
+  -   offset: 0x28
+  -   updating address
+  -   new address: 0x709225808e64
+  -   new offset: 0xffffffec
+execute_secondary
+- address: 0x709225808e78 [30 10 A9 83 60 57 00 00 01 00 00 00 90 F3 A8 83 60 57 00 00 00 10 A9 83 60 57 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x576083a91030)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x709225808e64
+
+- address: 0x709225808e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 30 10 A9 83 60 57 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x75b4c8c08ea0 [10 10 55 2E 4C 59 00 00 00 00 00 00 C0 10 55 2E 4C 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x594c2e551010)
+
+- address: 0x75b4c8c08eac [C0 10 55 2E 4C 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x594c2e5510c0)
+
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+    action_compact
+    - delete size: 60
+    - adjusting secondary
+    -   name: x
+    -   address: 0x75b4c8c08eb4
+    -   dest: 0x75b4c8c08e78
+    -   offset: 0x3c
+    -   updating address
+    -   new address: 0x75b4c8c08e78
+    -   new offset: (nil)
+    - adjusting secondary
+    -   name: a
+    -   address: 0x75b4c8c08ea0
+    -   dest: 0x75b4c8c08e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x75b4c8c08e64
+    -   new offset: 0xffffffec
+execute_secondary
+- address: 0x75b4c8c08e78 [40 10 55 2E 4C 59 00 00 01 00 00 00 A0 F3 54 2E 4C 59 00 00 10 10 55 2E 4C 59 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x594c2e551040)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x75b4c8c08e64
+
+- address: 0x75b4c8c08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 40 10 55 2E 4C 59 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - 
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - 
+
+LOGGING RESTARTED
+=================
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 32
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x741752c08ea0 [40 60 93 CB 0B 64 00 00 00 00 00 00 F0 60 93 CB 0B 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x640bcb936040)
+
+- address: 0x741752c08eac [F0 60 93 CB 0B 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x640bcb9360f0)
+
+action_source_pre
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 40
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+    action_compact
+    - delete size: 60
+    - adjusting secondary
+    -   name: x
+    -   address: 0x741752c08eb4
+    -   dest: 0x741752c08e78
+    -   offset: 0x3c
+    -   updating address
+    -   new address: 0x741752c08e78
+    -   new offset: (nil)
+    - adjusting secondary
+    -   name: a
+    -   address: 0x741752c08ea0
+    -   dest: 0x741752c08e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x741752c08e64
+    -   new offset: 0xffffffec
+execute_secondary
+- address: 0x741752c08e78 [70 60 93 CB 0B 64 00 00 01 00 00 00 D0 43 93 CB 0B 64 00 00 40 60 93 CB 0B 64 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x640bcb936070)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x741752c08e64
+
+- address: 0x741752c08e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 70 60 93 CB 0B 64 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+action_colon
+  action_source_pre
+- name: x
+- new wordwrite_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 32
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x751f27408ea0 [80 20 CC B7 4B 62 00 00 00 00 00 00 30 21 CC B7 4B 62 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x624bb7cc2080)
+
+- address: 0x751f27408eac [30 21 CC B7 4B 62 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x624bb7cc2130)
+
+action_colon
+  action_source_pre
+- name: x
+- word existswrite_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 40
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+    action_compact
+    - delete size: 60
+    - adjusting secondary
+    -   name: x
+    -   address: 0x751f27408eb4
+    -   dest: 0x751f27408e78
+    -   offset: 0x3c
+    -   updating address
+    -   new address: 0x751f27408e78
+    -   new offset: (nil)
+    - adjusting secondary
+    -   name: a
+    -   address: 0x751f27408ea0
+    -   dest: 0x751f27408e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x751f27408e64
+    -   new offset: 0xffffffec
+execute_secondary
+- address: 0x751f27408e78 [B0 20 CC B7 4B 62 00 00 01 00 00 00 10 04 CC B7 4B 62 00 00 80 20 CC B7 4B 62 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x624bb7cc20b0)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x751f27408e64
+
+- address: 0x751f27408e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 B0 20 CC B7 4B 62 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+action_colon
+  action_source_pre
+- name: x
+- new word
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 32
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x703a2c208ea0 [B0 B0 45 61 F1 57 00 00 00 00 00 00 60 B1 45 61 F1 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x57f16145b0b0)
+
+- address: 0x703a2c208eac [60 B1 45 61 F1 57 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x57f16145b160)
+
+action_colon
+  action_source_pre
+- name: x
+- word exists
+- offset: 0
+- definition_size: 60
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 40
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+    action_compact
+    - delete size: 60
+    - adjusting secondary
+    -   name: x
+    -   address: 0x703a2c208eb4
+    -   dest: 0x703a2c208e78
+    -   offset: 0x3c
+    -   updating address
+    -   new address: 0x703a2c208e78
+    -   new offset: (nil)
+    - adjusting secondary
+    -   name: a
+    -   address: 0x703a2c208ea0
+    -   dest: 0x703a2c208e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x703a2c208e64
+    -   new offset: 0xffffffec
+execute_secondary
+- address: 0x703a2c208e78 [E0 B0 45 61 F1 57 00 00 01 00 00 00 40 94 45 61 F1 57 00 00 B0 B0 45 61 F1 57 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x57f16145b0e0)
+-   index: 1
+-   a
+-   offset: -20
+-   address: 0x703a2c208e64
+
+- address: 0x703a2c208e64 [00 00 00 00 00 00 00 00 04 20 00 00 30 00 00 00 48 00 00 00 E0 B0 45 61 F1 57 00 00 01 00 00 00 ]
+- ' ((nil))
+
+
+
+LOGGING RESTARTED
+=================
+
+
+LOGGING RESTARTED
+=================
+action_colon
+  action_source_pre
+- name: x
+- new word
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 32
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+action_variable
+  action_source_pre
+  action_prepare_word
+  - name: a
+    action_compact
+    - nothing to compact
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+  expand_definitions
+  - not expanding
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+execute_secondary
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 21 36 C3 5C 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+action_colon
+  action_source_pre
+- name: x
+- word exists
+-   offset: 0
+-   definition_size: 40
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: @
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+expand_definitions
+- not expanding
+Compile primitive
+- name: X.R
+- body only
+  write_definition_primitive
+    expand_definitions
+    - not expanding
+Compile primitive
+- name: ;
+  action_semicolon
+  - name: x
+  - size: 40
+    write_definition_primitive
+      expand_definitions
+      - not expanding
+    action_compact
+    - delete size: 40
+    - adjusting secondary
+    -   name: x
+    -   address: 0x7fa7d1a08eb4
+    -   dest: 0x7fa7d1a08e78
+    -   offset: 0x3c
+    -   updating address
+    -   new address: 0x7fa7d1a08e8c
+    -   new offset: 0x14
+    - adjusting secondary
+    -   name: a
+    -   address: 0x7fa7d1a08ea0
+    -   dest: 0x7fa7d1a08e78
+    -   offset: 0x28
+    -   updating address
+    -   new address: 0x7fa7d1a08e78
+    -   new offset: (nil)
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+execute_secondary
+- address: 0x7fa7d1a08e8c [F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_secondary (0x555cc33620f0)
+-   index: 1
+-   a
+-   offset: 0
+-   address: 0x7fa7d1a08e78
+
+- address: 0x7fa7d1a08e78 [C0 20 36 C3 5C 55 00 00 00 00 00 00 70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08e84 [70 21 36 C3 5C 55 00 00 F0 20 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- prim_hidden_done (0x555cc3362170)
+
+- address: 0x7fa7d1a08e98 [50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 ]
+- @ (0x555cc3360450)
+
+- address: 0x7fa7d1a08ea0 [C0 20 36 C3 5C 55 00 00 05 00 00 00 70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 ]
+- prim_hidden_push (0x555cc33620c0)
+
+- address: 0x7fa7d1a08eac [70 16 36 C3 5C 55 00 00 70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 ]
+- X.R (0x555cc3361670)
+
+- address: 0x7fa7d1a08eb4 [70 21 36 C3 5C 55 00 00 01 00 00 00 50 04 36 C3 5C 55 00 00 C0 20 36 C3 5C 55 00 00 05 00 00 00 ]
+- prim_hidden_done (0x555cc3362170)
+
