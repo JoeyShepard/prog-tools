@@ -2,72 +2,7 @@
 #include "logging.h"
 
 #ifdef CG50
-    //Compiling for calculator
-
-    //Only useful function on calculator - used in code blocks so they can be optimized out
-    bool log_enabled()
-    {
-        return false;
-    }
-
-    //Empty functions that are optimized out since no logging on calculator
-    void init_logging(const char *new_path)
-    {
-        //Silence compiler warning
-        new_path=new_path;
-    }
-
-    void log_on(int point)
-    {
-        //Silence compiler warning
-        point=point;
-    }
-    
-    void log_off(int point)
-    {
-        //Silence compiler warning
-        point=point;
-    }
-    
-    void log_on_all(){}
-    
-    void log_off_all(){}
-
-    bool log_check(int point)
-    {
-        //Silence compiler warning
-        point=point;
-        
-        //Silence compiler warning - dummy value
-        return false;
-    }
-
-    void log_push(int point,const char *title)
-    {
-        //Silence compiler warning
-        point=point;
-        title=title;
-    }
-
-    void log_pop(){}
-
-    void log_text(const char *fmt,...)
-    {
-        //Silence compiler warning
-        fmt=fmt;
-    }
-
-    void log_text_raw(const char *fmt,...)
-    {
-        //Silence compiler warning
-        fmt=fmt;
-    }
-
-    void log_none(const char *fmt,...)
-    {
-        //Silence compiler warning
-        fmt=fmt;
-    }
+    //Compiling for calculator - header should remove all log functions on calculator
 
 #else
     #include <stdarg.h>

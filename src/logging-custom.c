@@ -4,19 +4,7 @@
 #include "logging-custom.h"
 
 #ifdef CG50
-    //Compiling for calculator - empty functions that are optimized out since no logging on calculator
-    void log_bytes(void *ptr,int bytes)
-    {
-        //Silence compiler warnings
-        ptr=ptr;
-        bytes=bytes;
-    }
-    void log_primitive(void(**func)(struct ForthEngine *),struct ForthCompileInfo *compile)
-    {
-        //Silence compiler warnings
-        func=func;
-        compile=compile;
-    }
+    //Compiling for calculator - header should remove all log functions on calculator
 
 #else
     void log_bytes(void *ptr,int bytes)
