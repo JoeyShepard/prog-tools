@@ -12,3 +12,3228 @@ write_definition_primitive
 - destination: 0x774e71008e78
 write_definition_primitive
 - destination: 0x774e71008e89
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 106
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 106
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 106
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 106
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+execute_secondary
+- address: 0x79a1a8c08e78 [F0 68 F1 18 1A 59 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- not found!
+
+- address: 0x79a1a8c08ea8 [18 1A 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x775c58a08e78 [C0 09 19 0D E1 5C 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- not found!
+
+- address: 0x775c58a08ea8 [0D E1 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x777188408e78 [C0 99 69 3C 8C 5E 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- not found!
+
+- address: 0x777188408ea8 [3C 8C 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x7ab25ac08e78 [C0 99 E9 B2 1E 56 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- not found!
+
+- address: 0x7ab25ac08ea8 [B2 1E 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x757f33a08e78 [C0 29 42 80 E5 64 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- not found!
+
+- address: 0x757f33a08ea8 [80 E5 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x7a3be0008e78 [C0 B9 3E 8C E0 63 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x63e08c3eb9c0)
+
+- address: 0x7a3be0008ea8 [8C E0 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x76fae2408e78 [F0 09 B9 0C BA 59 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x59ba0cb909f0)
+
+  prim_hidden_s_quote
+  - engine->address: 0x76fae2408e78
+  - length address: 0x20
+  - quote_length: 32
+  - character:  (-1552832162)
+  - character:  (-1552832162)
+  - character:   (-1552832162)
+  - character:   (-1552832162)
+  - character:  (-1552832162)
+  - character:  (-1552832162)
+  - character: 
+ (-1552832162)
+  - character:   (-1552832162)
+  - character:  (-1552832162)
+  - character: 
+ (-1552832162)
+  - character:   (-1552832162)
+  - character: 
+ (-1552832162)
+  - character: " (-1552832162)
+  - character:  (-1552832162)
+  - character: 	 (-1552832162)
+  - character:  (-1552832162)
+  - character:   (-1552832162)
+  - character: " (-1552832162)
+  - character:   (-1552832162)
+  - character:  (-1552832162)
+  - character: « (-1552832162)
+  - character: Í (-1552832162)
+  - character:  (-1552832162)
+  - character: + (-1552832162)
+  - character:   (-1552832162)
+  - character: \ (-1552832162)
+  - character:   (-1552832162)
+  - character:   (-1552832162)
+  - character:   (-1552832162)
+  - character: a (-1552832162)
+  - character: b (-1552832162)
+  - character: c (-1552832162)
+  - text: 0x76fae2408ea4
+  - ptr_len: 8
+  - new text: 0x76fae2408ea8
+  - new engine->address: 0x76fae2408ea0
+- address: 0x76fae2408ea8 [0C BA 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x7a41aea08e78 [F0 69 B3 56 C9 61 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x61c956b369f0)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7a41aea08e78
+  - length address: 0x7a41aea08e80
+  - quote_length: 32
+  - text: 0x7a41aea08e84
+  - character:  (2109580102)
+  - character:  (2109580102)
+  - character:   (2109580102)
+  - character:   (2109580102)
+  - character:  (2109580102)
+  - character:  (2109580102)
+  - character: 
+ (2109580102)
+  - character:   (2109580102)
+  - character:  (2109580102)
+  - character: 
+ (2109580102)
+  - character:   (2109580102)
+  - character: 
+ (2109580102)
+  - character: " (2109580102)
+  - character:  (2109580102)
+  - character: 	 (2109580102)
+  - character:  (2109580102)
+  - character:   (2109580102)
+  - character: " (2109580102)
+  - character:   (2109580102)
+  - character:  (2109580102)
+  - character: « (2109580102)
+  - character: Í (2109580102)
+  - character:  (2109580102)
+  - character: + (2109580102)
+  - character:   (2109580102)
+  - character: \ (2109580102)
+  - character:   (2109580102)
+  - character:   (2109580102)
+  - character:   (2109580102)
+  - character: a (2109580102)
+  - character: b (2109580102)
+  - character: c (2109580102)
+  - text: 0x7a41aea08ea4
+  - ptr_len: 8
+  - new text: 0x7a41aea08ea8
+  - new engine->address: 0x7a41aea08ea0
+- address: 0x7a41aea08ea8 [56 C9 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+execute_secondary
+- address: 0x7757ec608e78 [F0 A9 51 49 B7 60 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x60b74951a9f0)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7757ec608e78
+  - length address: 0x7757ec608e80
+  - quote_length: 32
+  - text: 0x7757ec608e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x7757ec608ea4
+  - ptr_len: 8
+  - new text: 0x7757ec608ea8
+  - new engine->address: 0x7757ec608ea0
+- address: 0x7757ec608ea8 [49 B7 60 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+execute_secondary
+- address: 0x7ea840808e78 [30 7A C2 C8 89 5B 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x5b89c8c27a30)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7ea840808e78
+  - length address: 0x7ea840808e80
+  - quote_length: 32
+  - text: 0x7ea840808e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x7ea840808ea4
+  - ptr_len: 8
+  - new text: 0x7ea840808ea8
+  - new engine->address: 0x7ea840808ea0
+- address: 0x7ea840808ea8 [C8 89 5B 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+- definition
+- engine->address: (nil)
+- ptr_size: 8
+- padding_count: 0
+- new engine->address: (nil)
+execute_secondary
+- address: 0x766831408e78 [50 8A EC 0B FA 64 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x64fa0bec8a50)
+
+  prim_hidden_s_quote
+  - engine->address: 0x766831408e78
+  - length address: 0x766831408e80
+  - quote_length: 32
+  - text: 0x766831408e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x766831408ea4
+  - ptr_len: 8
+  - new text: 0x766831408ea8
+  - new engine->address: 0x766831408ea0
+- address: 0x766831408ea8 [FA 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+- definition
+- address: 0x7689d4008ea4
+- ptr_size: 8
+- padding_count: 0
+- address: 0x7689d4008ea4
+execute_secondary
+- address: 0x7689d4008e78 [60 EA 22 6A D0 5A 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x5ad06a22ea60)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7689d4008e78
+  - length address: 0x7689d4008e80
+  - quote_length: 32
+  - text: 0x7689d4008e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x7689d4008ea4
+  - ptr_len: 8
+  - new text: 0x7689d4008ea8
+  - new engine->address: 0x7689d4008ea0
+- address: 0x7689d4008ea8 [D0 5A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+- definition
+- address: 0x70b64d408ea4
+- ptr_size: 8
+- padding_count: 4
+- address: 0x70b64d408ea8
+execute_secondary
+- address: 0x70b64d408e78 [60 AA CE 04 95 61 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x619504ceaa60)
+
+  prim_hidden_s_quote
+  - engine->address: 0x70b64d408e78
+  - length address: 0x70b64d408e80
+  - quote_length: 32
+  - text: 0x70b64d408e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x70b64d408ea4
+  - ptr_len: 8
+  - new text: 0x70b64d408ea8
+  - new engine->address: 0x70b64d408ea0
+- address: 0x70b64d408ea8 [80 A9 CE 04 95 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x619504cea980)
+
+execute_secondary
+- address: 0x70b64d408e78 [60 AA CE 04 95 61 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x619504ceaa60)
+
+  prim_hidden_s_quote
+  - engine->address: 0x70b64d408e78
+  - length address: 0x70b64d408e80
+  - quote_length: 32
+  - text: 0x70b64d408e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x70b64d408ea4
+  - ptr_len: 8
+  - new text: 0x70b64d408ea8
+  - new engine->address: 0x70b64d408ea0
+- address: 0x70b64d408ea8 [80 A9 CE 04 95 61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x619504cea980)
+
+action_quote_common
+- escape: 1
+- definition: 0
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: h (104)
+- character: e (101)
+- character: l (108)
+- character: l (108)
+- character: o (111)
+- character:   (32)
+- character: t (116)
+- character: e (101)
+- character: s (115)
+- character: t (116)
+- character: " (34)
+- done processing
+- bytes_written: 10
+- definition
+- address: 0x70b64d408ec6
+- ptr_size: 8
+- padding_count: 2
+- address: 0x70b64d408ec8
+execute_secondary
+- address: 0x70b64d408e78 [D0 A9 CE 04 95 61 00 00 0A 00 00 00 68 65 6C 6C 6F 20 74 65 73 74 00 00 80 A9 CE 04 95 61 00 00 ]
+- prim_hidden_dot_quote (0x619504cea9d0)
+
+- address: 0x70b64d408e82 [00 00 68 65 6C 6C 6F 20 74 65 73 74 00 00 80 A9 CE 04 95 61 00 00 AB CD 1A 2B 20 5C 20 00 20 61 ]
+- not found!
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 1
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 32
+- definition
+- address: 0x7c26cca08ea4
+- ptr_size: 8
+- padding_count: 4
+- address: 0x7c26cca08ea8
+execute_secondary
+- address: 0x7c26cca08e78 [60 0A 7F 01 EB 64 00 00 20 00 00 00 07 08 20 20 1B 0C 0A 20 0D 0A 20 0A 22 0D 09 0B 00 22 20 12 ]
+- prim_hidden_s_quote (0x64eb017f0a60)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7c26cca08e78
+  - length address: 0x7c26cca08e80
+  - quote_length: 32
+  - text: 0x7c26cca08e84
+  - character:  (7)
+  - character:  (8)
+  - character:   (32)
+  - character:   (32)
+  - character:  (27)
+  - character:  (12)
+  - character: 
+ (10)
+  - character:   (32)
+  - character:  (13)
+  - character: 
+ (10)
+  - character:   (32)
+  - character: 
+ (10)
+  - character: " (34)
+  - character:  (13)
+  - character: 	 (9)
+  - character:  (11)
+  - character:   (0)
+  - character: " (34)
+  - character:   (32)
+  - character:  (18)
+  - character: « (-85)
+  - character: Í (-51)
+  - character:  (26)
+  - character: + (43)
+  - character:   (32)
+  - character: \ (92)
+  - character:   (32)
+  - character:   (0)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x7c26cca08ea4
+  - ptr_len: 8
+  - new text: 0x7c26cca08ea8
+  - new engine->address: 0x7c26cca08ea0
+- address: 0x7c26cca08ea8 [80 09 7F 01 EB 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x64eb017f0980)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character: " (34)
+- done processing
+- bytes_written: 31
+- definition
+- address: 0x7c26cca08edb
+- ptr_size: 8
+- padding_count: 5
+- address: 0x7c26cca08ee0
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 64
+- definition
+- address: 0x7c26cca08f2c
+- ptr_size: 8
+- padding_count: 4
+- address: 0x7c26cca08f30
+execute_secondary
+- address: 0x7c26cca08ea8 [60 0A 7F 01 EB 64 00 00 40 00 00 00 5C 61 5C 62 20 5C 63 20 5C 65 5C 66 5C 6C 20 5C 6D 20 5C 6E ]
+- prim_hidden_s_quote (0x64eb017f0a60)
+
+  prim_hidden_s_quote
+  - engine->address: 0x7c26cca08ea8
+  - length address: 0x7c26cca08eb0
+  - quote_length: 64
+  - text: 0x7c26cca08eb4
+  - character: \ (92)
+  - character: a (97)
+  - character: \ (92)
+  - character: b (98)
+  - character:   (32)
+  - character: \ (92)
+  - character: c (99)
+  - character:   (32)
+  - character: \ (92)
+  - character: e (101)
+  - character: \ (92)
+  - character: f (102)
+  - character: \ (92)
+  - character: l (108)
+  - character:   (32)
+  - character: \ (92)
+  - character: m (109)
+  - character:   (32)
+  - character: \ (92)
+  - character: n (110)
+  - character: \ (92)
+  - character: q (113)
+  - character: \ (92)
+  - character: r (114)
+  - character: \ (92)
+  - character: t (116)
+  - character: \ (92)
+  - character: v (118)
+  - character: \ (92)
+  - character: z (122)
+  - character: \ (92)
+  - character:   (32)
+  - character: \ (92)
+  - character: x (120)
+  - character: 1 (49)
+  - character: 2 (50)
+  - character: \ (92)
+  - character: x (120)
+  - character: A (65)
+  - character: B (66)
+  - character: \ (92)
+  - character: x (120)
+  - character: c (99)
+  - character: d (100)
+  - character: \ (92)
+  - character: x (120)
+  - character: 1 (49)
+  - character: A (65)
+  - character: \ (92)
+  - character: x (120)
+  - character: 2 (50)
+  - character: b (98)
+  - character:   (32)
+  - character: \ (92)
+  - character: \ (92)
+  - character:   (32)
+  - character: \ (92)
+  - character: x (120)
+  - character: 0 (48)
+  - character: 0 (48)
+  - character:   (32)
+  - character: a (97)
+  - character: b (98)
+  - character: c (99)
+  - text: 0x7c26cca08ef4
+  - ptr_len: 8
+  - new text: 0x7c26cca08ef8
+  - new engine->address: 0x7c26cca08ef0
+- address: 0x7c26cca08ef8 [80 09 7F 01 EB 64 00 00 5C 71 5C 72 5C 74 5C 76 5C 7A 5C 20 5C 78 31 32 5C 78 41 42 5C 78 63 64 ]
+- prim_hidden_done (0x64eb017f0980)
+
+action_quote_common
+- escape: 0
+- definition: 0
+- character:   (32)
+- character: \ (92)
+- character: a (97)
+- character: \ (92)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: c (99)
+- character:   (32)
+- character: \ (92)
+- character: e (101)
+- character: \ (92)
+- character: f (102)
+- character: \ (92)
+- character: l (108)
+- character:   (32)
+- character: \ (92)
+- character: m (109)
+- character:   (32)
+- character: \ (92)
+- character: n (110)
+- character: \ (92)
+- character: q (113)
+- character: \ (92)
+- character: r (114)
+- character: \ (92)
+- character: t (116)
+- character: \ (92)
+- character: v (118)
+- character: \ (92)
+- character: z (122)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: 2 (50)
+- character: \ (92)
+- character: x (120)
+- character: A (65)
+- character: B (66)
+- character: \ (92)
+- character: x (120)
+- character: c (99)
+- character: d (100)
+- character: \ (92)
+- character: x (120)
+- character: 1 (49)
+- character: A (65)
+- character: \ (92)
+- character: x (120)
+- character: 2 (50)
+- character: b (98)
+- character:   (32)
+- character: \ (92)
+- character: \ (92)
+- character:   (32)
+- character: \ (92)
+- character: x (120)
+- character: 0 (48)
+- character: 0 (48)
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 64
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 3
+- definition
+- address: 0x7041f1e08e87
+- ptr_size: 8
+- padding_count: 1
+- address: 0x7041f1e08e88
+prim_hidden_dot_quote
+- engine->address: 0x7041f1e08e78
+- length address: 0x7041f1e08e80
+- quote_length: 3
+- text: 0x7041f1e08e84
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- text after printing: 0x7041f1e08e87
+- ptr_len: 8
+- new text: 0x7041f1e08e88
+- new engine->address: 0x7041f1e08e80
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: " (34)
+- done processing
+- bytes_written: 2
+- definition
+- address: 0x7c4329608e86
+- ptr_size: 8
+- padding_count: 2
+- address: 0x7c4329608e88
+prim_hidden_dot_quote
+- engine->address: 0x7c4329608e78
+- length address: 0x7c4329608e80
+- quote_length: 2
+- text: 0x7c4329608e84
+- character: a (97)
+- character: b (98)
+- text after printing: 0x7c4329608e86
+- ptr_len: 8
+- new text: 0x7c4329608e88
+- new engine->address: 0x7c4329608e80
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: " (34)
+- done processing
+- bytes_written: 2
+- definition
+- address: 0x78ef42008e86
+- ptr_size: 8
+- padding_count: 2
+- address: 0x78ef42008e88
+prim_hidden_dot_quote
+- engine->address: 0x78ef42008e78
+- length address: 0x78ef42008e80
+- quote_length: 2
+- text: 0x78ef42008e84
+- character: a (97)
+- printed: a
+- character: b (98)
+- printed: b
+- text after printing: 0x78ef42008e86
+- ptr_len: 8
+- new text: 0x78ef42008e88
+- new engine->address: 0x78ef42008e80
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 3
+- definition
+- address: 0x72ba59608e87
+- ptr_size: 8
+- padding_count: 1
+- address: 0x72ba59608e88
+execute_secondary
+- address: 0x72ba59608e78 [D0 19 93 28 B9 5E 00 00 03 00 00 00 61 62 63 00 80 19 93 28 B9 5E 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x5eb9289319d0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x72ba59608e78
+  - length address: 0x72ba59608e80
+  - quote_length: 3
+  - text: 0x72ba59608e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - text after printing: 0x72ba59608e87
+  - ptr_len: 8
+  - new text: 0x72ba59608e88
+  - new engine->address: 0x72ba59608e80
+- address: 0x72ba59608e88 [80 19 93 28 B9 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5eb928931980)
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 3
+- definition
+- address: 0x76d68ba08e87
+- ptr_size: 8
+- padding_count: 1
+- address: 0x76d68ba08e88
+execute_secondary
+- address: 0x76d68ba08e78 [F0 F8 87 45 AD 5A 00 00 03 00 00 00 61 62 63 00 A0 F8 87 45 AD 5A 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x5aad4587f8f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x76d68ba08e78
+  - length address: 0x76d68ba08e80
+  - quote_length: 3
+  - text: 0x76d68ba08e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - text after printing: 0x76d68ba08e87
+  - ptr_len: 8
+  - new text: 0x76d68ba08e88
+  - new engine->address: 0x76d68ba08e80
+- address: 0x76d68ba08e88 [A0 F8 87 45 AD 5A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5aad4587f8a0)
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 3
+- definition
+- address: 0x747798808e87
+- ptr_size: 8
+- padding_count: 1
+- address: 0x747798808e88
+execute_secondary
+- address: 0x747798808e78 [F0 38 EB 66 1D 5C 00 00 03 00 00 00 61 62 63 00 A0 38 EB 66 1D 5C 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x5c1d66eb38f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x747798808e78
+  - length address: 0x747798808e80
+  - quote_length: 3
+  - text: 0x747798808e84
+  - character: a (97)
+    console_text
+    - text: abc
+    - length: 3
+  - printed: a
+  - character: b (98)
+    console_text
+    - text: bc
+    - length: 2
+  - printed: b
+  - character: c (99)
+    console_text
+    - text: c
+    - length: 1
+  - printed: c
+  - text after printing: 0x747798808e87
+  - ptr_len: 8
+  - new text: 0x747798808e88
+  - new engine->address: 0x747798808e80
+- address: 0x747798808e88 [A0 38 EB 66 1D 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5c1d66eb38a0)
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: " (34)
+- done processing
+- bytes_written: 3
+- definition
+- address: 0x75c44b808e87
+- ptr_size: 8
+- padding_count: 1
+- address: 0x75c44b808e88
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 03 00 00 00 61 62 63 00 A0 18 A1 8E 49 64 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 3
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - text after printing: 0x75c44b808e87
+  - ptr_len: 8
+  - new text: 0x75c44b808e88
+  - new engine->address: 0x75c44b808e80
+- address: 0x75c44b808e88 [A0 18 A1 8E 49 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: " (34)
+- done processing
+- bytes_written: 4
+- definition
+- address: 0x75c44b808ea0
+- ptr_size: 8
+- padding_count: 0
+- address: 0x75c44b808ea0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 04 00 00 00 61 62 63 64 A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 4
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - text after printing: 0x75c44b808e88
+  - ptr_len: 8
+  - new text: 0x75c44b808e88
+  - new engine->address: 0x75c44b808e80
+- address: 0x75c44b808e88 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 04 00 00 00 61 62 63 64 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: " (34)
+- done processing
+- bytes_written: 5
+- definition
+- address: 0x75c44b808ea1
+- ptr_size: 8
+- padding_count: 7
+- address: 0x75c44b808ea8
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 05 00 00 00 61 62 63 64 65 00 00 00 00 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 5
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - text after printing: 0x75c44b808e89
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 05 00 00 00 61 62 63 64 65 00 00 00 00 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: " (34)
+- done processing
+- bytes_written: 6
+- definition
+- address: 0x75c44b808eaa
+- ptr_size: 8
+- padding_count: 6
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 06 00 00 00 61 62 63 64 65 66 00 00 00 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 6
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - text after printing: 0x75c44b808e8a
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 06 00 00 00 61 62 63 64 65 66 00 00 00 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: " (34)
+- done processing
+- bytes_written: 7
+- definition
+- address: 0x75c44b808eab
+- ptr_size: 8
+- padding_count: 5
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 07 00 00 00 61 62 63 64 65 66 67 00 00 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 7
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - text after printing: 0x75c44b808e8b
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 07 00 00 00 61 62 63 64 65 66 67 00 00 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: " (34)
+- done processing
+- bytes_written: 8
+- definition
+- address: 0x75c44b808eac
+- ptr_size: 8
+- padding_count: 4
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 08 00 00 00 61 62 63 64 65 66 67 68 00 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 8
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - text after printing: 0x75c44b808e8c
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 08 00 00 00 61 62 63 64 65 66 67 68 00 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: " (34)
+- done processing
+- bytes_written: 9
+- definition
+- address: 0x75c44b808ead
+- ptr_size: 8
+- padding_count: 3
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 09 00 00 00 61 62 63 64 65 66 67 68 69 00 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 9
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - text after printing: 0x75c44b808e8d
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 09 00 00 00 61 62 63 64 65 66 67 68 69 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: " (34)
+- done processing
+- bytes_written: 10
+- definition
+- address: 0x75c44b808eae
+- ptr_size: 8
+- padding_count: 2
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0A 00 00 00 61 62 63 64 65 66 67 68 69 6A 00 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 10
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - text after printing: 0x75c44b808e8e
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 0A 00 00 00 61 62 63 64 65 66 67 68 69 6A 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: " (34)
+- done processing
+- bytes_written: 11
+- definition
+- address: 0x75c44b808eaf
+- ptr_size: 8
+- padding_count: 1
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0B 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 00 A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 11
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - text after printing: 0x75c44b808e8f
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 0B 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: " (34)
+- done processing
+- bytes_written: 12
+- definition
+- address: 0x75c44b808eb0
+- ptr_size: 8
+- padding_count: 0
+- address: 0x75c44b808eb0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0C 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C A0 18 A1 8E 49 64 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 12
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - text after printing: 0x75c44b808e90
+  - ptr_len: 8
+  - new text: 0x75c44b808e90
+  - new engine->address: 0x75c44b808e88
+- address: 0x75c44b808e90 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 0C 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: " (34)
+- done processing
+- bytes_written: 13
+- definition
+- address: 0x75c44b808eb1
+- ptr_size: 8
+- padding_count: 7
+- address: 0x75c44b808eb8
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0D 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 00 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 13
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - text after printing: 0x75c44b808e91
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 0D 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: n (110)
+- character: " (34)
+- done processing
+- bytes_written: 14
+- definition
+- address: 0x75c44b808eba
+- ptr_size: 8
+- padding_count: 6
+- address: 0x75c44b808ec0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0E 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 00 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 14
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - character: n (110)
+  - printed: n
+  - text after printing: 0x75c44b808e92
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 0E 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: n (110)
+- character: o (111)
+- character: " (34)
+- done processing
+- bytes_written: 15
+- definition
+- address: 0x75c44b808ebb
+- ptr_size: 8
+- padding_count: 5
+- address: 0x75c44b808ec0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 0F 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 00 00 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 15
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - character: n (110)
+  - printed: n
+  - character: o (111)
+  - printed: o
+  - text after printing: 0x75c44b808e93
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 0F 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: n (110)
+- character: o (111)
+- character: p (112)
+- character: " (34)
+- done processing
+- bytes_written: 16
+- definition
+- address: 0x75c44b808ebc
+- ptr_size: 8
+- padding_count: 4
+- address: 0x75c44b808ec0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 10 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 00 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 16
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - character: n (110)
+  - printed: n
+  - character: o (111)
+  - printed: o
+  - character: p (112)
+  - printed: p
+  - text after printing: 0x75c44b808e94
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 10 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: n (110)
+- character: o (111)
+- character: p (112)
+- character: q (113)
+- character: " (34)
+- done processing
+- bytes_written: 17
+- definition
+- address: 0x75c44b808ebd
+- ptr_size: 8
+- padding_count: 3
+- address: 0x75c44b808ec0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 11 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71 00 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 17
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - character: n (110)
+  - printed: n
+  - character: o (111)
+  - printed: o
+  - character: p (112)
+  - printed: p
+  - character: q (113)
+  - printed: q
+  - text after printing: 0x75c44b808e95
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 11 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+action_quote_common
+- escape: 0
+- definition: 1
+- character:   (32)
+- character: a (97)
+- character: b (98)
+- character: c (99)
+- character: d (100)
+- character: e (101)
+- character: f (102)
+- character: g (103)
+- character: h (104)
+- character: i (105)
+- character: j (106)
+- character: k (107)
+- character: l (108)
+- character: m (109)
+- character: n (110)
+- character: o (111)
+- character: p (112)
+- character: q (113)
+- character: r (114)
+- character: " (34)
+- done processing
+- bytes_written: 18
+- definition
+- address: 0x75c44b808ebe
+- ptr_size: 8
+- padding_count: 2
+- address: 0x75c44b808ec0
+execute_secondary
+- address: 0x75c44b808e78 [F0 18 A1 8E 49 64 00 00 12 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71 72 00 00 ]
+- prim_hidden_dot_quote (0x64498ea118f0)
+
+  prim_hidden_dot_quote
+  - engine->address: 0x75c44b808e78
+  - length address: 0x75c44b808e80
+  - quote_length: 18
+  - text: 0x75c44b808e84
+  - character: a (97)
+  - printed: a
+  - character: b (98)
+  - printed: b
+  - character: c (99)
+  - printed: c
+  - character: d (100)
+  - printed: d
+  - character: e (101)
+  - printed: e
+  - character: f (102)
+  - printed: f
+  - character: g (103)
+  - printed: g
+  - character: h (104)
+  - printed: h
+  - character: i (105)
+  - printed: i
+  - character: j (106)
+  - printed: j
+  - character: k (107)
+  - printed: k
+  - character: l (108)
+  - printed: l
+  - character: m (109)
+  - printed: m
+  - character: n (110)
+  - printed: n
+  - character: o (111)
+  - printed: o
+  - character: p (112)
+  - printed: p
+  - character: q (113)
+  - printed: q
+  - character: r (114)
+  - printed: r
+  - text after printing: 0x75c44b808e96
+  - ptr_len: 8
+  - new text: 0x75c44b808e98
+  - new engine->address: 0x75c44b808e90
+- address: 0x75c44b808e98 [A0 18 A1 8E 49 64 00 00 F0 18 A1 8E 49 64 00 00 12 00 00 00 61 62 63 64 65 66 67 68 69 6A 6B 6C ]
+- prim_hidden_done (0x64498ea118a0)
+
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 107

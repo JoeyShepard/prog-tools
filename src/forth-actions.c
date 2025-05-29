@@ -76,6 +76,50 @@ static void action_compact(uint32_t delete_offset,uint32_t delete_size,struct Fo
     log_pop();
 }
 
+//Helper function to reuse or create word for constant, variable, create, etc
+static int action_prepare_word(const char *word_buffer,int word_type,uint8_t secondary_type,struct ForthCompileInfo *compile)
+{
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_PREPARE_WORD,"action_prepare_word");
+    log_text("name: %s\n",word_buffer);
+
+    //Handle constant depending on whether word already exists
+    if (word_type==FORTH_TYPE_SECONDARY)
+    {
+        //Word already exists - mark existing code for this word for deletion
+        uint32_t delete_offset=compile->secondary->offset;
+        uint32_t delete_size=compile->secondary->definition_size;
+
+        //Save address of re-used word header for processing later
+        compile->colon_word=compile->secondary;
+        compile->colon_word_index=compile->secondary->ID;
+
+        //Update existing word header with new details
+        compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        compile->secondary->offset=compile->definitions->index;
+        compile->secondary->definition_size=0;
+        compile->secondary->type=secondary_type;
+
+        //Compact memory of old definition
+        action_compact(delete_offset,delete_size,compile);
+    }
+    else if (word_type==FORTH_TYPE_NOT_FOUND)
+    {
+        //Save address of new constant
+        compile->colon_word=compile->words->header+compile->words->index;
+        compile->colon_word_index=compile->words->index;
+
+        //Word not found - create header for new word
+        int result=new_secondary(word_buffer,secondary_type,compile);
+        if (result!=FORTH_ERROR_NONE) return result;
+    }
+
+    //Logging
+    log_pop();
+
+    return FORTH_ERROR_NONE;
+}
+
 //Helper function for functions expecting name after primitive like constant, var, colon, etc
 static int action_source_pre(const char *source,uint32_t *start,char *word_buffer,uint32_t *word_len,int *word_type,
                                 struct ForthCompileInfo *compile)
@@ -122,117 +166,6 @@ static int action_source_pre(const char *source,uint32_t *start,char *word_buffe
     log_pop();
 
     return FORTH_ERROR_NONE;
-}
-
-//Helper function to reuse or create word for constant, variable, create, etc
-static int action_prepare_word(const char *word_buffer,int word_type,uint8_t secondary_type,struct ForthCompileInfo *compile)
-{
-    //Logging
-    log_push(LOGGING_FORTH_ACTION_PREPARE_WORD,"action_prepare_word");
-    log_text("name: %s\n",word_buffer);
-
-    //Handle constant depending on whether word already exists
-    if (word_type==FORTH_TYPE_SECONDARY)
-    {
-        //Word already exists - mark existing code for this word for deletion
-        uint32_t delete_offset=compile->secondary->offset;
-        uint32_t delete_size=compile->secondary->definition_size;
-
-        //Save address of re-used word header for processing later
-        compile->colon_word=compile->secondary;
-        compile->colon_word_index=compile->secondary->ID;
-
-        //Update existing word header with new details
-        compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
-        compile->secondary->offset=compile->definitions->index;
-        compile->secondary->definition_size=0;
-        compile->secondary->type=secondary_type;
-
-        //Compact memory of old definition
-        action_compact(delete_offset,delete_size,compile);
-    }
-    else if (word_type==FORTH_TYPE_NOT_FOUND)
-    {
-        //Save address of new constant
-        compile->colon_word=compile->words->header+compile->words->index;
-        compile->colon_word_index=compile->words->index;
-
-        //Word not found - create header for new word
-        int result=new_secondary(word_buffer,secondary_type,compile);
-        if (result!=FORTH_ERROR_NONE) return result;
-    }
-
-    //Logging
-    log_pop();
-
-    return FORTH_ERROR_NONE;
-
-}
-
-//Helper function - common to action_dot_quote_compile and action_s_quote_compile
-static int action_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
-{
-    //Save index in case needed for error message
-    uint32_t prior_start=*start;
-
-    //Track count of bytes written for padding at end
-    uint32_t bytes_written=0;
-   
-    //Skip first character which should be space but could be 0
-    bool skip_first=true;
-
-    //Loop through characters and write to thread
-    while(1)
-    {
-        char character=source[*start];
-        *start=*start+1;
-        if (character=='"')
-        {
-            //Matching " found. Write terminating zero first.
-            int result=write_definition_u8(0,compile);
-            if (result!=FORTH_ERROR_NONE) return result;
-            bytes_written++;
-
-            //Calculate padding bytes
-            int ptr_size=sizeof(void(*)(struct ForthEngine *));
-            int padding_count=(ptr_size-bytes_written%ptr_size)%ptr_size;
-
-            //Write alignment amount so primitive can add this value to address pointer to align it
-            result=write_definition_u8(padding_count,compile);
-            if (result!=FORTH_ERROR_NONE) return result;
-
-            //Write padding bytes
-            for (int i=0;i<padding_count-1;i++)
-            {
-                result=write_definition_u8(0,compile);
-                if (result!=FORTH_ERROR_NONE) return result;
-            }
-
-            return FORTH_ERROR_NONE;
-        }
-        else if (character==0)
-        {
-            //Error - reached end of string with no terminating "
-            compile->error_word=source+prior_start-compile->word_len;
-            *start=prior_start;
-            return FORTH_ERROR_MISSING_QUOTE;
-        }
-        else
-        {
-            if (skip_first==true)
-            {
-                //Skip first character which should be space but could be 0
-                skip_first=false;
-            }
-            else
-            {
-                //Write character to print
-                int result=write_definition_u8(character,compile);
-                if (result!=FORTH_ERROR_NONE) return result;
-                bytes_written++;
-            }
-        }
-    }
 }
 
 //Helper function - use print_color if it exists and print otherwise
@@ -427,16 +360,6 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     return FORTH_ERROR_NONE;
 }
 
-int action_dot_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
-{
-    //Write primitive that reads and prints characters
-    int result=write_definition_primitive(&prim_hidden_dot_quote,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Write characters to definition
-    action_quote_compile(engine,source,start,compile);
-}
-
 int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
@@ -611,64 +534,283 @@ void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_cha
     if ((engine->update_screen!=NULL)&&(redraw==true)) engine->update_screen();
 }
 
-int action_s_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *start,bool escape,bool definition,
+                    struct ForthCompileInfo *compile)
 {
-    //Write primitive that reads and prints characters
-    int result=write_definition_primitive(&prim_hidden_s_quote,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-    
-    //Write characters to definition
-    action_quote_compile(engine,source,start,compile);
-}
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_QUOTE_COMMON,"action_quote_common");
+    log_text("escape: %d\n",escape);
+    log_text("definition: %d\n",definition);
 
-int action_s_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
-{
     //Save index in case needed for error message
     uint32_t prior_start=*start;
+
+    //Track count of bytes written for padding at end
+    uint32_t bytes_written=0;
+
+    //Return on stack at end
+    uint32_t address=engine->data_index;
+   
+    //Hex value for \x escape code
+    uint8_t hex_value;
 
     //Skip first character which should be space but could be 0
     bool skip_first=true;
 
-    //Values to return on stack
-    uint32_t address=engine->data_index;
-    uint32_t bytes_written=0;
+    //If defining word, reserve space for length and write at end
+    uint32_t length_index=compile->definitions->index;
+    if (definition)
+    {
+        int result=write_definition_u32(0,compile);
+        if (result!=FORTH_ERROR_NONE) return result;
+    }
 
-    //Write characters to data memory
+    //Escape sequence handling
+    enum EscapeStates
+    {
+        ESCAPE_NONE,
+        ESCAPE_FOUND,
+        ESCAPE_HEX1,
+        ESCAPE_HEX2,
+    } escape_state=ESCAPE_NONE;
+
+    //Loop through characters and write to thread
     while(1)
     {
+        //Get next character
         char character=source[*start];
         *start=*start+1;
-        if (character=='"')
-        {
-            //Matching " found - done. Write return values.
-            *engine->stack=address;
-            uintptr_t lower;
-            lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-            engine->stack=(int32_t*)((engine->stack_base)|lower);
-            *engine->stack=bytes_written;;
-            lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-            engine->stack=(int32_t*)((engine->stack_base)|lower);
 
-            return FORTH_ERROR_NONE;
-        }
-        else if (character==0)
+        //Logging
+        log_text("character: %c (%d)\n",character,character);
+
+        //Flag whether to write character at end of loop
+        bool write_character=false;
+
+        //Escape \m writes two characters
+        char character2;
+        bool write_character2=false;
+
+        if (character==0)
         {
             //Error - reached end of string with no terminating "
             compile->error_word=source+prior_start-compile->word_len;
             *start=prior_start;
             return FORTH_ERROR_MISSING_QUOTE;
         }
-        else
+        else if ((escape==false)||((escape==true)&&(escape_state==ESCAPE_NONE)))
         {
+            //Process character normally
             if (skip_first==true)
             {
                 //Skip first character which should be space but could be 0
                 skip_first=false;
             }
+            else if (character=='"')
+            {
+                //Logging
+                log_text("done processing\n");
+                log_text("bytes_written: %d\n",bytes_written);
+
+                //Matching " found - done looping
+                if (definition)
+                {
+                    //Writing to word definition
+
+                    //Logging
+                    log_text("definition\n");
+                    log_text("address: %p\n",compile->definitions->data+compile->definitions->index);
+
+                    //Write string length to beginning of word at saved address
+                    *(uint32_t *)(compile->definitions->data+length_index)=bytes_written;
+
+                    //Calculate padding bytes
+                    int ptr_size=sizeof(void(*)(struct ForthEngine *));
+                    int padding_count=(ptr_size-(bytes_written+sizeof(uint32_t))%ptr_size)%ptr_size;
+
+                    //Logging
+                    log_text("ptr_size: %u\n",ptr_size);
+                    log_text("padding_count: %d\n",padding_count);
+
+                    //Write padding bytes
+                    for (int i=0;i<padding_count;i++)
+                    {
+                        int result=write_definition_u8(0,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
+
+                    //Logging
+                    log_text("address: %p\n",compile->definitions->data+compile->definitions->index);
+                }
+                else
+                {
+                    //Writing to data memory - write return values
+                    *engine->stack=address;
+                    uintptr_t lower;
+                    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+                    engine->stack=(int32_t*)((engine->stack_base)|lower);
+                    *engine->stack=bytes_written;
+                    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+                    engine->stack=(int32_t*)((engine->stack_base)|lower);
+                }
+
+                //Logging
+                log_pop();
+
+                return FORTH_ERROR_NONE;
+            }
             else
             {
-                //Write character to data memory
+                if ((escape==true)&&(character=='\\'))
+                {
+                    //Switch to escape mode
+                    escape_state=ESCAPE_FOUND;
+                }
+                else
+                {
+                    //Character to print - set flag and write below
+                    write_character=true;
+                }
+            }
+        }
+        else if ((escape==true)&&(escape_state!=ESCAPE_NONE))
+        {
+            if (escape_state==ESCAPE_FOUND)
+            {
+                if (character=='x')
+                {
+                    //Following two characters are hex digits
+                    escape_state=ESCAPE_HEX1;
+                }
+                else
+                {
+                    //Escape codes from Forth standard - including all even if not used
+                    write_character=true;
+                    switch (character)
+                    {
+                        case 'a':
+                            //alert
+                            character=7;
+                            break;
+                        case 'b':
+                            //backspace
+                            character=8;
+                            break;
+                        case 'e':
+                            //escape
+                            character=27;
+                            break;
+                        case 'f':
+                            //form feed
+                            character=12;
+                            break;
+                        case 'l':
+                            //line feed
+                            character=10;
+                            break;
+                        case 'm':
+                            //CR/LF
+                            character=13;
+                            character2=10;
+                            write_character2=true;
+                            break;
+                        case 'n':
+                            //newline
+                            character=10;
+                            break;
+                        case 'q':
+                            //double-quote
+                            character='"';
+                            break;
+                        case 'r':
+                            //carriage return
+                            character=13;
+                            break;
+                        case 't':
+                            //horizontal tab
+                            character=9;
+                            break;
+                        case 'v':
+                            //vertical tab
+                            character=11;
+                            break;
+                        case 'z':
+                            //no character
+                            character=0;
+                            break;
+                        case '"':
+                            //double-quote
+                            character='"';
+                            break;
+                        case '\\':
+                            //backslash
+                            character='\\';
+                            break;
+                        default:
+                            write_character=false;
+                    }
+                    escape_state=ESCAPE_NONE;
+                }
+            }
+            else
+            {
+                //Processing hex value
+                uint8_t new_value;
+                if ((character>='0')&&(character<='9')) new_value=character-'0';
+                else if ((character>='A')&&(character<='F')) new_value=character-'A'+10;
+                else if ((character>='a')&&(character<='f')) new_value=character-'a'+10;
+
+                if (escape_state==ESCAPE_HEX1)
+                {
+                    //First of two hex characters
+                    hex_value=new_value;
+                    escape_state=ESCAPE_HEX2;
+                }
+                else
+                {
+                    //Second hex character
+                    hex_value=(hex_value<<4)|new_value;
+                    escape_state=ESCAPE_NONE;
+                    character=hex_value;
+                    write_character=true;
+                }
+            }
+        }
+
+        if (definition)
+        {
+            //Write character to definition
+            if (write_character==true)
+            {
+                //First character
+                int result=write_definition_u8(character,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+                bytes_written++;
+            }
+            if (write_character2==true)
+            {
+                //Second character
+                int result=write_definition_u8(character2,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+                bytes_written++;
+            }
+        }
+        else
+        {
+            //Write character to data memory
+            if (write_character==true)
+            {
+                //First character
                 *(engine->data+engine->data_index)=character;
+                bytes_written++;
+
+                //Advance data pointer
+                engine->data_index=(engine->data_index+sizeof(character))&engine->data_mask;
+            }
+            if (write_character2==true)
+            {
+                //Second character
+                *(engine->data+engine->data_index)=character2;
                 bytes_written++;
 
                 //Advance data pointer

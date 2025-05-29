@@ -26,7 +26,10 @@
             }
         }
 
-        if (*func==prim_hidden_push) log_text("prim_hidden_push (%p)\n",*func);
+        if (*func==prim_hidden_done) log_text("prim_hidden_done (%p)\n",*func);
+        else if (*func==prim_hidden_push) log_text("prim_hidden_push (%p)\n",*func);
+        else if (*func==prim_hidden_dot_quote) log_text("prim_hidden_dot_quote (%p)\n",*func);
+        else if (*func==prim_hidden_s_quote) log_text("prim_hidden_s_quote (%p)\n",*func);
         else if (*func==prim_hidden_secondary)
         {
             log_text("prim_hidden_secondary (%p)\n",*func);
@@ -36,7 +39,6 @@
             log_text("  offset: %d\n",compile->words->header[index].offset);
             log_text("  address: %p\n",compile->words->header[index].address);
         }
-        else if (*func==prim_hidden_done) log_text("prim_hidden_done (%p)\n",*func);
         else log_text("not found!\n");
     }
     

@@ -25,6 +25,9 @@ log: $(BUILD_DIR)/$(PROJECT)
 	cat log.txt
 	ls -l log.txt | awk '{print "Log file size: " $$5}'
 
+only: $(BUILD_DIR)/$(PROJECT)
+	#Compile only
+
 $(BUILD_DIR)/$(PROJECT): $(OBJS)
 	$(CC) -o $(BUILD_DIR)/$(PROJECT) $^ $(CLFAGS) $(LIBS)
 

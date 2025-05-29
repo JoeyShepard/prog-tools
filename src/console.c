@@ -3,6 +3,7 @@
 #include "compatibility.h"
 #include "console.h"
 #include "getkey.h"
+#include "logging.h"
 #include "manager.h"
 #include "text.h"
 #include "structs.h"
@@ -140,11 +141,19 @@ void console_char_default(char character, struct ConsoleInfo *console)
 
 void console_text(const char *text, color_t fg, color_t bg, struct ConsoleInfo *console)
 {
+    //Logging
+    log_push(LOGGING_CONSOLE_TEXT,"console_text");
+    log_text("text: %s\n",text);
+    log_text("length: %d\n",strlen(text));
+
     while (*text)
     {
         console_char(*text,fg,bg,console);
         text++;
     }
+
+    //Logging
+    log_pop();
 }
 
 void console_text_default(const char *text, struct ConsoleInfo *console)

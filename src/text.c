@@ -9,11 +9,6 @@
 //Font data
 static uint8_t font_5x8[]=
 {
-    //Custom characters
-    0x10,0x20,0x40,0x7E,0x2,              // Root symbol
-    8,8,0x3E,0x1C,8,                      // Right arrow symbol from keypad   
-    0xFF,0xFF,0xFF,0xFF,0xFF,             // Solid block cursor
-
     //Normal characters
     0,0,0,0,0,                            // Space
     0x0,0x6F,0x6F,0x0,0x0,                // !
@@ -110,6 +105,11 @@ static uint8_t font_5x8[]=
     0x0,0x0,0xFF,0x0,0x0,                 // |
     0x0,0x81,0x76,0x8,0x0,                // }
     0x8,0x4,0x8,0x10,0x8,                 // ~
+
+    //Custom characters
+    0x10,0x20,0x40,0x7E,0x2,              // Root symbol
+    8,8,0x3E,0x1C,8,                      // Right arrow symbol from keypad   
+    0xFF,0xFF,0xFF,0xFF,0xFF,             // Solid block cursor
 };
 
 uint8_t *font_data(int font)
@@ -153,9 +153,11 @@ int text_width(const char *text, int font)
     return strlen(text)*(width+horz_spacing)+horz_spacing;
 }
 
-bool text_printable(char text)
+bool text_printable(char character)
 {
-    return ((text>=CHAR_PRINTABLE_MIN)&&(text<=CHAR_PRINTABLE_MAX));
+    //Extra characters on calculator are after 126, so need to do unsigned compare
+    unsigned char compare=character;
+    return ((compare>=CHAR_PRINTABLE_MIN)&&(compare<=CHAR_PRINTABLE_MAX));
 }
 
 struct Point draw_char(char text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font)
@@ -239,7 +241,8 @@ struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t b
         if (pos.x+width+horz_spacing>=DWIDTH) return pos;
 
         //Draw ? if character out of range
-        char draw_char=*text;
+        //(unsigned char since extra characters are after 126)
+        unsigned char draw_char=*text;
         if (text_printable(draw_char)==false) draw_char='?';
 
         //Calculate table offset

@@ -2,6 +2,7 @@
 
 #include "compatibility.h"
 #include "forth-primitives.h"
+#include "logging.h"
 #include "text.h"
 
 
@@ -44,68 +45,58 @@ void prim_hidden_done(struct ForthEngine *engine)
 //Print out characters stored in thread
 void prim_hidden_dot_quote(struct ForthEngine *engine)
 {
-    //Characters start after primitive address
-    const char *text=(char *)(engine->address+1);
+    //Length of quote appears after primitive
+    uint32_t quote_length=*(uint32_t *)(engine->address+1);
 
-    //Print out characters first
-    if (engine->print!=NULL)
+    //Characters start after that
+    const char *text=((char *)(engine->address+1))+sizeof(uint32_t);
+
+    //Logging
+    log_push(LOGGING_FORTH_PRIM_HIDDEN_DOT_QUOTE,"prim_hidden_dot_quote");
+    log_text("engine->address: %p\n",engine->address);
+    log_text("length address: %p\n",(uint32_t *)(engine->address+1));
+    log_text("quote_length: %u\n",quote_length);
+    log_text("text: %p\n",text);
+
+    //Loop through and print characters
+    char buffer[2];
+    buffer[1]=0;
+    for (int i=0;i<quote_length;i++)
     {
-        engine->print(text);
+        //Logging
+        log_text("character: %c (%d)\n",*text,*text);
 
-        //Update screen
-        if (engine->update_screen!=NULL) engine->update_screen();
-    }
+        if (engine->print!=NULL)
+        {
+            buffer[0]=*text;
+            engine->print(buffer);
 
-    //Find end of string to skip over it and point to next primitive
-    while (*text) text++;
-
-    //Skip over null terminator to alignment value
-    text++;
-
-    //Add alignment value
-    text+=*text;
-    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
-}
-
-//Write characters to data memory
-void prim_hidden_s_quote(struct ForthEngine *engine)
-{
-    //Characters start after primitive address
-    const char *text=(char *)(engine->address+1);
-
-    //Values to return on stack
-    uint32_t address=engine->data_index;
-    uint32_t bytes_written=0;
-
-    //Find end of string to skip over it and point to next primitive
-    while (*text)
-    {
-        //Write character to data memory
-        *(engine->data+engine->data_index)=*text;
-        bytes_written++;
-
-        //Advance data pointer
-        engine->data_index=(engine->data_index+sizeof(char))&engine->data_mask;
+            //Logging
+            log_text("printed: %s\n",buffer);
+        }
 
         //Advance to next character
         text++;
     }
 
-    //Skip over null terminator to alignment value
-    text++;
+    //Update screen
+    if (engine->update_screen!=NULL) engine->update_screen();
 
-    //Add alignment value
-    text+=*text;
+    //Logging
+    log_text("text after printing: %p\n",text);
+
+    //Align address pointer
+    uint32_t ptr_len=sizeof(void(*)(struct ForthEngine *engine));
+    text+=(ptr_len-(uintptr_t)text%(ptr_len))%ptr_len;
     engine->address=((void (**)(struct ForthEngine *engine))text)-1;
 
-    //Write return values to stack
-    *engine->stack=address;
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    *engine->stack=bytes_written;;
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    //Logging
+    log_text("ptr_len: %u\n",ptr_len);
+    log_text("new text: %p\n",text);
+    log_text("new engine->address: %p\n",engine->address);
+
+    //Logging
+    log_pop();
 }
 
 //Push next cell in dictionary to stack
@@ -121,6 +112,67 @@ void prim_hidden_push(struct ForthEngine *engine)
     *engine->stack=num;
     uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+//Write characters to data memory
+void prim_hidden_s_quote(struct ForthEngine *engine)
+{
+    //Length of quote appears after primitive
+    uint32_t quote_length=*(uint32_t *)(engine->address+1);
+
+    //Characters start after that
+    const char *text=((char *)(engine->address+1))+sizeof(uint32_t);
+
+    //Return address to stack at end
+    uint32_t address=engine->data_index;
+
+    //Logging
+    log_push(LOGGING_FORTH_PRIM_HIDDEN_S_QUOTE,"prim_hidden_s_quote");
+    log_text("engine->address: %p\n",engine->address);
+    log_text("length address: %p\n",(uint32_t *)(engine->address+1));
+    log_text("quote_length: %u\n",quote_length);
+    log_text("text: %p\n",text);
+
+    //Loop through characters
+    for (int i=0;i<quote_length;i++)
+    {
+        //Logging
+        log_text("character: %c (%d)\n",*text,*text);
+
+        //Write character to data memory
+        *(engine->data+engine->data_index)=*text;
+
+        //Advance data pointer
+        engine->data_index=(engine->data_index+sizeof(char))&engine->data_mask;
+
+        //Advance to next character
+        text++;
+    }
+
+    //Logging
+    log_text("text: %p\n",text);
+
+    //Align address pointer
+    uint32_t ptr_len=sizeof(void(*)(struct ForthEngine *engine));
+    text+=(ptr_len-(uintptr_t)text%(ptr_len))%ptr_len;
+    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+
+    //Logging
+    log_text("ptr_len: %u\n",ptr_len);
+    log_text("new text: %p\n",text);
+    log_text("new engine->address: %p\n",engine->address);
+
+    //Write return values to stack
+    *engine->stack=address;
+    uintptr_t lower;
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    *engine->stack=quote_length;
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+    //Logging
+    log_pop();
 }
 
 //Call secondary which may be user-defined word or variable
@@ -2011,13 +2063,18 @@ int prim_optimize_roll(struct ForthEngine *engine)
 }
 
 //S_BACKSLASH_QUOTE
-void prim_body_s_backslash_quote(struct ForthEngine *engine){}
-int prim_immediate_s_backslash_quote(struct ForthEngine *engine){}
-int prim_compile_s_backslash_quote(struct ForthEngine *engine){}
-int prim_optimize_s_backslash_quote(struct ForthEngine *engine)
+int prim_immediate_s_backslash_quote(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_S_BACKSLASH_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
+int prim_compile_s_backslash_quote(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_S_BACKSLASH_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //TRUE
@@ -2171,7 +2228,7 @@ void prim_body_dump(struct ForthEngine *engine)
                 char address_buffer[7]; //Six hex digits plus null terminator
                 text_hex32_padded(address,address_buffer,6);
                 engine->print(address_buffer);
-                engine->print(":");
+                engine->print(": ");
             }
             //Print byte
             uint8_t byte=*(engine->data+address);
@@ -2535,7 +2592,7 @@ const struct ForthPrimitive forth_primitives[]=
     //{"ENDOF",5,&prim_immediate_endof,&prim_compile_endof,&prim_body_endof,&prim_optimize_endof},
     {"FALSE",5,NULL,NULL,&prim_body_false,&prim_optimize_false},
     {"NIP",3,NULL,NULL,&prim_body_nip,&prim_optimize_nip},
-    //{"S\"",3,&prim_immediate_s_backslash_quote,&prim_compile_s_backslash_quote,&prim_body_s_backslash_quote,&prim_optimize_s_backslash_quote},
+    {"S\\\"",3,&prim_immediate_s_backslash_quote,&prim_compile_s_backslash_quote,NULL,NULL},
     {"TRUE",4,NULL,NULL,&prim_body_true,&prim_optimize_true},
     {"TUCK",4,NULL,NULL,&prim_body_tuck,&prim_optimize_tuck},
     {"UNUSED",6,NULL,NULL,&prim_body_unused,NULL},
@@ -2551,6 +2608,8 @@ const struct ForthPrimitive forth_primitives[]=
 
     //digit?
     //:NONAME
+    //2DUP
+    //2DROP
 
     //Words from here are not standard forth
     {"RESET",5,&prim_immediate_reset,&prim_compile_reset,NULL,NULL},
@@ -2563,6 +2622,13 @@ const struct ForthPrimitive forth_primitives[]=
     {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL,NULL},
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL,NULL},
 
+    //DOES>
+        //Actually may work though need to figure out how to handle memory
+        //Problem is several words made by CREATE will all share same code
+            //Biggest obstacle is making CREATE compile since breaks model
+        //So, either need one common copy or new copy for each new word
+        //Common copy seems unworkable since either need unnamed chunk or rely on CREATE word which may be redefined
+        //Only way at this point then seems copy whole body into new primitive
     //DEBUG that steps through word
         //ON should also go to debugger
         //BREAKPOINT would be good

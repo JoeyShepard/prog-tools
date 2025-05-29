@@ -10,12 +10,11 @@
     int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_constant(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
-    int action_dot_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     void action_paren(const char *source,uint32_t *start);
     void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw);
-    int action_s_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
-    int action_s_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+    int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *start,bool escape,bool definition,
+                                struct ForthCompileInfo *compile);
     void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_characters,bool defined,bool redraw,
                             struct ForthCompileInfo *compile);
     int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile);

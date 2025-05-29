@@ -670,9 +670,15 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 action_primitives(engine,&first_word,&line_characters,true);
                                 break;
                             }
+                            case FORTH_ACTION_S_BACKSLASH_QUOTE:
+                            {
+                                int result=action_quote_common(engine,source,&start,true,false,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_S_QUOTE:
                             {
-                                int result=action_s_quote_interpret(engine,source,&start,compile);
+                                int result=action_quote_common(engine,source,&start,false,false,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
@@ -817,7 +823,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             }
                             case FORTH_ACTION_DOT_QUOTE:
                             {
-                                int result=action_dot_quote_compile(engine,source,&start,compile);
+                                //Write primitive that reads and prints characters
+                                int result=write_definition_primitive(&prim_hidden_dot_quote,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Write characters to definition
+                                result=action_quote_common(engine,source,&start,false,true,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
@@ -832,9 +843,25 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_S_BACKSLASH_QUOTE:
+                            {
+                                //Write primitive that reads and prints characters
+                                int result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Write characters to definition
+                                result=action_quote_common(engine,source,&start,true,true,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_S_QUOTE:
                             {
-                                int result=action_s_quote_compile(engine,source,&start,compile);
+                                //Write primitive that reads and prints characters
+                                int result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+
+                                //Write characters to definition
+                                result=action_quote_common(engine,source,&start,false,true,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }

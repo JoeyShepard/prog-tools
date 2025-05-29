@@ -1,4 +1,5 @@
 #include "compatibility.h"
+#include "forth-primitives.h"
 #include "graphics.h"
 #include "logging.h"
 #include "manager.h"
@@ -12,6 +13,8 @@ revisit casting rules esp for structs
   - char * is not the same as uint8_t *
 - might be good to post some examples and ask for help
 offsetof operator
+- fsanitize=undefined
+  - make sanitize
 
 remove unnecessary headers
 TODOs in all files
@@ -37,6 +40,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - words with header but no definition should be yellow
 - red after const and var like ;
 - color secondaries if match like primitives
+- escape sequences
 stagger key legend to take up less room
 console - only copy to history if different from last
 double check all engine->print references check not NULL
@@ -99,6 +103,9 @@ int main(void)                      //cg50 and PC
 {
     //Initialize logging if on PC
     init_logging("log.txt");
+
+    //TODO: remove?
+    log_none("Primitive count: %d\n",forth_primitives_len);
 
     //Setup - SDL2 on PC and timer on calculator
     setup(SCALE_FACTOR,TICK_MS);
