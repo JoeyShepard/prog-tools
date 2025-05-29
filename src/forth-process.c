@@ -325,6 +325,9 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct F
     //Expand definitions memory if necessary
     int result=expand_definitions(sizeof(word),compile);
     if (result!=FORTH_ERROR_NONE) return result;
+
+    //Logging
+    log_text("destination: %p\n",compile->definitions->data+compile->definitions->index);
     
     //Write value to definitions - memcpy to avoid casting object pointer to function pointer
     memcpy(compile->definitions->data+compile->definitions->index,&word,sizeof(word));
@@ -339,6 +342,25 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct F
     //Logging
     log_pop();
     
+    return FORTH_ERROR_NONE;
+}
+
+int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile)
+{
+    //Expand definitions memory if necessary
+    int result=expand_definitions(sizeof(value),compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    
+    //Write value to definitions - memcpy to avoid casting object pointer to function pointer
+    memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
+
+    //Update counts in definitions memory
+    compile->definitions->index+=sizeof(value);
+    compile->definitions->bytes_left-=sizeof(value);
+
+    //Update size of definition in word header
+    compile->colon_word->definition_size+=sizeof(value);
+
     return FORTH_ERROR_NONE;
 }
 
@@ -380,14 +402,18 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
-//TODO: move to forth-engine.c
 int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
-
-    //Error if secondary has header but hasn't been defined
     if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
     {
+        //Error - secondary has header but hasn't been defined (ie included in other word)
         engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=compile->secondary->name;
+    }
+    else if (((engine->state==FORTH_STATE_INTERPRET)&&(engine->in_bracket==true))&&(compile->colon_word==compile->secondary))
+    {
+        //Error - can't run word between [ and ] if word is still being defined
+        engine->error=FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET;
         engine->error_word=compile->secondary->name;
     }
     else
@@ -628,6 +654,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_DOT_QUOTE:
+                            {
+                                int result=action_dot_quote_interpret(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
@@ -636,6 +668,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 bool first_word=true;
                                 int line_characters=0;
                                 action_primitives(engine,&first_word,&line_characters,true);
+                                break;
+                            }
+                            case FORTH_ACTION_S_QUOTE:
+                            {
+                                int result=action_s_quote_interpret(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
                             case FORTH_ACTION_SECONDARIES:
@@ -693,7 +731,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
-                    //Secondary
+                    //Run secondary
                     int result=execute_secondary(engine,compile);
 
                     //Abort if error occured while running secondary
@@ -777,9 +815,29 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_DOT_QUOTE:
+                            {
+                                int result=action_dot_quote_compile(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_LITERAL:
+                            {
+                                int result=write_definition_primitive(&prim_hidden_push,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=write_definition_i32(forth_pop(engine),compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_S_QUOTE:
+                            {
+                                int result=action_s_quote_compile(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_SEMICOLON:
                                 int result=action_semicolon(engine,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;

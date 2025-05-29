@@ -277,6 +277,221 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     }
 }
 
+static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
+{
+    //Only process if text exists
+    if (console->input.len==0) return COMMAND_NONE;
+
+    int return_command=COMMAND_NONE;
+
+    //Color input before copying to console since secondaries previously not colored if cursor is on them
+    color_input(console,true,compile->words);
+
+    //Copy input text to console
+    for (uint32_t i=0;i<console->input.len;i++)
+    {
+        console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
+    }
+    console->reset_input=true;
+
+    //Add input to history
+    add_history(console);
+    
+    //Hide input line since program may output to console
+    console_text_default(" ",console);
+    console->input.visible=false;
+    draw_console(console);
+    dupdate();
+
+    //Process input
+    char input_buffer[FORTH_INPUT_MAX];
+    copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
+    int process_result=process_source(forth->engine,input_buffer,compile);
+
+    //Exit if word like BYE requested program exit
+    if (forth->engine->exit_program)
+    {
+        return_command=COMMAND_EXIT;
+    }
+
+    //Show input line again
+    console_text_default("\n",console);
+    console->input.visible=true;
+
+    //Process errors from processing source
+    switch (process_result)
+    {
+        case FORTH_ERROR_NONE:
+            //No error - nothing to do
+            break;
+        case FORTH_ERROR_INVALID_NAME:
+        case FORTH_ERROR_MISSING_QUOTE:
+        case FORTH_ERROR_NO_WORD:
+        case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
+        case FORTH_ERROR_NOT_FOUND:
+        case FORTH_ERROR_TOO_LONG:
+            //All of these errors share code for printing out word that caused error
+            if (process_result==FORTH_ERROR_INVALID_NAME)
+                console_text_default("Invalid word for operation: ",console);
+            else if (process_result==FORTH_ERROR_MISSING_QUOTE)
+                console_text_default("Missing \" after ",console);
+            else if (process_result==FORTH_ERROR_NO_WORD)
+                console_text_default("Missing word after ",console);
+            else if (process_result==FORTH_ERROR_NOT_BETWEEN_BRACKETS)
+                console_text_default("Word not allowed between [ and ]: ",console);
+            else if (process_result==FORTH_ERROR_NOT_FOUND)
+                //Word not found by outer interpreter. For secondary calling undefined word, see FORTH_ENGINE_ERROR_UNDEFINED.
+                console_text_default("Word not defined: ",console);
+            else if (process_result==FORTH_ERROR_TOO_LONG)
+                console_text_default("Word too long: ",console);
+
+            //Output word causing error
+            uint32_t start=0;
+            uint32_t word_len=next_word_source(compile->error_word,&start);
+            for (uint32_t i=0;i<word_len;i++)
+                console_char_default(compile->error_word[i],console);
+            console_text_default("\n",console);
+            break;
+        case FORTH_ERROR_ENGINE:
+            //Error set in Forth engine - ie inside of primitive
+            switch (forth->engine->error)
+            {
+                case FORTH_ENGINE_ERROR_NONE:
+                    //Should never happen but just in case
+                    console_text_default("Engine error but code not set\n",console);
+                    break;
+                case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
+                case FORTH_ENGINE_ERROR_COMPILE_ONLY:
+                    if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
+                        console_text_default("Word is interpret only: ",console);
+                    else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
+                        console_text_default("Word is compile only: ",console);
+                    //All of these errors share code for printing out word that caused error
+                    uint32_t start=0;
+                    uint32_t word_len=next_word_source(compile->error_word,&start);
+                    for (uint32_t i=0;i<word_len;i++)
+                        console_char_default(compile->error_word[i],console);
+                    console_text_default("\n",console);
+                    break;
+                case FORTH_ENGINE_ERROR_RSTACK_FULL:
+                    console_text_default("Out of R-stack space - aborting\n",console);
+                    break;
+                case FORTH_ENGINE_ERROR_UNDEFINED:
+                    console_text_default("Word not defined: ",console);
+                    console_text_default(forth->engine->error_word,console);
+                    console_text_default("\n",console);
+                    break;
+                case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
+                    console_text_default("Word must occur in definition: ]\n",console);
+                    break;
+                case FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET:
+                    console_text_default("Word is still being defined: ",console);
+                    console_text_default(forth->engine->error_word,console);
+                    console_text_default("\n",console);
+                    break;
+                default:
+                    //No error message for error - should never reach here unless forgot to add error message
+                    console_text_default("Unhandled engine error: ",console);
+                    char num_buffer[TEXT_INT32_SIZE];
+                    text_int32(forth->engine->error,num_buffer);
+                    console_text_default(num_buffer,console);
+                    console_text_default("\n",console);
+                    break;
+            }
+            break;
+        case FORTH_ERROR_MEMORY_OTHER:
+            console_text_default("Memory allocation error such as alignment\n",console);
+            break;
+        case FORTH_ERROR_OUT_OF_MEMORY:
+            console_text_default("Out of memory\n",console);
+            break;
+        default:
+            //No error message for error - should never reach here unless forgot to add error message
+            console_text_default("Unhandled error: ",console);
+            char num_buffer[TEXT_INT32_SIZE];
+            text_int32(process_result,num_buffer);
+            console_text_default(num_buffer,console);
+            console_text_default("\n",console);
+            break;
+    }
+
+    //Check compile state - definition can't be left open
+    if ((forth->engine->state==FORTH_STATE_COMPILE)||((forth->engine->state==FORTH_STATE_INTERPRET)&&(forth->engine->in_bracket==true)))
+    {
+        //Definition left open - cancel word
+        struct ForthWordHeader *secondary=compile->words->header;
+
+        //Cancel new words headers and recover memory
+        uint32_t rewind_header_bytes=0;
+        uint32_t rewind_name_bytes=0;
+        uint32_t header_count=0;
+        bool looping=true;
+        while(looping==true)
+        {
+            //Check if at end of list first since ->done not valid unless ->last is false
+            if (secondary->last==false)
+            {
+                //Still looping through headers
+                if (secondary->done==false)
+                {
+                    //Reached unfinished header - mark as end of list of headers
+                    //(Marking end only useful for first marked header but doesn't hurt to mark all)
+                    secondary->last=true;
+                    rewind_header_bytes+=sizeof(*secondary);
+                    rewind_name_bytes+=secondary->name_len+1;
+                    header_count++;
+                }
+                else
+                {
+                    //Header was not created while defining this word so nothing to do. This happens because
+                    //the header refers to something else or the definition redefined an existing word that
+                    //already had a header.
+                }
+            }
+            else
+            {
+                //Reached end of list - done looping
+                looping=false;
+            }
+
+            //Advance to next word header
+            secondary++;
+        }
+
+        //Restore header information to state before aborted word began
+        compile->words->index-=header_count;
+        compile->words->bytes_left+=rewind_header_bytes;
+        compile->word_names->index-=rewind_name_bytes;
+        compile->word_names->bytes_left+=rewind_name_bytes;
+
+        //Restore target address pointer of word if it existed before
+        if (compile->colon_word_exists==true)
+        {
+            if (compile->save_type!=FORTH_SECONDARY_UNDEFINED) 
+                compile->colon_word->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->save_offset);
+            else compile->colon_word->address=NULL;
+            compile->colon_word->offset=compile->save_offset;
+            compile->colon_word->definition_size=compile->save_definition_size;
+            compile->colon_word->type=compile->save_type;
+        }
+
+        if (process_result==FORTH_ERROR_NONE)
+        {
+            //Only warn of unterminated word if no other error
+            console_text_default("Unterminated word: ",console);
+            console_text_default(compile->colon_word->name,console);
+            console_text_default("\n",console);
+        }
+
+        //Back to interpret mode
+        forth->engine->state=FORTH_STATE_INTERPRET;
+        forth->engine->in_bracket=false;
+    }
+
+    //Return value set above
+    return return_command;
+}
+
 int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 {
     struct WindowInfo window=windows[selected_window];
@@ -296,20 +511,22 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         pos=window_pos(window,true);
     }
 
-    //Heap memory
-    select_heap(window.tab_index,drawn_split);
-    uint8_t *heap_ptr=get_split_heap();
-
     //Pointers to data on heap
     struct ForthInfo *forth;
     struct ConsoleInfo *console;
     uint8_t *forth_data;
+
+    //struct to hold arguments to compile functions. No need to preserve on heap.
     struct ForthCompileInfo compile;
+
+    //Heap memory
+    select_heap(window.tab_index,drawn_split);
+    compile.heap_ptr=get_split_heap();
 
     if (command_ID==COMMAND_START) 
     {
         //Allocate memory for console and Forth system
-        forth=(struct ForthInfo *)add_object(sizeof(struct ForthInfo),heap_ptr);
+        forth=(struct ForthInfo *)add_object(sizeof(struct ForthInfo),compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (forth==NULL)
@@ -319,7 +536,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth data memory
-        forth_data=add_object(FORTH_MEM_DATA,heap_ptr);
+        forth_data=add_object(FORTH_MEM_DATA,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (forth_data==NULL)
@@ -329,7 +546,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth word definitions
-        compile.definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,heap_ptr);
+        compile.definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.definitions==NULL)
@@ -343,7 +560,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.definitions->bytes_left=FORTH_MEM_DEFINITIONS-sizeof(struct ForthDefinitionsInfo);
 
         //Allocate space for Forth word headers
-        compile.words=(struct ForthWordHeaderInfo *)add_object(FORTH_MEM_WORD_HEADERS,heap_ptr);
+        compile.words=(struct ForthWordHeaderInfo *)add_object(FORTH_MEM_WORD_HEADERS,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.words==NULL)
@@ -360,7 +577,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.words->header[0].last=true;
 
         //Allocate space for Forth word names 
-        compile.word_names=(struct ForthWordNameInfo *)add_object(FORTH_MEM_WORD_NAMES,heap_ptr);
+        compile.word_names=(struct ForthWordNameInfo *)add_object(FORTH_MEM_WORD_NAMES,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.word_names==NULL)
@@ -374,7 +591,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.word_names->bytes_left=FORTH_MEM_WORD_NAMES-sizeof(struct ForthWordNameInfo);
 
         //Allocate space for control stack
-        compile.control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,heap_ptr);
+        compile.control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.control_stack==NULL)
@@ -442,7 +659,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     else
     {
         //Resume or Redraw - reuse existing memory for console
-        forth=(struct ForthInfo *)object_address(FORTH_ID_CONSOLE,heap_ptr);
+        forth=(struct ForthInfo *)object_address(FORTH_ID_CONSOLE,compile.heap_ptr);
         console=&forth->console;
         reset_console_pointers(console);
 
@@ -450,11 +667,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         *forth->engine=forth->engine_copy;
 
         //Restore pointers to word definitions, list of word headers, and control stack
-        forth_data=object_address(FORTH_ID_DATA,heap_ptr);
-        compile.definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,heap_ptr);
-        compile.words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,heap_ptr);
-        compile.word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,heap_ptr);
-        compile.control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,heap_ptr);
+        forth_data=object_address(FORTH_ID_DATA,compile.heap_ptr);
+        compile.definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile.heap_ptr);
+        compile.words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,compile.heap_ptr);
+        compile.word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile.heap_ptr);
+        compile.control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr);
 
         //Recalculate pointers in word header
         struct ForthWordHeader *secondary=compile.words->header;
@@ -511,8 +728,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
     //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
     //const char *debug_keys=": asdf a b c d e f ;\n: a b ;\n: b 1 ;\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\n";
-    const char *debug_keys=": x a 5 x.r ; var a 0x123 a ! : x a @ 5 x.r ; x";
-    //const char *debug_keys="";
+    //const char *debug_keys=": x a 5 x.r ; var a 0x123 a ! : x a @ 5 x.r ; x";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
@@ -637,196 +854,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     console_text_default(" \n",console);
                     break;
                 case VKEY_EXE:
-                    //Only process if text exists
-                    if (console->input.len==0) break;
-
-                    //Color input before copying to console since secondaries previously not colored if cursor is on them
-                    color_input(console,true,compile.words);
-
-                    //Copy input text to console
-                    for (uint32_t i=0;i<console->input.len;i++)
+                    return_command=handle_VKEY_EXE(forth,console,&compile);
+                    if (return_command!=COMMAND_NONE)
                     {
-                        console_char(console->input.text[i].character,console->input.text[i].fg,console->input.text[i].bg,console);
-                    }
-                    console->reset_input=true;
-
-                    //Add input to history
-                    add_history(console);
-                    
-                    //Hide input line since program may output to console
-                    console_text_default(" ",console);
-                    console->input.visible=false;
-                    draw_console(console);
-                    dupdate();
-
-                    //Process input
-                    char input_buffer[FORTH_INPUT_MAX];
-                    copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
-                    compile.heap_ptr=heap_ptr;
-                    int process_result=process_source(forth->engine,input_buffer,&compile);
-
-                    //Exit if word like BYE requested program exit
-                    if (forth->engine->exit_program)
-                    {
-                        return_command=COMMAND_EXIT;
-                        save_exit=forth->engine->exit_program;
-                    }
-
-                    //Show input line again
-                    console_text_default("\n",console);
-                    console->input.visible=true;
-
-                    //Process errors from processing source
-                    switch (process_result)
-                    {
-                        case FORTH_ERROR_NONE:
-                            //No error - nothing to do
-                            break;
-                        case FORTH_ERROR_TOO_LONG:
-                        case FORTH_ERROR_NOT_FOUND:
-                        case FORTH_ERROR_INVALID_NAME:
-                        case FORTH_ERROR_NO_WORD:
-                            //All of these errors share code for printing out word that caused error
-                            if (process_result==FORTH_ERROR_TOO_LONG)
-                                console_text_default("Word too long: ",console);
-                            else if (process_result==FORTH_ERROR_NOT_FOUND)
-                                console_text_default("Undefined word: ",console);
-                            else if (process_result==FORTH_ERROR_INVALID_NAME)
-                                console_text_default("Invalid word for operation: ",console);
-                            else if (process_result==FORTH_ERROR_NO_WORD)
-                                console_text_default("Missing word after ",console);
-                            uint32_t start=0;
-                            uint32_t word_len=next_word_source(compile.error_word,&start);
-
-                            for (uint32_t i=0;i<word_len;i++)
-                                console_char_default(compile.error_word[i],console);
-                            console_text_default("\n",console);
-                            break;
-                        case FORTH_ERROR_ENGINE:
-                            //Error set in Forth engine - ie inside of primitive
-                            switch (forth->engine->error)
-                            {
-                                case FORTH_ENGINE_ERROR_NONE:
-                                    //Should never happen but just in case
-                                    console_text_default("Engine error but code not set\n",console);
-                                    break;
-                                case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
-                                case FORTH_ENGINE_ERROR_COMPILE_ONLY:
-                                    if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
-                                        console_text_default("Word is interpret only: ",console);
-                                    else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
-                                        console_text_default("Word is compile only: ",console);
-                                    //All of these errors share code for printing out word that caused error
-                                    uint32_t start=0;
-                                    uint32_t word_len=next_word_source(compile.error_word,&start);
-                                    for (uint32_t i=0;i<word_len;i++)
-                                        console_char_default(compile.error_word[i],console);
-                                    console_text_default("\n",console);
-                                    break;
-                                case FORTH_ENGINE_ERROR_RSTACK_FULL:
-                                    console_text_default("Out of R-stack space - aborting\n",console);
-                                    break;
-                                case FORTH_ENGINE_ERROR_UNDEFINED:
-                                    console_text_default("Word not defined: ",console);
-                                    console_text_default(forth->engine->error_word,console);
-                                    console_text_default("\n",console);
-                                    break;
-                                default:
-                                    //No error message for error - should never reach here unless forgot to add error message
-                                    console_text_default("Unhandled engine error: ",console);
-                                    char num_buffer[TEXT_INT32_SIZE];
-                                    text_int32(forth->engine->error,num_buffer);
-                                    console_text_default(num_buffer,console);
-                                    console_text_default("\n",console);
-                                    break;
-                            }
-                            break;
-                        case FORTH_ERROR_OUT_OF_MEMORY:
-                            console_text_default("Out of memory\n",console);
-                            break;
-                        case FORTH_ERROR_MEMORY_OTHER:
-                            console_text_default("Memory allocation error such as alignment\n",console);
-                            break;
-                        default:
-                            //No error message for error - should never reach here unless forgot to add error message
-                            console_text_default("Unhandled error: ",console);
-                            char num_buffer[TEXT_INT32_SIZE];
-                            text_int32(process_result,num_buffer);
-                            console_text_default(num_buffer,console);
-                            console_text_default("\n",console);
-                            break;
-                    }
-
-                    //Check compile state - definition can't be left open
-                    if (forth->engine->state==FORTH_STATE_COMPILE)
-                    {
-                        //Definition left open - cancel word
-                        struct ForthWordHeader *secondary=compile.words->header;
-
-                        //Cancel new words headers and recover memory
-                        uint32_t rewind_header_bytes=0;
-                        uint32_t rewind_name_bytes=0;
-                        uint32_t header_count=0;
-                        bool looping=true;
-                        while(looping==true)
-                        {
-                            //Check if at end of list first since ->done not valid unless ->last is false
-                            if (secondary->last==false)
-                            {
-                                //Still looping through headers
-                                if (secondary->done==false)
-                                {
-                                    //Reached unfinished header - mark as end of list of headers
-                                    //(Marking end only useful for first marked header but doesn't hurt to mark all)
-                                    secondary->last=true;
-                                    rewind_header_bytes+=sizeof(*secondary);
-                                    rewind_name_bytes+=secondary->name_len+1;
-                                    header_count++;
-                                }
-                                else
-                                {
-                                    //Header was not created while defining this word so nothing to do. This happens because
-                                    //the header refers to something else or the definition redefined an existing word that
-                                    //already had a header.
-                                }
-                            }
-                            else
-                            {
-                                //Reached end of list - done looping
-                                looping=false;
-                            }
-
-                            //Advance to next word header
-                            secondary++;
-                        }
-
-                        //Restore header information to state before aborted word began
-                        compile.words->index-=header_count;
-                        compile.words->bytes_left+=rewind_header_bytes;
-                        compile.word_names->index-=rewind_name_bytes;
-                        compile.word_names->bytes_left+=rewind_name_bytes;
-
-                        //Restore target address pointer of word if it existed before
-                        if (compile.colon_word_exists==true)
-                        {
-                            if (compile.save_type!=FORTH_SECONDARY_UNDEFINED) 
-                                compile.colon_word->address=(void(**)(struct ForthEngine *))(compile.definitions->data+compile.save_offset);
-                            else compile.colon_word->address=NULL;
-                            compile.colon_word->offset=compile.save_offset;
-                            compile.colon_word->definition_size=compile.save_definition_size;
-                            compile.colon_word->type=compile.save_type;
-                        }
-
-                        if (process_result==FORTH_ERROR_NONE)
-                        {
-                            //Only warn of unterminated word if no other error
-                            console_text_default("Unterminated word: ",console);
-                            console_text_default(compile.colon_word->name,console);
-                            console_text_default("\n",console);
-                        }
-
-                        //Back to interpret mode
-                        forth->engine->state=FORTH_STATE_INTERPRET;
+                        //Handling EXE above generated request to exit Forth
+                        save_exit=true;
                     }
                     break;
                 case VKEY_UP:

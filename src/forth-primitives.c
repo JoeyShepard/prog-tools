@@ -8,6 +8,106 @@
 //Internal primitives - not visible to user
 //=========================================
 
+//Done executing primitive
+void prim_hidden_done(struct ForthEngine *engine)
+{
+    //Pop all R-stack values for word including return address
+    while (1)
+    {
+        //Pop R-stack value
+        engine->rstack++;
+
+        //No need to check index since FORTH_RSTACK_RETURN only exists once per word
+        if (engine->rstack->type==FORTH_RSTACK_RETURN)
+        {
+            //Return to calling word
+            engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
+
+            //Done searching
+            break;
+        }
+        else if (engine->rstack->type==FORTH_RSTACK_DONE)
+        {
+            //Returning from top-level word - stop executing
+            engine->executing=false;
+
+            //Done searching
+            break;
+        }
+        else
+        {
+            //Found loop counter or something else - keep searching
+        }
+    }
+}
+
+//Print out characters stored in thread
+void prim_hidden_dot_quote(struct ForthEngine *engine)
+{
+    //Characters start after primitive address
+    const char *text=(char *)(engine->address+1);
+
+    //Print out characters first
+    if (engine->print!=NULL)
+    {
+        engine->print(text);
+
+        //Update screen
+        if (engine->update_screen!=NULL) engine->update_screen();
+    }
+
+    //Find end of string to skip over it and point to next primitive
+    while (*text) text++;
+
+    //Skip over null terminator to alignment value
+    text++;
+
+    //Add alignment value
+    text+=*text;
+    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+}
+
+//Write characters to data memory
+void prim_hidden_s_quote(struct ForthEngine *engine)
+{
+    //Characters start after primitive address
+    const char *text=(char *)(engine->address+1);
+
+    //Values to return on stack
+    uint32_t address=engine->data_index;
+    uint32_t bytes_written=0;
+
+    //Find end of string to skip over it and point to next primitive
+    while (*text)
+    {
+        //Write character to data memory
+        *(engine->data+engine->data_index)=*text;
+        bytes_written++;
+
+        //Advance data pointer
+        engine->data_index=(engine->data_index+sizeof(char))&engine->data_mask;
+
+        //Advance to next character
+        text++;
+    }
+
+    //Skip over null terminator to alignment value
+    text++;
+
+    //Add alignment value
+    text+=*text;
+    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+
+    //Write return values to stack
+    *engine->stack=address;
+    uintptr_t lower;
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    *engine->stack=bytes_written;;
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
 //Push next cell in dictionary to stack
 void prim_hidden_push(struct ForthEngine *engine)
 {
@@ -59,39 +159,6 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 
         //Account for interpreter advancing execution address
         engine->address--;
-    }
-}
-
-//Done executing primitive
-void prim_hidden_done(struct ForthEngine *engine)
-{
-    //Pop all R-stack values for word including return address
-    while (1)
-    {
-        //Pop R-stack value
-        engine->rstack++;
-
-        //No need to check index since FORTH_RSTACK_RETURN only exists once per word
-        if (engine->rstack->type==FORTH_RSTACK_RETURN)
-        {
-            //Return to calling word
-            engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
-
-            //Done searching
-            break;
-        }
-        else if (engine->rstack->type==FORTH_RSTACK_DONE)
-        {
-            //Returning from top-level word - stop executing
-            engine->executing=false;
-
-            //Done searching
-            break;
-        }
-        else
-        {
-            //Found loop counter or something else - keep searching
-        }
     }
 }
 
@@ -442,13 +509,18 @@ void prim_body_x_dot(struct ForthEngine *engine)
 }
 
 //DOT_QUOTE
-void prim_body_dot_quote(struct ForthEngine *engine){}
-int prim_immediate_dot_quote(struct ForthEngine *engine){}
-int prim_compile_dot_quote(struct ForthEngine *engine){}
-int prim_optimize_dot_quote(struct ForthEngine *engine)
+int prim_immediate_dot_quote(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_DOT_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
+int prim_compile_dot_quote(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_DOT_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //SLASH
@@ -996,6 +1068,7 @@ void prim_body_emit(struct ForthEngine *engine)
         text_buffer[0]=*engine->stack;
         text_buffer[1]=0;
         engine->print(text_buffer);
+
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
@@ -1151,13 +1224,16 @@ int prim_optimize_leave(struct ForthEngine *engine)
 }
 
 //LITERAL
-void prim_body_literal(struct ForthEngine *engine){}
-int prim_immediate_literal(struct ForthEngine *engine){}
-int prim_compile_literal(struct ForthEngine *engine){}
-int prim_optimize_literal(struct ForthEngine *engine)
+int prim_immediate_literal(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_literal(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_LITERAL;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //LOOP
@@ -1446,13 +1522,18 @@ int prim_optimize_r_shift(struct ForthEngine *engine)
 }
 
 //S_QUOTE
-void prim_body_s_quote(struct ForthEngine *engine){}
-int prim_immediate_s_quote(struct ForthEngine *engine){}
-int prim_compile_s_quote(struct ForthEngine *engine){}
-int prim_optimize_s_quote(struct ForthEngine *engine)
+int prim_immediate_s_quote(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_S_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
+int prim_compile_s_quote(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_S_QUOTE;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //SPACE
@@ -1685,23 +1766,36 @@ int prim_optimize_x_or(struct ForthEngine *engine)
 }
 
 //LEFT_BRACKET
-void prim_body_left_bracket(struct ForthEngine *engine){}
-int prim_immediate_left_bracket(struct ForthEngine *engine){}
-int prim_compile_left_bracket(struct ForthEngine *engine){}
-int prim_optimize_left_bracket(struct ForthEngine *engine)
+int prim_immediate_left_bracket(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_left_bracket(struct ForthEngine *engine)
+{
+    engine->state=FORTH_STATE_INTERPRET;
+    engine->in_bracket=true;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 
 //RIGHT_BRACKET
-void prim_body_right_bracket(struct ForthEngine *engine){}
-int prim_immediate_right_bracket(struct ForthEngine *engine){}
-int prim_compile_right_bracket(struct ForthEngine *engine){}
-int prim_optimize_right_bracket(struct ForthEngine *engine)
+int prim_immediate_right_bracket(struct ForthEngine *engine)
 {
-    engine=engine;
-    return 0;
+    if (engine->in_bracket==false) 
+    {
+        //No matching opening [
+        return FORTH_ENGINE_ERROR_RIGHT_BRACKET;
+    }
+    else
+    {
+        engine->state=FORTH_STATE_COMPILE;
+        return FORTH_ENGINE_ERROR_NONE;
+    }
+}
+
+int prim_compile_right_bracket(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //BRACKET_TICK
@@ -2348,7 +2442,7 @@ const struct ForthPrimitive forth_primitives[]=
     {".",1,NULL,NULL,&prim_body_dot,NULL},
     {"U.",2,NULL,NULL,&prim_body_u_dot,NULL},
     {"X.",2,NULL,NULL,&prim_body_x_dot,NULL},
-    //{".\"",2,&prim_immediate_dot_quote,&prim_compile_dot_quote,&prim_body_dot_quote,&prim_optimize_dot_quote},
+    {".\"",2,&prim_immediate_dot_quote,&prim_compile_dot_quote,NULL,NULL},
     {"/",1,NULL,NULL,&prim_body_slash,&prim_optimize_slash},
     {"/MOD",4,NULL,NULL,&prim_body_slash_mod,&prim_optimize_slash_mod},
     {":",1,&prim_immediate_colon,&prim_compile_colon,NULL,NULL},
@@ -2394,8 +2488,8 @@ const struct ForthPrimitive forth_primitives[]=
     //{"J",1,&prim_immediate_j,&prim_compile_j,&prim_body_j,&prim_optimize_j},
     {"KEY",3,NULL,NULL,&prim_body_key,NULL},
     //{"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,&prim_body_leave,&prim_optimize_leave},
-    //{"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,&prim_body_literal,&prim_optimize_literal},
-    //{"LIT",3,&prim_immediate_literal,&prim_compile_literal,&prim_body_literal,&prim_optimize_literal},
+    {"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,NULL,NULL},
+    {"LIT",3,&prim_immediate_literal,&prim_compile_literal,NULL,NULL},
     //{"LOOP",4,&prim_immediate_loop,&prim_compile_loop,&prim_body_loop,&prim_optimize_loop},
     {"LSHIFT",6,NULL,NULL,&prim_body_l_shift,&prim_optimize_l_shift},
     {"MAX",3,NULL,NULL,&prim_body_max,&prim_optimize_max},
@@ -2411,7 +2505,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"ROT",3,NULL,NULL,&prim_body_rote,&prim_optimize_rote},
     {"-ROT",4,NULL,NULL,&prim_body_minus_rote,&prim_optimize_minus_rote},
     {"RSHIFT",6,NULL,NULL,&prim_body_r_shift,&prim_optimize_r_shift},
-    //{"S\"",2,&prim_immediate_s_quote,&prim_compile_s_quote,&prim_body_s_quote,&prim_optimize_s_quote},
+    {"S\"",2,&prim_immediate_s_quote,&prim_compile_s_quote,NULL,NULL},
     {"SPACE",5,NULL,NULL,&prim_body_space,NULL},
     {"SPACES",6,NULL,NULL,&prim_body_spaces,NULL},
     //{"STATE",5,&prim_immediate_state,&prim_compile_state,&prim_body_state,&prim_optimize_state},
@@ -2426,8 +2520,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"VAR",3,&prim_immediate_variable,&prim_compile_variable,NULL,NULL},
     //{"WHILE",5,&prim_immediate_while,&prim_compile_while,&prim_body_while,&prim_optimize_while},
     {"XOR",3,NULL,NULL,&prim_body_x_or,&prim_optimize_x_or},
-    //{"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,&prim_body_left_bracket,&prim_optimize_left_bracket},
-    //{"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,&prim_body_right_bracket,&prim_optimize_right_bracket},
+    {"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,NULL,NULL},
+    {"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,NULL,NULL},
     {"[']",3,&prim_immediate_bracket_tick,&prim_compile_bracket_tick,NULL,NULL},
     {"[CHAR]",6,&prim_immediate_bracket_char,&prim_compile_bracket_char,NULL,NULL},
     {".R",2,NULL,NULL,&prim_body_dot_r,NULL},
@@ -2470,13 +2564,14 @@ const struct ForthPrimitive forth_primitives[]=
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL,NULL},
 
     //DEBUG that steps through word
+        //ON should also go to debugger
+        //BREAKPOINT would be good
     //action to change data size
     //help
     //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
-    //. for unsigned (u. and u.r?) and hex since no BASE
-    //- h.? x.?
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
+        //actually yes, this would probably help a lot
     //COLD or equivalent
 
     //May add but not sure yet
@@ -2484,6 +2579,8 @@ const struct ForthPrimitive forth_primitives[]=
     //search ??
     //wordsize
     //disasm - just see? edit?
+        //better to have one name for both prim and secondaries
+        //objdump -t shows function lengths
 };
 
 //Can't determine length of array primitives in other files, so calculate here

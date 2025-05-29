@@ -22,8 +22,10 @@
     extern const int forth_primitives_len;
 
     //Primitives visible externally
-    void prim_hidden_push(struct ForthEngine *engine);
-    void prim_hidden_secondary(struct ForthEngine *engine);
     void prim_hidden_done(struct ForthEngine *engine);
+    void prim_hidden_dot_quote(struct ForthEngine *engine);
+    void prim_hidden_push(struct ForthEngine *engine);
+    void prim_hidden_s_quote(struct ForthEngine *engine);
+    void prim_hidden_secondary(struct ForthEngine *engine);
 
 #endif

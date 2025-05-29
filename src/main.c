@@ -25,8 +25,6 @@ assembler with built-in safety checks?
 Forth
 =====
 only highlight syntax after 1 second? not sure if affects battery life
-revisit stack bounds checks instead of masking now that no PICK or ROLL
-- check every so many instructions?
 in Forth console, cursor in last column is one pixel too wide
 key modifier in cursor?
 recheck syntax highlighter for : since colors primitives as secondary name
@@ -38,6 +36,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - quoting words not working yet
 - words with header but no definition should be yellow
 - red after const and var like ;
+- color secondaries if match like primitives
 stagger key legend to take up less room
 console - only copy to history if different from last
 double check all engine->print references check not NULL
@@ -54,8 +53,10 @@ individual primitives for local accesses
 i and j are function pointers
 add test for NULL for headers in primitives that use them
 RECURSE? no problem using name if in definition but bad in [ ]
-make sure logging really is compiled out! ie comment out then compare binary sizes
-- especially for code blocks relying on log_enabled
+dont update screen for emit etc if no print defined
+keyboard shortcut to clear stack
+excessive masking in primitives? data_index should always be valid
+- looked briefly and only found C_COMMA. anywhere else?
 
 Forth optimizing
 ================
@@ -69,9 +70,13 @@ peepholing
 - could render asm with fixed address for ie MOVE but no benefit on RISC
 copy primitive bodies to RAM
 no stack wrapping and check every 10 primitives for overflow
+- only check so many instructions
+- alignment no longer matters - should work!
+- otoh, what if OOB then back in? wouldnt catch
+  - could OR and AND one address in primitive but need stack to be aligned - wastes 2x stack
 assembly? doesnt seem worth it for this
 - might be ok since already have C version for x86
-- how to combined primitives? either or
+- how to do combined primitives? either or
 tests
 - fibonacci
 - N queens

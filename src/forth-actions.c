@@ -169,6 +169,72 @@ static int action_prepare_word(const char *word_buffer,int word_type,uint8_t sec
 
 }
 
+//Helper function - common to action_dot_quote_compile and action_s_quote_compile
+static int action_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Save index in case needed for error message
+    uint32_t prior_start=*start;
+
+    //Track count of bytes written for padding at end
+    uint32_t bytes_written=0;
+   
+    //Skip first character which should be space but could be 0
+    bool skip_first=true;
+
+    //Loop through characters and write to thread
+    while(1)
+    {
+        char character=source[*start];
+        *start=*start+1;
+        if (character=='"')
+        {
+            //Matching " found. Write terminating zero first.
+            int result=write_definition_u8(0,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            bytes_written++;
+
+            //Calculate padding bytes
+            int ptr_size=sizeof(void(*)(struct ForthEngine *));
+            int padding_count=(ptr_size-bytes_written%ptr_size)%ptr_size;
+
+            //Write alignment amount so primitive can add this value to address pointer to align it
+            result=write_definition_u8(padding_count,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Write padding bytes
+            for (int i=0;i<padding_count-1;i++)
+            {
+                result=write_definition_u8(0,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+            }
+
+            return FORTH_ERROR_NONE;
+        }
+        else if (character==0)
+        {
+            //Error - reached end of string with no terminating "
+            compile->error_word=source+prior_start-compile->word_len;
+            *start=prior_start;
+            return FORTH_ERROR_MISSING_QUOTE;
+        }
+        else
+        {
+            if (skip_first==true)
+            {
+                //Skip first character which should be space but could be 0
+                skip_first=false;
+            }
+            else
+            {
+                //Write character to print
+                int result=write_definition_u8(character,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+                bytes_written++;
+            }
+        }
+    }
+}
+
 //Helper function - use print_color if it exists and print otherwise
 static void action_words_print(struct ForthEngine *engine,const char *text, color_t color)
 {
@@ -177,14 +243,48 @@ static void action_words_print(struct ForthEngine *engine,const char *text, colo
 }
 
 
-//TODO: rearrange functions here to match alphabetical order in header
-
 //Actions - triggered in primitive and handled here to avoid platform specific code in primitives
 //===============================================================================================
+int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile)
+{
+    //Save index in case needed for error message
+    uint32_t prior_start=*start;
+
+    //Find next word in source
+    uint32_t word_len=next_word_source(source,start);
+    if (word_len==0)
+    {
+        //No word after CHAR
+        compile->error_word=source+prior_start-compile->word_len;
+        *start=prior_start;
+        return FORTH_ERROR_NO_WORD;
+    }
+    else
+    {
+        //Return first character of word
+        *index=*(uint8_t *)(source+*start);
+
+        //Advance to next word
+        *start+=word_len;
+
+        return FORTH_ERROR_NONE;
+    }
+}
+
 int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Logging
     log_push(LOGGING_FORTH_ACTION_COLON,"action_colon");
+
+    if (engine->in_bracket==true)
+    {
+        //Logging
+        log_pop();
+
+        //Error - not allowed after [ while defining word
+        compile->error_word=source+*start-compile->word_len;
+        return FORTH_ERROR_NOT_BETWEEN_BRACKETS;
+    }
 
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
@@ -251,6 +351,19 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
 
 int action_constant(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_CONSTANT,"action_constant");
+
+    if (engine->in_bracket==true)
+    {
+        //Logging
+        log_pop();
+
+        //Error - not allowed after [ while defining word
+        compile->error_word=source+*start-compile->word_len;
+        return FORTH_ERROR_NOT_BETWEEN_BRACKETS;
+    }
+
     //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
@@ -277,6 +390,19 @@ int action_constant(struct ForthEngine *engine,const char *source,uint32_t *star
 
 int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_CREATE,"action_create");
+
+    if (engine->in_bracket==true)
+    {
+        //Logging
+        log_pop();
+
+        //Error - not allowed after [ while defining word
+        compile->error_word=source+*start-compile->word_len;
+        return FORTH_ERROR_NOT_BETWEEN_BRACKETS;
+    }
+
     //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
@@ -301,70 +427,65 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     return FORTH_ERROR_NONE;
 }
 
-int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile)
+int action_dot_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
-    //Logging
-    log_push(LOGGING_FORTH_ACTION_SEMICOLON,"action_semicolon");
-    log_text("name: %s\n",compile->colon_word->name);
-    log_text("size: %d\n",compile->colon_word->definition_size);
-
-    //Add primitive to word to stop executing
-    int result=write_definition_primitive(&prim_hidden_done,compile);
+    //Write primitive that reads and prints characters
+    int result=write_definition_primitive(&prim_hidden_dot_quote,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
-    //Start at word defined by colon and mark all words as done
-    //(New word is either newly created in which case it and all headers after should be marked done OR the new word
-    //reuses an existing header since the word is being redefined in which case there may not be any new word headers and
-    //the search here may needlessly re-mark a lot of headers done. Redefining a word is relatively rare so leave as is.) 
-    struct ForthWordHeader *secondary=compile->colon_word;
-
-    //Mark header for word and any other headers created in word as done
-    while(secondary->last==false)
-    {
-        secondary->done=true;
-        secondary++;
-    }
-
-    //Recover definition memory if word was redfined
-    if ((compile->colon_word_exists==true)&&(compile->delete_size!=0))
-    {
-        //Compact memory of old definition
-        action_compact(compile->delete_offset,compile->delete_size,compile);
-    }
-
-    //Set compile state back to interpret
-    engine->state=FORTH_STATE_INTERPRET;
-
-    //Logging
-    log_pop();
-
-    return FORTH_ERROR_NONE;
+    //Write characters to definition
+    action_quote_compile(engine,source,start,compile);
 }
 
-int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile)
+int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
     uint32_t prior_start=*start;
 
-    //Find next word in source
-    uint32_t word_len=next_word_source(source,start);
-    if (word_len==0)
-    {
-        //No word after CHAR
-        compile->error_word=source+prior_start-compile->word_len;
-        *start=prior_start;
-        return FORTH_ERROR_NO_WORD;
-    }
-    else
-    {
-        //Return first character of word
-        *index=*(uint8_t *)(source+*start);
+    //Skip first character which should be space but could be 0
+    bool skip_first=true;
 
-        //Advance to next word
-        *start+=word_len;
-
-        return FORTH_ERROR_NONE;
+    //Print out characters
+    char buffer[2];
+    buffer[1]=0;
+    bool characters_printed=false;
+    while(1)
+    {
+        buffer[0]=source[*start];
+        *start=*start+1;
+        if (buffer[0]=='"')
+        {
+            //Matching " found - done printing
+            return FORTH_ERROR_NONE;
+        }
+        else if (buffer[0]==0)
+        {
+            //Error - reached end of string with no terminating "
+            compile->error_word=source+prior_start-compile->word_len;
+            *start=prior_start;
+            return FORTH_ERROR_MISSING_QUOTE;
+        }
+        else
+        {
+            if (skip_first==true)
+            {
+                //Skip first character which should be space but could be 0
+                skip_first=false;
+            }
+            else
+            {
+                //Print out character if print function is defined
+                if (engine->print!=NULL)
+                {
+                    engine->print(buffer);
+                    characters_printed=true;
+                }
+            }
+        }
     }
+
+    //Update screen if anything printed
+    if ((engine->update_screen!=NULL)&&(characters_printed)) engine->update_screen();
 }
 
 void action_paren(const char *source,uint32_t *start)
@@ -385,42 +506,6 @@ void action_paren(const char *source,uint32_t *start)
             return;
         }
     }
-}
-
-int action_variable(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
-{
-    //Logging
-    log_push(LOGGING_FORTH_ACTION_VARIABLE,"action_variable");
-
-    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
-    char word_buffer[FORTH_WORD_MAX+1];
-    uint32_t word_len;
-    int word_type;
-    int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-    
-    //Reuse or create word for VARIABLE
-    result=action_prepare_word(word_buffer,word_type,FORTH_SECONDARY_VARIABLE,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Allocate address in data section for variable
-    uint32_t variable_address=engine->data_index;
-    engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32; 
-
-    //Add code to push variable address
-    result=write_definition_primitive(&prim_hidden_push,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-    result=write_definition_i32(variable_address,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Add primitive to word to stop exectuing
-    result=write_definition_primitive(&prim_hidden_done,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Logging
-    log_pop();
-
-    return FORTH_ERROR_NONE;
 }
 
 void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw)
@@ -524,6 +609,73 @@ void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_cha
 
     //Update screen
     if ((engine->update_screen!=NULL)&&(redraw==true)) engine->update_screen();
+}
+
+int action_s_quote_compile(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Write primitive that reads and prints characters
+    int result=write_definition_primitive(&prim_hidden_s_quote,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    
+    //Write characters to definition
+    action_quote_compile(engine,source,start,compile);
+}
+
+int action_s_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Save index in case needed for error message
+    uint32_t prior_start=*start;
+
+    //Skip first character which should be space but could be 0
+    bool skip_first=true;
+
+    //Values to return on stack
+    uint32_t address=engine->data_index;
+    uint32_t bytes_written=0;
+
+    //Write characters to data memory
+    while(1)
+    {
+        char character=source[*start];
+        *start=*start+1;
+        if (character=='"')
+        {
+            //Matching " found - done. Write return values.
+            *engine->stack=address;
+            uintptr_t lower;
+            lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+            engine->stack=(int32_t*)((engine->stack_base)|lower);
+            *engine->stack=bytes_written;;
+            lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+            engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+            return FORTH_ERROR_NONE;
+        }
+        else if (character==0)
+        {
+            //Error - reached end of string with no terminating "
+            compile->error_word=source+prior_start-compile->word_len;
+            *start=prior_start;
+            return FORTH_ERROR_MISSING_QUOTE;
+        }
+        else
+        {
+            if (skip_first==true)
+            {
+                //Skip first character which should be space but could be 0
+                skip_first=false;
+            }
+            else
+            {
+                //Write character to data memory
+                *(engine->data+engine->data_index)=character;
+                bytes_written++;
+
+                //Advance data pointer
+                engine->data_index=(engine->data_index+sizeof(character))&engine->data_mask;
+            }
+        }
+    }
 }
 
 void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_characters,bool defined,bool redraw,
@@ -666,6 +818,47 @@ void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_ch
     if ((engine->update_screen!=NULL)&&(redraw==true)) engine->update_screen();
 }
 
+int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile)
+{
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_SEMICOLON,"action_semicolon");
+    log_text("name: %s\n",compile->colon_word->name);
+    log_text("size: %d\n",compile->colon_word->definition_size);
+
+    //Add primitive to word to stop executing
+    int result=write_definition_primitive(&prim_hidden_done,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Start at word defined by colon and mark all words as done
+    //(New word is either newly created in which case it and all headers after should be marked done OR the new word
+    //reuses an existing header since the word is being redefined in which case there may not be any new word headers and
+    //the search here may needlessly re-mark a lot of headers done. Redefining a word is relatively rare so leave as is.) 
+    struct ForthWordHeader *secondary=compile->colon_word;
+
+    //Mark header for word and any other headers created in word as done
+    while(secondary->last==false)
+    {
+        secondary->done=true;
+        secondary++;
+    }
+
+    //Recover definition memory if word was redfined
+    if ((compile->colon_word_exists==true)&&(compile->delete_size!=0))
+    {
+        //Compact memory of old definition
+        action_compact(compile->delete_offset,compile->delete_size,compile);
+    }
+
+    //Set compile state back to interpret
+    engine->state=FORTH_STATE_INTERPRET;
+    engine->in_bracket=false;
+
+    //Logging
+    log_pop();
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
@@ -721,4 +914,51 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
         return FORTH_ERROR_INVALID_NAME;
     }
 }
+
+int action_variable(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Logging
+    log_push(LOGGING_FORTH_ACTION_VARIABLE,"action_variable");
+
+    if (engine->in_bracket==true)
+    {
+        //Logging
+        log_pop();
+
+        //Error - not allowed after [ while defining word
+        compile->error_word=source+*start-compile->word_len;
+        return FORTH_ERROR_NOT_BETWEEN_BRACKETS;
+    }
+
+    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len;
+    int word_type;
+    int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    
+    //Reuse or create word for VARIABLE
+    result=action_prepare_word(word_buffer,word_type,FORTH_SECONDARY_VARIABLE,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Allocate address in data section for variable
+    uint32_t variable_address=engine->data_index;
+    engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32; 
+
+    //Add code to push variable address
+    result=write_definition_primitive(&prim_hidden_push,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    result=write_definition_i32(variable_address,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Add primitive to word to stop exectuing
+    result=write_definition_primitive(&prim_hidden_done,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Logging
+    log_pop();
+
+    return FORTH_ERROR_NONE;
+}
+
 

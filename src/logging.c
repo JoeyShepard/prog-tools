@@ -16,15 +16,23 @@
 
     //Global variables not visible outside of file
     const char *log_path;
+    bool log_header_printed;
     bool log_list[LOGGING_POINTS_COUNT];
     int log_selected;
     int log_stack[LOG_STACK_COUNT];
     int log_index;
 
     //Functions
-    bool log_enabled()
+    void log_header()
     {
-        return true;
+        if (log_header_printed==false)
+        {
+            //Set flag first then call log_none since log_none calls log_header if flag false
+            log_header_printed=true;
+            log_none("\n\n");
+            log_none("LOGGING RESTARTED\n");
+            log_none("=================\n");
+        }
     }
 
     void init_logging(const char *new_path)
@@ -43,11 +51,6 @@
 
         //Configure logs in separate logging-config.c
         log_config();
-
-        //Start logging new session
-        log_none("\n\n");
-        log_none("LOGGING RESTARTED\n");
-        log_none("=================\n");
     }
 
     void log_on(int point)
@@ -134,7 +137,10 @@
     {
         //Only print log if enabled unless LOGGING_NONE which is always printed
         if ((log_selected!=LOGGING_NONE)&&(log_list[log_selected]==false)) return;
-        
+       
+        //Only print header if not printed yet - prevents empty log entry if nothing logged
+        log_header();
+
         //Indentation
         for (int i=1;i<log_index;i++)
             if (log_check(log_stack[i])) log_text_raw("  ");
@@ -163,6 +169,9 @@
         //Only print log if enabled unless LOGGING_NONE which is always printed
         if ((log_selected!=LOGGING_NONE)&&(log_list[log_selected]==false)) return;
         
+        //Only print header if not printed yet - prevents empty log entry if nothing logged
+        log_header();
+
         //Open logging file for append
         FILE *fptr=fopen(log_path,"a");
         if (fptr==NULL)
@@ -184,6 +193,9 @@
     void log_none(const char *fmt,...)
     {
         //Passing var_args to log_text didn't work so copy here
+
+        //log_header calls log_none so check flag explicitly instead of calling log_header
+        if (log_header_printed==false) log_header();
 
         //Open logging file for append
         FILE *fptr=fopen(log_path,"a");
