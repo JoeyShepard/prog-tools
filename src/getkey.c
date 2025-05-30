@@ -483,14 +483,21 @@ const int vkey_printable[]={
     'd',    //VKEY_d,
     'e',    //VKEY_e,
     'f',    //VKEY_f,
+    '!',    //VKEY_EXCLAMATION,
+    '@',    //VKEY_AT,
+    '#',    //VKEY_HASH,
+    '$',    //VKEY_DOLLAR,
+    '%',    //VKEY_PERCENT,
+    '&',    //VKEY_AMPERSAND,
+    '_',    //VKEY_UNDERSCORE,
+    '\\',   //VKEY_BACKSLASH,
+    '|',    //VKEY_PIPE,
     ':',    //VKEY_COLON,
     ';',    //VKEY_SEMICOLON,
+    '\'',   //VKEY_APOSTROPHE,
     '<',    //VKEY_LESS_THAN,
     '>',    //VKEY_GREATER_THAN,
-    '@',    //VKEY_AT,
-    '!',    //VKEY_EXCLAMATION,
-    '\'',   //VKEY_APOSTROPHE
-    '?',    //VKEY_QUESTION
+    '?',    //VKEY_QUESTION,
 };
 
 const int vkey_printable_len=ARRAY_SIZE(vkey_printable);

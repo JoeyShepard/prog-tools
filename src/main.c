@@ -41,7 +41,6 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - red after const and var like ;
 - color secondaries if match like primitives
 - escape sequences
-stagger key legend to take up less room
 console - only copy to history if different from last
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY
@@ -56,9 +55,9 @@ individual primitives for local accesses
 - even 16 might be good - dont need 256
 i and j are function pointers
 add test for NULL for headers in primitives that use them
-RECURSE? no problem using name if in definition but bad in [ ]
 dont update screen for emit etc if no print defined
 keyboard shortcut to clear stack
+- shift DEL?
 excessive masking in primitives? data_index should always be valid
 - looked briefly and only found C_COMMA. anywhere else?
 

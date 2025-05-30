@@ -8,10 +8,12 @@
     //Custom characters - same numbering for all fonts
     #define CHAR_ROOT_SYMBOL        127 //Root symbol
     #define CHAR_RIGHT_ARROW        128 //Right arrow symbol from keypad
-    #define CHAR_CUSTOM_CURSOR      129 //solid cursor
+    #define CHAR_CUSTOM_CURSOR      129 //Solid block cursor
+    #define CHAR_CUSTOM_THETA       130 //Theta
+    #define CHAR_CUSTOM_SUPER_X     131 //Superscript X
 
     #define CHAR_PRINTABLE_MIN      32  //First printable character
-    #define CHAR_PRINTABLE_MAX      129 //Last printable character
+    #define CHAR_PRINTABLE_MAX      131 //Last printable character
 
     #define TEXT_INT32_SIZE         12  //max 10 digits, 1 for - sign, 1 for terminator
     #define TEXT_UINT32_SIZE        11  //max 10 digits, 1 for terminator

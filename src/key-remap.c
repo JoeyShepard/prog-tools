@@ -90,14 +90,19 @@ struct KeyRemap forth_keys[]=
     {31,    MODIFIER_SHIFT_NONE,    VKEY_AT},           //2 -> @
     {32,    MODIFIER_ALPHA_LOWER,   VKEY_3},            //3
     {32,    MODIFIER_ALPHA_UPPER,   VKEY_3},            //3
+    {32,    MODIFIER_SHIFT_NONE,    VKEY_HASH},         //3 -> #
     {33,    MODIFIER_ALPHA_LOWER,   VKEY_4},            //4
     {33,    MODIFIER_ALPHA_UPPER,   VKEY_4},            //4
+    {33,    MODIFIER_SHIFT_NONE,    VKEY_DOLLAR},       //4 -> $
     {34,    MODIFIER_ALPHA_LOWER,   VKEY_5},            //5
     {34,    MODIFIER_ALPHA_UPPER,   VKEY_5},            //5
+    {34,    MODIFIER_SHIFT_NONE,    VKEY_PERCENT},      //5 -> %
     {35,    MODIFIER_ALPHA_LOWER,   VKEY_6},            //6
     {35,    MODIFIER_ALPHA_UPPER,   VKEY_6},            //6
+    {35,    MODIFIER_SHIFT_NONE,    VKEY_POWER},        //6 -> ^
     {36,    MODIFIER_ALPHA_LOWER,   VKEY_7},            //7
     {36,    MODIFIER_ALPHA_UPPER,   VKEY_7},            //7
+    {36,    MODIFIER_SHIFT_NONE,    VKEY_AMPERSAND},    //7 -> &
     {37,    MODIFIER_ALPHA_LOWER,   VKEY_8},            //8
     {37,    MODIFIER_ALPHA_UPPER,   VKEY_8},            //8
     {37,    MODIFIER_SHIFT_NONE,    VKEY_MUL},          //8 -> *
@@ -116,6 +121,7 @@ struct KeyRemap forth_keys[]=
     {45,    MODIFIER_NONE,          VKEY_SUB},          //-
     {45,    MODIFIER_ALPHA_LOWER,   VKEY_SUB},          //-
     {45,    MODIFIER_ALPHA_UPPER,   VKEY_SUB},          //-
+    {45,    MODIFIER_SHIFT_NONE,    VKEY_UNDERSCORE},   //- -> _
     {46,    MODIFIER_NONE,          VKEY_EQUAL},        //=
     {46,    MODIFIER_ALPHA_LOWER,   VKEY_EQUAL},        //=
     {46,    MODIFIER_ALPHA_UPPER,   VKEY_EQUAL},        //=
@@ -128,6 +134,10 @@ struct KeyRemap forth_keys[]=
     {48,    MODIFIER_ALPHA_LOWER,   VKEY_RSBRACKET},    //]
     {48,    MODIFIER_ALPHA_UPPER,   VKEY_RSBRACKET},    //]
     {48,    MODIFIER_SHIFT_NONE,    VKEY_RCBRACKET},    //] -> }
+    {49,    MODIFIER_NONE,          VKEY_BACKSLASH},    //Backslash
+    {49,    MODIFIER_ALPHA_LOWER,   VKEY_BACKSLASH},    //Backslash
+    {49,    MODIFIER_ALPHA_UPPER,   VKEY_BACKSLASH},    //Backslash
+    {49,    MODIFIER_SHIFT_NONE,    VKEY_PIPE},         //Backslash -> |
     {51,    MODIFIER_NONE,          VKEY_SEMICOLON},    //;
     {51,    MODIFIER_ALPHA_LOWER,   VKEY_SEMICOLON},    //;
     {51,    MODIFIER_ALPHA_UPPER,   VKEY_SEMICOLON},    //;
@@ -156,17 +166,24 @@ struct KeyRemap forth_keys[]=
 int forth_key_remap(int key)
 {
     //Remap keys for characters not on keypad
-    if (key==VKEY_RADIAN) key=VKEY_EXCLAMATION;
-    else if (key==VKEY_THETA) key=VKEY_AT;
+    if (key==VKEY_XOT) key=VKEY_AT;
+    else if (key==VKEY_LOG) key=VKEY_EXCLAMATION;
     else if (key==VKEY_LN) key=VKEY_COLON;
     else if (key==VKEY_SIN) key=VKEY_SEMICOLON;
     else if (key==VKEY_COS) key=VKEY_APOSTROPHE;
     else if (key==VKEY_TAN) key=VKEY_QUESTION;
-    else if (key==VKEY_IMAG) key=VKEY_LESS_THAN;
-    else if (key==VKEY_PI) key=VKEY_GREATER_THAN;
+    else if (key==key_shifted[VKEY_XOT]) key=VKEY_HASH;
+    else if (key==key_shifted[VKEY_LOG]) key=VKEY_DOLLAR;
+    else if (key==key_shifted[VKEY_LN]) key=VKEY_PERCENT;
+    else if (key==key_shifted[VKEY_SIN]) key=VKEY_AMPERSAND;
+    else if (key==key_shifted[VKEY_COS]) key=VKEY_PIPE;
+    else if (key==key_shifted[VKEY_TAN]) key=VKEY_BACKSLASH;
+    else if (key==key_shifted[VKEY_0]) key=VKEY_LESS_THAN;
+    else if (key==key_shifted[VKEY_EXP]) key=VKEY_GREATER_THAN;
     //Remap existing keys on keypad for convenience
-    else if (key==VKEY_XOT) key=VKEY_x;
+    else if (key==VKEY_SQUARE) key=VKEY_x;
     else if (key==VKEY_NEG) key=VKEY_SPACE;
+    else if (key==key_shifted[VKEY_NEG]) key=VKEY_UNDERSCORE;
 
     return key;
 }

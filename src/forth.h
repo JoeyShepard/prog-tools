@@ -80,8 +80,9 @@
     #define FORTH_STACK_CONSOLE_X_OFFSET    1
     #define FORTH_STACK_WIDTH_OFFSET        1
     //Small adjustments to align key legend below stack display
-    #define FORTH_LEGEND_OFFSET1            4
-    #define FORTH_LEGEND_OFFSET2            7
+    #define FORTH_LEGEND_OFFSET_X           5
+    #define FORTH_LEGEND_OFFSET_Y           3
+    #define FORTH_SUGGESTION_OFFSET_Y       2
     #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
     //Forth memory
@@ -102,10 +103,10 @@
         FORTH_ERROR_MEMORY_OTHER,
         FORTH_ERROR_MISSING_QUOTE,
         FORTH_ERROR_NO_WORD,
+        FORTH_ERROR_NOT_BETWEEN_BRACKETS,
         FORTH_ERROR_NOT_FOUND,
         FORTH_ERROR_OUT_OF_MEMORY,
         FORTH_ERROR_TOO_LONG,
-        FORTH_ERROR_NOT_BETWEEN_BRACKETS
     };
 
 

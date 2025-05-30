@@ -2626,8 +2626,9 @@ const struct ForthPrimitive forth_primitives[]=
         //Actually may work though need to figure out how to handle memory
         //Problem is several words made by CREATE will all share same code
             //Biggest obstacle is making CREATE compile since breaks model
+            //Need to keep compiling mechanism out of forth-engine. More vectors? Pass source to engine?
         //So, either need one common copy or new copy for each new word
-        //Common copy seems unworkable since either need unnamed chunk or rely on CREATE word which may be redefined
+        //Common copy seems unworkable since either need unnamed chunk or rely on CREATEd word which may be redefined
         //Only way at this point then seems copy whole body into new primitive
     //DEBUG that steps through word
         //ON should also go to debugger

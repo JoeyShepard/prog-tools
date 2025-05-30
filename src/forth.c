@@ -235,45 +235,70 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     if (window_state==WINDOW_WHOLE)
     {
         //Small gap after stack display so easier to see
-        pos.y+=FORTH_LEGEND_OFFSET1;
+        pos.y+=FORTH_LEGEND_OFFSET_Y;
         
         //Key legend
-        const struct KeyText
+        struct KeyText
         {
             const char *key;
             const char *remapped_key;
-            const color_t color;
-        }key_texts[]={
-        {"radian  ","!",COL_ALPHA},
-        {"theta   ","@",COL_ALPHA},
-        {"ln      ",":",FORTH_COL_FG},
-        {"sin     ",";",FORTH_COL_FG},
-        {"cos     ","'",FORTH_COL_FG},
-        {"tan     ","?",FORTH_COL_FG},
-        {"i       ","<",COL_SHIFT},
-        {"pi      ",">",COL_SHIFT}};
+            const char *remapped_key_shift;
+            const color_t fg_color;
+            const color_t bg_color;
+        };
 
+        const char x_theta_t[]={'X',CHAR_CUSTOM_THETA,'T',0};
+        const char exponent[]={'1','0',CHAR_CUSTOM_SUPER_X,0};
+        const struct KeyText key_texts[]={
+        {x_theta_t,"@","#",COL_WHITE,COL_BLACK},
+        {"log","!","$",COL_WHITE,COL_BLACK},
+        {"ln",":","%",COL_WHITE,COL_BLACK},
+        {"sin",";","&",COL_WHITE,COL_BLACK},
+        {"cos","\'","|",COL_WHITE,COL_BLACK},
+        {"tan","?","\\",COL_WHITE,COL_BLACK},
+        {" 0 "," ","<",COL_BLACK,COL_WHITE},
+        {exponent," ",">",COL_BLACK,COL_WHITE}
+        };
+        
+        const int legend_row_height=CONS_ROW_HEIGHT+2;
         for (int i=0;i<ARRAY_SIZE(key_texts);i++)
         {
-            pos=draw_text(key_texts[i].key,pos,key_texts[i].color,-1,false,FONT_5x8);
-            draw_text(key_texts[i].remapped_key,pos,FORTH_STACK_FG,-1,false,FONT_5x8);
-            pos.y+=CONS_ROW_HEIGHT;
-            pos.x=text_x;
+            //Print out key
+            pos.x=text_x+FORTH_LEGEND_OFFSET_X;
+            if (strlen(key_texts[i].key)==2)
+            {
+                //Print key centered if name is only 2 long
+                struct Point temp_pos=pos;
+                pos=draw_text("   ",pos,key_texts[i].fg_color,key_texts[i].bg_color,false,FONT_5x8);
+                temp_pos.x+=font_width(FONT_5x8)/2+1;
+                draw_text(key_texts[i].key,temp_pos,key_texts[i].fg_color,-1,false,FONT_5x8);
+            }
+            else
+            {
+                //No special handling
+                pos=draw_text(key_texts[i].key,pos,key_texts[i].fg_color,key_texts[i].bg_color,false,FONT_5x8);
+            }
+
+            //Print out remapped key
+            pos.x+=font_width(FONT_5x8)*2;
+            pos=draw_text(key_texts[i].remapped_key,pos,FORTH_STACK_FG,-1,false,FONT_5x8);
+            
+            //Print out remapped shifted key
+            pos.x+=font_width(FONT_5x8)*2;
+            pos=draw_text(key_texts[i].remapped_key_shift,pos,COL_SHIFT,-1,false,FONT_5x8);
+            pos.y+=legend_row_height;
         }
 
         //Typing suggestion
-        pos.y+=FORTH_LEGEND_OFFSET2;
-        pos=draw_char(CHAR_RIGHT_ARROW,pos,FORTH_COL_FG,-1,false,FONT_5x8);
-        draw_text(" for word",pos,FORTH_COL_FG,-1,false,FONT_5x8);
-        pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
         pos.x=text_x;
+        pos.y+=FORTH_SUGGESTION_OFFSET_Y;
         draw_text("ACCEPT",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
         pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
         pos.x=text_x;
-        draw_text("ALIGN",pos,FORTH_COL_PRIMITIVE,-1,false,FONT_5x8);
+        draw_text("ALIGN",pos,FORTH_COL_PRIMITIVE,COL_GREEN,false,FONT_5x8);
         pos.y+=FORTH_SUGGESTION_ROW_HEIGHT;
         pos.x=text_x;
-        draw_text("ALIGNED",pos,FORTH_COL_PRIMITIVE,FORTH_STACK_BG,true,FONT_5x8);
+        draw_text("ALIGNED",pos,FORTH_COL_PRIMITIVE,COL_GREEN,false,FONT_5x8);
     }
 }
 

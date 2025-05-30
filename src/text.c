@@ -110,6 +110,9 @@ static uint8_t font_5x8[]=
     0x10,0x20,0x40,0x7E,0x2,              // Root symbol
     8,8,0x3E,0x1C,8,                      // Right arrow symbol from keypad   
     0xFF,0xFF,0xFF,0xFF,0xFF,             // Solid block cursor
+    //0x30,0x4E,0x49,0x39,0x6,              // Theta
+    0x30,0x4C,0x2A,0x19,0x6,              // Theta
+    0,5,2,5,0                             // Superscript X
 };
 
 uint8_t *font_data(int font)
