@@ -20,3 +20,4 @@ differences from other forths
 - no immediate
   - not needed if make planned changes to STATE
 - lots of words interpret only like WORDS
+- var and create align address

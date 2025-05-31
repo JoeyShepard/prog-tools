@@ -754,9 +754,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
     //const char *debug_keys=": asdf a b c d e f ;\n: a b ;\n: b 1 ;\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\n";
     //const char *debug_keys=": x a 5 x.r ; var a 0x123 a ! : x a @ 5 x.r ; x";
-    const char *debug_keys=": foo s\\\" \\a\\b \\c \\e\\f\\l \\m \\n\\q\\r\\t\\v\\z\\\" \\x12\\xAB\\xcd\\x1A\\x2b \\\\ \\x00 abc\" ; foo" ;
+    //const char *debug_keys=": foo s\\\" \\a\\b \\c \\e\\f\\l \\m \\n\\q\\r\\t\\v\\z\\\" \\x12\\xAB\\xcd\\x1A\\x2b \\\\ \\x00 abc\" ; foo" ;
     //const char *debug_keys=": foo .\" abc\" ; foo\n";
-    //const char *debug_keys="";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
@@ -899,6 +899,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     //Fallthrough!
                 case VKEY_DEL:
                     console_key(console,key);
+                    break;
+                case VKEY_INS:  //Shift+VKEY_DEL
+                    //Reset Forth data stack
+                    forth->engine->stack=(int32_t*)(forth->engine->stack_base+(forth->engine->stack_count-1)*FORTH_CELL_SIZE);
                     break;
                 default:
                     //Check for system keys like MENU, OFF, etc

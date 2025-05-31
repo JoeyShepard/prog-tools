@@ -40,7 +40,6 @@
         FORTH_CONTROL_ELSE,
     };
 
-    uint32_t align4(uint32_t value);
     int classify_char(char c);
     int classify_word(const char *word);
     int find_primitive(const char *word);

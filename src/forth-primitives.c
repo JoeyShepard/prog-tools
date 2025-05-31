@@ -1707,13 +1707,17 @@ void prim_body_type(struct ForthEngine *engine)
     {
         //Limit count so it loops through memory at most once
         if (count>=engine->data_size) count=engine->data_size;
+        char text_buffer[2];
+        text_buffer[1]=0;
         for (uint32_t i=0;i<count;i++)
         {
             //Mask address
             address&=engine->data_mask;
+
             //Print out character
-            char text_buffer[2]={*(int32_t*)(engine->data+address),0};
+            text_buffer[0]=*(engine->data+address);
             engine->print(text_buffer);
+            
             //Next byte
             address++;
         }
@@ -2629,6 +2633,7 @@ const struct ForthPrimitive forth_primitives[]=
             //Need to keep compiling mechanism out of forth-engine. More vectors? Pass source to engine?
         //So, either need one common copy or new copy for each new word
         //Common copy seems unworkable since either need unnamed chunk or rely on CREATEd word which may be redefined
+            //May work - mark word as from DOES> and keep reference count in unnamed chunk
         //Only way at this point then seems copy whole body into new primitive
     //DEBUG that steps through word
         //ON should also go to debugger
@@ -2640,11 +2645,13 @@ const struct ForthPrimitive forth_primitives[]=
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
         //actually yes, this would probably help a lot
     //COLD or equivalent
+        //menu option?
 
     //May add but not sure yet
     //cleave ??
     //search ??
     //wordsize
+        //definitely
     //disasm - just see? edit?
         //better to have one name for both prim and secondaries
         //objdump -t shows function lengths

@@ -182,6 +182,8 @@ int forth_key_remap(int key)
     else if (key==key_shifted[VKEY_EXP]) key=VKEY_GREATER_THAN;
     //Remap existing keys on keypad for convenience
     else if (key==VKEY_SQUARE) key=VKEY_x;
+    else if (key==key_lower[VKEY_SQUARE]) key=VKEY_x;
+    else if (key==key_upper[VKEY_SQUARE]) key=VKEY_x;
     else if (key==VKEY_NEG) key=VKEY_SPACE;
     else if (key==key_shifted[VKEY_NEG]) key=VKEY_UNDERSCORE;
 

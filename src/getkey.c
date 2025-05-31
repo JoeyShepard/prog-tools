@@ -251,7 +251,7 @@ const int key_upper[]=
     VKEY_C,             //VKEY_LN       -> VKEY_C
     VKEY_D,             //VKEY_SIN      -> VKEY_D
     VKEY_E,             //VKEY_COS      -> VKEY_E
-    VKEY_F,             //VKEY_TA       -> VKEY_F
+    VKEY_F,             //VKEY_TAN      -> VKEY_F
     VKEY_ALPHA,
     VKEY_RADIAN,        //VKEY_SQUARE   -> VKEY_RADIAN
     VKEY_THETA,         //VKEY_POWER    -> VKEY_THETA
@@ -306,7 +306,7 @@ const int key_lower[]=
     VKEY_c,             //VKEY_LN       -> VKEY_c
     VKEY_d,             //VKEY_SIN      -> VKEY_d
     VKEY_e,             //VKEY_COS      -> VKEY_e
-    VKEY_f,             //VKEY_TA       -> VKEY_f
+    VKEY_f,             //VKEY_TAN      -> VKEY_f
     VKEY_ALPHA,
     VKEY_RADIAN,        //VKEY_SQUARE   -> VKEY_RADIAN
     VKEY_THETA,         //VKEY_POWER    -> VKEY_THETA

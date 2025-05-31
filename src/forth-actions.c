@@ -9,6 +9,7 @@
 #include "forth-primitives.h"
 #include "logging.h"
 #include "mem.h"
+#include "util.h"
 
 //Helper functions
 //================
@@ -347,10 +348,14 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     result=action_prepare_word(word_buffer,word_type,FORTH_SECONDARY_CREATE,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
+    //Allocate address in data section for create
+    uint32_t variable_address=align4(engine->data_index)&engine->data_mask_32;
+    engine->data_index=(variable_address+sizeof(int32_t))&engine->data_mask_32; 
+
     //Add code to push create address
     result=write_definition_primitive(&prim_hidden_push,compile);
     if (result!=FORTH_ERROR_NONE) return result;
-    result=write_definition_i32(engine->data_index,compile);
+    result=write_definition_i32(variable_address,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Add primitive to word to stop exectuing
@@ -1084,8 +1089,8 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Allocate address in data section for variable
-    uint32_t variable_address=engine->data_index;
-    engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32; 
+    uint32_t variable_address=align4(engine->data_index)&engine->data_mask_32;
+    engine->data_index=(variable_address+sizeof(int32_t))&engine->data_mask_32; 
 
     //Add code to push variable address
     result=write_definition_primitive(&prim_hidden_push,compile);

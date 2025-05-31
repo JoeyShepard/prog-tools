@@ -11,12 +11,6 @@
 #include "logging.h"
 #include "mem.h"
 
-
-uint32_t align4(uint32_t value)
-{
-    return value+((4-value%4)%4);
-}
-
 //TODO: table look up if this is too slow
 int classify_char(char c)
 {
