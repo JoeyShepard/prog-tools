@@ -46,7 +46,7 @@ uint8_t *write_heap_u8(uint8_t val,uint8_t *heap_ptr)
     return heap_ptr+sizeof(int8_t);
 }
 
-uint8_t *new_split_mem(uint8_t tab, uint8_t split, uint8_t *heap_ptr)
+uint8_t *new_split_mem(uint8_t tab,uint8_t split,uint8_t *heap_ptr)
 {
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
     //Size of new memory record being created (struct size excludes objects[] so uint32_t for size of objects[0])
@@ -73,7 +73,7 @@ void init_heap()
 }
 
 //Move heap for selected tab/split to top so it can access free memory
-void select_heap(int tab, int split)
+void select_heap(int tab,int split)
 {
     uint8_t *heap_ptr=heap; 
     uint32_t *obj_start;
@@ -212,9 +212,16 @@ uint8_t *object_address(int ID, uint8_t *heap_ptr)
     return object_base_address(ID,heap_ptr)+sizeof(uint32_t);
 }
 
+static size_t object_base_size(int ID, uint8_t *heap_ptr)
+{
+    //Return size of object INCLUDING preceding uint32 holding its size
+    return *(uint32_t *)object_base_address(ID,heap_ptr);
+}
+
 size_t object_size(int ID, uint8_t *heap_ptr)
 {
-    return *(uint32_t *)object_base_address(ID,heap_ptr);
+    //Return size of object EXCLUDING preceding uint32 holding its size
+    return *(uint32_t *)object_base_address(ID,heap_ptr)-sizeof(uint32_t);
 }
 
 int expand_object(size_t size,int ID,uint8_t *heap_ptr)
@@ -232,20 +239,21 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     }
     
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
-
     //Memory range overlaps - memmove instead of memcpy
     uint8_t *object=object_base_address(ID,heap_ptr);
-    uint8_t *src=object+object_size(ID,heap_ptr);
+    uint8_t *src=object+object_base_size(ID,heap_ptr);
     uint8_t *dest=src+size;
     uint32_t copy_size=heap_info->next-(object-heap_ptr);
     memmove(dest,src,copy_size);
+
+    //Update linked lists
     heap_info->next+=size;
     *(uint32_t *)object+=size;
     
     return ERROR_NONE;
 }
 
-int reduce_object(size_t size,int ID, uint8_t *heap_ptr)
+int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
 {
     if (size%sizeof(uint32_t))
     {
@@ -256,8 +264,10 @@ int reduce_object(size_t size,int ID, uint8_t *heap_ptr)
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
     //Memory range overlaps - memmove instead of memcpy
     uint8_t *object=object_base_address(ID,heap_ptr);
-    uint8_t *src=object+object_size(ID,heap_ptr);
+    uint8_t *src=object+object_base_size(ID,heap_ptr);
     memmove(src-size,src,size);
+
+    //Update linked lists
     heap_info->next-=size;
     *(uint32_t *)object-=size;
     

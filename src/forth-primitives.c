@@ -503,6 +503,19 @@ int prim_optimize_minus(struct ForthEngine *engine)
     return 0;
 }
 
+//BACKSLASH
+int prim_immediate_backslash(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_COMMENT;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_backslash(struct ForthEngine *engine)
+{
+    //Same behavior as immediate
+    return prim_immediate_backslash(engine);
+}
+
 //DOT
 void prim_body_dot(struct ForthEngine *engine)
 {
@@ -2500,6 +2513,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"C,",2,NULL,NULL,&prim_body_c_comma,&prim_optimize_c_comma},
     {"W,",2,NULL,NULL,&prim_body_w_comma,&prim_optimize_w_comma},
     {"-",1,NULL,NULL,&prim_body_minus,&prim_optimize_minus},
+    {"\\",1,&prim_immediate_backslash,&prim_compile_backslash,NULL,NULL},
     {".",1,NULL,NULL,&prim_body_dot,NULL},
     {"U.",2,NULL,NULL,&prim_body_u_dot,NULL},
     {"X.",2,NULL,NULL,&prim_body_x_dot,NULL},
@@ -2544,7 +2558,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"FILL",4,NULL,NULL,&prim_body_fill,&prim_optimize_fill},
     {"HERE",4,NULL,NULL,&prim_body_here,NULL},
     //{"I",1,&prim_immediate_i,&prim_compile_i,&prim_body_i,&prim_optimize_i},
-    //{"IF",2,&prim_immediate_if,&prim_compile_if,&prim_body_if,&prim_optimize_if},
+    {"IF",2,&prim_immediate_if,&prim_compile_if,NULL,NULL},
     {"INVERT",6,NULL,NULL,&prim_body_invert,&prim_optimize_invert},
     //{"J",1,&prim_immediate_j,&prim_compile_j,&prim_body_j,&prim_optimize_j},
     {"KEY",3,NULL,NULL,&prim_body_key,NULL},
@@ -2640,6 +2654,12 @@ const struct ForthPrimitive forth_primitives[]=
         //BREAKPOINT would be good
     //action to change data size
     //help
+        //with word and without
+        //good to have whole different screen if without
+            //list of all words with explanation and example of using at console
+            //How do I... or FAQ
+                //Lots of answers about how this Forth is different
+            //C equivalency section
     //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)

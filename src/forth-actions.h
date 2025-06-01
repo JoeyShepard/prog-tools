@@ -8,6 +8,7 @@
 
     int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile);
     int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+    void action_comment(const char *source,uint32_t *start);
     int action_constant(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);

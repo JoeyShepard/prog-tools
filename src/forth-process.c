@@ -396,6 +396,40 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
+int push_control_element(uint32_t offset,uint8_t type)
+{
+    if (compile->control_info->bytes_left<sizeof(struct ForthControlElement))
+    {
+        //Not enough room left to push new item - expand memory
+        int result=expand_object(FORTH_MEM_CONTROL_STACK,FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+        if (result!=ERROR_NONE)
+        {
+            //Error while allocating memory
+            if (result==ERROR_OUT_OF_MEMORY)
+                return FORTH_ERROR_OUT_OF_MEMORY;
+            else
+            {
+                //Some other type of allocation error like alignment
+                return FORTH_ERROR_MEMORY_OTHER;
+            }
+        }
+
+        //Update count of bytes left
+        compile->control_info->bytes_left+=FORTH_MEM_CONTROL_STACK;
+
+        //Update pointers since shifted by expand_object above
+        update_compile_pointers(compile);
+    }
+
+    //Write new info to control stack
+    compile->control_stack->elements[compile->control_stack->index]->offset=offset;
+    compile->control_stack->elements[compile->control_stack->index]->type=type;
+    compile->control_stack->index++;
+    compile->control_stack->bytes_left-=sizeof(struct ForthControlElement);
+
+    return FORTH_ERROR_NONE;
+}
+
 int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
     if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
@@ -636,6 +670,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_COMMENT:
+                                action_comment(source,&start);
+                                break;
                             case FORTH_ACTION_CONSTANT:
                             {
                                 int result=action_constant(engine,source,&start,compile);
@@ -800,6 +837,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_COMMENT:
+                                action_comment(source,&start);
+                                break;
                             case FORTH_ACTION_BRACKET_TICK:
                             {
                                 //Find ID or primitive and secondary if it exists

@@ -253,3 +253,28 @@ Primitive count: 107
 LOGGING RESTARTED
 =================
 Primitive count: 107
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 108
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 108
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 108
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 108
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 108

@@ -109,6 +109,16 @@
         FORTH_ERROR_TOO_LONG,
     };
 
+    enum ForthControlTypes
+    {
+        FORTH_CONTROL_BEGIN,
+        FORTH_CONTROL_CASE,
+        FORTH_CONTROL_OF,
+        FORTH_CONTROL_DO,
+        FORTH_CONTROL_IF,
+        FORTH_CONTROL_THEN,
+        FORTH_CONTROL_ELSE,
+    };
 
     //structs
     //=======
@@ -162,8 +172,15 @@
 
     struct ForthControlElement
     {
-        uint32_t index;
+        uint32_t offset;
         uint8_t type;
+    };
+
+    struct ForthControlInfo
+    {
+        uint32_t index;
+        uint32_t bytes_left;
+        struct ForthControlElement elements[];
     };
 
     struct ForthCompileInfo
@@ -173,7 +190,7 @@
         struct ForthDefinitionsInfo *definitions;
         struct ForthWordHeaderInfo *words;
         struct ForthWordNameInfo *word_names;
-        struct ForthControlElement *control_stack;
+        struct ForthControlInfo *control_stack;
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;

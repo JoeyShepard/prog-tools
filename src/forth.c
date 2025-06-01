@@ -328,16 +328,15 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     draw_console(console);
     dupdate();
 
+    //Initialize control stack for processing input
+    //(Handle outside of process_source since may call elsewhere for multiline input)
+    compile->control_stack->index=0;
+    compile->control_stack->bytes_left=FORTH_MEM_CONTROL_STACK-sizeof(struct ForthControlInfo);
+
     //Process input
     char input_buffer[FORTH_INPUT_MAX];
     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
     int process_result=process_source(forth->engine,input_buffer,compile);
-
-    //Exit if word like BYE requested program exit
-    if (forth->engine->exit_program)
-    {
-        return_command=COMMAND_EXIT;
-    }
 
     //Show input line again
     console_text_default("\n",console);
@@ -616,7 +615,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.word_names->bytes_left=FORTH_MEM_WORD_NAMES-sizeof(struct ForthWordNameInfo);
 
         //Allocate space for control stack
-        compile.control_stack=(struct ForthControlElement *)add_object(FORTH_MEM_CONTROL_STACK,compile.heap_ptr);
+        compile.control_stack=(struct ForthControlInfo *)add_object(FORTH_MEM_CONTROL_STACK,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.control_stack==NULL)
@@ -625,9 +624,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
-        //TODO: remove
-        *(uint32_t *)compile.control_stack=0x12345678;
-
+        //No need to initialize control stack - reinitialized every time source is processed
+        
 
         //Init console
         console=&forth->console;
@@ -696,7 +694,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile.heap_ptr);
         compile.words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,compile.heap_ptr);
         compile.word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile.heap_ptr);
-        compile.control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr);
+        compile.control_stack=(struct ForthControlInfo *)object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr);
 
         //Recalculate pointers in word header
         struct ForthWordHeader *secondary=compile.words->header;

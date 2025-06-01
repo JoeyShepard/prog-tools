@@ -283,6 +283,20 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     return FORTH_ERROR_NONE;
 }
 
+void action_comment(const char *source,uint32_t *start)
+{
+    while(1)
+    {
+        char character=source[*start];
+        *start=*start+1;
+        if ((character==10)||(character==0))
+        {
+            //Reached end of line or of string - comment ended
+            return;
+        }
+    }
+}
+
 int action_constant(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Logging
@@ -430,7 +444,6 @@ void action_paren(const char *source,uint32_t *start)
         else if (character==0)
         {
             //Reached end of zero terminated string with no matching ) but no error
-            //since using ( here like \ since no \ on calculator keypad
             return;
         }
     }
