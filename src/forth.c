@@ -431,6 +431,9 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         case FORTH_ERROR_MEMORY_OTHER:
             console_text_default("Memory allocation error such as alignment\n",console);
             break;
+        case FORTH_ERROR_ON_KEY:
+            console_text_default("Break - ON key pressed\n",console);
+            break;
         case FORTH_ERROR_OUT_OF_MEMORY:
             console_text_default("Out of memory\n",console);
             break;

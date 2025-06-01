@@ -24,6 +24,9 @@ error_exit in mem? maybe better to recover
 - or provide error function in forth-compatibility.c
 console assumes input less than size of screen
 assembler with built-in safety checks?
+review code on github - better to see in second light
+gint font is truly 5x7 not 5x8 like mine
+- shrink my font? might fit 2-3 more lines on screen
 
 Forth
 =====

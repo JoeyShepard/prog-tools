@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: remove
+#include "text.h"
+
 #include "error.h"
 #include "forth.h"
 #include "forth-actions.h"
@@ -448,60 +451,6 @@ int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *c
     return FORTH_ERROR_NONE;
 }
 
-int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile)
-{
-    if (compile->secondary->type==FORTH_SECONDARY_UNDEFINED)
-    {
-        //Error - secondary has header but hasn't been defined (ie included in other word)
-        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
-        engine->error_word=compile->secondary->name;
-    }
-    else if (((engine->state==FORTH_STATE_INTERPRET)&&(engine->in_bracket==true))&&(compile->colon_word==compile->secondary))
-    {
-        //Error - can't run word between [ and ] if word is still being defined
-        engine->error=FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET;
-        engine->error_word=compile->secondary->name;
-    }
-    else
-    {
-        //Prepare engine to run secondary
-        forth_engine_pre_exec(engine);
-        engine->executing=true;
-        engine->address=compile->secondary->address;
-        engine->word_headers=compile->words->header;
-        engine->word_bodies=compile->definitions->data;
-        engine->error=FORTH_ENGINE_ERROR_NONE;
-
-        //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
-        forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
-        
-        //Logging
-        log_push(LOGGING_FORTH_EXECUTE_SECONDARY,"execute_secondary");
-
-        //Execute primitives
-        while(engine->executing)
-        {
-            //Logging
-            log_text("address: %p [",engine->address);
-            log_bytes(engine->address,32);
-            log_text_raw("]\n");
-            log_primitive(engine->address,compile); 
-            log_text_raw("\n");
-
-            //Jump to primitive function
-            (*engine->address)(engine);
-            engine->address++;
-        }
-
-        //Stop logging
-        log_pop();
-    }
-
-    //Flag error if any
-    if (engine->error!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
-    else return FORTH_ERROR_NONE;
-}
-
 int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile)
 {
     //Pointer to new secondary
@@ -785,11 +734,24 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
+                    //Break on ON key - set up pointers
+                    bool on_key_halted=false;
+                    on_key_pressed=&on_key_halted;
+                    on_key_executing=&engine->executing;
+
                     //Run secondary
-                    int result=execute_secondary(engine,compile);
+                    int result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,compile->words->header,
+                                                        compile->definitions->data);
 
                     //Abort if error occured while running secondary
-                    if (result!=FORTH_ERROR_NONE) return result;
+                    if (result!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
+
+                    //Abort if ON key was pressed
+                    if (on_key_halted==true) return FORTH_ERROR_ON_KEY;
+
+                    //ON key detection no longer needed
+                    on_key_pressed=NULL;
+                    on_key_executing=NULL;
                 }
                 else if (word_type==FORTH_TYPE_NOT_FOUND)
                 {
@@ -836,7 +798,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             return FORTH_ERROR_ENGINE;
                         }
 
-                        //Process outer interreter action requested by word if present
+                        //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of the primitives for portability
                         switch (engine->word_action)
                         {

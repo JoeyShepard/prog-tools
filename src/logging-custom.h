@@ -14,7 +14,7 @@
         #include "forth-primitives.h"
 
         void log_bytes(void *ptr,int bytes);
-        void log_primitive(void(**func)(struct ForthEngine *),struct ForthCompileInfo *compile);
+        void log_primitive(void(**func)(struct ForthEngine *),struct ForthWordHeader *word_headers);
     
     #endif
 #endif

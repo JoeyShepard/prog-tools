@@ -10,8 +10,20 @@
 //Internal primitives - not visible to user
 //=========================================
 
-//Done executing primitive
 void prim_hidden_done(struct ForthEngine *engine)
+{
+    static uint32_t debug_count=0;
+    if (debug_count<20000000)
+    {
+        //Jump back to self for testing ON key
+        engine->address--;
+        debug_count++;
+    }
+    else engine->executing=false;
+}
+
+//Done executing primitive
+void prim_hidden_done_real(struct ForthEngine *engine)
 {
     //Pop all R-stack values for word including return address
     while (1)

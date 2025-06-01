@@ -157,7 +157,7 @@
         //TODO: see assembly - may need to change order so SH4 doesn't try to load byte by byte
         //Execution
         void (**address)(struct ForthEngine *engine);
-        bool executing;
+        volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
         bool exit_program;
         uint32_t word_index;
         struct ForthWordHeader *word_headers;
@@ -234,5 +234,7 @@
     void forth_push(struct ForthEngine *engine,int32_t value);
     int32_t forth_pop(struct ForthEngine *engine);
     void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine);
-    
+    int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
+                                struct ForthWordHeader *word_headers,uint8_t *word_bodies);
+
 #endif

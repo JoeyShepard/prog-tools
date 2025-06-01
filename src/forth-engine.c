@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "forth-engine.h"
+#include "logging.h"
 #include "structs.h"
 
 //Called only once when program first starts
@@ -85,6 +86,7 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
 
 //Called before executing word in outer interpreter (ie process_source in forth.c)
 //TODO: anything else to add? see how used in forth.c
+//TODO: combine with execute_secondary and/or create execute_primitive
 void forth_engine_pre_exec(struct ForthEngine *engine)
 {
     //Word may request caller perform action
@@ -129,5 +131,62 @@ void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngi
 
     //Decrease R-stack pointer to next element
     engine->rstack--;
+}
+
+int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
+                            struct ForthWordHeader *word_headers,uint8_t *word_bodies)
+{
+    if (secondary->type==FORTH_SECONDARY_UNDEFINED)
+    {
+        //Error - secondary has header but hasn't been defined (ie included in other word)
+        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+        engine->error_word=secondary->name;
+    }
+    else if (((engine->state==FORTH_STATE_INTERPRET)&&(engine->in_bracket==true))&&(colon_word==secondary))
+    {
+        //Error - can't run word between [ and ] if word is still being defined
+        engine->error=FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET;
+        engine->error_word=secondary->name;
+    }
+    else
+    {
+        //Prepare engine to run secondary
+        forth_engine_pre_exec(engine);
+        engine->executing=true;
+        engine->address=secondary->address;
+        engine->word_headers=word_headers;
+        engine->word_bodies=word_bodies;
+        engine->error=FORTH_ENGINE_ERROR_NONE;
+
+        //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
+        forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
+
+        //Logging
+        log_push(LOGGING_FORTH_EXECUTE_SECONDARY,"execute_secondary");
+
+        //Execute primitives
+        while(engine->executing)
+        {
+            //Logging
+            log_text("address: %p [",engine->address);
+            log_bytes(engine->address,32);
+            log_text_raw("]\n");
+            log_primitive(engine->address,word_headers); 
+            log_text_raw("\n");
+
+            //Jump to primitive function
+            (*engine->address)(engine);
+            engine->address++;
+        }
+
+        //Clear address so interrupt doesn't set when ON pressed - address on engine->executing changes
+        on_key_executing=NULL;
+
+        //Stop logging
+        log_pop();
+    }
+
+    //Flag error if any
+    return engine->error;
 }
 

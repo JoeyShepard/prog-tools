@@ -34,6 +34,7 @@
 
     #define COL_PURPLE      C_RGB(COL_3_4,0,COL_3_4)
     #define COL_ORANGE      C_RGB(COL_MAX,COL_MID,0)
+    //TODO: doesn't -1 as int16_t (ie color_t) also encode as transparent?
     //Compatibility functions take color as int32_t to pass transparency as 0xFFFFFFFF
     #define COL_TRANS       -1  
 
@@ -52,7 +53,10 @@
     //Copy of address from malloc later passed to free
     extern uint8_t *xram_base;
     extern uint8_t *yram_base;
-
+    //Whether ON key is currently down - updated in interrupt on calculator and thread on PC
+    extern volatile bool *on_key_pressed;
+    extern volatile bool *on_key_executing;
+    
     //Functions common to PC and CG50 (some are empty)
     void setup(int scale_factor,int tick_ms);
     void delay();
@@ -62,9 +66,6 @@
     int wrapper_remap_key(int modifier,int key,struct KeyRemap *keys);
     char *wrapper_normalize_path(const char *path,int local_path_max);
 
-    #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
-    #define UNUSED(x) __attribute__((unused)) x
-    
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
         #include <gint/clock.h>
@@ -72,6 +73,7 @@
         #include <gint/fs.h>
         #include <gint/gint.h>
         #include <gint/keyboard.h>
+        #include <gint/drivers/keydev.h>
         #include <gint/timer.h>
 
         #include "exceptions.h"
@@ -79,8 +81,10 @@
     #else
         //Compiling for PC using SDL2 wrapper
         #include <linux/limits.h>
+        #include <pthread.h>
         #include <SDL2/SDL.h>
         #include <SDL2/SDL_image.h>
+        #include <unistd.h>
 
         //Constants from gint
         #define DWIDTH          396

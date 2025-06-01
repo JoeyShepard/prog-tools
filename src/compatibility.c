@@ -5,6 +5,10 @@
 #include "compatibility.h"
 #include "macros.h"
 
+//Common to cg50 and PC
+volatile bool *on_key_executing;
+volatile bool *on_key_pressed;
+
 #ifdef CG50
 //cg50 specific
 //=============
@@ -23,6 +27,27 @@
         return TIMER_CONTINUE;
     }
 
+    static bool on_key_filter(key_event_t event)
+    {
+        if (event.key==KEY_ACON)
+        {
+            if (event.type==KEYEV_DOWN)
+            {     
+                //ON key was pressed - halt interpreter if one is running
+                if (on_key_executing!=NULL)
+                {
+                    *on_key_executing=false;
+                    
+                    //Also, set flag to tell interpreter ON key was source of halt
+                    if (on_key_pressed!=NULL) *on_key_pressed=true;
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     //On CG50, initialize timer and catch unaligned memory accesses
     void setup(UNUSED(int scale_factor),int delay_ms)
     {
@@ -31,6 +56,12 @@
 
         //Menu functionality so add-in doesn't crash if calculator left off for too long
         gint_setrestart(1);
+
+        //Interrupt sets target of this pointer to false when ON is pressed to halt interpreter if one is running
+        on_key_executing=NULL;
+
+        //Filter for keys to catch ON and halt interpreter if one is running
+        keydev_set_async_filter(keydev_std(),on_key_filter);
 
         //Initialize timer for limiting FPS
         tick_flag=1;
@@ -234,6 +265,37 @@
         }
     }
 
+    //Thread function mirroring interrupt on cg50 that checks for ON key
+    static void *interrupt_thread(UNUSED(void *arg))
+    {
+        //Run for the life of the program
+        while(1)
+        {
+            //Check for SDL_QUIT and new keypresses
+            wrapper_events();
+
+            //Check if ON key (mapped to HOME on PC) is down
+            const Uint8 *key_list=SDL_GetKeyboardState(NULL);
+            
+            if (key_list[SDL_SCANCODE_HOME]!=0)
+            {
+                //Clear flag pointed to by this pointer if ON down. Halts interpreter if one is running.
+                if (on_key_executing!=NULL)
+                {
+                    *on_key_executing=false;
+
+                    //Also, set flag to tell interpreter ON key was source of halt
+                    if (on_key_pressed!=NULL) *on_key_pressed=true;
+                }
+            }
+            
+            //Check once per second
+            sleep(1);
+        }
+
+        return NULL;
+    }
+
     //Functions with separate copies for cg50 and PC
     //==============================================
     //On PC, start SDL2
@@ -254,6 +316,7 @@
             printf("Error: failed to allocate memory for calculator XRAM.\n");
             exit(1);
         }
+
         //Round up xram to nearest 8K boundary keeping xram_base to pass to free later
         uintptr_t xram_diff=XRAM_SIZE-((uintptr_t)(xram_base))%XRAM_SIZE;
         xram=xram_base+xram_diff;
@@ -265,6 +328,7 @@
             printf("Error: failed to allocate memory for calculator YRAM.\n");
             exit(1);
         }
+
         //Round up yram to nearest 8K boundary keeping yram_base to pass to free later
         uintptr_t yram_diff=YRAM_SIZE-((uintptr_t)(yram_base))%YRAM_SIZE;
         yram=yram_base+yram_diff;
@@ -294,6 +358,16 @@
 
         //Scancode of last key pressed
         pc_scancode=0;
+
+        //Thread sets target of this pointer to false when ON is pressed to halt interpreter if one is running
+        on_key_executing=NULL;
+
+        //Create separate thread to check for ON key (HOME on PC) mirroring interrupt on calculator
+        pthread_t thread_id;
+        int result=pthread_create(&thread_id,NULL,*interrupt_thread,NULL);
+
+        //Note thread_id goes out of scope here - no problem since pthread_create confirmed not to save pointer
+        //to thread_id to write to it later. Also, no further interaction with thread so don't need ID for anything.
     }
 
     void delay()
@@ -395,6 +469,7 @@
     key_event_t getkey_opt(int options, volatile int *timeout)
     {
         key_event_t ret_val;
+
         //Check for SDL_QUIT and new keypresses
         wrapper_events(); 
         

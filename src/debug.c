@@ -3,6 +3,7 @@
 #include "compatibility.h"
 #include "debug.h"
 #include "forth-primitives.h"
+#include "macros.h"
 #include "manager.h"
 #include "mem.h"
 

@@ -15,7 +15,7 @@
         }
     }
 
-    void log_primitive(void(**func)(struct ForthEngine *),struct ForthCompileInfo *compile)
+    void log_primitive(void(**func)(struct ForthEngine *),struct ForthWordHeader *word_headers)
     {
         for (int i=0;i<forth_primitives_len;i++)
         {
@@ -35,9 +35,9 @@
             log_text("prim_hidden_secondary (%p)\n",*func);
             uint32_t index=*(uint32_t *)(func+1);
             log_text("  index: %d\n",index);
-            log_text("  %s\n",compile->words->header[index].name);
-            log_text("  offset: %d\n",compile->words->header[index].offset);
-            log_text("  address: %p\n",compile->words->header[index].address);
+            log_text("  %s\n",word_headers[index].name);
+            log_text("  offset: %d\n",word_headers[index].offset);
+            log_text("  address: %p\n",word_headers[index].address);
         }
         else log_text("not found!\n");
     }
