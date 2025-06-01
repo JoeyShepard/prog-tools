@@ -802,6 +802,18 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         //This keeps platform specific code out of the primitives for portability
                         switch (engine->word_action)
                         {
+                            case FORTH_ACTION_AGAIN:
+                            {
+                                int result=action_again(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_BEGIN:
+                            {
+                                int result=action_begin(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_BRACKET_CHAR:
                             {
                                 //Find value of first character in next word

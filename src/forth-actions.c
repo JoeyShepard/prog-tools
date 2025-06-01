@@ -179,6 +179,51 @@ static void action_words_print(struct ForthEngine *engine,const char *text, colo
 
 //Actions - triggered in primitive and handled here to avoid platform specific code in primitives
 //===============================================================================================
+int action_again(struct ForthCompileInfo *compile)
+{
+    //Write primitive that performs IF function
+    int result=write_definition_primitive(&prim_hidden_jump,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Pop element from control stack which should be BEGIN to match AGAIN
+    struct ForthControlElement popped_element;
+    result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no BEGIN to match AGAIN
+            return FORTH_ERROR_AGAIN_WITHOUT_BEGIN;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_BEGIN)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match AGAIN
+        return FORTH_ERROR_AGAIN_WITHOUT_BEGIN;
+    }
+
+    //Write jump offset at address after primitive so primitive will jump here
+    uint32_t offset=compile->definitions->index-popped_element.index;
+    result=write_definition_u32(offset,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
+int action_begin(struct ForthCompileInfo *compile)
+{
+    //Save offset into definitions where matching AGAIN or REPEAT will jump to
+    uint32_t index=compile->definitions->index;
+
+    //Write offset and type (BEGIN) to control stack
+    int result=push_control_element(index,FORTH_CONTROL_BEGIN,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message

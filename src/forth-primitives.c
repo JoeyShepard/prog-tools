@@ -10,20 +10,8 @@
 //Internal primitives - not visible to user
 //=========================================
 
-void prim_hidden_done(struct ForthEngine *engine)
-{
-    static uint32_t debug_count=0;
-    if (debug_count<20000000)
-    {
-        //Jump back to self for testing ON key
-        engine->address--;
-        debug_count++;
-    }
-    else engine->executing=false;
-}
-
 //Done executing primitive
-void prim_hidden_done_real(struct ForthEngine *engine)
+void prim_hidden_done(struct ForthEngine *engine)
 {
     //Pop all R-stack values for word including return address
     while (1)
@@ -133,6 +121,14 @@ void prim_hidden_if(struct ForthEngine *engine)
         //Jump not taken - increment thread pointer to account for offset stored after primitive
         engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
     }
+}
+
+//Jump to different part of thread
+void prim_hidden_jump(struct ForthEngine *engine)
+{
+    //Fetch offset which is stored after pointer to current word and jump
+    uint32_t offset=*(uint32_t *)(engine->address+1);
+    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address-offset);
 }
 
 //Push next cell in dictionary to stack
@@ -873,9 +869,17 @@ void prim_body_and(struct ForthEngine *engine)
 }
 
 //BEGIN
-//void prim_body_begin(struct ForthEngine *engine){}
-//int prim_immediate_begin(struct ForthEngine *engine){}
-//int prim_compile_begin(struct ForthEngine *engine){}
+int prim_immediate_begin(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_begin(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_BEGIN;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //B_L
 void prim_body_b_l(struct ForthEngine *engine)
@@ -1731,9 +1735,17 @@ void prim_body_not_equals(struct ForthEngine *engine)
 }
 
 //AGAIN
-//void prim_body_again(struct ForthEngine *engine){}
-//int prim_immediate_again(struct ForthEngine *engine){}
-//int prim_compile_again(struct ForthEngine *engine){}
+int prim_immediate_again(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_again(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_AGAIN;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //CASE
 //void prim_body_case(struct ForthEngine *engine){}
@@ -2180,7 +2192,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"ALIGNED",7,NULL,NULL,&prim_body_aligned},
     {"ALLOT",5,NULL,NULL,&prim_body_allot},
     {"AND",3,NULL,NULL,&prim_body_and},
-    //{"BEGIN",5,&prim_immediate_begin,&prim_compile_begin,&prim_body_begin},
+    {"BEGIN",5,&prim_immediate_begin,&prim_compile_begin,NULL},
     {"BL",2,NULL,NULL,&prim_body_b_l},
     {"BOUNDS",6,NULL,NULL,&prim_body_bounds},
     {"CELLS",5,NULL,NULL,&prim_body_cells},
@@ -2245,7 +2257,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"U.R",3,NULL,NULL,&prim_body_u_dot_r},
     {"X.R",3,NULL,NULL,&prim_body_x_dot_r},
     {"<>",2,NULL,NULL,&prim_body_not_equals},
-    //{"AGAIN",5,&prim_immediate_again,&prim_compile_again,&prim_body_again},
+    {"AGAIN",5,&prim_immediate_again,&prim_compile_again,NULL},
     //{"CASE",4,&prim_immediate_case,&prim_compile_case,&prim_body_case},
     //{"ENDCASE",7,&prim_immediate_endcase,&prim_compile_endcase,&prim_body_endcase},
     //{"OF",2,&prim_immediate_of,&prim_compile_of,&prim_body_of},

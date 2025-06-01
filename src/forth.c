@@ -424,6 +424,9 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
                     break;
             }
             break;
+        case FORTH_ERROR_AGAIN_WITHOUT_BEGIN:
+            console_text_default("AGAIN without matching BEGIN\n",console);
+            break;
         case FORTH_ERROR_CONTROL_UNDERFLOW:
             //Should be caught and replaced with FORTH_ERROR_THEN_WITHOUT_IF or similar but just in case
             console_text_default("Missing matching control structure\n",console);
@@ -766,6 +769,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo s\\\" \\a\\b \\c \\e\\f\\l \\m \\n\\q\\r\\t\\v\\z\\\" \\x12\\xAB\\xcd\\x1A\\x2b \\\\ \\x00 abc\" ; foo" ;
     //const char *debug_keys=": foo .\" abc\" ; foo\n";
     //const char *debug_keys=": foo if 5 then ; 0 foo";
+    //const char *debug_keys=": foo 0 begin dup 1 + again ; foo";
     const char *debug_keys="";
 
     //Main loop

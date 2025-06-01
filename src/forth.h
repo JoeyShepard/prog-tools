@@ -97,6 +97,7 @@
     enum ForthCompileError
     {
         FORTH_ERROR_NONE,
+        FORTH_ERROR_AGAIN_WITHOUT_BEGIN,
         FORTH_ERROR_CONTROL_UNDERFLOW,
         FORTH_ERROR_ENGINE,
         FORTH_ERROR_INTERNAL,

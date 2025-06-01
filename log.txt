@@ -483,3 +483,48 @@ Primitive count: 110
 LOGGING RESTARTED
 =================
 Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 111
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 112

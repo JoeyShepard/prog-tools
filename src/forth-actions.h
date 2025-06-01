@@ -6,6 +6,8 @@
     #include "forth-engine.h"
     #include "forth-process.h"
 
+    int action_again(struct ForthCompileInfo *compile);
+    int action_begin(struct ForthCompileInfo *compile);
     int action_char_common(const char *source,uint32_t *start,int32_t *index,struct ForthCompileInfo *compile);
     int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     void action_comment(const char *source,uint32_t *start);
