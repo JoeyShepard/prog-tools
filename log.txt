@@ -278,3 +278,58 @@ Primitive count: 108
 LOGGING RESTARTED
 =================
 Primitive count: 108
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 109
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 109
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 109
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 109
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 110

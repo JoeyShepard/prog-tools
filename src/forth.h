@@ -97,6 +97,7 @@
     enum ForthCompileError
     {
         FORTH_ERROR_NONE,
+        FORTH_ERROR_CONTROL_UNDERFLOW,
         FORTH_ERROR_ENGINE,
         FORTH_ERROR_INTERNAL,
         FORTH_ERROR_INVALID_NAME,
@@ -106,19 +107,10 @@
         FORTH_ERROR_NOT_BETWEEN_BRACKETS,
         FORTH_ERROR_NOT_FOUND,
         FORTH_ERROR_OUT_OF_MEMORY,
+        FORTH_ERROR_THEN_WITHOUT_IF,
         FORTH_ERROR_TOO_LONG,
     };
 
-    enum ForthControlTypes
-    {
-        FORTH_CONTROL_BEGIN,
-        FORTH_CONTROL_CASE,
-        FORTH_CONTROL_OF,
-        FORTH_CONTROL_DO,
-        FORTH_CONTROL_IF,
-        FORTH_CONTROL_THEN,
-        FORTH_CONTROL_ELSE,
-    };
 
     //structs
     //=======
@@ -172,7 +164,7 @@
 
     struct ForthControlElement
     {
-        uint32_t offset;
+        uint32_t index;
         uint8_t type;
     };
 

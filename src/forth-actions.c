@@ -430,6 +430,26 @@ int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uin
     if ((engine->update_screen!=NULL)&&(characters_printed)) engine->update_screen();
 }
 
+int action_if(struct ForthCompileInfo *compile)
+{
+    //Write primitive that performs IF function
+    int result=write_definition_primitive(&prim_hidden_if,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Save offset into definitions where matching ELSE or THEN will write jump address
+    uint32_t index=compile->definitions->index;
+
+    //Reserve room in dictionary for offset which matching ELSE or THEN will write
+    result=write_definition_u32(0,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write offset and type (IF) to control stack
+    result=push_control_element(index,FORTH_CONTROL_IF,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    
+    return FORTH_ERROR_NONE;
+}
+
 void action_paren(const char *source,uint32_t *start)
 {
     while(1)
@@ -1015,6 +1035,34 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
 
     //Logging
     log_pop();
+
+    return FORTH_ERROR_NONE;
+}
+
+int action_then(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be IF to match THEN
+    struct ForthControlElement popped_element;
+    int result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no IF to match THEN
+            return FORTH_ERROR_THEN_WITHOUT_IF;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_IF)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match THEN 
+        return FORTH_ERROR_THEN_WITHOUT_IF;
+    }
+
+    //Write jump offset at address after primitive so primitive will jump here
+    uint32_t offset=compile->definitions->index-popped_element.index;
+    *(uint32_t *)(compile->definitions->data+popped_element.index)=offset;
 
     return FORTH_ERROR_NONE;
 }

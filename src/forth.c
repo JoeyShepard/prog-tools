@@ -423,11 +423,18 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
                     break;
             }
             break;
+        case FORTH_ERROR_CONTROL_UNDERFLOW:
+            //Should be caught and replaced with FORTH_ERROR_THEN_WITHOUT_IF or similar but just in case
+            console_text_default("Missing matching control structure\n",console);
+            break;
         case FORTH_ERROR_MEMORY_OTHER:
             console_text_default("Memory allocation error such as alignment\n",console);
             break;
         case FORTH_ERROR_OUT_OF_MEMORY:
             console_text_default("Out of memory\n",console);
+            break;
+        case FORTH_ERROR_THEN_WITHOUT_IF:
+            console_text_default("THEN without matching IF\n",console);
             break;
         default:
             //No error message for error - should never reach here unless forgot to add error message
@@ -754,7 +761,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": x a 5 x.r ; var a 0x123 a ! : x a @ 5 x.r ; x";
     //const char *debug_keys=": foo s\\\" \\a\\b \\c \\e\\f\\l \\m \\n\\q\\r\\t\\v\\z\\\" \\x12\\xAB\\xcd\\x1A\\x2b \\\\ \\x00 abc\" ; foo" ;
     //const char *debug_keys=": foo .\" abc\" ; foo\n";
-    const char *debug_keys="";
+    const char *debug_keys=": foo if 5 then ; 0 foo";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

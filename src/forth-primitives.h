@@ -14,7 +14,6 @@
         int (*immediate)(struct ForthEngine *engine);
         int (*compile)(struct ForthEngine *engine);
         void (*body)(struct ForthEngine *engine);
-        int (*optimize)(struct ForthEngine *engine);
     };
 
     //Globals
@@ -24,6 +23,7 @@
     //Primitives visible externally
     void prim_hidden_done(struct ForthEngine *engine);
     void prim_hidden_dot_quote(struct ForthEngine *engine);
+    void prim_hidden_if(struct ForthEngine *engine);
     void prim_hidden_push(struct ForthEngine *engine);
     void prim_hidden_s_quote(struct ForthEngine *engine);
     void prim_hidden_secondary(struct ForthEngine *engine);

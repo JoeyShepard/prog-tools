@@ -396,9 +396,27 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
-int push_control_element(uint32_t offset,uint8_t type)
+int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile)
 {
-    if (compile->control_info->bytes_left<sizeof(struct ForthControlElement))
+    if (compile->control_stack->index==0)
+    {
+        //Error - nothing on stack to pop
+        return FORTH_ERROR_CONTROL_UNDERFLOW;
+    }
+    
+    //Adjust for popped element
+    compile->control_stack->index--;
+    compile->control_stack->bytes_left+=sizeof(struct ForthControlElement);
+
+    //Copy popped element instead of setting pointer since memory may shift
+    *element=compile->control_stack->elements[compile->control_stack->index];
+
+    return FORTH_ERROR_NONE;
+}
+
+int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile)
+{
+    if (compile->control_stack->bytes_left<sizeof(struct ForthControlElement))
     {
         //Not enough room left to push new item - expand memory
         int result=expand_object(FORTH_MEM_CONTROL_STACK,FORTH_ID_CONTROL_STACK,compile->heap_ptr);
@@ -415,15 +433,15 @@ int push_control_element(uint32_t offset,uint8_t type)
         }
 
         //Update count of bytes left
-        compile->control_info->bytes_left+=FORTH_MEM_CONTROL_STACK;
+        compile->control_stack->bytes_left+=FORTH_MEM_CONTROL_STACK;
 
         //Update pointers since shifted by expand_object above
         update_compile_pointers(compile);
     }
 
     //Write new info to control stack
-    compile->control_stack->elements[compile->control_stack->index]->offset=offset;
-    compile->control_stack->elements[compile->control_stack->index]->type=type;
+    compile->control_stack->elements[compile->control_stack->index].index=offset;
+    compile->control_stack->elements[compile->control_stack->index].type=type;
     compile->control_stack->index++;
     compile->control_stack->bytes_left-=sizeof(struct ForthControlElement);
 
@@ -866,6 +884,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_IF:
+                            {
+                                int result=action_if(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_LITERAL:
                             {
                                 int result=write_definition_primitive(&prim_hidden_push,compile);
@@ -900,9 +924,17 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_SEMICOLON:
+                            {
                                 int result=action_semicolon(engine,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
+                            }
+                            case FORTH_ACTION_THEN:
+                            {
+                                int result=action_then(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                         }
                     }
                     else
@@ -1003,7 +1035,7 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     }
 
     //Update pointer to control stack
-    compile->control_stack=(struct ForthControlElement *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+    compile->control_stack=(struct ForthControlInfo *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
 
     //Logging
     log_pop();

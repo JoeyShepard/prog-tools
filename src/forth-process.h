@@ -34,9 +34,14 @@
         FORTH_PARSE_OTHER,
     };
 
-    enum ForthControlType
+    enum ForthControlTypes
     {
+        FORTH_CONTROL_BEGIN,
+        FORTH_CONTROL_CASE,
+        FORTH_CONTROL_OF,
+        FORTH_CONTROL_DO,
         FORTH_CONTROL_IF,
+        FORTH_CONTROL_THEN,
         FORTH_CONTROL_ELSE,
     };
 
@@ -54,6 +59,8 @@
     int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile);
     int write_definition_i32(int32_t value,struct ForthCompileInfo *compile);
     int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile);
+    int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile);
+    int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile);
     int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile);
     int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile);
     int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile);
