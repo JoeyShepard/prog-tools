@@ -9,6 +9,7 @@
 #include "error.h"
 #include "getkey.h"
 #include "graphics.h"
+#include "macros.h"
 #include "text.h"
 #include "manager.h"
 #include "mem.h"

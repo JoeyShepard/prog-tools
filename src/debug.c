@@ -8,11 +8,8 @@
 
 #ifdef CG50
 
-    void debug_heap(int level)
+    void debug_heap(UNUSED(int level))
     {
-        //Silence unused variable warning
-        level=level;
-
         return;
     }
 

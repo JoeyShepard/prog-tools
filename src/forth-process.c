@@ -598,7 +598,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
     //Loop through words in source
     compile->word_len=0;
     uint32_t start=0;
-    uint32_t control_stack_index=0;
     do
     {
         //Get next word of source

@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "compatibility.h"
 #include "getkey.h"
+#include "macros.h"
 #include "manager.h"
 #include "structs.h"
 

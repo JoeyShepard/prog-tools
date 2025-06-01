@@ -63,6 +63,7 @@
     char *wrapper_normalize_path(const char *path,int local_path_max);
 
     #define ARRAY_SIZE(x) ((int)(sizeof(x)/sizeof(x[0])))
+    #define UNUSED(x) __attribute__((unused)) x
     
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.

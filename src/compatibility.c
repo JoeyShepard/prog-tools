@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "compatibility.h"
+#include "macros.h"
 
 #ifdef CG50
 //cg50 specific
@@ -23,7 +24,7 @@
     }
 
     //On CG50, initialize timer and catch unaligned memory accesses
-    void setup(int scale_factor,int delay_ms)
+    void setup(UNUSED(int scale_factor),int delay_ms)
     {
         //Exception handling for unaligned memory accesses
         setup_exception_handling();
@@ -35,9 +36,6 @@
         tick_flag=1;
         int t=timer_configure(TIMER_ANY, delay_ms*1000, GINT_CALL(timer_callback,&tick_flag));
         if (t>=0) timer_start(t);
-
-        //Scale_factor only used on PC. Silence not used warning.
-        scale_factor=scale_factor;
     }
     
     void delay()
@@ -61,20 +59,18 @@
         return 0;
     }
 
-    int wrapper_remap_key(int modifier,int key,struct KeyRemap *key_list)
+    int wrapper_remap_key(UNUSED(int modifier),UNUSED(int key),UNUSED(struct KeyRemap *key_list))
     {
         //No keys to remap on calculator
         return 0;
     }
 
-    char *wrapper_normalize_path(const char *path,int local_path_max)
+    char *wrapper_normalize_path(const char *path,UNUSED(int local_path_max))
     {
-        //Silence unused variable warning
-        local_path_max=local_path_max;
-
         return fs_path_normalize(path);
     }
 #else
+
 //PC specific
 //===========
 

@@ -1,5 +1,6 @@
 #include "compatibility.h"
 #include "logging.h"
+#include "macros.h"
 
 void log_config()
 {

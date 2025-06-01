@@ -3,6 +3,7 @@
 #include "compatibility.h"
 #include "forth-primitives.h"
 #include "logging.h"
+#include "macros.h"
 #include "text.h"
 
 
@@ -61,7 +62,7 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
     //Loop through and print characters
     char buffer[2];
     buffer[1]=0;
-    for (int i=0;i<quote_length;i++)
+    for (uint32_t i=0;i<quote_length;i++)
     {
         //Logging
         log_text("character: %c (%d)\n",*text,*text);
@@ -157,7 +158,7 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
     log_text("text: %p\n",text);
 
     //Loop through characters
-    for (int i=0;i<quote_length;i++)
+    for (uint32_t i=0;i<quote_length;i++)
     {
         //Logging
         log_text("character: %c (%d)\n",*text,*text);
@@ -298,13 +299,13 @@ void prim_body_w_store(struct ForthEngine *engine)
 }
 
 //TICK
-int prim_immediate_tick(struct ForthEngine *engine)
+int prim_immediate_tick(UNUSED(struct ForthEngine *engine))
 {
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_TICK;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_tick(struct ForthEngine *engine)
+int prim_compile_tick(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -402,9 +403,9 @@ void prim_body_plus(struct ForthEngine *engine)
 }
 
 //PLUS_LOOP
-void prim_body_plus_loop(struct ForthEngine *engine){}
-int prim_immediate_plus_loop(struct ForthEngine *engine){}
-int prim_compile_plus_loop(struct ForthEngine *engine){}
+//void prim_body_plus_loop(struct ForthEngine *engine){}
+//int prim_immediate_plus_loop(struct ForthEngine *engine){}
+//int prim_compile_plus_loop(struct ForthEngine *engine){}
 
 //COMMA
 void prim_body_comma(struct ForthEngine *engine)
@@ -592,13 +593,13 @@ int prim_immediate_colon(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_COLON;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_colon(struct ForthEngine *engine)
+int prim_compile_colon(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //SEMICOLON
-int prim_immediate_semicolon(struct ForthEngine *engine)
+int prim_immediate_semicolon(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -771,9 +772,9 @@ void prim_body_w_fetch(struct ForthEngine *engine)
 }
 
 //QUIT
-void prim_body_quit(struct ForthEngine *engine){}
-int prim_immediate_quit(struct ForthEngine *engine){}
-int prim_compile_quit(struct ForthEngine *engine){}
+//void prim_body_quit(struct ForthEngine *engine){}
+//int prim_immediate_quit(struct ForthEngine *engine){}
+//int prim_compile_quit(struct ForthEngine *engine){}
 
 //ABS
 void prim_body_abs(struct ForthEngine *engine)
@@ -860,9 +861,9 @@ void prim_body_and(struct ForthEngine *engine)
 }
 
 //BEGIN
-void prim_body_begin(struct ForthEngine *engine){}
-int prim_immediate_begin(struct ForthEngine *engine){}
-int prim_compile_begin(struct ForthEngine *engine){}
+//void prim_body_begin(struct ForthEngine *engine){}
+//int prim_immediate_begin(struct ForthEngine *engine){}
+//int prim_compile_begin(struct ForthEngine *engine){}
 
 //B_L
 void prim_body_b_l(struct ForthEngine *engine)
@@ -905,7 +906,7 @@ int prim_immediate_char(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_CHAR;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_char(struct ForthEngine *engine)
+int prim_compile_char(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -917,7 +918,7 @@ int prim_immediate_constant(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_CONSTANT;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_constant(struct ForthEngine *engine)
+int prim_compile_constant(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -939,7 +940,7 @@ int prim_immediate_create(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_CREATE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_create(struct ForthEngine *engine)
+int prim_compile_create(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -955,9 +956,9 @@ void prim_body_depth(struct ForthEngine *engine)
 }
 
 //DO
-void prim_body_do(struct ForthEngine *engine){}
-int prim_immediate_do(struct ForthEngine *engine){}
-int prim_compile_do(struct ForthEngine *engine){}
+//void prim_body_do(struct ForthEngine *engine){}
+//int prim_immediate_do(struct ForthEngine *engine){}
+//int prim_compile_do(struct ForthEngine *engine){}
 
 //DROP
 void prim_body_drop(struct ForthEngine *engine)
@@ -979,9 +980,9 @@ void prim_body_dupe(struct ForthEngine *engine)
 }
 
 //ELSE
-void prim_body_else(struct ForthEngine *engine){}
-int prim_immediate_else(struct ForthEngine *engine){}
-int prim_compile_else(struct ForthEngine *engine){}
+//void prim_body_else(struct ForthEngine *engine){}
+//int prim_immediate_else(struct ForthEngine *engine){}
+//int prim_compile_else(struct ForthEngine *engine){}
 
 //EMIT
 void prim_body_emit(struct ForthEngine *engine)
@@ -1003,9 +1004,9 @@ void prim_body_emit(struct ForthEngine *engine)
 }
 
 //EXIT
-void prim_body_exit(struct ForthEngine *engine){}
-int prim_immediate_exit(struct ForthEngine *engine){}
-int prim_compile_exit(struct ForthEngine *engine){}
+//void prim_body_exit(struct ForthEngine *engine){}
+//int prim_immediate_exit(struct ForthEngine *engine){}
+//int prim_compile_exit(struct ForthEngine *engine){}
 
 //FILL
 void prim_body_fill(struct ForthEngine *engine)
@@ -1036,9 +1037,9 @@ void prim_body_fill(struct ForthEngine *engine)
 }
 
 //FIND
-void prim_body_find(struct ForthEngine *engine){}
-int prim_immediate_find(struct ForthEngine *engine){}
-int prim_compile_find(struct ForthEngine *engine){}
+//void prim_body_find(struct ForthEngine *engine){}
+//int prim_immediate_find(struct ForthEngine *engine){}
+//int prim_compile_find(struct ForthEngine *engine){}
 
 //HERE
 void prim_body_here(struct ForthEngine *engine)
@@ -1051,12 +1052,12 @@ void prim_body_here(struct ForthEngine *engine)
 }
 
 //I
-void prim_body_i(struct ForthEngine *engine){}
-int prim_immediate_i(struct ForthEngine *engine){}
-int prim_compile_i(struct ForthEngine *engine){}
+//void prim_body_i(struct ForthEngine *engine){}
+//int prim_immediate_i(struct ForthEngine *engine){}
+//int prim_compile_i(struct ForthEngine *engine){}
 
 //IF
-int prim_immediate_if(struct ForthEngine *engine)
+int prim_immediate_if(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1069,9 +1070,9 @@ int prim_compile_if(struct ForthEngine *engine)
 }
 
 //IMMEDIATE
-void prim_body_immediate(struct ForthEngine *engine){}
-int prim_immediate_immediate(struct ForthEngine *engine){}
-int prim_compile_immediate(struct ForthEngine *engine){}
+//void prim_body_immediate(struct ForthEngine *engine){}
+//int prim_immediate_immediate(struct ForthEngine *engine){}
+//int prim_compile_immediate(struct ForthEngine *engine){}
 
 //INVERT
 void prim_body_invert(struct ForthEngine *engine)
@@ -1082,9 +1083,9 @@ void prim_body_invert(struct ForthEngine *engine)
 }
 
 //J
-void prim_body_j(struct ForthEngine *engine){}
-int prim_immediate_j(struct ForthEngine *engine){}
-int prim_compile_j(struct ForthEngine *engine){}
+//void prim_body_j(struct ForthEngine *engine){}
+//int prim_immediate_j(struct ForthEngine *engine){}
+//int prim_compile_j(struct ForthEngine *engine){}
 
 //KEY
 void prim_body_key(struct ForthEngine *engine)
@@ -1110,12 +1111,12 @@ void prim_body_key(struct ForthEngine *engine)
 }
 
 //LEAVE
-void prim_body_leave(struct ForthEngine *engine){}
-int prim_immediate_leave(struct ForthEngine *engine){}
-int prim_compile_leave(struct ForthEngine *engine){}
+///void prim_body_leave(struct ForthEngine *engine){}
+//int prim_immediate_leave(struct ForthEngine *engine){}
+//int prim_compile_leave(struct ForthEngine *engine){}
 
 //LITERAL
-int prim_immediate_literal(struct ForthEngine *engine)
+int prim_immediate_literal(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1128,9 +1129,9 @@ int prim_compile_literal(struct ForthEngine *engine)
 }
 
 //LOOP
-void prim_body_loop(struct ForthEngine *engine){}
-int prim_immediate_loop(struct ForthEngine *engine){}
-int prim_compile_loop(struct ForthEngine *engine){}
+//void prim_body_loop(struct ForthEngine *engine){}
+//int prim_immediate_loop(struct ForthEngine *engine){}
+//int prim_compile_loop(struct ForthEngine *engine){}
 
 //L_SHIFT
 void prim_body_l_shift(struct ForthEngine *engine)
@@ -1210,9 +1211,9 @@ void prim_body_mod(struct ForthEngine *engine)
 }
 
 //MOVE
-void prim_body_move(struct ForthEngine *engine){}
-int prim_immediate_move(struct ForthEngine *engine){}
-int prim_compile_move(struct ForthEngine *engine){}
+//void prim_body_move(struct ForthEngine *engine){}
+//int prim_immediate_move(struct ForthEngine *engine){}
+//int prim_compile_move(struct ForthEngine *engine){}
 
 //NEGATE
 void prim_body_negate(struct ForthEngine *engine)
@@ -1281,9 +1282,9 @@ void prim_body_page(struct ForthEngine *engine)
 }
 
 //REPEAT
-void prim_body_repeat(struct ForthEngine *engine){}
-int prim_immediate_repeat(struct ForthEngine *engine){}
-int prim_compile_repeat(struct ForthEngine *engine){}
+//void prim_body_repeat(struct ForthEngine *engine){}
+//int prim_immediate_repeat(struct ForthEngine *engine){}
+//int prim_compile_repeat(struct ForthEngine *engine){}
 
 //ROTE
 void prim_body_rote(struct ForthEngine *engine)
@@ -1324,8 +1325,6 @@ void prim_body_minus_rote(struct ForthEngine *engine)
     lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
     *(int32_t*)((engine->stack_base)|lower)=arg1;
 }
-int prim_immediate_minus_rote(struct ForthEngine *engine){}
-int prim_compile_minus_rote(struct ForthEngine *engine){}
 
 //R_SHIFT
 void prim_body_r_shift(struct ForthEngine *engine)
@@ -1393,9 +1392,9 @@ void prim_body_spaces(struct ForthEngine *engine)
 }
 
 //STATE
-void prim_body_state(struct ForthEngine *engine){}
-int prim_immediate_state(struct ForthEngine *engine){}
-int prim_compile_state(struct ForthEngine *engine){}
+//void prim_body_state(struct ForthEngine *engine){}
+//int prim_immediate_state(struct ForthEngine *engine){}
+//int prim_compile_state(struct ForthEngine *engine){}
 
 //SWAP
 void prim_body_swap(struct ForthEngine *engine)
@@ -1438,7 +1437,7 @@ void prim_body_2_swap(struct ForthEngine *engine)
 }
 
 //THEN
-int prim_immediate_then(struct ForthEngine *engine)
+int prim_immediate_then(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1516,9 +1515,9 @@ void prim_body_u_greater_than(struct ForthEngine *engine)
 }
 
 //UNTIL
-void prim_body_until(struct ForthEngine *engine){}
-int prim_immediate_until(struct ForthEngine *engine){}
-int prim_compile_until(struct ForthEngine *engine){}
+//void prim_body_until(struct ForthEngine *engine){}
+//int prim_immediate_until(struct ForthEngine *engine){}
+//int prim_compile_until(struct ForthEngine *engine){}
 
 //VARIABLE
 int prim_immediate_variable(struct ForthEngine *engine)
@@ -1527,15 +1526,15 @@ int prim_immediate_variable(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_VARIABLE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_variable(struct ForthEngine *engine)
+int prim_compile_variable(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //WHILE
-void prim_body_while(struct ForthEngine *engine){}
-int prim_immediate_while(struct ForthEngine *engine){}
-int prim_compile_while(struct ForthEngine *engine){}
+//void prim_body_while(struct ForthEngine *engine){}
+//int prim_immediate_while(struct ForthEngine *engine){}
+//int prim_compile_while(struct ForthEngine *engine){}
 
 //X_OR
 void prim_body_x_or(struct ForthEngine *engine)
@@ -1553,7 +1552,7 @@ void prim_body_x_or(struct ForthEngine *engine)
 }
 
 //LEFT_BRACKET
-int prim_immediate_left_bracket(struct ForthEngine *engine)
+int prim_immediate_left_bracket(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1579,8 +1578,7 @@ int prim_immediate_right_bracket(struct ForthEngine *engine)
         return FORTH_ENGINE_ERROR_NONE;
     }
 }
-
-int prim_compile_right_bracket(struct ForthEngine *engine)
+int prim_compile_right_bracket(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -1592,13 +1590,13 @@ int prim_compile_bracket_tick(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_BRACKET_TICK;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_immediate_bracket_tick(struct ForthEngine *engine)
+int prim_immediate_bracket_tick(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
 
 //BRACKET_CHAR
-int prim_immediate_bracket_char(struct ForthEngine *engine)
+int prim_immediate_bracket_char(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1721,14 +1719,14 @@ void prim_body_not_equals(struct ForthEngine *engine)
 }
 
 //AGAIN
-void prim_body_again(struct ForthEngine *engine){}
-int prim_immediate_again(struct ForthEngine *engine){}
-int prim_compile_again(struct ForthEngine *engine){}
+//void prim_body_again(struct ForthEngine *engine){}
+//int prim_immediate_again(struct ForthEngine *engine){}
+//int prim_compile_again(struct ForthEngine *engine){}
 
 //CASE
-void prim_body_case(struct ForthEngine *engine){}
-int prim_immediate_case(struct ForthEngine *engine){}
-int prim_compile_case(struct ForthEngine *engine){}
+//void prim_body_case(struct ForthEngine *engine){}
+//int prim_immediate_case(struct ForthEngine *engine){}
+//int prim_compile_case(struct ForthEngine *engine){}
 
 //FALSE
 void prim_body_false(struct ForthEngine *engine)
@@ -1753,14 +1751,14 @@ void prim_body_nip(struct ForthEngine *engine)
 }
 
 //PICK
-void prim_body_pick(struct ForthEngine *engine){}
-int prim_immediate_pick(struct ForthEngine *engine){}
-int prim_compile_pick(struct ForthEngine *engine){}
+//void prim_body_pick(struct ForthEngine *engine){}
+//int prim_immediate_pick(struct ForthEngine *engine){}
+//int prim_compile_pick(struct ForthEngine *engine){}
 
 //ROLL
-void prim_body_roll(struct ForthEngine *engine){}
-int prim_immediate_roll(struct ForthEngine *engine){}
-int prim_compile_roll(struct ForthEngine *engine){}
+//void prim_body_roll(struct ForthEngine *engine){}
+//int prim_immediate_roll(struct ForthEngine *engine){}
+//int prim_compile_roll(struct ForthEngine *engine){}
 
 //S_BACKSLASH_QUOTE
 int prim_immediate_s_backslash_quote(struct ForthEngine *engine)
@@ -1930,7 +1928,7 @@ void prim_body_dump(struct ForthEngine *engine)
                 for (int32_t j=0;j<byte_index;j++)
                 {
                     //Replace unprintable characters with .
-                    if ((byte_display[j]<CHAR_PRINTABLE_MIN)||(byte_display[j]>CHAR_PRINTABLE_MAX))
+                    if ((byte_display[j]<CHAR_PRINTABLE_MIN)||((unsigned char)byte_display[j]>CHAR_PRINTABLE_MAX))
                     {
                         byte_display[j]='.';
                     }
@@ -1972,9 +1970,9 @@ void prim_body_dump(struct ForthEngine *engine)
 }
 
 //SEE
-void prim_body_see(struct ForthEngine *engine){}
-int prim_immediate_see(struct ForthEngine *engine){}
-int prim_compile_see(struct ForthEngine *engine){}
+//void prim_body_see(struct ForthEngine *engine){}
+//int prim_immediate_see(struct ForthEngine *engine){}
+//int prim_compile_see(struct ForthEngine *engine){}
 
 //WORDS
 int prim_immediate_words(struct ForthEngine *engine)
@@ -1983,7 +1981,7 @@ int prim_immediate_words(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_WORDS;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_words(struct ForthEngine *engine)
+int prim_compile_words(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -1996,17 +1994,16 @@ void prim_body_bye(struct ForthEngine *engine)
 }
 
 //COMPARE
-void prim_body_compare(struct ForthEngine *engine){}
-int prim_immediate_compare(struct ForthEngine *engine){}
-int prim_compile_compare(struct ForthEngine *engine){}
+//void prim_body_compare(struct ForthEngine *engine){}
+//int prim_immediate_compare(struct ForthEngine *engine){}
+//int prim_compile_compare(struct ForthEngine *engine){}
 
 //RESET
-int prim_immediate_reset(struct ForthEngine *engine)
+void prim_body_reset(struct ForthEngine *engine)
 {
-    forth_reset_engine_stacks(engine);
-    return FORTH_ENGINE_ERROR_NONE;
+    //Reset Forth data stack
+    engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
 }
-int prim_compile_reset(struct ForthEngine *engine){}
 
 //WALIGN
 void prim_body_walign(struct ForthEngine *engine)
@@ -2099,7 +2096,7 @@ int prim_immediate_primitives(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_PRIMITIVES;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_primitives(struct ForthEngine *engine)
+int prim_compile_primitives(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -2111,7 +2108,7 @@ int prim_immediate_secondaries(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_SECONDARIES;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_secondaries(struct ForthEngine *engine)
+int prim_compile_secondaries(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -2123,7 +2120,7 @@ int prim_immediate_undefined(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_UNDEFINED;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_undefined(struct ForthEngine *engine)
+int prim_compile_undefined(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -2263,7 +2260,7 @@ const struct ForthPrimitive forth_primitives[]=
     //2DROP
 
     //Words from here are not standard forth
-    {"RESET",5,&prim_immediate_reset,&prim_compile_reset,NULL},
+    {"RESET",5,NULL,NULL,&prim_body_reset},
     {"WALIGN",6,NULL,NULL,&prim_body_walign},
     {"WALIGNED",8,NULL,NULL,&prim_body_waligned},
     {"PRINTABLE",9,NULL,NULL,&prim_body_printable},
@@ -2293,6 +2290,7 @@ const struct ForthPrimitive forth_primitives[]=
             //How do I... or FAQ
                 //Lots of answers about how this Forth is different
             //C equivalency section
+        //ALL remapped keys
     //output number to memory (opposite of >number. number> ? >text ?)
     //output hex to memory (>hex ?)
     //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
