@@ -181,13 +181,9 @@ static void action_words_print(struct ForthEngine *engine,const char *text, colo
 //===============================================================================================
 int action_again(struct ForthCompileInfo *compile)
 {
-    //Write primitive that performs IF function
-    int result=write_definition_primitive(&prim_hidden_jump,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
     //Pop element from control stack which should be BEGIN to match AGAIN
     struct ForthControlElement popped_element;
-    result=pop_control_element(&popped_element,compile);
+    int result=pop_control_element(&popped_element,compile);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -204,9 +200,13 @@ int action_again(struct ForthCompileInfo *compile)
         return FORTH_ERROR_AGAIN_WITHOUT_BEGIN;
     }
 
+    //Write primitive that performs IF function
+    result=write_definition_primitive(&prim_hidden_jump,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
     //Write jump offset at address after primitive so primitive will jump here
-    uint32_t offset=compile->definitions->index-popped_element.index;
-    result=write_definition_u32(offset,compile);
+    int32_t offset=-(compile->definitions->index-popped_element.index);
+    result=write_definition_i32(offset,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     return FORTH_ERROR_NONE;
@@ -473,6 +473,49 @@ int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uin
 
     //Update screen if anything printed
     if ((engine->update_screen!=NULL)&&(characters_printed)) engine->update_screen();
+}
+
+int action_else(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be IF to match ELSE
+    struct ForthControlElement popped_element;
+    int result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no IF to match THEN
+            return FORTH_ERROR_ELSE_WITHOUT_IF;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_IF)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match ELSE 
+        return FORTH_ERROR_ELSE_WITHOUT_IF;
+    }
+
+    //Write primitive at end of IF block to jump over ELSE block
+    result=write_definition_primitive(&prim_hidden_jump,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Save offset into definitions where matching THEN will write jump address
+    uint32_t index=compile->definitions->index;
+
+    //Write offset and type (ELSE) to control stack
+    result=push_control_element(index,FORTH_CONTROL_ELSE,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Reserve room in dictionary for offset which matching THEN will write
+    result=write_definition_u32(0,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after primitive so primitive will jump here
+    uint32_t offset=compile->definitions->index-popped_element.index;
+    *(uint32_t *)(compile->definitions->data+popped_element.index)=offset;
+
+    return FORTH_ERROR_NONE;
 }
 
 int action_if(struct ForthCompileInfo *compile)
@@ -1050,6 +1093,31 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
     log_text("name: %s\n",compile->colon_word->name);
     log_text("size: %d\n",compile->colon_word->definition_size);
 
+    //Error if control structure like IF or BEGIN left unterminated
+    if (compile->control_stack->index!=0)
+    {
+        struct ForthControlElement element;
+        pop_control_element(&element,compile);
+        //TODO: accounted for all control types? double check forth-process.h
+        switch (element.type)
+        {
+            case FORTH_CONTROL_BEGIN:
+                return FORTH_ERROR_UNTERMINATED_BEGIN;
+            case FORTH_CONTROL_CASE:
+                return FORTH_ERROR_UNTERMINATED_CASE;
+            case FORTH_CONTROL_OF:
+                return FORTH_ERROR_UNTERMINATED_OF;
+            case FORTH_CONTROL_DO:
+                return FORTH_ERROR_UNTERMINATED_DO;
+            case FORTH_CONTROL_IF:
+                return FORTH_ERROR_UNTERMINATED_IF;
+            case FORTH_CONTROL_ELSE:
+                return FORTH_ERROR_UNTERMINATED_ELSE;
+            case FORTH_CONTROL_WHILE:
+                return FORTH_ERROR_UNTERMINATED_WHILE;
+        }
+    }
+    
     //Add primitive to word to stop executing
     int result=write_definition_primitive(&prim_hidden_done,compile);
     if (result!=FORTH_ERROR_NONE) return result;
@@ -1099,7 +1167,7 @@ int action_then(struct ForthCompileInfo *compile)
         else return result;
     }
 
-    if (popped_element.type!=FORTH_CONTROL_IF)
+    if ((popped_element.type!=FORTH_CONTROL_IF)&&(popped_element.type!=FORTH_CONTROL_ELSE))
     {
         //Element on control stack is something else like DO or CASE that doesn't match THEN 
         return FORTH_ERROR_THEN_WITHOUT_IF;

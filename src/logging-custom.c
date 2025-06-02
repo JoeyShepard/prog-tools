@@ -27,8 +27,10 @@
         }
 
         if (*func==prim_hidden_done) log_text("prim_hidden_done (%p)\n",*func);
-        else if (*func==prim_hidden_push) log_text("prim_hidden_push (%p)\n",*func);
         else if (*func==prim_hidden_dot_quote) log_text("prim_hidden_dot_quote (%p)\n",*func);
+        else if (*func==prim_hidden_if) log_text("prim_hidden_if (%p)\n",*func);
+        else if (*func==prim_hidden_jump) log_text("prim_hidden_jump (%p)\n",*func);
+        else if (*func==prim_hidden_push) log_text("prim_hidden_push (%p)\n",*func);
         else if (*func==prim_hidden_s_quote) log_text("prim_hidden_s_quote (%p)\n",*func);
         else if (*func==prim_hidden_secondary)
         {

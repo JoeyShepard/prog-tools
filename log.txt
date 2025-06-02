@@ -2,529 +2,98 @@
 
 LOGGING RESTARTED
 =================
-Primitive count: 107
+Primitive count: 113
+execute_secondary
+- address: 0x701307208e78 [E0 C0 51 FA DA 5C 00 00 14 00 00 00 60 B0 51 FA DA 5C 00 00 00 B0 51 FA DA 5C 00 00 F0 BE 51 FA ]
+- not found!
 
+- address: 0x701307208e84 [60 B0 51 FA DA 5C 00 00 00 B0 51 FA DA 5C 00 00 F0 BE 51 FA DA 5C 00 00 00 00 00 00 00 00 00 00 ]
+- TRUE (0x5cdafa51b060)
 
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 107
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 108
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 108
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 108
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 108
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 108
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 109
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 109
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 109
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 109
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 110
+- address: 0x701307208e8c [00 B0 51 FA DA 5C 00 00 F0 BE 51 FA DA 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- FALSE (0x5cdafa51b000)
 
+- address: 0x701307208e94 [F0 BE 51 FA DA 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5cdafa51bef0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 110
+execute_secondary
+- address: 0x701307208e78 [E0 C0 51 FA DA 5C 00 00 14 00 00 00 60 B0 51 FA DA 5C 00 00 00 B0 51 FA DA 5C 00 00 F0 BE 51 FA ]
+- not found!
 
+- address: 0x701307208e94 [F0 BE 51 FA DA 5C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5cdafa51bef0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 110
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 110
+Primitive count: 113
+execute_secondary
+- address: 0x7b1b43208e78 [E0 F0 3F 96 DF 5E 00 00 14 00 00 00 60 E0 3F 96 DF 5E 00 00 00 E0 3F 96 DF 5E 00 00 F0 EE 3F 96 ]
+- prim_hidden_if (0x5edf963ff0e0)
 
+- address: 0x7b1b43208e84 [60 E0 3F 96 DF 5E 00 00 00 E0 3F 96 DF 5E 00 00 F0 EE 3F 96 DF 5E 00 00 00 00 00 00 00 00 00 00 ]
+- TRUE (0x5edf963fe060)
 
-LOGGING RESTARTED
-=================
-Primitive count: 110
+- address: 0x7b1b43208e8c [00 E0 3F 96 DF 5E 00 00 F0 EE 3F 96 DF 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- FALSE (0x5edf963fe000)
 
+- address: 0x7b1b43208e94 [F0 EE 3F 96 DF 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5edf963feef0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 110
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 111
+Primitive count: 113
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 112
+Primitive count: 113
+execute_secondary
+- address: 0x72a478808e78 [E0 F0 17 74 0E 56 00 00 18 00 00 00 60 E0 17 74 0E 56 00 00 20 F1 17 74 0E 56 00 00 0C 00 00 00 ]
+- prim_hidden_if (0x560e7417f0e0)
 
+- address: 0x72a478808e84 [60 E0 17 74 0E 56 00 00 20 F1 17 74 0E 56 00 00 0C 00 00 00 00 E0 17 74 0E 56 00 00 F0 EE 17 74 ]
+- TRUE (0x560e7417e060)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+- address: 0x72a478808e8c [20 F1 17 74 0E 56 00 00 0C 00 00 00 00 E0 17 74 0E 56 00 00 F0 EE 17 74 0E 56 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x560e7417f120)
 
+- address: 0x72a478808ea0 [F0 EE 17 74 0E 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x560e7417eef0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+execute_secondary
+- address: 0x72a478808e78 [E0 F0 17 74 0E 56 00 00 18 00 00 00 60 E0 17 74 0E 56 00 00 20 F1 17 74 0E 56 00 00 0C 00 00 00 ]
+- prim_hidden_if (0x560e7417f0e0)
 
+- address: 0x72a478808e98 [00 E0 17 74 0E 56 00 00 F0 EE 17 74 0E 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- FALSE (0x560e7417e000)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+- address: 0x72a478808ea0 [F0 EE 17 74 0E 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x560e7417eef0)
 
+execute_secondary
+- address: 0x72a478808e78 [E0 F0 17 74 0E 56 00 00 1C 00 00 00 40 F1 17 74 0E 56 00 00 05 00 00 00 20 F1 17 74 0E 56 00 00 ]
+- prim_hidden_if (0x560e7417f0e0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+- address: 0x72a478808e84 [40 F1 17 74 0E 56 00 00 05 00 00 00 20 F1 17 74 0E 56 00 00 10 00 00 00 40 F1 17 74 0E 56 00 00 ]
+- prim_hidden_push (0x560e7417f140)
 
+- address: 0x72a478808e90 [20 F1 17 74 0E 56 00 00 10 00 00 00 40 F1 17 74 0E 56 00 00 07 00 00 00 F0 EE 17 74 0E 56 00 00 ]
+- prim_hidden_jump (0x560e7417f120)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+- address: 0x72a478808ea8 [F0 EE 17 74 0E 56 00 00 1C 00 00 00 40 F1 17 74 0E 56 00 00 05 00 00 00 20 F1 17 74 0E 56 00 00 ]
+- prim_hidden_done (0x560e7417eef0)
 
+execute_secondary
+- address: 0x72a478808e78 [E0 F0 17 74 0E 56 00 00 1C 00 00 00 40 F1 17 74 0E 56 00 00 05 00 00 00 20 F1 17 74 0E 56 00 00 ]
+- prim_hidden_if (0x560e7417f0e0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112
+- address: 0x72a478808e9c [40 F1 17 74 0E 56 00 00 07 00 00 00 F0 EE 17 74 0E 56 00 00 1C 00 00 00 40 F1 17 74 0E 56 00 00 ]
+- prim_hidden_push (0x560e7417f140)
 
+- address: 0x72a478808ea8 [F0 EE 17 74 0E 56 00 00 1C 00 00 00 40 F1 17 74 0E 56 00 00 05 00 00 00 20 F1 17 74 0E 56 00 00 ]
+- prim_hidden_done (0x560e7417eef0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 112

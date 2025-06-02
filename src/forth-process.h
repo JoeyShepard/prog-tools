@@ -41,8 +41,8 @@
         FORTH_CONTROL_OF,
         FORTH_CONTROL_DO,
         FORTH_CONTROL_IF,
-        FORTH_CONTROL_THEN,
         FORTH_CONTROL_ELSE,
+        FORTH_CONTROL_WHILE,
     };
 
     int classify_char(char c);

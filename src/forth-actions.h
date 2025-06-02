@@ -14,6 +14,7 @@
     int action_constant(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+    int action_else(struct ForthCompileInfo *compile);
     int action_if(struct ForthCompileInfo *compile);
     void action_paren(const char *source,uint32_t *start);
     void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw);

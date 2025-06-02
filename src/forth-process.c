@@ -828,9 +828,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
-                            case FORTH_ACTION_COMMENT:
-                                action_comment(source,&start);
-                                break;
                             case FORTH_ACTION_BRACKET_TICK:
                             {
                                 //Find ID or primitive and secondary if it exists
@@ -846,6 +843,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_COMMENT:
+                                action_comment(source,&start);
+                                break;
                             case FORTH_ACTION_DOT_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
@@ -854,6 +854,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
 
                                 //Write characters to definition
                                 result=action_quote_common(engine,source,&start,false,true,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_ELSE:
+                            {
+                                int result=action_else(compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }

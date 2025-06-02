@@ -127,8 +127,8 @@ void prim_hidden_if(struct ForthEngine *engine)
 void prim_hidden_jump(struct ForthEngine *engine)
 {
     //Fetch offset which is stored after pointer to current word and jump
-    uint32_t offset=*(uint32_t *)(engine->address+1);
-    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address-offset);
+    int32_t offset=*(int32_t *)(engine->address+1);
+    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
 }
 
 //Push next cell in dictionary to stack
@@ -996,9 +996,16 @@ void prim_body_dupe(struct ForthEngine *engine)
 }
 
 //ELSE
-//void prim_body_else(struct ForthEngine *engine){}
-//int prim_immediate_else(struct ForthEngine *engine){}
-//int prim_compile_else(struct ForthEngine *engine){}
+int prim_immediate_else(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+int prim_compile_else(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_ELSE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //EMIT
 void prim_body_emit(struct ForthEngine *engine)
@@ -2205,7 +2212,7 @@ const struct ForthPrimitive forth_primitives[]=
     //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do},
     {"DROP",4,NULL,NULL,&prim_body_drop},
     {"DUP",3,NULL,NULL,&prim_body_dupe},
-    //{"ELSE",4,&prim_immediate_else,&prim_compile_else,&prim_body_else},
+    {"ELSE",4,&prim_immediate_else,&prim_compile_else,NULL},
     {"EMIT",4,NULL,NULL,&prim_body_emit},
     {"ERASE",5,NULL,NULL,&prim_body_erase},
     //{"EXIT",4,&prim_immediate_exit,&prim_compile_exit,&prim_body_exit},

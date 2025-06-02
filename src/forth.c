@@ -303,6 +303,145 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     }
 }
 
+static void output_error_source(int process_result,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
+{
+    //Output error messages from processing source
+    switch (process_result)
+    {
+        case FORTH_ERROR_NONE:
+            //No error - nothing to do
+            break;
+        case FORTH_ERROR_INVALID_NAME:
+        case FORTH_ERROR_MISSING_QUOTE:
+        case FORTH_ERROR_NO_WORD:
+        case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
+        case FORTH_ERROR_NOT_FOUND:
+        case FORTH_ERROR_TOO_LONG:
+            //All of these errors share code for printing out word that caused error
+            if (process_result==FORTH_ERROR_INVALID_NAME)
+                console_text_default("Invalid word for operation: ",console);
+            else if (process_result==FORTH_ERROR_MISSING_QUOTE)
+                console_text_default("Missing \" after ",console);
+            else if (process_result==FORTH_ERROR_NO_WORD)
+                console_text_default("Missing word after ",console);
+            else if (process_result==FORTH_ERROR_NOT_BETWEEN_BRACKETS)
+                console_text_default("Word not allowed between [ and ]: ",console);
+            else if (process_result==FORTH_ERROR_NOT_FOUND)
+                //Word not found by outer interpreter. For secondary calling undefined word, see FORTH_ENGINE_ERROR_UNDEFINED.
+                console_text_default("Word not defined: ",console);
+            else if (process_result==FORTH_ERROR_TOO_LONG)
+                console_text_default("Word too long: ",console);
+
+            //Output word causing error
+            uint32_t start=0;
+            uint32_t word_len=next_word_source(compile->error_word,&start);
+            for (uint32_t i=0;i<word_len;i++)
+                console_char_default(compile->error_word[i],console);
+            console_text_default("\n",console);
+            break;
+        case FORTH_ERROR_AGAIN_WITHOUT_BEGIN:
+            console_text_default("AGAIN without matching BEGIN\n",console);
+            break;
+        case FORTH_ERROR_CONTROL_UNDERFLOW:
+            //Should be caught and replaced with FORTH_ERROR_THEN_WITHOUT_IF or similar but just in case
+            console_text_default("Missing matching control structure\n",console);
+            break;
+        case FORTH_ERROR_ELSE_WITHOUT_IF:
+            console_text_default("ELSE without matching IF\n",console);
+            break;
+        case FORTH_ERROR_MEMORY_OTHER:
+            console_text_default("Memory allocation error such as alignment\n",console);
+            break;
+        case FORTH_ERROR_ON_KEY:
+            console_text_default("Break - ON key pressed\n",console);
+            break;
+        case FORTH_ERROR_OUT_OF_MEMORY:
+            console_text_default("Out of memory\n",console);
+            break;
+        case FORTH_ERROR_THEN_WITHOUT_IF:
+            console_text_default("THEN without matching IF\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_BEGIN:
+            console_text_default("BEGIN without matching AGAIN\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_CASE:
+            console_text_default("CASE without matching ENDCASE\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_OF:
+            console_text_default("OF without matching ENDOF\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_DO:
+            console_text_default("DO without matching LOOP or +LOOP\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_IF:
+            console_text_default("IF without matching THEN\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_ELSE:
+            console_text_default("ELSE without matching THEN\n",console);
+            break;
+        case FORTH_ERROR_UNTERMINATED_WHILE:
+            console_text_default("WHILE without matching REPEAT\n",console);
+            break;
+        default:
+            //No error message for error - should never reach here unless forgot to add error message
+            console_text_default("Unhandled error: ",console);
+            char num_buffer[TEXT_INT32_SIZE];
+            text_int32(process_result,num_buffer);
+            console_text_default(num_buffer,console);
+            console_text_default("\n",console);
+            break;
+    }
+}
+
+static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
+{
+    //Output message for error set in Forth engine - ie inside of primitive
+    switch (forth->engine->error)
+    {
+        case FORTH_ENGINE_ERROR_NONE:
+            //Should never happen but just in case
+            console_text_default("Engine error but code not set\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
+        case FORTH_ENGINE_ERROR_COMPILE_ONLY:
+            if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
+                console_text_default("Word is interpret only: ",console);
+            else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
+                console_text_default("Word is compile only: ",console);
+            //All of these errors share code for printing out word that caused error
+            uint32_t start=0;
+            uint32_t word_len=next_word_source(compile->error_word,&start);
+            for (uint32_t i=0;i<word_len;i++)
+                console_char_default(compile->error_word[i],console);
+            console_text_default("\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_RSTACK_FULL:
+            console_text_default("Out of R-stack space - aborting\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_UNDEFINED:
+            console_text_default("Word not defined: ",console);
+            console_text_default(forth->engine->error_word,console);
+            console_text_default("\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
+            console_text_default("Word must occur in definition: ]\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET:
+            console_text_default("Word is still being defined: ",console);
+            console_text_default(forth->engine->error_word,console);
+            console_text_default("\n",console);
+            break;
+        default:
+            //No error message for error - should never reach here unless forgot to add error message
+            console_text_default("Unhandled engine error: ",console);
+            char num_buffer[TEXT_INT32_SIZE];
+            text_int32(forth->engine->error,num_buffer);
+            console_text_default(num_buffer,console);
+            console_text_default("\n",console);
+            break;
+    }
+}
+
 static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
 {
     //Only process if text exists
@@ -343,114 +482,19 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     console_text_default("\n",console);
     console->input.visible=true;
 
-    //Process errors from processing source
-    switch (process_result)
+    if (process_result==FORTH_ERROR_NONE)
     {
-        case FORTH_ERROR_NONE:
-            //No error - nothing to do
-            break;
-        case FORTH_ERROR_INVALID_NAME:
-        case FORTH_ERROR_MISSING_QUOTE:
-        case FORTH_ERROR_NO_WORD:
-        case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
-        case FORTH_ERROR_NOT_FOUND:
-        case FORTH_ERROR_TOO_LONG:
-            //All of these errors share code for printing out word that caused error
-            if (process_result==FORTH_ERROR_INVALID_NAME)
-                console_text_default("Invalid word for operation: ",console);
-            else if (process_result==FORTH_ERROR_MISSING_QUOTE)
-                console_text_default("Missing \" after ",console);
-            else if (process_result==FORTH_ERROR_NO_WORD)
-                console_text_default("Missing word after ",console);
-            else if (process_result==FORTH_ERROR_NOT_BETWEEN_BRACKETS)
-                console_text_default("Word not allowed between [ and ]: ",console);
-            else if (process_result==FORTH_ERROR_NOT_FOUND)
-                //Word not found by outer interpreter. For secondary calling undefined word, see FORTH_ENGINE_ERROR_UNDEFINED.
-                console_text_default("Word not defined: ",console);
-            else if (process_result==FORTH_ERROR_TOO_LONG)
-                console_text_default("Word too long: ",console);
-
-            //Output word causing error
-            uint32_t start=0;
-            uint32_t word_len=next_word_source(compile->error_word,&start);
-            for (uint32_t i=0;i<word_len;i++)
-                console_char_default(compile->error_word[i],console);
-            console_text_default("\n",console);
-            break;
-        case FORTH_ERROR_ENGINE:
-            //Error set in Forth engine - ie inside of primitive
-            switch (forth->engine->error)
-            {
-                case FORTH_ENGINE_ERROR_NONE:
-                    //Should never happen but just in case
-                    console_text_default("Engine error but code not set\n",console);
-                    break;
-                case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
-                case FORTH_ENGINE_ERROR_COMPILE_ONLY:
-                    if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
-                        console_text_default("Word is interpret only: ",console);
-                    else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
-                        console_text_default("Word is compile only: ",console);
-                    //All of these errors share code for printing out word that caused error
-                    uint32_t start=0;
-                    uint32_t word_len=next_word_source(compile->error_word,&start);
-                    for (uint32_t i=0;i<word_len;i++)
-                        console_char_default(compile->error_word[i],console);
-                    console_text_default("\n",console);
-                    break;
-                case FORTH_ENGINE_ERROR_RSTACK_FULL:
-                    console_text_default("Out of R-stack space - aborting\n",console);
-                    break;
-                case FORTH_ENGINE_ERROR_UNDEFINED:
-                    console_text_default("Word not defined: ",console);
-                    console_text_default(forth->engine->error_word,console);
-                    console_text_default("\n",console);
-                    break;
-                case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
-                    console_text_default("Word must occur in definition: ]\n",console);
-                    break;
-                case FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET:
-                    console_text_default("Word is still being defined: ",console);
-                    console_text_default(forth->engine->error_word,console);
-                    console_text_default("\n",console);
-                    break;
-                default:
-                    //No error message for error - should never reach here unless forgot to add error message
-                    console_text_default("Unhandled engine error: ",console);
-                    char num_buffer[TEXT_INT32_SIZE];
-                    text_int32(forth->engine->error,num_buffer);
-                    console_text_default(num_buffer,console);
-                    console_text_default("\n",console);
-                    break;
-            }
-            break;
-        case FORTH_ERROR_AGAIN_WITHOUT_BEGIN:
-            console_text_default("AGAIN without matching BEGIN\n",console);
-            break;
-        case FORTH_ERROR_CONTROL_UNDERFLOW:
-            //Should be caught and replaced with FORTH_ERROR_THEN_WITHOUT_IF or similar but just in case
-            console_text_default("Missing matching control structure\n",console);
-            break;
-        case FORTH_ERROR_MEMORY_OTHER:
-            console_text_default("Memory allocation error such as alignment\n",console);
-            break;
-        case FORTH_ERROR_ON_KEY:
-            console_text_default("Break - ON key pressed\n",console);
-            break;
-        case FORTH_ERROR_OUT_OF_MEMORY:
-            console_text_default("Out of memory\n",console);
-            break;
-        case FORTH_ERROR_THEN_WITHOUT_IF:
-            console_text_default("THEN without matching IF\n",console);
-            break;
-        default:
-            //No error message for error - should never reach here unless forgot to add error message
-            console_text_default("Unhandled error: ",console);
-            char num_buffer[TEXT_INT32_SIZE];
-            text_int32(process_result,num_buffer);
-            console_text_default(num_buffer,console);
-            console_text_default("\n",console);
-            break;
+        //No error - nothing to do
+    }
+    else if (process_result==FORTH_ERROR_ENGINE)
+    {
+        //Forth engine errors handled separately
+        output_error_engine(forth,console,compile);
+    }
+    else
+    {
+        //All other errors
+        output_error_source(process_result,console,compile);
     }
 
     //Check compile state - definition can't be left open
@@ -519,6 +563,9 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
             console_text_default("Unterminated word: ",console);
             console_text_default(compile->colon_word->name,console);
             console_text_default("\n",console);
+            
+            //Set error so error checking code below knows error printed here
+            process_result=FORTH_ERROR_DEFINTION_OPEN;
         }
 
         //Back to interpret mode
@@ -770,7 +817,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo .\" abc\" ; foo\n";
     //const char *debug_keys=": foo if 5 then ; 0 foo";
     //const char *debug_keys=": foo 0 begin dup 1 + again ; foo";
-    const char *debug_keys="";
+    const char *debug_keys=": foo if true else false then ;\n";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
