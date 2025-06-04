@@ -70,7 +70,6 @@ void forth_reset_engine(struct ForthEngine *engine)
     engine->state=false;
     engine->in_bracket=false;
     engine->data_index=0;
-    engine->error=FORTH_ENGINE_ERROR_NONE;
 
     //Reset stack pointers
     forth_reset_engine_stacks(engine);
@@ -91,6 +90,9 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
 {
     //Word may request caller perform action
     engine->word_action=FORTH_ACTION_NONE;
+
+    //Word may set error
+    engine->error=FORTH_ENGINE_ERROR_NONE;
 
     //Index to identify values on R stack
     engine->word_index=0;
@@ -156,10 +158,12 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         engine->address=secondary->address;
         engine->word_headers=word_headers;
         engine->word_bodies=word_bodies;
-        engine->error=FORTH_ENGINE_ERROR_NONE;
 
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
         forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
+
+        //Point to engine->executing flag so interrupt can set to false when ON pressed
+        on_key_executing=&engine->executing;
 
         //Logging
         log_push(LOGGING_FORTH_EXECUTE_SECONDARY,"execute_secondary");

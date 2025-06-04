@@ -318,7 +318,6 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_NOT_FOUND:
         case FORTH_ERROR_TOO_LONG:
         case FORTH_ERROR_INT32_RANGE:
-        case FORTH_ERROR_UINT32_RANGE:
             //All of these errors share code for printing out word that caused error
             if (process_result==FORTH_ERROR_INVALID_NAME)
                 console_text_default("Invalid word for operation: ",console);
@@ -334,8 +333,6 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
             else if (process_result==FORTH_ERROR_TOO_LONG)
                 console_text_default("Word too long: ",console);
             else if (process_result==FORTH_ERROR_INT32_RANGE)
-                console_text_default("Number out of range: ",console);
-            else if (process_result==FORTH_ERROR_UINT32_RANGE)
                 console_text_default("Number out of range: ",console);
 
             //Output word causing error
@@ -408,8 +405,8 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
             //Should never happen but just in case
             console_text_default("Engine error but code not set\n",console);
             break;
-        case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
         case FORTH_ENGINE_ERROR_COMPILE_ONLY:
+        case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
             if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
                 console_text_default("Word is interpret only: ",console);
             else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
@@ -421,8 +418,12 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
                 console_char_default(compile->error_word[i],console);
             console_text_default("\n",console);
             break;
+        case FORTH_ENGINE_ERROR_INT32_RANGE:
+            //Number string not zero-terminated and number may have overwritten string so don't output
+            console_text_default("Number out of range\n",console);
+            break;
         case FORTH_ENGINE_ERROR_RSTACK_FULL:
-            console_text_default("Out of R-stack space - aborting\n",console);
+            console_text_default("Break - out of return stack space\n",console);
             break;
         case FORTH_ENGINE_ERROR_UNDEFINED:
             console_text_default("Word not defined: ",console);
@@ -823,8 +824,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo .\" abc\" ; foo\n";
     //const char *debug_keys=": foo if 5 then ; 0 foo";
     //const char *debug_keys=": foo 0 begin dup 1 + again ; foo";
-    const char *debug_keys=": foo if true else false then ;\n";
-    //const char *debug_keys="";
+    //const char *debug_keys=": foo if true else false then ;\n";
+    //const char *debug_keys=": foo s\" 2147483648\" >num ;\n s\" 2147483647\" >num";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

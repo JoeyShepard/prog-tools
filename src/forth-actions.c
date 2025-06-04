@@ -140,7 +140,7 @@ static int action_source_pre(const char *source,uint32_t *start,char *word_buffe
     }
     else if (*word_len==0)
     {
-        //Error - no word name after :
+        //Error - no word name after primitive
         compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
@@ -1282,4 +1282,28 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
     return FORTH_ERROR_NONE;
 }
 
+int action_wordsize(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len;
+    int word_type;
+    int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+    
+    if (word_type==FORTH_TYPE_SECONDARY)
+    {
+        //Write word size to stack
+        *engine->stack=compile->secondary->definition_size;
+        uintptr_t lower;
+        lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+        engine->stack=(int32_t*)((engine->stack_base)|lower);
+        return FORTH_ERROR_NONE;
+    }
+    else
+    {
+        //Error - type is FORTH_TYPE_NOT_FOUND. All other errors caught above by action_source_pre.
+        compile->error_word=source+*start-word_len;
+        return FORTH_ERROR_INVALID_NAME;
+    }
+}
 

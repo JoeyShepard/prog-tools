@@ -26,5 +26,6 @@
     int action_then(struct ForthCompileInfo *compile);
     int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct ForthCompileInfo *compile);
     int action_variable(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+    int action_wordsize(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
 
 #endif

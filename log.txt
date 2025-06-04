@@ -43,3 +43,168 @@ Primitive count: 115 of 147 (32 left)
 LOGGING RESTARTED
 =================
 Primitive count: 115 of 147 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 147 (31 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 147 (31 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 116 of 148 (32 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 118 of 148 (30 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 118 of 148 (30 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 119 of 148 (29 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 120 of 148 (28 left)

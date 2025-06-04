@@ -239,23 +239,7 @@ int int32_text(const char *word_buffer,int32_t *num)
         total*=10;
         if (negative==true) total-=*word_buffer-'0';
         else if (negative==false) total+=*word_buffer-'0';
-        if ((total>INT32_MAX)||(total<INT32_MIN)) return FORTH_ERROR_INT32_RANGE;
-        word_buffer++;
-    }
-
-    *num=total;
-
-    return FORTH_ERROR_NONE;
-}
-
-int uint32_text(const char *word_buffer,uint32_t *num)
-{
-    uint64_t total=0;
-    while (*word_buffer)
-    {
-        total*=10;
-        total+=*word_buffer-'0';
-        if (total>UINT32_MAX) return FORTH_ERROR_UINT32_RANGE;
+        if ((total>UINT32_MAX)||(total<INT32_MIN)) return FORTH_ERROR_INT32_RANGE;
         word_buffer++;
     }
 
@@ -290,33 +274,10 @@ int hex32_text(const char *word_buffer,int32_t *num)
             digit=*word_buffer-'A'+10;
         if (negative==true) total-=digit;
         else if (negative==false) total+=digit;
-        if ((total>INT32_MAX)||(total<INT32_MIN)) return FORTH_ERROR_INT32_RANGE;
-        word_buffer++;
-    }
-
-    *num=total;
-
-    return FORTH_ERROR_NONE;
-}
-
-int uhex32_text(const char *word_buffer,uint32_t *num)
-{
-    //Skip over 0x prefix
-    word_buffer+=2;
-
-    uint64_t total=0;
-    while (*word_buffer)
-    {
-        total*=0x10;
-        int digit=0;
-        if ((*word_buffer>='0')&&(*word_buffer<='9'))
-            digit=*word_buffer-'0';
-        else if ((*word_buffer>='a')&&(*word_buffer<='f'))
-            digit=*word_buffer-'a'+10;
-        else if ((*word_buffer>='A')&&(*word_buffer<='F'))
-            digit=*word_buffer-'A'+10;
-        total+=digit;
-        if (total>UINT32_MAX) return FORTH_ERROR_UINT32_RANGE;
+        if ((total>UINT32_MAX)||(total<INT32_MIN))
+        {
+            return FORTH_ERROR_INT32_RANGE;
+        }
         word_buffer++;
     }
 
@@ -628,21 +589,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 int result=int32_text(word_buffer,&num);
                 if (result!=FORTH_ERROR_NONE)
                 {
-                    //Number is out of range of int32 so check if in range of uint32
-                    if (*word_buffer=='-')
-                    {
-                        //Error - negative so not in range of uint32
-                        compile->error_word=source+start;
-                        return FORTH_ERROR_INT32_RANGE;
-                    }
-                    int result=uint32_text(word_buffer,&num);
-                    if (result!=FORTH_ERROR_NONE)
-                    {
-                        //Error - not in range of uint32 either 
-                        //Return int32 range error since stack is int32
-                        compile->error_word=source+start;
-                        return FORTH_ERROR_INT32_RANGE;
-                    }
+                    compile->error_word=source+start;
+                    return result;
                 }
             }
             else if (word_type==FORTH_TYPE_HEX)
@@ -651,21 +599,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 int result=hex32_text(word_buffer,&num);
                 if (result!=FORTH_ERROR_NONE)
                 {
-                    //Number is out of range of int32 so check if in range of uint32
-                    if (*word_buffer=='-')
-                    {
-                        //Error - negative so not in range of uint32
-                        compile->error_word=source+start;
-                        return FORTH_ERROR_INT32_RANGE;
-                    }
-                    int result=uhex32_text(word_buffer,&num);
-                    if (result!=FORTH_ERROR_NONE)
-                    {
-                        //Error - not in range of uint32 either 
-                        //Return int32 range error since stack is int32
-                        compile->error_word=source+start;
-                        return FORTH_ERROR_INT32_RANGE;
-                    }
+                    compile->error_word=source+start;
+                    return result;
                 }
             } 
             else if (word_type==FORTH_TYPE_OTHER)
@@ -704,6 +639,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         {
                             //Error in word
                             engine->error=result;
+
                             //Set pointer to word in case used in error message
                             compile->error_word=source+start-compile->word_len;
                             return FORTH_ERROR_ENGINE;
@@ -808,6 +744,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 action_secondaries(engine,&first_word,&line_characters,false,true,compile);
                                 break;
                             }
+                            case FORTH_ACTION_WORDSIZE:
+                            {
+                                int result=action_wordsize(engine,source,&start,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                         }
                     }
                     else
@@ -818,6 +760,11 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         {
                             forth_engine_pre_exec(engine);
                             body_func(engine);
+                            if (engine->error!=FORTH_ENGINE_ERROR_NONE)
+                            {
+                                //Error in word
+                                return FORTH_ERROR_ENGINE;
+                            }
                         }
                     }
                 }
@@ -875,13 +822,13 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     if (compile_func!=NULL)
                     {
                         //Primitive has special compile behavior
-                        //TODO: do any compile functions return error? moved compiling functions here
                         forth_engine_pre_exec(engine);
                         int result=compile_func(engine);
                         if (result!=FORTH_ENGINE_ERROR_NONE)
                         {
                             //Error in word
                             engine->error=result;
+                            
                             //Set pointer to word in case used in error message
                             compile->error_word=source+start-compile->word_len;
                             return FORTH_ERROR_ENGINE;

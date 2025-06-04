@@ -66,6 +66,8 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - color secondaries if match like primitives
 - escape sequences
 - numbers out of range
+- wordsize
+- var, const, etc
 console - only copy to history if different from last
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY
@@ -142,7 +144,7 @@ int main(void)                      //cg50 and PC
     init_logging("log.txt");
 
     //TODO: remove
-    const int expected_count=147;
+    const int expected_count=148;
     log_none("Primitive count: %d of %d (%d left)\n",forth_primitives_len,expected_count,expected_count-forth_primitives_len);
 
     //Setup - SDL2 on PC and timer on calculator
