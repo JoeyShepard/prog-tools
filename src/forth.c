@@ -317,6 +317,8 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
         case FORTH_ERROR_NOT_FOUND:
         case FORTH_ERROR_TOO_LONG:
+        case FORTH_ERROR_INT32_RANGE:
+        case FORTH_ERROR_UINT32_RANGE:
             //All of these errors share code for printing out word that caused error
             if (process_result==FORTH_ERROR_INVALID_NAME)
                 console_text_default("Invalid word for operation: ",console);
@@ -331,6 +333,10 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
                 console_text_default("Word not defined: ",console);
             else if (process_result==FORTH_ERROR_TOO_LONG)
                 console_text_default("Word too long: ",console);
+            else if (process_result==FORTH_ERROR_INT32_RANGE)
+                console_text_default("Number out of range: ",console);
+            else if (process_result==FORTH_ERROR_UINT32_RANGE)
+                console_text_default("Number out of range: ",console);
 
             //Output word causing error
             uint32_t start=0;

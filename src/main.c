@@ -24,6 +24,27 @@ error_exit in mem? maybe better to recover
 - or provide error function in forth-compatibility.c
 console assumes input less than size of screen
 assembler with built-in safety checks?
+- posted on this but now C-like language seems better
+C like language
+- translates directly to assembly
+- variables referring to XRAM
+- address registers directly
+  - I0, U0 - int, unsigned int
+  - B0, ?0 - char, unsigned char
+  - W0, ?0 - int16, uint16
+- arbitrary calculations with variables and constants
+- ideas to reduce masking
+  - for loop that takes array name so check bounds at beginning
+    - variable name is read/write for array
+  - first element is length so always able to check bounds
+    - also type? actually, should be declared in argument
+  - no pointers, just indexes
+    - foo[R0]=...
+  - function call passes pointer like python
+  - no casting
+- dynamic strings
+  - how to pass around? ref checking?
+- no cpp, pointer shenanigans, UB
 review code on github - better to see in second light
 gint font is truly 5x7 not 5x8 like mine
 - shrink my font? might fit 2-3 more lines on screen
@@ -44,6 +65,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - red after const and var like ;
 - color secondaries if match like primitives
 - escape sequences
+- numbers out of range
 console - only copy to history if different from last
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY
@@ -63,6 +85,7 @@ keyboard shortcut to clear stack
 - shift DEL?
 excessive masking in primitives? data_index should always be valid
 - looked briefly and only found C_COMMA. anywhere else?
+see assembly for body_dupe. redundant calculation optimized out?
 
 Forth optimizing
 ================
@@ -89,6 +112,18 @@ tests
 - compare to Basic and Python
 - https://github.com/ulixxe/forth_coremark
 - https://www.eembc.org/coremark/
+only check ->executing on branch
+words load next word?
+- stops double jump and ->executing=false can just load different address
+  - OTOH, not needed if copying primitive body to RAM
+- ->executing=false exists very few times in source
+try code generation
+- doesnt have to be perfect
+- compare cycles to combined primitive at runtime to make sure worth it
+  - see cycle counting post
+  - separate add-on could check all combos and error if not as predicted
+switch case as mentioned online?
+- someone said this was fastest on x86 but how? switch in while?
 */
 
 
@@ -106,8 +141,9 @@ int main(void)                      //cg50 and PC
     //Initialize logging if on PC
     init_logging("log.txt");
 
-    //TODO: remove?
-    log_none("Primitive count: %d\n",forth_primitives_len);
+    //TODO: remove
+    const int expected_count=147;
+    log_none("Primitive count: %d of %d (%d left)\n",forth_primitives_len,expected_count,expected_count-forth_primitives_len);
 
     //Setup - SDL2 on PC and timer on calculator
     setup(SCALE_FACTOR,TICK_MS);

@@ -3,6 +3,7 @@
 /*.g1a
 /*.g3a
 *.o
+*.swo
 *.swp
 *.lst
 

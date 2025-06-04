@@ -223,53 +223,106 @@ uint32_t next_word_source(const char *source,uint32_t *start)
     return len;
 }
 
-int32_t int32_text(const char *word_buffer)
+int int32_text(const char *word_buffer,int32_t *num)
 {
-    int32_t num=0;
-    bool negative=false;
+    bool negative;
     if (*word_buffer=='-')
     {
         negative=true;
         word_buffer++;
     }
+    else negative=false;
+
+    int64_t total=0;
     while (*word_buffer)
     {
-        num*=10;
-        num+=*word_buffer-'0';
+        total*=10;
+        if (negative==true) total-=*word_buffer-'0';
+        else if (negative==false) total+=*word_buffer-'0';
+        if ((total>INT32_MAX)||(total<INT32_MIN)) return FORTH_ERROR_INT32_RANGE;
         word_buffer++;
     }
-    if (negative) num*=-1;
 
-    return num;
+    *num=total;
+
+    return FORTH_ERROR_NONE;
 }
 
-int32_t hex32_text(const char *word_buffer)
+int uint32_text(const char *word_buffer,uint32_t *num)
 {
-    int32_t num=0;
-    bool negative=false;
+    uint64_t total=0;
+    while (*word_buffer)
+    {
+        total*=10;
+        total+=*word_buffer-'0';
+        if (total>UINT32_MAX) return FORTH_ERROR_UINT32_RANGE;
+        word_buffer++;
+    }
+
+    *num=total;
+
+    return FORTH_ERROR_NONE;
+}
+
+int hex32_text(const char *word_buffer,int32_t *num)
+{
+    bool negative;
     if (*word_buffer=='-')
     {
         negative=true;
         word_buffer++;
     }
+    else negative=false;
     
     //Skip over 0x prefix
     word_buffer+=2;
 
+    int64_t total=0;
     while (*word_buffer)
     {
-        num*=0x10;
+        total*=0x10;
+        int digit=0;
         if ((*word_buffer>='0')&&(*word_buffer<='9'))
-            num+=*word_buffer-'0';
+            digit=*word_buffer-'0';
         else if ((*word_buffer>='a')&&(*word_buffer<='f'))
-            num+=*word_buffer-'a'+10;
+            digit=*word_buffer-'a'+10;
         else if ((*word_buffer>='A')&&(*word_buffer<='F'))
-            num+=*word_buffer-'A'+10;
+            digit=*word_buffer-'A'+10;
+        if (negative==true) total-=digit;
+        else if (negative==false) total+=digit;
+        if ((total>INT32_MAX)||(total<INT32_MIN)) return FORTH_ERROR_INT32_RANGE;
         word_buffer++;
     }
-    if (negative) num*=-1;
 
-    return num;
+    *num=total;
+
+    return FORTH_ERROR_NONE;
+}
+
+int uhex32_text(const char *word_buffer,uint32_t *num)
+{
+    //Skip over 0x prefix
+    word_buffer+=2;
+
+    uint64_t total=0;
+    while (*word_buffer)
+    {
+        total*=0x10;
+        int digit=0;
+        if ((*word_buffer>='0')&&(*word_buffer<='9'))
+            digit=*word_buffer-'0';
+        else if ((*word_buffer>='a')&&(*word_buffer<='f'))
+            digit=*word_buffer-'a'+10;
+        else if ((*word_buffer>='A')&&(*word_buffer<='F'))
+            digit=*word_buffer-'A'+10;
+        total+=digit;
+        if (total>UINT32_MAX) return FORTH_ERROR_UINT32_RANGE;
+        word_buffer++;
+    }
+
+    *num=total;
+
+    return FORTH_ERROR_NONE;
 }
 
 int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
@@ -572,12 +625,48 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
             if (word_type==FORTH_TYPE_NUMBER)
             {
                 //Number
-                num=int32_text(word_buffer);
+                int result=int32_text(word_buffer,&num);
+                if (result!=FORTH_ERROR_NONE)
+                {
+                    //Number is out of range of int32 so check if in range of uint32
+                    if (*word_buffer=='-')
+                    {
+                        //Error - negative so not in range of uint32
+                        compile->error_word=source+start;
+                        return FORTH_ERROR_INT32_RANGE;
+                    }
+                    int result=uint32_text(word_buffer,&num);
+                    if (result!=FORTH_ERROR_NONE)
+                    {
+                        //Error - not in range of uint32 either 
+                        //Return int32 range error since stack is int32
+                        compile->error_word=source+start;
+                        return FORTH_ERROR_INT32_RANGE;
+                    }
+                }
             }
             else if (word_type==FORTH_TYPE_HEX)
             {
                 //Hex
-                num=hex32_text(word_buffer);
+                int result=hex32_text(word_buffer,&num);
+                if (result!=FORTH_ERROR_NONE)
+                {
+                    //Number is out of range of int32 so check if in range of uint32
+                    if (*word_buffer=='-')
+                    {
+                        //Error - negative so not in range of uint32
+                        compile->error_word=source+start;
+                        return FORTH_ERROR_INT32_RANGE;
+                    }
+                    int result=uhex32_text(word_buffer,&num);
+                    if (result!=FORTH_ERROR_NONE)
+                    {
+                        //Error - not in range of uint32 either 
+                        //Return int32 range error since stack is int32
+                        compile->error_word=source+start;
+                        return FORTH_ERROR_INT32_RANGE;
+                    }
+                }
             } 
             else if (word_type==FORTH_TYPE_OTHER)
             {

@@ -983,12 +983,37 @@ void prim_body_drop(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
+//2DROP
+void prim_body_two_drop(struct ForthEngine *engine)
+{
+    uintptr_t lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
 //DUPE
 void prim_body_dupe(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Write duplicated value
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
+    //Advance stack pointer
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+//2DUPE
+void prim_body_two_dupe(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Write duplicated value
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
+    //Advance stack pointer
+    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    //Write duplicated value
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     *engine->stack=*(int32_t*)((engine->stack_base)|lower);
     //Advance stack pointer
     lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
@@ -1274,7 +1299,7 @@ void prim_body_over(struct ForthEngine *engine)
 }
 
 //2OVER
-void prim_body_2_over(struct ForthEngine *engine)
+void prim_body_two_over(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Fetch values from stack
@@ -1435,8 +1460,8 @@ void prim_body_swap(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1;
 }
 
-//ROTE
-void prim_body_2_swap(struct ForthEngine *engine)
+//2SWAP
+void prim_body_two_swap(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Fetch values from stack
@@ -2211,7 +2236,9 @@ const struct ForthPrimitive forth_primitives[]=
     {"DEPTH",5,NULL,NULL,&prim_body_depth},
     //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do},
     {"DROP",4,NULL,NULL,&prim_body_drop},
+    {"2DROP",5,NULL,NULL,&prim_body_two_drop},
     {"DUP",3,NULL,NULL,&prim_body_dupe},
+    {"2DUP",4,NULL,NULL,&prim_body_two_dupe},
     {"ELSE",4,&prim_immediate_else,&prim_compile_else,NULL},
     {"EMIT",4,NULL,NULL,&prim_body_emit},
     {"ERASE",5,NULL,NULL,&prim_body_erase},
@@ -2235,7 +2262,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"NEGATE",6,NULL,NULL,&prim_body_negate},
     {"OR",2,NULL,NULL,&prim_body_or},
     {"OVER",4,NULL,NULL,&prim_body_over},
-    {"2OVER",5,NULL,NULL,&prim_body_2_over},
+    {"2OVER",5,NULL,NULL,&prim_body_two_over},
     {"PAGE",4,NULL,NULL,&prim_body_page},
     //{"REPEAT",6,&prim_immediate_repeat,&prim_compile_repeat,&prim_body_repeat},
     {"ROT",3,NULL,NULL,&prim_body_rote},
@@ -2246,7 +2273,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"SPACES",6,NULL,NULL,&prim_body_spaces},
     //{"STATE",5,&prim_immediate_state,&prim_compile_state,&prim_body_state},
     {"SWAP",4,NULL,NULL,&prim_body_swap},
-    {"2SWAP",5,NULL,NULL,&prim_body_2_swap},
+    {"2SWAP",5,NULL,NULL,&prim_body_two_swap},
     {"THEN",4,&prim_immediate_then,&prim_compile_then,NULL},
     {"TYPE",4,NULL,NULL,&prim_body_type},
     {"U<",2,NULL,NULL,&prim_body_u_less_than},
@@ -2287,8 +2314,7 @@ const struct ForthPrimitive forth_primitives[]=
 
     //digit?
     //:NONAME
-    //2DUP
-    //2DROP
+
 
     //Words from here are not standard forth
     {"RESET",5,NULL,NULL,&prim_body_reset},
@@ -2313,6 +2339,7 @@ const struct ForthPrimitive forth_primitives[]=
     //DEBUG that steps through word
         //ON should also go to debugger
         //BREAKPOINT would be good
+        //shouldnt need extra debug info unless compiling to machine code
     //action to change data size
     //help
         //with word and without

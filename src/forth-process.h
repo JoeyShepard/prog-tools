@@ -52,8 +52,10 @@
     int classify_other(const char *word,struct ForthCompileInfo *compile);
     uint32_t next_word(struct ConsoleInfo *console,uint32_t *start);
     uint32_t next_word_source(const char *source,uint32_t *start);
-    int32_t int32_text(const char *word_buffer);
-    int32_t hex32_text(const char *word_buffer);
+    int int32_text(const char *word_buffer,int32_t *num);
+    int uint32_text(const char *word_buffer,uint32_t *num);
+    int hex32_text(const char *word_buffer,int32_t *num);
+    int uhex32_text(const char *word_buffer,uint32_t *num);
     int expand_definitions(uint32_t size,struct ForthCompileInfo *compile);
     int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct ForthCompileInfo *compile);
     int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile);
