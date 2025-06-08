@@ -1,6 +1,7 @@
 #ifndef __GUARD_PROG_TOOLS_CONSOLE
     #define __GUARD_PROG_TOOLS_CONSOLE
 
+    #include <stddef.h>
     #include <stdint.h>
 
     #include "structs.h"

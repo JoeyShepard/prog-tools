@@ -333,12 +333,12 @@ void action_comment(const char *source,uint32_t *start)
     while(1)
     {
         char character=source[*start];
-        *start=*start+1;
         if ((character==10)||(character==0))
         {
             //Reached end of line or of string - comment ended
             return;
         }
+        *start=*start+1;
     }
 }
 

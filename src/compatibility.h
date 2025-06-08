@@ -68,23 +68,14 @@
 
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
-        #include <gint/clock.h>
-        #include <gint/display.h>
-        #include <gint/fs.h>
-        #include <gint/gint.h>
-        #include <gint/keyboard.h>
-        #include <gint/drivers/keydev.h>
-        #include <gint/timer.h>
 
-        #include "exceptions.h"
+        #include <pthread.h>
+
+        //Globals
+        extern pthread_mutex_t sdl_mutex;
 
     #else
         //Compiling for PC using SDL2 wrapper
-        #include <linux/limits.h>
-        #include <pthread.h>
-        #include <SDL2/SDL.h>
-        #include <SDL2/SDL_image.h>
-        #include <unistd.h>
 
         //Constants from gint
         #define DWIDTH          396
@@ -162,6 +153,9 @@
         #define WINDOW_TITLE    "SDL2 wrapper for fx-CG50"
         
         //structs
+        #ifndef uint
+            typedef unsigned int uint;
+        #endif
         typedef struct
         {
             uint time	:16;/* Time of event, unique over short periods */

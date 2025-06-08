@@ -2521,6 +2521,7 @@ const struct ForthPrimitive forth_primitives[]=
     //{"COMPARE",7,&prim_immediate_compare,&prim_compile_compare,&prim_body_compare,&prim_optimize_compare},
     
     //:NONAME
+    //SMUDGE
 
     //Words from here are not standard forth
     {"RESET",5,NULL,NULL,&prim_body_reset},

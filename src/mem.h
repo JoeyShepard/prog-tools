@@ -1,6 +1,8 @@
 #ifndef __GUARD_PROG_TOOLS_MEM
     #define __GUARD_PROG_TOOLS_MEM
 
+    #include <stddef.h>
+
     struct HeapInfo
     {
         uint32_t next;

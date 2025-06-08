@@ -5,6 +5,20 @@
 #include "manager.h"
 #include "mem.h"
 
+
+//TODO - PRIORITY
+//===============
+/*
+START HERE: 
+race condition with SDL
+change ->executing to pointer system
+- solves problem of still executing after ->executing false if only check every 5th time 
+- no longer need to mask!
+  - implement PERF word first
+- actually, not sure in that case how to do check
+*/
+
+
 //TODO
 //====
 /*
@@ -15,6 +29,8 @@ revisit casting rules esp for structs
 offsetof operator
 - fsanitize=undefined
   - make sanitize
+
+use (-) in console as space too
 
 remove unnecessary headers
 TODOs in all files
@@ -28,19 +44,19 @@ assembler with built-in safety checks?
 C like language
 - translates directly to assembly
 - variables referring to XRAM
-- address registers directly
-  - I0, U0 - int, unsigned int
-  - B0, ?0 - char, unsigned char
-  - W0, ?0 - int16, uint16
+- s8, i16 etc variables
+- register keyword with up to 8 or so variables per funtion
 - arbitrary calculations with variables and constants
 - ideas to reduce masking
   - for loop that takes array name so check bounds at beginning
     - variable name is read/write for array
+    - should also have step as argument
+      - step 4 would mean x+2 generated with no mask
+    - variable itself can't be modified
   - first element is length so always able to check bounds
     - also type? actually, should be declared in argument
-  - no pointers, just indexes
-    - foo[R0]=...
-  - function call passes pointer like python
+  - small amount of checking to see if need mask
+  - seems masking only when pointer modified is most efficient
   - no casting
 - dynamic strings
   - how to pass around? ref checking?
@@ -105,6 +121,12 @@ no stack wrapping and check every 10 primitives for overflow
 - alignment no longer matters - should work!
 - otoh, what if OOB then back in? wouldnt catch
   - could OR and AND one address in primitive but need stack to be aligned - wastes 2x stack
+- could work but not if NEXT is in each primitive
+linked list for stack
+- probably slower than masking but could try
+- could also be index for each stack depth but slower than explicit check?
+explicit check
+- put in word and compare
 assembly? doesnt seem worth it for this
 - might be ok since already have C version for x86
 - how to do combined primitives? either or
@@ -147,10 +169,9 @@ int main(void)                      //cg50 and PC
     const int expected_count=148;
     log_none("Primitive count: %d of %d (%d left)\n",forth_primitives_len,expected_count,expected_count-forth_primitives_len);
 
-    //Setup - SDL2 on PC and timer on calculator
+    //Configure device specific settings - SDL2 on PC and timer on calculator
     setup(SCALE_FACTOR,TICK_MS);
 
-    //TODO: move to setup?
     //Initialize heap memory
     init_heap();
 

@@ -37,6 +37,8 @@
 #else
     //PC version
     #include <stdio.h>
+    #include <stdlib.h>
+
     void error_exit(int error)
     {
         switch (error)

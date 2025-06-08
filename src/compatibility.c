@@ -13,6 +13,17 @@ volatile bool *on_key_pressed;
 //cg50 specific
 //=============
 
+    #include <gint/clock.h>
+    #include <gint/display.h>
+    #include <gint/fs.h>
+    #include <gint/gint.h>
+    #include <gint/keyboard.h>
+    #include <gint/drivers/keydev.h>
+    #include <gint/timer.h>
+
+    #include "exceptions.h"
+
+
     //2MB of unused space in RAM for heap
     uint8_t *heap=(uint8_t *)0x8c200000;
     uint8_t *xram=(uint8_t *)0xe5007000;
@@ -105,6 +116,12 @@ volatile bool *on_key_pressed;
 //PC specific
 //===========
 
+    #include <linux/limits.h>
+    #include <pthread.h>
+    #include <SDL2/SDL.h>
+    #include <SDL2/SDL_image.h>
+    #include <unistd.h>
+
     //Globals
     //=======
     uint16_t screen[DHEIGHT*DWIDTH];
@@ -123,6 +140,8 @@ volatile bool *on_key_pressed;
     uint8_t *yram;
     uint8_t *xram_base;
     uint8_t *yram_base;
+    pthread_mutex_t sdl_mutex;
+
 
     //Static functions only in PC version
     //===================================
@@ -244,12 +263,18 @@ volatile bool *on_key_pressed;
 
     static void wrapper_events()
     {
+        //Also called by separate thread so lock here with mutex
+
+        pthread_mutex_lock(&sdl_mutex);
+
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             switch (event.type)
             {
                 case SDL_QUIT:
+                    //Unlock mutex before exiting
+                    pthread_mutex_unlock(&sdl_mutex);
                     wrapper_exit();
                     break;
                 case SDL_KEYDOWN:
@@ -263,6 +288,9 @@ volatile bool *on_key_pressed;
                     break;
             }
         }
+        
+        //Unlock mutex protecting SDL_PollEvent
+        pthread_mutex_unlock(&sdl_mutex);
     }
 
     //Thread function mirroring interrupt on cg50 that checks for ON key
@@ -359,12 +387,15 @@ volatile bool *on_key_pressed;
         //Scancode of last key pressed
         pc_scancode=0;
 
+        //Create mutex for wrapper_events since it calls SDL_PollEvent and is called by main and second thread
+        pthread_mutex_init(&sdl_mutex,NULL);
+
         //Thread sets target of this pointer to false when ON is pressed to halt interpreter if one is running
         on_key_executing=NULL;
 
         //Create separate thread to check for ON key (HOME on PC) mirroring interrupt on calculator
         pthread_t thread_id;
-        int result=pthread_create(&thread_id,NULL,*interrupt_thread,NULL);
+        int result=pthread_create(&thread_id,NULL,interrupt_thread,NULL);
 
         //Note thread_id goes out of scope here - no problem since pthread_create confirmed not to save pointer
         //to thread_id to write to it later. Also, no further interaction with thread so don't need ID for anything.
@@ -480,18 +511,32 @@ volatile bool *on_key_pressed;
             while(true)
             {
                 wrapper_events();
+
+                //Lock with mutex since second thread also calls wrapper_events which modifies keys_end
+                pthread_mutex_lock(&sdl_mutex);
+
                 if (keys_start!=keys_end)
                 {
                     ret_val.type=KEYEV_DOWN;
                     ret_val.key=keys[keys_start];
                     pc_scancode=pc_keys[keys_start];
                     keys_start=(keys_start+1)%KEYS_SIZE;
+
+                    //Unlock mutex before returning
+                    pthread_mutex_unlock(&sdl_mutex);
+
                     return ret_val;
                 }
+
+                //Unlock mutex if no key found
+                pthread_mutex_unlock(&sdl_mutex);
             }
         }
         else
         {
+            //Lock with mutex since second thread also calls wrapper_events which modifies keys_end
+            pthread_mutex_lock(&sdl_mutex);
+
             //Check for key and exit immediately
             if (keys_start!=keys_end)
             {
@@ -501,6 +546,9 @@ volatile bool *on_key_pressed;
                 keys_start=(keys_start+1)%KEYS_SIZE;
             }
             else ret_val.type=KEYEV_NONE;
+
+            //Unlock mutex
+            pthread_mutex_unlock(&sdl_mutex);
 
             return ret_val;
         }
