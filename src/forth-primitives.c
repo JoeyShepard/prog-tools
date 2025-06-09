@@ -197,7 +197,7 @@ void prim_hidden_loop(struct ForthEngine *engine)
     engine->loop_i++;
 
     //Jump back to DO if done looping
-    if (engine->loop_i<engine->loop_i_max)
+    if (engine->loop_i!=engine->loop_i_max)
     {
         //Jump taken - fetch offset which is stored after pointer to current word
         int32_t offset=*(int32_t *)(engine->address+1);
