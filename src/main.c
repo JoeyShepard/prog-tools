@@ -9,13 +9,7 @@
 //TODO - PRIORITY
 //===============
 /*
-START HERE: 
-race condition with SDL
-change ->executing to pointer system
-- solves problem of still executing after ->executing false if only check every 5th time 
-- no longer need to mask!
-  - implement PERF word first
-- actually, not sure in that case how to do check
+- check in I and J that in loop
 */
 
 
@@ -67,6 +61,11 @@ gint font is truly 5x7 not 5x8 like mine
 
 Forth
 =====
+change ->executing to pointer system
+- solves problem of still executing after ->executing false if only check every 5th time 
+- no longer need to mask!
+  - implement PERF and DO first
+- actually, not sure in that case how to do check
 only highlight syntax after 1 second? not sure if affects battery life
 in Forth console, cursor in last column is one pixel too wide
 key modifier in cursor?

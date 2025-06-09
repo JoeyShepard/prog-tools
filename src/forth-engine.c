@@ -96,6 +96,12 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
 
     //Index to identify values on R stack
     engine->word_index=0;
+
+    //Loop counters
+    engine->loop_i=0;
+    engine->loop_i_max=0;
+    engine->loop_j=0;
+    engine->loop_j_max=0;
 }
 
 int32_t forth_stack_count(struct ForthEngine *engine)
@@ -117,7 +123,7 @@ int32_t forth_pop(struct ForthEngine *engine)
     return *engine->stack;
 }
 
-void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine)
+void forth_rstack_push(int32_t value,int32_t value_max,uint8_t type,uint32_t index,struct ForthEngine *engine)
 {
     if (engine->rstack<engine->rstack_base)
     {
@@ -125,14 +131,17 @@ void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngi
         engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
         engine->executing=false;
     }
+    else
+    {
+        //Push new values to R-stack
+        engine->rstack->value=value;
+        engine->rstack->value_max=value_max;
+        engine->rstack->type=type;
+        engine->rstack->index=index;
 
-    //Push new values to R-stack
-    engine->rstack->value=value;
-    engine->rstack->type=type;
-    engine->rstack->index=index;
-
-    //Decrease R-stack pointer to next element
-    engine->rstack--;
+        //Decrease R-stack pointer to next element
+        engine->rstack--;
+    }
 }
 
 int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
@@ -160,7 +169,7 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         engine->word_bodies=word_bodies;
 
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
-        forth_rstack_push(0,FORTH_RSTACK_DONE,engine->word_index,engine);
+        forth_rstack_push(0,0,FORTH_RSTACK_DONE,engine->word_index,engine);
 
         //Point to engine->executing flag so interrupt can set to false when ON pressed
         on_key_executing=&engine->executing;

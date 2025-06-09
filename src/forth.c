@@ -352,6 +352,9 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_ELSE_WITHOUT_IF:
             console_text_default("ELSE without matching IF\n",console);
             break;
+        case FORTH_ERROR_LOOP_WITHOUT_DO:
+            console_text_default("LOOP without matching DO\n",console);
+            break;
         case FORTH_ERROR_MEMORY_OTHER:
             console_text_default("Memory allocation error such as alignment\n",console);
             break;
@@ -361,11 +364,14 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_OUT_OF_MEMORY:
             console_text_default("Out of memory\n",console);
             break;
+        case FORTH_ERROR_REPEAT_WITHOUT_WHILE:
+            console_text_default("REPEAT without matching WHILE\n",console);
+            break;
         case FORTH_ERROR_THEN_WITHOUT_IF:
             console_text_default("THEN without matching IF\n",console);
             break;
         case FORTH_ERROR_UNTERMINATED_BEGIN:
-            console_text_default("BEGIN without matching AGAIN\n",console);
+            console_text_default("BEGIN without matching AGAIN, WHILE, or UNTIL\n",console);
             break;
         case FORTH_ERROR_UNTERMINATED_CASE:
             console_text_default("CASE without matching ENDCASE\n",console);
@@ -384,6 +390,12 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
             break;
         case FORTH_ERROR_UNTERMINATED_WHILE:
             console_text_default("WHILE without matching REPEAT\n",console);
+            break;
+        case FORTH_ERROR_UNTIL_WITHOUT_BEGIN:
+            console_text_default("UNTIL without matching BEGIN\n",console);
+            break;
+        case FORTH_ERROR_WHILE_WITHOUT_BEGIN:
+            console_text_default("WHILE without matching BEGIN\n",console);
             break;
         default:
             //No error message for error - should never reach here unless forgot to add error message
@@ -826,6 +838,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 0 begin dup 1 + again ; foo";
     //const char *debug_keys=": foo if true else false then ;\n";
     //const char *debug_keys=": foo s\" 2147483648\" >num ;\n s\" 2147483647\" >num";
+    //const char *debug_keys=": foo begin 1 + dup . dup 5 > until ;\n0 foo";
+    //const char *debug_keys=": foo 0 begin dup 5 < while 1 + repeat ;\nfoo";
     const char *debug_keys="";
 
     //Main loop

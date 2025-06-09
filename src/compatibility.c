@@ -14,10 +14,8 @@ volatile bool *on_key_pressed;
 //=============
 
     #include <gint/clock.h>
-    #include <gint/display.h>
     #include <gint/fs.h>
     #include <gint/gint.h>
-    #include <gint/keyboard.h>
     #include <gint/drivers/keydev.h>
     #include <gint/timer.h>
 

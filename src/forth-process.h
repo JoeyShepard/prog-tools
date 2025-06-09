@@ -59,6 +59,7 @@
     int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile);
     int write_definition_i32(int32_t value,struct ForthCompileInfo *compile);
     int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile);
+    int peek_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile);
     int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile);
     int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile);
     int execute_secondary(struct ForthEngine *engine,struct ForthCompileInfo *compile);

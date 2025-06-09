@@ -2,299 +2,771 @@
 
 LOGGING RESTARTED
 =================
-Primitive count: 115 of 147 (32 left)
+Primitive count: 123 of 148 (25 left)
+execute_secondary
+- address: 0x71f0e0409678 [00 8D 01 76 BB 55 00 00 00 00 00 00 80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096ac [00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 ]
+- prim_hidden_push (0x55bb76018d00)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096b8 [00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 ]
+- + (0x55bb76016600)
 
+- address: 0x71f0e04096c0 [80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096c8 [E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x55bb76018ce0)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096ac [00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 ]
+- prim_hidden_push (0x55bb76018d00)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096b8 [00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 ]
+- + (0x55bb76016600)
 
+- address: 0x71f0e04096c0 [80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 115 of 147 (32 left)
+- address: 0x71f0e04096c8 [E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x55bb76018ce0)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 147 (31 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 147 (31 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096ac [00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 ]
+- prim_hidden_push (0x55bb76018d00)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096b8 [00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 ]
+- + (0x55bb76016600)
 
+- address: 0x71f0e04096c0 [80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096c8 [E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x55bb76018ce0)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096ac [00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 ]
+- prim_hidden_push (0x55bb76018d00)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096b8 [00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 ]
+- + (0x55bb76016600)
 
+- address: 0x71f0e04096c0 [80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096c8 [E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x55bb76018ce0)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096ac [00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 ]
+- prim_hidden_push (0x55bb76018d00)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096b8 [00 66 01 76 BB 55 00 00 80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 ]
+- + (0x55bb76016600)
 
+- address: 0x71f0e04096c0 [80 6F 01 76 BB 55 00 00 E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096c8 [E0 8C 01 76 BB 55 00 00 B4 FF FF FF B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jump (0x55bb76018ce0)
 
+- address: 0x71f0e0409684 [80 6F 01 76 BB 55 00 00 00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 ]
+- DUP (0x55bb76016f80)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e040968c [00 8D 01 76 BB 55 00 00 05 00 00 00 F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 ]
+- prim_hidden_push (0x55bb76018d00)
 
+- address: 0x71f0e0409698 [F0 67 01 76 BB 55 00 00 A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 ]
+- < (0x55bb760167f0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
+- address: 0x71f0e04096a0 [A0 8C 01 76 BB 55 00 00 2C 00 00 00 00 8D 01 76 BB 55 00 00 01 00 00 00 00 66 01 76 BB 55 00 00 ]
+- prim_hidden_if (0x55bb76018ca0)
 
+- address: 0x71f0e04096d4 [B0 8A 01 76 BB 55 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x55bb76018ab0)
 
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 116 of 148 (32 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 118 of 148 (30 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 118 of 148 (30 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 119 of 148 (29 left)
+Primitive count: 123 of 148 (25 left)
+execute_secondary
+- address: 0x7677a7e096c8 [B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 2
+-   b
+-   offset: 100
+-   address: 0x7677a7e096dc
+
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096d4 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e096f0 [B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 4
+-   d
+-   offset: 160
+-   address: 0x7677a7e09718
+
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096fc [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09708 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09710 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e09678 [B0 8E 03 A8 33 59 00 00 01 00 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 1
+-   a
+-   offset: 80
+-   address: 0x7677a7e096c8
+
+- address: 0x7677a7e096c8 [B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 2
+-   b
+-   offset: 100
+-   address: 0x7677a7e096dc
+
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096d4 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09684 [B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8E 03 A8 33 59 00 00 03 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 2
+-   b
+-   offset: 100
+-   address: 0x7677a7e096dc
+
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09690 [B0 8E 03 A8 33 59 00 00 03 00 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 3
+-   c
+-   offset: 120
+-   address: 0x7677a7e096f0
+
+- address: 0x7677a7e096f0 [B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 4
+-   d
+-   offset: 160
+-   address: 0x7677a7e09718
+
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096fc [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09708 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09710 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0969c [B0 8E 03 A8 33 59 00 00 04 00 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 4
+-   d
+-   offset: 160
+-   address: 0x7677a7e09718
+
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096a8 [B0 8E 03 A8 33 59 00 00 05 00 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 B0 8A 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096b4 [B0 8E 03 A8 33 59 00 00 06 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096c0 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e0977c [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09784 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e0978c [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09794 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e0979c [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e097a4 [B0 8A 03 A8 33 59 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+execute_secondary
+- address: 0x7677a7e0977c [B0 8E 03 A8 33 59 00 00 00 00 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 0
+-   asdf
+-   offset: 0
+-   address: 0x7677a7e09678
+
+- address: 0x7677a7e09678 [B0 8E 03 A8 33 59 00 00 01 00 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 1
+-   a
+-   offset: 80
+-   address: 0x7677a7e096c8
+
+- address: 0x7677a7e096c8 [B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 2
+-   b
+-   offset: 100
+-   address: 0x7677a7e096dc
+
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096d4 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09684 [B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8E 03 A8 33 59 00 00 03 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 2
+-   b
+-   offset: 100
+-   address: 0x7677a7e096dc
+
+- address: 0x7677a7e096dc [00 8D 03 A8 33 59 00 00 01 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e096e8 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09690 [B0 8E 03 A8 33 59 00 00 03 00 00 00 B0 8E 03 A8 33 59 00 00 04 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 3
+-   c
+-   offset: 120
+-   address: 0x7677a7e096f0
+
+- address: 0x7677a7e096f0 [B0 8E 03 A8 33 59 00 00 04 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 4
+-   d
+-   offset: 160
+-   address: 0x7677a7e09718
+
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096fc [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09708 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09710 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0969c [B0 8E 03 A8 33 59 00 00 04 00 00 00 B0 8E 03 A8 33 59 00 00 05 00 00 00 B0 8E 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 4
+-   d
+-   offset: 160
+-   address: 0x7677a7e09718
+
+- address: 0x7677a7e09718 [B0 8E 03 A8 33 59 00 00 05 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09724 [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09730 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09738 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096a8 [B0 8E 03 A8 33 59 00 00 05 00 00 00 B0 8E 03 A8 33 59 00 00 06 00 00 00 B0 8A 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 5
+-   e
+-   offset: 200
+-   address: 0x7677a7e09740
+
+- address: 0x7677a7e09740 [B0 8E 03 A8 33 59 00 00 06 00 00 00 00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e0974c [00 8D 03 A8 33 59 00 00 01 00 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09758 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09760 [B0 8A 03 A8 33 59 00 00 00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096b4 [B0 8E 03 A8 33 59 00 00 06 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 ]
+- prim_hidden_secondary (0x5933a8038eb0)
+-   index: 6
+-   f
+-   offset: 240
+-   address: 0x7677a7e09768
+
+- address: 0x7677a7e09768 [00 8D 03 A8 33 59 00 00 03 00 00 00 B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 ]
+- prim_hidden_push (0x5933a8038d00)
+
+- address: 0x7677a7e09774 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 00 00 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e096c0 [B0 8A 03 A8 33 59 00 00 B0 8E 03 A8 33 59 00 00 02 00 00 00 B0 8A 03 A8 33 59 00 00 00 8D 03 A8 ]
+- prim_hidden_done (0x5933a8038ab0)
+
+- address: 0x7677a7e09788 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09790 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e09798 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e097a0 [00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e097a8 [00 66 03 A8 33 59 00 00 B0 8A 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- + (0x5933a8036600)
+
+- address: 0x7677a7e097b0 [B0 8A 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 00 66 03 A8 33 59 00 00 ]
+- prim_hidden_done (0x5933a8038ab0)
+
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 125 of 148 (23 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 127 of 148 (21 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 127 of 148 (21 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 120 of 148 (28 left)
+Primitive count: 127 of 148 (21 left)

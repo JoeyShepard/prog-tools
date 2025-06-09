@@ -431,6 +431,20 @@ int pop_control_element(struct ForthControlElement *element,struct ForthCompileI
     return FORTH_ERROR_NONE;
 }
 
+int peek_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile)
+{
+    if (compile->control_stack->index==0)
+    {
+        //Error - nothing on stack to peek
+        return FORTH_ERROR_CONTROL_UNDERFLOW;
+    }
+    
+    //Copy peeked element instead of setting pointer since memory may shift
+    *element=compile->control_stack->elements[compile->control_stack->index-1];
+
+    return FORTH_ERROR_NONE;
+}
+
 int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile)
 {
     if (compile->control_stack->bytes_left<sizeof(struct ForthControlElement))
@@ -882,6 +896,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_COMMENT:
                                 action_comment(source,&start);
                                 break;
+                            case FORTH_ACTION_DO:
+                            {
+                                int result=action_do(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_DOT_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
@@ -899,9 +919,21 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_I:
+                            {
+                                int result=action_i(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_IF:
                             {
                                 int result=action_if(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_J:
+                            {
+                                int result=action_j(compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
@@ -913,9 +945,21 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_LOOP:
+                            {
+                                int result=action_loop(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_REPEAT:
+                            {
+                                int result=action_repeat(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_S_BACKSLASH_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
@@ -947,6 +991,18 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_THEN:
                             {
                                 int result=action_then(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_UNTIL:
+                            {
+                                int result=action_until(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_WHILE:
+                            {
+                                int result=action_while(compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }

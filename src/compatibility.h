@@ -69,10 +69,9 @@
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
 
-        #include <pthread.h>
-
-        //Globals
-        extern pthread_mutex_t sdl_mutex;
+        #include <gint/display.h>
+        #include <gint/gint.h>
+        #include <gint/keyboard.h>
 
     #else
         //Compiling for PC using SDL2 wrapper

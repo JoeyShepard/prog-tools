@@ -200,7 +200,7 @@ int action_again(struct ForthCompileInfo *compile)
         return FORTH_ERROR_AGAIN_WITHOUT_BEGIN;
     }
 
-    //Write primitive that performs IF function
+    //Write primitive that jumps to BEGIN
     result=write_definition_primitive(&prim_hidden_jump,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
@@ -424,6 +424,22 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     return FORTH_ERROR_NONE;
 }
 
+int action_do(struct ForthCompileInfo *compile)
+{
+    //Write primitive to set up loop counter
+    int result=write_definition_primitive(&prim_hidden_do,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Save offset into definitions where matching LOOP or +LOOP will jump to
+    uint32_t index=compile->definitions->index;
+
+    //Write offset and type (DO) to control stack
+    result=push_control_element(index,FORTH_CONTROL_DO,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Save index in case needed for error message
@@ -518,6 +534,15 @@ int action_else(struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
+int action_i(struct ForthCompileInfo *compile)
+{
+    //Write primitive to push I counter
+    int result=write_definition_primitive(&prim_hidden_i,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_if(struct ForthCompileInfo *compile)
 {
     //Write primitive that performs IF function
@@ -535,6 +560,48 @@ int action_if(struct ForthCompileInfo *compile)
     result=push_control_element(index,FORTH_CONTROL_IF,compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
+    return FORTH_ERROR_NONE;
+}
+
+int action_j(struct ForthCompileInfo *compile)
+{
+    //Write primitive to push J counter
+    int result=write_definition_primitive(&prim_hidden_j,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
+int action_loop(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be DO to match LOOP
+    struct ForthControlElement popped_element;
+    int result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match LOOP
+            return FORTH_ERROR_LOOP_WITHOUT_DO;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_DO)
+    {
+        //Element on control stack is something else like BEGIN or CASE that doesn't match DO
+        return FORTH_ERROR_LOOP_WITHOUT_DO;
+    }
+
+    //Write primitive for LOOP
+    result=write_definition_primitive(&prim_hidden_loop,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after primitive so primitive will jump here
+    int32_t offset=-(compile->definitions->index-popped_element.index);
+    result=write_definition_i32(offset,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
     return FORTH_ERROR_NONE;
 }
 
@@ -946,6 +1013,47 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
     }
 }
 
+int action_repeat(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be WHILE to match REPEAT
+    struct ForthControlElement while_element;
+    int result=pop_control_element(&while_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no WHILE to match REPEAT
+            return FORTH_ERROR_REPEAT_WITHOUT_WHILE;
+        }
+        else return result;
+    }
+
+    if (while_element.type!=FORTH_CONTROL_WHILE)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match REPEAT
+        return FORTH_ERROR_REPEAT_WITHOUT_WHILE;
+    }
+
+    //Pop element from control stack which is definitely BEGIN since WHILE already made sure it is
+    struct ForthControlElement begin_element;
+    pop_control_element(&begin_element,compile);
+
+    //Write primitive that jumps to BEGIN
+    result=write_definition_primitive(&prim_hidden_jump,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after primitive so primitive will jump here
+    int32_t offset=-(compile->definitions->index-begin_element.index);
+    result=write_definition_i32(offset,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after WHILE so primitive will jump here
+    offset=compile->definitions->index-while_element.index;
+    *(int32_t *)(compile->definitions->data+while_element.index)=offset;
+
+    return FORTH_ERROR_NONE;
+}
+
 void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_characters,bool defined,bool redraw,
                         struct ForthCompileInfo *compile)
 {
@@ -1174,8 +1282,8 @@ int action_then(struct ForthCompileInfo *compile)
     }
 
     //Write jump offset at address after primitive so primitive will jump here
-    uint32_t offset=compile->definitions->index-popped_element.index;
-    *(uint32_t *)(compile->definitions->data+popped_element.index)=offset;
+    int32_t offset=compile->definitions->index-popped_element.index;
+    *(int32_t *)(compile->definitions->data+popped_element.index)=offset;
 
     return FORTH_ERROR_NONE;
 }
@@ -1236,6 +1344,39 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
     }
 }
 
+int action_until(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be BEGIN to match UNTIL
+    struct ForthControlElement popped_element;
+    int result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no BEGIN to match UNTIL
+            return FORTH_ERROR_UNTIL_WITHOUT_BEGIN;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_BEGIN)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match UNTIL
+        return FORTH_ERROR_UNTIL_WITHOUT_BEGIN;
+    }
+
+    //Write primitive that jumps to BEGIN if not true - same behavior as IF
+    result=write_definition_primitive(&prim_hidden_if,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after primitive so primitive will jump here
+    int32_t offset=-(compile->definitions->index-popped_element.index);
+    result=write_definition_i32(offset,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_variable(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
     //Logging
@@ -1278,6 +1419,45 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
 
     //Logging
     log_pop();
+
+    return FORTH_ERROR_NONE;
+}
+
+int action_while(struct ForthCompileInfo *compile)
+{
+    //Peek element from control stack which should be BEGIN to match WHILE
+    struct ForthControlElement begin_element;
+    int result=peek_control_element(&begin_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no BEGIN to match WHILE
+            return FORTH_ERROR_WHILE_WITHOUT_BEGIN;
+        }
+        else return result;
+    }
+
+    if (begin_element.type!=FORTH_CONTROL_BEGIN)
+    {
+        //Element on control stack is something else like DO or CASE that doesn't match WHILE
+        return FORTH_ERROR_WHILE_WITHOUT_BEGIN;
+    }
+
+    //Write primitive that performs WHILE function - same behavior as IF
+    result=write_definition_primitive(&prim_hidden_if,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Save offset into definitions where matching ELSE or THEN will write jump address
+    uint32_t index=compile->definitions->index;
+
+    //Reserve room in dictionary for offset which matching REPEAT will write
+    result=write_definition_u32(0,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write offset and type (WHILE) to control stack
+    result=push_control_element(index,FORTH_CONTROL_WHILE,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
 
     return FORTH_ERROR_NONE;
 }

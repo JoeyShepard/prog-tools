@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "compatibility.h"
@@ -9,6 +10,48 @@
 
 //Internal primitives - not visible to user
 //=========================================
+
+void prim_hidden_do(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+
+    //Fetch loop values
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    int32_t loop_min=*(int32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    int32_t loop_max=*(int32_t*)((engine->stack_base)|lower);
+    
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+    //Push existing J counter to R-stack
+    if (engine->rstack<engine->rstack_base)
+    {
+        //Out of R-stack memory - abort
+        engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+        engine->executing=false;
+    }
+    else
+    {
+        //Push J counter to R-stack
+        engine->rstack->value=engine->loop_j;
+        engine->rstack->value_max=engine->loop_j_max;
+        engine->rstack->type=FORTH_RSTACK_DO_LOOP;
+        engine->rstack->index=engine->word_index;;
+
+        //Decrease R-stack pointer to next element
+        engine->rstack--;
+
+        //Copy I counter to J counter
+        engine->loop_j=engine->loop_i;
+        engine->loop_j_max=engine->loop_i_max;
+
+        //Set new I counter
+        engine->loop_i=loop_min;
+        engine->loop_i_max=loop_max;
+    }
+}
 
 //Done executing primitive
 void prim_hidden_done(struct ForthEngine *engine)
@@ -100,7 +143,15 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
     log_pop();
 }
 
-//TODO: same for other primitives? replace with 0BRANCH?
+//Push I counter to stack
+void prim_hidden_i(struct ForthEngine *engine)
+{
+    //Push number to stack
+    *engine->stack=engine->loop_i;
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
 //Test value on stack and jump if not 0
 void prim_hidden_if(struct ForthEngine *engine)
 {
@@ -113,7 +164,7 @@ void prim_hidden_if(struct ForthEngine *engine)
     if (test_value==0)
     {
         //Jump taken - fetch offset which is stored after pointer to current word
-        uint32_t offset=*(uint32_t *)(engine->address+1);
+        int32_t offset=*(int32_t *)(engine->address+1);
         engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
     }
     else
@@ -123,12 +174,49 @@ void prim_hidden_if(struct ForthEngine *engine)
     }
 }
 
+//Push J counter to stack
+void prim_hidden_j(struct ForthEngine *engine)
+{
+    //Push number to stack
+    *engine->stack=engine->loop_j;
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
 //Jump to different part of thread
 void prim_hidden_jump(struct ForthEngine *engine)
 {
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
     engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+}
+
+void prim_hidden_loop(struct ForthEngine *engine)
+{
+    //Increment loop counter
+    engine->loop_i++;
+
+    //Jump back to DO if done looping
+    if (engine->loop_i<engine->loop_i_max)
+    {
+        //Jump taken - fetch offset which is stored after pointer to current word
+        int32_t offset=*(int32_t *)(engine->address+1);
+        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+    }
+    else
+    {
+        //Jump not taken - increment thread pointer to account for offset stored after primitive
+        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+
+        //Copy J counter to I counter
+        engine->loop_i=engine->loop_j;
+        engine->loop_i_max=engine->loop_j_max;
+
+        //Pop structure from R-stack to restore J counter
+        engine->rstack++;
+        engine->loop_j=engine->rstack->value;
+        engine->loop_j_max=engine->rstack->value_max;
+    }
 }
 
 //Push next cell in dictionary to stack
@@ -229,23 +317,34 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     }
     else
     {
-        //Increase word index so tagged R-stack addresses can be linked to word they belong to
-        engine->word_index++;
+        //Push word return address to R-stack - faster to inline than call forth_rstack_push
+        if (engine->rstack<engine->rstack_base)
+        {
+            //Out of R-stack memory - abort
+            engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+            engine->executing=false;
+        }
+        else
+        {
+            //Increase word index so tagged R-stack addresses can be linked to word they belong to
+            engine->word_index++;
 
-        //Push current thread pointer address to R-stack
-        forth_rstack_push((uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies),
-                            FORTH_RSTACK_RETURN,engine->word_index,engine);
+            //Push new values to R-stack
+            engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
+            engine->rstack->type=FORTH_RSTACK_RETURN;
+            engine->rstack->index=engine->word_index;;
 
-        //TODO: forth_rstack_push may set executing to false. any problem with code below in that case?
+            //Decrease R-stack pointer to next element
+            engine->rstack--;
 
-        //Set new execution address to address of secondary stored in word header list
-        engine->address=secondary->address;
+            //Set new execution address to address of secondary stored in word header list
+            engine->address=secondary->address;
 
-        //Account for interpreter advancing execution address
-        engine->address--;
+            //Account for interpreter advancing execution address
+            engine->address--;
+        }
     }
 }
-
 
 //Primitives visible to user
 //==========================
@@ -1165,9 +1264,16 @@ void prim_body_depth(struct ForthEngine *engine)
 }
 
 //DO
-//void prim_body_do(struct ForthEngine *engine){}
-//int prim_immediate_do(struct ForthEngine *engine){}
-//int prim_compile_do(struct ForthEngine *engine){}
+int prim_immediate_do(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+int prim_compile_do(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_DO;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //DROP
 void prim_body_drop(struct ForthEngine *engine)
@@ -1293,9 +1399,16 @@ void prim_body_here(struct ForthEngine *engine)
 }
 
 //I
-//void prim_body_i(struct ForthEngine *engine){}
-//int prim_immediate_i(struct ForthEngine *engine){}
-//int prim_compile_i(struct ForthEngine *engine){}
+int prim_immediate_i(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+int prim_compile_i(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_I;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //IF
 int prim_immediate_if(UNUSED(struct ForthEngine *engine))
@@ -1324,9 +1437,16 @@ void prim_body_invert(struct ForthEngine *engine)
 }
 
 //J
-//void prim_body_j(struct ForthEngine *engine){}
-//int prim_immediate_j(struct ForthEngine *engine){}
-//int prim_compile_j(struct ForthEngine *engine){}
+int prim_immediate_j(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+int prim_compile_j(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_J;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //KEY
 void prim_body_key(struct ForthEngine *engine)
@@ -1370,9 +1490,17 @@ int prim_compile_literal(struct ForthEngine *engine)
 }
 
 //LOOP
-//void prim_body_loop(struct ForthEngine *engine){}
-//int prim_immediate_loop(struct ForthEngine *engine){}
-//int prim_compile_loop(struct ForthEngine *engine){}
+int prim_immediate_loop(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_loop(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_LOOP;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //L_SHIFT
 void prim_body_l_shift(struct ForthEngine *engine)
@@ -1523,9 +1651,17 @@ void prim_body_page(struct ForthEngine *engine)
 }
 
 //REPEAT
-//void prim_body_repeat(struct ForthEngine *engine){}
-//int prim_immediate_repeat(struct ForthEngine *engine){}
-//int prim_compile_repeat(struct ForthEngine *engine){}
+int prim_immediate_repeat(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_repeat(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_REPEAT;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //ROTE
 void prim_body_rote(struct ForthEngine *engine)
@@ -1756,9 +1892,17 @@ void prim_body_u_greater_than(struct ForthEngine *engine)
 }
 
 //UNTIL
-//void prim_body_until(struct ForthEngine *engine){}
-//int prim_immediate_until(struct ForthEngine *engine){}
-//int prim_compile_until(struct ForthEngine *engine){}
+int prim_immediate_until(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_until(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_UNTIL;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //VARIABLE
 int prim_immediate_variable(struct ForthEngine *engine)
@@ -1773,9 +1917,17 @@ int prim_compile_variable(UNUSED(struct ForthEngine *engine))
 }
 
 //WHILE
-//void prim_body_while(struct ForthEngine *engine){}
-//int prim_immediate_while(struct ForthEngine *engine){}
-//int prim_compile_while(struct ForthEngine *engine){}
+int prim_immediate_while(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_while(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_WHILE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //X_OR
 void prim_body_x_or(struct ForthEngine *engine)
@@ -2443,7 +2595,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"CR",2,NULL,NULL,&prim_body_c_r},
     {"CREATE",6,&prim_immediate_create,&prim_compile_create,NULL},
     {"DEPTH",5,NULL,NULL,&prim_body_depth},
-    //{"DO",2,&prim_immediate_do,&prim_compile_do,&prim_body_do},
+    {"DO",2,&prim_immediate_do,&prim_compile_do,NULL},
     {"DROP",4,NULL,NULL,&prim_body_drop},
     {"2DROP",5,NULL,NULL,&prim_body_two_drop},
     {"DUP",3,NULL,NULL,&prim_body_dupe},
@@ -2454,15 +2606,15 @@ const struct ForthPrimitive forth_primitives[]=
     //{"EXIT",4,&prim_immediate_exit,&prim_compile_exit,&prim_body_exit},
     {"FILL",4,NULL,NULL,&prim_body_fill},
     {"HERE",4,NULL,NULL,&prim_body_here},
-    //{"I",1,&prim_immediate_i,&prim_compile_i,&prim_body_i},
+    {"I",1,&prim_immediate_i,&prim_compile_i,NULL},
     {"IF",2,&prim_immediate_if,&prim_compile_if,NULL},
     {"INVERT",6,NULL,NULL,&prim_body_invert},
-    //{"J",1,&prim_immediate_j,&prim_compile_j,&prim_body_j},
+    {"J",1,&prim_immediate_j,&prim_compile_j,NULL},
     {"KEY",3,NULL,NULL,&prim_body_key},
     //{"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,&prim_body_leave},
     {"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,NULL},
     {"LIT",3,&prim_immediate_literal,&prim_compile_literal,NULL},
-    //{"LOOP",4,&prim_immediate_loop,&prim_compile_loop,&prim_body_loop},
+    {"LOOP",4,&prim_immediate_loop,&prim_compile_loop,NULL},
     {"LSHIFT",6,NULL,NULL,&prim_body_l_shift},
     {"MAX",3,NULL,NULL,&prim_body_max},
     {"MIN",3,NULL,NULL,&prim_body_min},
@@ -2473,7 +2625,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"OVER",4,NULL,NULL,&prim_body_over},
     {"2OVER",5,NULL,NULL,&prim_body_two_over},
     {"PAGE",4,NULL,NULL,&prim_body_page},
-    //{"REPEAT",6,&prim_immediate_repeat,&prim_compile_repeat,&prim_body_repeat},
+    {"REPEAT",6,&prim_immediate_repeat,&prim_compile_repeat,NULL},
     {"ROT",3,NULL,NULL,&prim_body_rote},
     {"-ROT",4,NULL,NULL,&prim_body_minus_rote},
     {"RSHIFT",6,NULL,NULL,&prim_body_r_shift},
@@ -2486,10 +2638,10 @@ const struct ForthPrimitive forth_primitives[]=
     {"TYPE",4,NULL,NULL,&prim_body_type},
     {"U<",2,NULL,NULL,&prim_body_u_less_than},
     {"U>",2,NULL,NULL,&prim_body_u_greater_than},
-    //{"UNTIL",5,&prim_immediate_until,&prim_compile_until,&prim_body_until},
+    {"UNTIL",5,&prim_immediate_until,&prim_compile_until,NULL},
     {"VARIABLE",8,&prim_immediate_variable,&prim_compile_variable,NULL},
     {"VAR",3,&prim_immediate_variable,&prim_compile_variable,NULL},
-    //{"WHILE",5,&prim_immediate_while,&prim_compile_while,&prim_body_while},
+    {"WHILE",5,&prim_immediate_while,&prim_compile_while,NULL},
     {"XOR",3,NULL,NULL,&prim_body_x_or},
     {"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,NULL},
     {"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,NULL},

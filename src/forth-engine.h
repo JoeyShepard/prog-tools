@@ -62,13 +62,16 @@
         FORTH_ACTION_END,
         FORTH_ACTION_ENDCASE,
         FORTH_ACTION_ENDOF,
+        FORTH_ACTION_I,
         FORTH_ACTION_IF,
+        FORTH_ACTION_J,
         FORTH_ACTION_LITERAL,
         FORTH_ACTION_LOOP,
         FORTH_ACTION_OF,
         FORTH_ACTION_PAREN,
         FORTH_ACTION_PLUS_LOOP,
         FORTH_ACTION_PRIMITIVES,
+        FORTH_ACTION_REPEAT,
         FORTH_ACTION_S_QUOTE,
         FORTH_ACTION_S_BACKSLASH_QUOTE,
         FORTH_ACTION_SECONDARIES,
@@ -78,6 +81,7 @@
         FORTH_ACTION_UNDEFINED,
         FORTH_ACTION_UNTIL,
         FORTH_ACTION_VARIABLE,
+        FORTH_ACTION_WHILE,
         FORTH_ACTION_WORDS,
         FORTH_ACTION_WORDSIZE,
     };
@@ -123,14 +127,16 @@
     enum ForthRStackType
     {
         FORTH_RSTACK_DONE,      //Pushed by top-level secondary. Stop executing when returning from this. 
-        FORTH_RSTACK_RETURN     //Return address to return to calling secondary.
+        FORTH_RSTACK_RETURN,    //Return address to return to calling secondary.
+        FORTH_RSTACK_DO_LOOP
     };
 
     struct ForthRStackElement
     {
         uint32_t value;
+        uint32_t value_max;
+        uint32_t index;
         uint8_t type;
-        uint8_t index;
     };
 
     //Declared here for struct ForthEngine and defined below
@@ -147,6 +153,12 @@
         struct ForthRStackElement *rstack_base;
         struct ForthRStackElement *rstack;      //Points to currently free stack element
         uint32_t rstack_count;                  //Count of elements allocated for stack
+
+        //Loop counters
+        int32_t loop_i;
+        int32_t loop_i_max;
+        int32_t loop_j;
+        int32_t loop_j_max;
 
         //Data area - like dictionary but no definitions stored there
         uint8_t *data;          //Pointer to memory occupied by data area
@@ -235,7 +247,7 @@
     int32_t forth_stack_count(struct ForthEngine *engine);
     void forth_push(struct ForthEngine *engine,int32_t value);
     int32_t forth_pop(struct ForthEngine *engine);
-    void forth_rstack_push(int32_t value,uint8_t type,uint8_t index,struct ForthEngine *engine);
+    void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
     int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
                                 struct ForthWordHeader *word_headers,uint8_t *word_bodies);
 
