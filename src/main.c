@@ -9,7 +9,15 @@
 //TODO - PRIORITY
 //===============
 /*
-- check in I and J that in loop
+- alphabetical order is different on calculator?
+- tail call improvements
+  - get compiler to generate tail call
+    - new sh gcc in container
+  - generate listing for each primitive in its own file
+    - that way dont have to trust compile to do TCO every time
+  - maybe better to scan source for reference to pr
+  - have stack underflow generate exception
+- vscode for debugging?
 */
 
 
@@ -19,12 +27,16 @@
 revisit casting rules esp for structs
 - seems char * is an exception
   - char * is not the same as uint8_t *
+  - seems unsigned char though also has special status???
 - might be good to post some examples and ask for help
+  - yes, file in repo with explanation and links to what may be UB
 offsetof operator
 - fsanitize=undefined
   - make sanitize
+- valgrind
 
 use (-) in console as space too
+- anything else that's useful?
 
 remove unnecessary headers
 TODOs in all files
@@ -39,7 +51,8 @@ C like language
 - translates directly to assembly
 - variables referring to XRAM
 - s8, i16 etc variables
-- register keyword with up to 8 or so variables per funtion
+  - better s1, s2, s4?
+- register keyword with up to 8 or so variables per function
 - arbitrary calculations with variables and constants
 - ideas to reduce masking
   - for loop that takes array name so check bounds at beginning
@@ -52,6 +65,9 @@ C like language
   - small amount of checking to see if need mask
   - seems masking only when pointer modified is most efficient
   - no casting
+- see assembly for line typed if more than 1 second
+  - limits to optmizing a line at a time but that's fine
+  - either show on screen while typing, press key to see, or link split to show
 - dynamic strings
   - how to pass around? ref checking?
 - no cpp, pointer shenanigans, UB
@@ -135,11 +151,13 @@ tests
 - compare to Basic and Python
 - https://github.com/ulixxe/forth_coremark
 - https://www.eembc.org/coremark/
+- bad apple?
 only check ->executing on branch
 words load next word?
 - stops double jump and ->executing=false can just load different address
   - OTOH, not needed if copying primitive body to RAM
 - ->executing=false exists very few times in source
+- -fno-PIC produces TCO!
 try code generation
 - doesnt have to be perfect
 - compare cycles to combined primitive at runtime to make sure worth it
