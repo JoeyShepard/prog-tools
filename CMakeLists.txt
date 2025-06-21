@@ -2,11 +2,11 @@
 # toolchain file and module path of the fxSDK
 
 cmake_minimum_required(VERSION 3.15)
-project(prog-tools)
+project(prog-tools LANGUAGES ASM C)
 
-include(GenerateG1A)
+#include(GenerateG1A)
 include(GenerateG3A)
-include(GenerateHH2Bin)
+#include(GenerateHH2Bin)
 include(Fxconv)
 find_package(Gint 2.9 REQUIRED)
 
@@ -37,7 +37,9 @@ set(SOURCES
   src/shell.c
   src/text.c
   src/util.c
-  # ...
+
+  #Assembly file generated separately by GCC 15.1.0 for __attribute__((musttail))
+  src/custom/generated/test.s
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS
@@ -58,15 +60,5 @@ add_executable(prog-tools ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
 target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50)
 target_link_libraries(prog-tools Gint::Gint)
 
-if("${FXSDK_PLATFORM_LONG}" STREQUAL fx9860G)
-  generate_g1a(TARGET prog-tools OUTPUT "prog-tools.g1a"
-    NAME "prog-tools" ICON assets-fx/icon.png)
-elseif("${FXSDK_PLATFORM_LONG}" STREQUAL fxCG50)
-  generate_g3a(TARGET prog-tools OUTPUT "prog-tools.g3a"
+generate_g3a(TARGET prog-tools OUTPUT "prog-tools.g3a"
     NAME "prog-tools" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
-elseif("${FXSDK_PLATFORM_LONG}" STREQUAL fx9860G_G3A)
-  generate_g3a(TARGET prog-tools OUTPUT "prog-tools-fx.g3a"
-    NAME "prog-tools-fx" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
-elseif("${FXSDK_PLATFORM_LONG}" STREQUAL fxCP)
-  generate_hh2_bin(TARGET prog-tools OUTPUT "prog-tools-hh2.bin")
-endif()

@@ -1289,22 +1289,13 @@ void prim_body_two_drop(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//TODO: remove
-int32_t asm_test();
-
 //DUPE
 void prim_body_dupe(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Write duplicated value
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-
-
-    //TODO: undo
-    //*engine->stack=*(int32_t*)((engine->stack_base)|lower);
-    *engine->stack=asm_test();
-
-
+    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
     //Advance stack pointer
     lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);

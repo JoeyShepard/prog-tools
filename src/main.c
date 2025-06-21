@@ -13,11 +13,12 @@
 - tail call improvements
   - get compiler to generate tail call
     - new sh gcc in container
-  - generate listing for each primitive in its own file
-    - that way dont have to trust compile to do TCO every time
-  - maybe better to scan source for reference to pr
   - have stack underflow generate exception
 - vscode for debugging?
+  - at least try once
+- local variables
+  - then can benchmark
+  - https://rosettacode.org/wiki/N-queens_problem#C
 */
 
 
@@ -38,6 +39,8 @@ offsetof operator
 use (-) in console as space too
 - anything else that's useful?
 
+each character output should NOT update screen
+- wait for ticks to go by?
 remove unnecessary headers
 TODOs in all files
 rearrange struct orders for speed
