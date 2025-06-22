@@ -972,6 +972,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
+                            case FORTH_ACTION_PLUS_LOOP:
+                            {
+                                int result=action_plus_loop(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_REPEAT:
                             {
                                 int result=action_repeat(compile);

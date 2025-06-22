@@ -22,6 +22,7 @@
     int action_j(struct ForthCompileInfo *compile);
     int action_loop(struct ForthCompileInfo *compile);
     void action_paren(const char *source,uint32_t *start);
+    int action_plus_loop(struct ForthCompileInfo *compile);
     void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw);
     int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *start,bool escape,bool definition,
                                 struct ForthCompileInfo *compile);

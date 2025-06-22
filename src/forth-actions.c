@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: remove
+#include "macros.h"
+#include "text.h"
+
+
+
 #include "error.h"
 #include "forth.h"
 #include "forth-engine.h"
@@ -542,7 +548,7 @@ int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompile
     engine->stack=(int32_t*)((engine->stack_base)|lower);
     uint32_t word_ID=*engine->stack;
 
-    if (word_ID<forth_primitives_len)
+    if (word_ID<(uint32_t)forth_primitives_len)
     {
         //ID on stack is primitive
         *word_type=FORTH_TYPE_PRIMITIVE;
@@ -648,6 +654,39 @@ void action_paren(const char *source,uint32_t *start)
             return;
         }
     }
+}
+
+int action_plus_loop(struct ForthCompileInfo *compile)
+{
+    //Pop element from control stack which should be DO to match +LOOP
+    struct ForthControlElement popped_element;
+    int result=pop_control_element(&popped_element,compile);
+    if (result!=FORTH_ERROR_NONE)
+    {
+        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        {
+            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match +LOOP
+            return FORTH_ERROR_PLUS_LOOP_WITHOUT_DO;
+        }
+        else return result;
+    }
+
+    if (popped_element.type!=FORTH_CONTROL_DO)
+    {
+        //Element on control stack is something else like BEGIN or CASE that doesn't match DO
+        return FORTH_ERROR_PLUS_LOOP_WITHOUT_DO;
+    }
+
+    //Write primitive for +LOOP
+    result=write_definition_primitive(&prim_hidden_plus_loop,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write jump offset at address after primitive so primitive will jump here
+    int32_t offset=-(compile->definitions->index-popped_element.index);
+    result=write_definition_i32(offset,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
 }
 
 void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw)

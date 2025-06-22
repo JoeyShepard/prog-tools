@@ -22,3 +22,6 @@ differences from other forths
 - lots of words interpret only like WORDS
 - var and create align address
 - I and J work in words without skipping over return address
+- no EXEC in EXEC
+- EXEC in word only works on body
+- strcasecmp doesn't treat as lowercase. already fixed in dev.

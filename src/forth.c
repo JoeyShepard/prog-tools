@@ -370,6 +370,9 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_OUT_OF_MEMORY:
             console_text_default("Out of memory\n",console);
             break;
+        case FORTH_ERROR_PLUS_LOOP_WITHOUT_DO:
+            console_text_default("+LOOP without matching DO\n",console);
+            break;
         case FORTH_ERROR_REPEAT_WITHOUT_WHILE:
             console_text_default("REPEAT without matching WHILE\n",console);
             break;

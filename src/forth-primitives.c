@@ -219,6 +219,38 @@ void prim_hidden_loop(struct ForthEngine *engine)
     }
 }
 
+void prim_hidden_plus_loop(struct ForthEngine *engine)
+{
+    //Update stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+    //Increment loop counter
+    engine->loop_i+=*engine->stack;
+
+    //Jump back to DO if done looping
+    if (engine->loop_i<engine->loop_i_max)
+    {
+        //Jump taken - fetch offset which is stored after pointer to current word
+        int32_t offset=*(int32_t *)(engine->address+1);
+        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+    }
+    else
+    {
+        //Jump not taken - increment thread pointer to account for offset stored after primitive
+        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+
+        //Copy J counter to I counter
+        engine->loop_i=engine->loop_j;
+        engine->loop_i_max=engine->loop_j_max;
+
+        //Pop structure from R-stack to restore J counter
+        engine->rstack++;
+        engine->loop_j=engine->rstack->value;
+        engine->loop_j_max=engine->rstack->value_max;
+    }
+}
+
 //Push next cell in dictionary to stack
 void prim_hidden_push(struct ForthEngine *engine)
 {
@@ -519,9 +551,17 @@ void prim_body_plus(struct ForthEngine *engine)
 }
 
 //PLUS_LOOP
-//void prim_body_plus_loop(struct ForthEngine *engine){}
-//int prim_immediate_plus_loop(struct ForthEngine *engine){}
-//int prim_compile_plus_loop(struct ForthEngine *engine){}
+int prim_immediate_plus_loop(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_plus_loop(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_PLUS_LOOP;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //COMMA
 void prim_body_comma(struct ForthEngine *engine)
@@ -1374,7 +1414,7 @@ void prim_body_execute(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 
     uint32_t word_ID=*engine->stack;
-    if (word_ID<forth_primitives_len)
+    if (word_ID<(uint32_t)forth_primitives_len)
     {
         //TODO: checking body is enough now but recheck after all words added
 
@@ -1407,6 +1447,8 @@ void prim_body_execute(struct ForthEngine *engine)
         //ID on stack is secondary
         uint32_t secondary_id=word_ID-forth_primitives_len;
 
+        //Same as prim_hidden_secondary - inlined for speed
+
         //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
         struct ForthWordHeader *secondary=&engine->word_headers[secondary_id];
         if (secondary->type==FORTH_SECONDARY_UNDEFINED)
@@ -1415,6 +1457,17 @@ void prim_body_execute(struct ForthEngine *engine)
             engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
             engine->error_word=secondary->name;
             engine->executing=false;
+        }
+        else if ((secondary->type==FORTH_SECONDARY_CONSTANT)||(secondary->type==FORTH_SECONDARY_CREATE)||
+                (secondary->type==FORTH_SECONDARY_VARIABLE))
+        {
+            //These are actually words that can be executed but faster to extract value and push here manually instead
+            int32_t num=*(int32_t *)(secondary->address+1);
+            
+            //Push number to stack
+            *engine->stack=num;
+            uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+            engine->stack=(int32_t*)((engine->stack_base)|lower);
         }
         else
         {
@@ -2655,7 +2708,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"*/",2,NULL,NULL,&prim_body_star_slash},
     {"*/MOD",5,NULL,NULL,&prim_body_star_slash_mod},
     {"+",1,NULL,NULL,&prim_body_plus},
-    //{"+LOOP",5,&prim_immediate_plus_loop,&prim_compile_plus_loop,&prim_body_plus_loop},
+    {"+LOOP",5,&prim_immediate_plus_loop,&prim_compile_plus_loop,NULL},
     {",",1,NULL,NULL,&prim_body_comma},
     {"C,",2,NULL,NULL,&prim_body_c_comma},
     {"W,",2,NULL,NULL,&prim_body_w_comma},

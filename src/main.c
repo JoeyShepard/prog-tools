@@ -9,13 +9,9 @@
 //TODO - PRIORITY
 //===============
 /*
-- alphabetical order is different on calculator?
-- calling secondary for var is very slow
-  - no need for r-stack stuff. just recognize variable and push
-
+- try perf on cg50
 - tail call improvements
   - get compiler to generate tail call
-    - new sh gcc in container
   - have stack underflow generate exception
 - vscode for debugging?
   - at least try once
@@ -24,6 +20,7 @@
   - see 8 queens on wikipedia
     - fits on one line though?
     - best not to break up into words other than init
+  - store names after word for browser
 */
 
 
@@ -99,6 +96,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - color primitives red if compile only etc
 - tick on number
 - tick on ;, :, quotes etc
+- tick and ['] too
 - quoting words not working yet
 - words with header but no definition should be yellow
 - red after const and var like ;
@@ -122,8 +120,6 @@ individual primitives for local accesses
 i and j are function pointers
 add test for NULL for headers in primitives that use them
 dont update screen for emit etc if no print defined
-keyboard shortcut to clear stack
-- shift DEL?
 excessive masking in primitives? data_index should always be valid
 - looked briefly and only found C_COMMA. anywhere else?
 see assembly for body_dupe. redundant calculation optimized out?
