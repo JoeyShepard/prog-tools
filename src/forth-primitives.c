@@ -306,14 +306,23 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 
     //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
     struct ForthWordHeader *secondary=&engine->word_headers[index];
-
-    //TODO: update function pointer when secondary is redefined? would eliminate if here but not sure if actually faster
     if (secondary->type==FORTH_SECONDARY_UNDEFINED)
     {
         //Error - word referenced in word but never defined
         engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
         engine->error_word=secondary->name;
         engine->executing=false;
+    }
+    else if ((secondary->type==FORTH_SECONDARY_CONSTANT)||(secondary->type==FORTH_SECONDARY_CREATE)||
+            (secondary->type==FORTH_SECONDARY_VARIABLE))
+    {
+        //These are actually words that can be executed but faster to extract value and push here manually instead
+        int32_t num=*(int32_t *)(secondary->address+1);
+        
+        //Push number to stack
+        *engine->stack=num;
+        uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+        engine->stack=(int32_t*)((engine->stack_base)|lower);
     }
     else
     {
@@ -1356,13 +1365,93 @@ int prim_immediate_execute(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_EXECUTE;
-    return FORTH_ERROR_NONE;
+    return FORTH_ENGINE_ERROR_NONE;
 }
 void prim_body_execute(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+    uint32_t word_ID=*engine->stack;
+    if (word_ID<forth_primitives_len)
+    {
+        //TODO: checking body is enough now but recheck after all words added
+
+        //ID on stack is primitive
+        void (*body_func)(struct ForthEngine *engine)=forth_primitives[word_ID].body;
+        if (body_func!=NULL)
+        {
+            if (body_func==&prim_body_execute)
+            {
+                //Error - can't execute EXECUTE from EXECUTE
+                engine->error=FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE;
+                engine->executing=false;
+            }
+            else
+            {
+                //Primitive has body - ok to execute
+                body_func(engine);
+            }
+        }
+        else
+        {
+            //Error - no body present for primitive so only has interpret and compile behavior
+            engine->error=FORTH_ENGINE_ERROR_EXECUTE_NO_BODY;
+            engine->error_word=forth_primitives[word_ID].name;
+            engine->executing=false;
+        }
+    }   
+    else if (word_ID<forth_primitives_len+engine->word_count)
+    {
+        //ID on stack is secondary
+        uint32_t secondary_id=word_ID-forth_primitives_len;
+
+        //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
+        struct ForthWordHeader *secondary=&engine->word_headers[secondary_id];
+        if (secondary->type==FORTH_SECONDARY_UNDEFINED)
+        {
+            //Error - word referenced in word but never defined
+            engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+            engine->error_word=secondary->name;
+            engine->executing=false;
+        }
+        else
+        {
+            //Push word return address to R-stack - faster to inline than call forth_rstack_push
+            if (engine->rstack<engine->rstack_base)
+            {
+                //Out of R-stack memory - abort
+                engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+                engine->executing=false;
+            }
+            else
+            {
+                //Increase word index so tagged R-stack addresses can be linked to word they belong to
+                engine->word_index++;
+
+                //Push new values to R-stack
+                engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
+                engine->rstack->type=FORTH_RSTACK_RETURN;
+                engine->rstack->index=engine->word_index;;
+
+                //Decrease R-stack pointer to next element
+                engine->rstack--;
+
+                //Set new execution address to address of secondary stored in word header list
+                engine->address=secondary->address;
+
+                //Account for interpreter advancing execution address
+                engine->address--;
+            }
+        }
+    }
+    else
+    {
+        //Error - ID on stack is out of range
+        engine->error=FORTH_ENGINE_ERROR_EXECUTE;
+        engine->executing=false;
+    }
 }
 
 //EXIT

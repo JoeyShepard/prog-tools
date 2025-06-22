@@ -436,23 +436,34 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
                 console_char_default(compile->error_word[i],console);
             console_text_default("\n",console);
             break;
+        case FORTH_ENGINE_ERROR_EXECUTE:
+            console_text_default("Invalid ID for EXECUTE\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE:
+            console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_EXECUTE_NO_BODY:
+            console_text_default("Word has no run-time behavior for EXECUTE: ",console);
+            console_text_default(forth->engine->error_word,console);
+            console_text_default("\n",console);
+            break;
         case FORTH_ENGINE_ERROR_INT32_RANGE:
             //Number string not zero-terminated and number may have overwritten string so don't output
             console_text_default("Number out of range\n",console);
             break;
-        case FORTH_ENGINE_ERROR_RSTACK_FULL:
-            console_text_default("Break - out of return stack space\n",console);
-            break;
-        case FORTH_ENGINE_ERROR_UNDEFINED:
-            console_text_default("Word not defined: ",console);
-            console_text_default(forth->engine->error_word,console);
-            console_text_default("\n",console);
-            break;
         case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
             console_text_default("Word must occur in definition: ]\n",console);
             break;
+        case FORTH_ENGINE_ERROR_RSTACK_FULL:
+            console_text_default("Break - out of return stack space\n",console);
+            break;
         case FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET:
             console_text_default("Word is still being defined: ",console);
+            console_text_default(forth->engine->error_word,console);
+            console_text_default("\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_UNDEFINED:
+            console_text_default("Word not defined: ",console);
             console_text_default(forth->engine->error_word,console);
             console_text_default("\n",console);
             break;

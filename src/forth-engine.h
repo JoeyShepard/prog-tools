@@ -90,13 +90,16 @@
     enum ForthEngineErrors
     {
         FORTH_ENGINE_ERROR_NONE,
-        FORTH_ENGINE_ERROR_INTERPRET_ONLY,
         FORTH_ENGINE_ERROR_COMPILE_ONLY,
+        FORTH_ENGINE_ERROR_EXECUTE,
+        FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE,
+        FORTH_ENGINE_ERROR_EXECUTE_NO_BODY,
         FORTH_ENGINE_ERROR_INT32_RANGE,
-        FORTH_ENGINE_ERROR_RSTACK_FULL,
-        FORTH_ENGINE_ERROR_UNDEFINED,
+        FORTH_ENGINE_ERROR_INTERPRET_ONLY,
         FORTH_ENGINE_ERROR_RIGHT_BRACKET,
-        FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET
+        FORTH_ENGINE_ERROR_RSTACK_FULL,
+        FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
+        FORTH_ENGINE_ERROR_UNDEFINED,
     };
 
     enum ForthState
@@ -177,6 +180,7 @@
         uint32_t word_index;
         struct ForthWordHeader *word_headers;
         uint8_t *word_bodies;
+        uint32_t word_count;
         const char *error_word;
 
         //Compilation
@@ -250,6 +254,6 @@
     int32_t forth_pop(struct ForthEngine *engine);
     void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
     int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
-                                struct ForthWordHeader *word_headers,uint8_t *word_bodies);
+                                struct ForthWordHeader *word_headers,uint32_t word_count,uint8_t *word_bodies);
 
 #endif

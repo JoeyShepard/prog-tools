@@ -145,7 +145,7 @@ void forth_rstack_push(int32_t value,int32_t value_max,uint8_t type,uint32_t ind
 }
 
 int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
-                            struct ForthWordHeader *word_headers,uint8_t *word_bodies)
+                            struct ForthWordHeader *word_headers,uint32_t word_count,uint8_t *word_bodies)
 {
     if (secondary->type==FORTH_SECONDARY_UNDEFINED)
     {
@@ -167,6 +167,7 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         engine->address=secondary->address;
         engine->word_headers=word_headers;
         engine->word_bodies=word_bodies;
+        engine->word_count=word_count;
 
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
         forth_rstack_push(0,0,FORTH_RSTACK_DONE,engine->word_index,engine);

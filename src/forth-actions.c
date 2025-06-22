@@ -414,7 +414,7 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     //Add code to push create address
     result=write_definition_primitive(&prim_hidden_push,compile);
     if (result!=FORTH_ERROR_NONE) return result;
-    result=write_definition_i32(variable_address,compile);
+    result=write_definition_u32(variable_address,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Add primitive to word to stop exectuing
@@ -540,19 +540,19 @@ int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompile
     uintptr_t lower;
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
-    uint32_t word_id=*engine->stack;
+    uint32_t word_ID=*engine->stack;
 
-    if (word_id<forth_primitives_len)
+    if (word_ID<forth_primitives_len)
     {
         //ID on stack is primitive
         *word_type=FORTH_TYPE_PRIMITIVE;
-        compile->primitive_ID=word_id;
+        compile->primitive_ID=word_ID;
     }
-    else if (word_id<forth_primitives_len+compile->words->index)
+    else if (word_ID<forth_primitives_len+compile->words->index)
     {
         //ID is a secondary
         *word_type=FORTH_TYPE_SECONDARY;
-        uint32_t secondary_id=word_id-forth_primitives_len;
+        uint32_t secondary_id=word_ID-forth_primitives_len;
         compile->secondary=&compile->words->header[secondary_id];
     }
     else return FORTH_ERROR_EXECUTE;
@@ -1436,7 +1436,7 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
     //Add code to push variable address
     result=write_definition_primitive(&prim_hidden_push,compile);
     if (result!=FORTH_ERROR_NONE) return result;
-    result=write_definition_i32(variable_address,compile);
+    result=write_definition_u32(variable_address,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Add primitive to word to stop exectuing

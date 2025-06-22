@@ -809,7 +809,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
 
                     //Run secondary
                     int result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,compile->words->header,
-                                                        compile->definitions->data);
+                                                        compile->words->index,compile->definitions->data);
 
                     //Abort if error occured while running secondary
                     if (result!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
