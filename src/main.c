@@ -10,6 +10,9 @@
 //===============
 /*
 - alphabetical order is different on calculator?
+- calling secondary for var is very slow
+  - no need for r-stack stuff. just recognize variable and push
+
 - tail call improvements
   - get compiler to generate tail call
     - new sh gcc in container
@@ -18,7 +21,9 @@
   - at least try once
 - local variables
   - then can benchmark
-  - https://rosettacode.org/wiki/N-queens_problem#C
+  - see 8 queens on wikipedia
+    - fits on one line though?
+    - best not to break up into words other than init
 */
 
 

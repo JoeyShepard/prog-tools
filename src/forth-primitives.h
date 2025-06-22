@@ -20,7 +20,10 @@
     extern const struct ForthPrimitive forth_primitives[];
     extern const int forth_primitives_len;
 
-    //Primitives visible externally
+    //EXECUTE primitive has special handling so expose function externally
+    int prim_immediate_execute(struct ForthEngine *engine);
+
+    //Primitives visible externally (but hidden from from user)
     void prim_hidden_done(struct ForthEngine *engine);
     void prim_hidden_do(struct ForthEngine *engine);
     void prim_hidden_dot_quote(struct ForthEngine *engine);

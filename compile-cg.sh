@@ -12,6 +12,7 @@ if [ $ret -ne 0 ]; then
 fi
 cd ../../
 
+#Next, start fxsdk to compile C files and .s files generated above
 fxsdk build-cg -- -s
 ret=$?
 if [ $ret -ne 0 ]; then

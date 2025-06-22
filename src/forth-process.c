@@ -635,6 +635,17 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
             if (engine->state==FORTH_STATE_INTERPRET)
             {
                 //Interpret mode
+                if (word_type==FORTH_TYPE_PRIMITIVE)
+                {
+                    if (forth_primitives[compile->primitive_ID].immediate==&prim_immediate_execute)
+                    {
+                        //Special handling for EXECUTE to reuse word processing below
+                        int result=action_execute(engine,&word_type,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
+                }
+                
+                //Handle word depending on type
                 if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
                 {
                     //Number or hex - push to stack
@@ -694,6 +705,13 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             {
                                 int result=action_dot_quote_interpret(engine,source,&start,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_EXECUTE:
+                            {
+                                //EXECUTE executing another EXECUTE not allowed in immediate mode
+                                //(no way to break processing with ON key and circular stack could hang)
+                                return FORTH_ERROR_EXECUTE_IN_EXECUTE;
                                 break;
                             }
                             case FORTH_ACTION_PAREN:

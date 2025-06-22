@@ -1289,21 +1289,13 @@ void prim_body_two_drop(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//TODO: remove
-int32_t asm_test();
-
 //DUPE
 void prim_body_dupe(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Write duplicated value
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-
-
-    //TODO: undo
-    //*engine->stack=*(int32_t*)((engine->stack_base)|lower);
-    *engine->stack=asm_test();
-
+    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
 
     //Advance stack pointer
     lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
@@ -1357,6 +1349,20 @@ void prim_body_emit(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+}
+
+//EXECUTE
+int prim_immediate_execute(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_EXECUTE;
+    return FORTH_ERROR_NONE;
+}
+void prim_body_execute(struct ForthEngine *engine)
+{
+    //Update stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //EXIT
@@ -2612,6 +2618,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"ELSE",4,&prim_immediate_else,&prim_compile_else,NULL},
     {"EMIT",4,NULL,NULL,&prim_body_emit},
     {"ERASE",5,NULL,NULL,&prim_body_erase},
+    {"EXECUTE",7,&prim_immediate_execute,NULL,&prim_body_execute},
+    {"EXEC",4,&prim_immediate_execute,NULL,&prim_body_execute},
     //{"EXIT",4,&prim_immediate_exit,&prim_compile_exit,&prim_body_exit},
     {"FILL",4,NULL,NULL,&prim_body_fill},
     {"HERE",4,NULL,NULL,&prim_body_here},
@@ -2694,6 +2702,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"PRIMITIVES",10,&prim_immediate_primitives,&prim_compile_primitives,NULL},
     {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL},
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL},
+
+    //Word browser showing source or disassembly of all words
 
     //DOES>
         //leaving out since engine would need to see source

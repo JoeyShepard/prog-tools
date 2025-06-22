@@ -352,6 +352,12 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_ELSE_WITHOUT_IF:
             console_text_default("ELSE without matching IF\n",console);
             break;
+        case FORTH_ERROR_EXECUTE:
+            console_text_default("Invalid ID for EXECUTE\n",console);
+            break;
+        case FORTH_ERROR_EXECUTE_IN_EXECUTE:
+            console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
+            break;
         case FORTH_ERROR_LOOP_WITHOUT_DO:
             console_text_default("LOOP without matching DO\n",console);
             break;

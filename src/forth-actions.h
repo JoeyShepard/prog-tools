@@ -16,6 +16,7 @@
     int action_do(struct ForthCompileInfo *compile);
     int action_dot_quote_interpret(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_else(struct ForthCompileInfo *compile);
+    int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompileInfo *compile);
     int action_i(struct ForthCompileInfo *compile);
     int action_if(struct ForthCompileInfo *compile);
     int action_j(struct ForthCompileInfo *compile);
