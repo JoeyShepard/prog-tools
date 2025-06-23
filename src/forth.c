@@ -361,6 +361,9 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_LOOP_WITHOUT_DO:
             console_text_default("LOOP without matching DO\n",console);
             break;
+        case FORTH_ERROR_LEAVE_WITHOUT_DO:
+            console_text_default("LEAVE without matching DO\n",console);
+            break;
         case FORTH_ERROR_MEMORY_OTHER:
             console_text_default("Memory allocation error such as alignment\n",console);
             break;
@@ -516,6 +519,8 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     char input_buffer[FORTH_INPUT_MAX];
     copy_console_text(&console->input,input_buffer,FORTH_INPUT_MAX,0);
     int process_result=process_source(forth->engine,input_buffer,compile);
+
+    //TODO: check engine->exit_program set by BYE and exit
 
     //Show input line again
     console_text_default("\n",console);
@@ -845,7 +850,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     else draw_stack=false;
 
 
-    //TODO: delete
+    //TODO: move to tests
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
@@ -860,7 +865,11 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo s\" 2147483648\" >num ;\n s\" 2147483647\" >num";
     //const char *debug_keys=": foo begin 1 + dup . dup 5 > until ;\n0 foo";
     //const char *debug_keys=": foo 0 begin dup 5 < while 1 + repeat ;\nfoo";
-    const char *debug_keys="";
+    //const char *debug_keys=": foo 100 20 do i . 15 10 do i . leave 999 . loop i . loop 42 ;\nfoo";
+    //const char *debug_keys=": foo dup 0 do cr dup 0 do i j = if dup 1 - i = if leave then .\" .\" else i j + . then loop loop drop ;\n3 foo";
+    //const char *debug_keys=": foo 6 3 do cr i begin dup while dup . leave 1 - repeat loop ;\nfoo";
+    const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

@@ -9,6 +9,7 @@
 //TODO - PRIORITY
 //===============
 /*
+- LEAVE with all structures
 - try perf on cg50
 - tail call improvements
   - get compiler to generate tail call

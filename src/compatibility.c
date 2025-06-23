@@ -139,7 +139,8 @@ volatile bool *on_key_pressed;
     uint8_t *xram_base;
     uint8_t *yram_base;
     pthread_mutex_t sdl_mutex;
-
+    pthread_t thread_id;
+    volatile bool exit_thread;
 
     //Static functions only in PC version
     //===================================
@@ -271,6 +272,7 @@ volatile bool *on_key_pressed;
             switch (event.type)
             {
                 case SDL_QUIT:
+
                     //Unlock mutex before exiting
                     pthread_mutex_unlock(&sdl_mutex);
                     wrapper_exit();
@@ -300,6 +302,9 @@ volatile bool *on_key_pressed;
             //Check for SDL_QUIT and new keypresses
             wrapper_events();
 
+            //End thread if SDL_QUIT
+            if (exit_thread) return NULL;
+
             //Check if ON key (mapped to HOME on PC) is down
             const Uint8 *key_list=SDL_GetKeyboardState(NULL);
             
@@ -315,8 +320,8 @@ volatile bool *on_key_pressed;
                 }
             }
             
-            //Check once per second
-            sleep(1);
+            //Check 5 times per second
+            usleep(200000);
         }
 
         return NULL;
@@ -385,6 +390,9 @@ volatile bool *on_key_pressed;
         //Scancode of last key pressed
         pc_scancode=0;
 
+        //Signal thread to exit when program ends
+        exit_thread=false;
+
         //Create mutex for wrapper_events since it calls SDL_PollEvent and is called by main and second thread
         pthread_mutex_init(&sdl_mutex,NULL);
 
@@ -392,11 +400,7 @@ volatile bool *on_key_pressed;
         on_key_executing=NULL;
 
         //Create separate thread to check for ON key (HOME on PC) mirroring interrupt on calculator
-        pthread_t thread_id;
         int result=pthread_create(&thread_id,NULL,interrupt_thread,NULL);
-
-        //Note thread_id goes out of scope here - no problem since pthread_create confirmed not to save pointer
-        //to thread_id to write to it later. Also, no further interaction with thread so don't need ID for anything.
     }
 
     void delay()
@@ -407,6 +411,12 @@ volatile bool *on_key_pressed;
 
     void wrapper_exit()
     {
+        //Wait on thread to exit
+        pthread_mutex_lock(&sdl_mutex);
+        exit_thread=true;
+        pthread_mutex_unlock(&sdl_mutex);
+        pthread_join(thread_id,NULL);
+
         //Free allocated memory
         free(heap);
         free(xram_base);

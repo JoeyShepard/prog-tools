@@ -130,12 +130,12 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
     log_text("text after printing: %p\n",text);
 
     //Align address pointer
-    uint32_t ptr_len=sizeof(void(*)(struct ForthEngine *engine));
-    text+=(ptr_len-(uintptr_t)text%(ptr_len))%ptr_len;
+    uint32_t ptr_size=sizeof(void(*)(struct ForthEngine *engine));
+    text+=(ptr_size-(quote_length%ptr_size))%ptr_size;
     engine->address=((void (**)(struct ForthEngine *engine))text)-1;
 
     //Logging
-    log_text("ptr_len: %u\n",ptr_len);
+    log_text("ptr_size: %u\n",ptr_size);
     log_text("new text: %p\n",text);
     log_text("new engine->address: %p\n",engine->address);
 
@@ -186,6 +186,22 @@ void prim_hidden_j(struct ForthEngine *engine)
 //Jump to different part of thread
 void prim_hidden_jump(struct ForthEngine *engine)
 {
+    //Fetch offset which is stored after pointer to current word and jump
+    int32_t offset=*(int32_t *)(engine->address+1);
+    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+}
+
+void prim_hidden_leave(struct ForthEngine *engine)
+{
+    //Copy J counter to I counter
+    engine->loop_i=engine->loop_j;
+    engine->loop_i_max=engine->loop_j_max;
+
+    //Pop structure from R-stack to restore J counter
+    engine->rstack++;
+    engine->loop_j=engine->rstack->value;
+    engine->loop_j_max=engine->rstack->value_max;
+
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
     engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
@@ -305,12 +321,12 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
     log_text("text: %p\n",text);
 
     //Align address pointer
-    uint32_t ptr_len=sizeof(void(*)(struct ForthEngine *engine));
-    text+=(ptr_len-(uintptr_t)text%(ptr_len))%ptr_len;
+    uint32_t ptr_size=sizeof(void(*)(struct ForthEngine *engine));
+    text+=(ptr_size-(quote_length%ptr_size))%ptr_size;
     engine->address=((void (**)(struct ForthEngine *engine))text)-1;
 
     //Logging
-    log_text("ptr_len: %u\n",ptr_len);
+    log_text("ptr_size: %u\n",ptr_size);
     log_text("new text: %p\n",text);
     log_text("new engine->address: %p\n",engine->address);
 
@@ -1121,9 +1137,14 @@ void prim_body_w_fetch(struct ForthEngine *engine)
 }
 
 //QUIT
-//void prim_body_quit(struct ForthEngine *engine){}
-//int prim_immediate_quit(struct ForthEngine *engine){}
-//int prim_compile_quit(struct ForthEngine *engine){}
+void prim_body_quit(struct ForthEngine *engine)
+{
+    engine->executing=false;
+}
+int prim_immediate_quit(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
 
 //ABS
 void prim_body_abs(struct ForthEngine *engine)
@@ -1508,9 +1529,10 @@ void prim_body_execute(struct ForthEngine *engine)
 }
 
 //EXIT
-//void prim_body_exit(struct ForthEngine *engine){}
-//int prim_immediate_exit(struct ForthEngine *engine){}
-//int prim_compile_exit(struct ForthEngine *engine){}
+int prim_immediate_exit(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
 
 //FILL
 void prim_body_fill(struct ForthEngine *engine)
@@ -1629,9 +1651,17 @@ void prim_body_key(struct ForthEngine *engine)
 }
 
 //LEAVE
-///void prim_body_leave(struct ForthEngine *engine){}
-//int prim_immediate_leave(struct ForthEngine *engine){}
-//int prim_compile_leave(struct ForthEngine *engine){}
+int prim_immediate_leave(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_compile_leave(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_LEAVE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
 
 //LITERAL
 int prim_immediate_literal(UNUSED(struct ForthEngine *engine))
@@ -2735,7 +2765,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"@",1,NULL,NULL,&prim_body_fetch},
     {"C@",2,NULL,NULL,&prim_body_c_fetch},
     {"W@",2,NULL,NULL,&prim_body_w_fetch},
-    //{"QUIT",4,&prim_immediate_quit,&prim_compile_quit,&prim_body_quit},
+    {"QUIT",4,&prim_immediate_quit,NULL,&prim_body_quit},
     {"ABS",3,NULL,NULL,&prim_body_abs},
     {"ACCEPT",6,NULL,NULL,&prim_body_accept},
     {"ALIGN",5,NULL,NULL,&prim_body_align},
@@ -2762,7 +2792,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"ERASE",5,NULL,NULL,&prim_body_erase},
     {"EXECUTE",7,&prim_immediate_execute,NULL,&prim_body_execute},
     {"EXEC",4,&prim_immediate_execute,NULL,&prim_body_execute},
-    //{"EXIT",4,&prim_immediate_exit,&prim_compile_exit,&prim_body_exit},
+    {"EXIT",4,&prim_immediate_exit,NULL,&prim_hidden_done},
     {"FILL",4,NULL,NULL,&prim_body_fill},
     {"HERE",4,NULL,NULL,&prim_body_here},
     {"I",1,&prim_immediate_i,&prim_compile_i,NULL},
@@ -2770,7 +2800,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"INVERT",6,NULL,NULL,&prim_body_invert},
     {"J",1,&prim_immediate_j,&prim_compile_j,NULL},
     {"KEY",3,NULL,NULL,&prim_body_key},
-    //{"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,&prim_body_leave},
+    {"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,NULL},
     {"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,NULL},
     {"LIT",3,&prim_immediate_literal,&prim_compile_literal,NULL},
     {"LOOP",4,&prim_immediate_loop,&prim_compile_loop,NULL},
@@ -2829,7 +2859,6 @@ const struct ForthPrimitive forth_primitives[]=
     {"WORDS",5,&prim_immediate_words,&prim_compile_words,NULL},
     {"WORDSIZE",8,&prim_immediate_wordsize,&prim_compile_wordsize,NULL},
     {"BYE",3,NULL,NULL,&prim_body_bye},
-    //{"COMPARE",7,&prim_immediate_compare,&prim_compile_compare,&prim_body_compare,&prim_optimize_compare},
     
     //:NONAME
     //SMUDGE
@@ -2856,6 +2885,7 @@ const struct ForthPrimitive forth_primitives[]=
         //shouldnt need extra debug info unless compiling to machine code
     //PERF for gint perf
         //always use and perf just gets value
+    //INCLUDE
     //action to change data size
     //help
         //with word and without
@@ -2869,6 +2899,7 @@ const struct ForthPrimitive forth_primitives[]=
         //actually yes, this would probably help a lot
     //COLD or equivalent
         //menu option?
+        //RESET?
 
     //May add but not sure yet
     //cleave ??

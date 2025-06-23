@@ -189,7 +189,7 @@ int action_again(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be BEGIN to match AGAIN
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
+    int result=pop_control_element(&popped_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -501,7 +501,7 @@ int action_else(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be IF to match ELSE
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
+    int result=pop_control_element(&popped_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -604,35 +604,83 @@ int action_j(struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
+int action_leave(struct ForthCompileInfo *compile)
+{
+    if (search_control_element(compile,FORTH_CONTROL_DO)==false)
+    {
+        //Error - LEAVE must appear within DO/LOOP or DO/+LOOP
+        return FORTH_ERROR_LEAVE_WITHOUT_DO;
+    }
+
+    //Write primitive to jump to LOOP or LOOP+
+    int result=write_definition_primitive(&prim_hidden_leave,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Save offset into definitions where address of closing LOOP or +LOOP will be written
+    uint32_t index=compile->definitions->index;
+
+    //Reserve room in dictionary for offset which matching LOOP or +LOOP will write
+    result=write_definition_u32(0,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Write offset and type (LEAVE) to control stack
+    result=push_control_element(index,FORTH_CONTROL_LEAVE,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    return FORTH_ERROR_NONE;
+}
+
 int action_loop(struct ForthCompileInfo *compile)
 {
-    //Pop element from control stack which should be DO to match LOOP
+    //Pop elements from control stack which should be LEAVE or DO to match LOOP
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
-    if (result!=FORTH_ERROR_NONE)
+    while(1)
     {
-        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        //Pop control element
+        int result=pop_control_element(&popped_element,compile,false);
+        if (result!=FORTH_ERROR_NONE)
         {
-            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match LOOP
+            if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+            {
+                //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match LOOP
+                return FORTH_ERROR_LOOP_WITHOUT_DO;
+            }
+            else return result;
+        }
+
+        //Handle control element
+        if (popped_element.type==FORTH_CONTROL_LEAVE)
+        {
+            //Write jump offset for LEAVE
+            int32_t offset=compile->definitions->index-popped_element.index;
+
+            //Ending LOOP primitive not written yet. Point LEAVE to address after LOOP and it's argument.
+            offset+=sizeof(&prim_hidden_loop);
+            offset+=sizeof(int32_t);
+
+            //Write jump offset at address after jump primitive so primitive will jump here
+            *(int32_t *)(compile->definitions->data+popped_element.index)=offset;
+        }
+        else if (popped_element.type==FORTH_CONTROL_DO)
+        {
+            //Write primitive for LOOP
+            result=write_definition_primitive(&prim_hidden_loop,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Write jump offset at address after LOOP primitive so primitive will jump here
+            int32_t offset=-(compile->definitions->index-popped_element.index);
+            result=write_definition_i32(offset,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Done searching - break out of while loop
+            break;
+        }
+        else 
+        {
+            //Element on control stack is something else like BEGIN or CASE that doesn't match DO
             return FORTH_ERROR_LOOP_WITHOUT_DO;
         }
-        else return result;
     }
-
-    if (popped_element.type!=FORTH_CONTROL_DO)
-    {
-        //Element on control stack is something else like BEGIN or CASE that doesn't match DO
-        return FORTH_ERROR_LOOP_WITHOUT_DO;
-    }
-
-    //Write primitive for LOOP
-    result=write_definition_primitive(&prim_hidden_loop,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Write jump offset at address after primitive so primitive will jump here
-    int32_t offset=-(compile->definitions->index-popped_element.index);
-    result=write_definition_i32(offset,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
 
     return FORTH_ERROR_NONE;
 }
@@ -660,31 +708,53 @@ int action_plus_loop(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be DO to match +LOOP
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
-    if (result!=FORTH_ERROR_NONE)
+    while(1)
     {
-        if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+        //Pop control element
+        int result=pop_control_element(&popped_element,compile,false);
+        if (result!=FORTH_ERROR_NONE)
         {
-            //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match +LOOP
+            if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
+            {
+                //Only error here should be FORTH_ERROR_CONTROL_UNDERFLOW meaning stack is empty so no DO to match +LOOP
+                return FORTH_ERROR_PLUS_LOOP_WITHOUT_DO;
+            }
+            else return result;
+        }
+
+        //Handle control element
+        if (popped_element.type==FORTH_CONTROL_LEAVE)
+        {
+            //Write jump offset for LEAVE
+            int32_t offset=compile->definitions->index-popped_element.index;
+
+            //Ending LOOP primitive not written yet. Point LEAVE to address after LOOP and it's argument.
+            offset+=sizeof(&prim_hidden_plus_loop);
+            offset+=sizeof(int32_t);
+
+            //Write jump offset at address after jump primitive so primitive will jump here
+            *(int32_t *)(compile->definitions->data+popped_element.index)=offset;
+        }
+        else if (popped_element.type==FORTH_CONTROL_DO)
+        {
+            //Write primitive for +LOOP
+            result=write_definition_primitive(&prim_hidden_plus_loop,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Write jump offset at address after primitive so primitive will jump here
+            int32_t offset=-(compile->definitions->index-popped_element.index);
+            result=write_definition_i32(offset,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Done searching - break out of while loop
+            break;
+        }
+        else 
+        {
+            //Element on control stack is something else like BEGIN or CASE that doesn't match DO
             return FORTH_ERROR_PLUS_LOOP_WITHOUT_DO;
         }
-        else return result;
     }
-
-    if (popped_element.type!=FORTH_CONTROL_DO)
-    {
-        //Element on control stack is something else like BEGIN or CASE that doesn't match DO
-        return FORTH_ERROR_PLUS_LOOP_WITHOUT_DO;
-    }
-
-    //Write primitive for +LOOP
-    result=write_definition_primitive(&prim_hidden_plus_loop,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    //Write jump offset at address after primitive so primitive will jump here
-    int32_t offset=-(compile->definitions->index-popped_element.index);
-    result=write_definition_i32(offset,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
 
     return FORTH_ERROR_NONE;
 }
@@ -884,7 +954,7 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
 
                     //Calculate padding bytes
                     int ptr_size=sizeof(void(*)(struct ForthEngine *));
-                    int padding_count=(ptr_size-(bytes_written+sizeof(uint32_t))%ptr_size)%ptr_size;
+                    int padding_count=(ptr_size-(bytes_written%ptr_size))%ptr_size;
 
                     //Logging
                     log_text("ptr_size: %u\n",ptr_size);
@@ -1082,7 +1152,7 @@ int action_repeat(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be WHILE to match REPEAT
     struct ForthControlElement while_element;
-    int result=pop_control_element(&while_element,compile);
+    int result=pop_control_element(&while_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -1101,7 +1171,7 @@ int action_repeat(struct ForthCompileInfo *compile)
 
     //Pop element from control stack which is definitely BEGIN since WHILE already made sure it is
     struct ForthControlElement begin_element;
-    pop_control_element(&begin_element,compile);
+    pop_control_element(&begin_element,compile,true);
 
     //Write primitive that jumps to BEGIN
     result=write_definition_primitive(&prim_hidden_jump,compile);
@@ -1270,7 +1340,7 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
     if (compile->control_stack->index!=0)
     {
         struct ForthControlElement element;
-        pop_control_element(&element,compile);
+        pop_control_element(&element,compile,true);
         //TODO: accounted for all control types? double check forth-process.h
         switch (element.type)
         {
@@ -1329,7 +1399,7 @@ int action_then(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be IF to match THEN
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
+    int result=pop_control_element(&popped_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -1413,7 +1483,7 @@ int action_until(struct ForthCompileInfo *compile)
 {
     //Pop element from control stack which should be BEGIN to match UNTIL
     struct ForthControlElement popped_element;
-    int result=pop_control_element(&popped_element,compile);
+    int result=pop_control_element(&popped_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)
@@ -1492,7 +1562,7 @@ int action_while(struct ForthCompileInfo *compile)
 {
     //Peek element from control stack which should be BEGIN to match WHILE
     struct ForthControlElement begin_element;
-    int result=peek_control_element(&begin_element,compile);
+    int result=peek_control_element(&begin_element,compile,true);
     if (result!=FORTH_ERROR_NONE)
     {
         if (result==FORTH_ERROR_CONTROL_UNDERFLOW)

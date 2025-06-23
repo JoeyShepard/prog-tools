@@ -413,36 +413,69 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
-int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile)
+int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile,bool ignore_leave)
 {
-    if (compile->control_stack->index==0)
+    uint32_t starting_index=compile->control_stack->index; 
+    uint32_t temp_index=starting_index;
+    while(1)
     {
-        //Error - nothing on stack to pop
-        return FORTH_ERROR_CONTROL_UNDERFLOW;
-    }
+        if (temp_index==0)
+        {
+            //Error - nothing on stack to pop
+            return FORTH_ERROR_CONTROL_UNDERFLOW;
+        }
     
-    //Adjust for popped element
-    compile->control_stack->index--;
-    compile->control_stack->bytes_left+=sizeof(struct ForthControlElement);
+        //Advance to next element
+        temp_index--;
 
-    //Copy popped element instead of setting pointer since memory may shift
-    *element=compile->control_stack->elements[compile->control_stack->index];
+        //Looking for either:
+        //- any element if not ignoring LEAVE or
+        //- any element other than LEAVE if ignoring LEAVE 
+        if ((ignore_leave==false)||
+            ((ignore_leave==true)&&(compile->control_stack->elements[temp_index].type!=FORTH_CONTROL_LEAVE)))
+        {
+            //Adjust for popped element
+            compile->control_stack->index--;
+            compile->control_stack->bytes_left+=sizeof(struct ForthControlElement);
 
-    return FORTH_ERROR_NONE;
+            //Copy popped element instead of setting pointer since memory may shift
+            *element=compile->control_stack->elements[temp_index];
+
+            //Copy any ignored stack elements down over popped element
+            for (uint32_t i=temp_index;i<starting_index-1;i++)
+                compile->control_stack->elements[i]=compile->control_stack->elements[i+1];
+
+            return FORTH_ERROR_NONE;
+        }
+    }
 }
 
-int peek_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile)
+int peek_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile,bool ignore_leave)
 {
-    if (compile->control_stack->index==0)
+    uint32_t temp_index=compile->control_stack->index; 
+    while(1)
     {
-        //Error - nothing on stack to peek
-        return FORTH_ERROR_CONTROL_UNDERFLOW;
-    }
-    
-    //Copy peeked element instead of setting pointer since memory may shift
-    *element=compile->control_stack->elements[compile->control_stack->index-1];
+        if (temp_index==0)
+        {
+            //Error - nothing on stack to peek
+            return FORTH_ERROR_CONTROL_UNDERFLOW;
+        }
 
-    return FORTH_ERROR_NONE;
+        //Advance to next element
+        temp_index--;
+
+        //Looking for either:
+        //- any element if not ignoring LEAVE or
+        //- any element other than LEAVE if ignoring LEAVE 
+        if ((ignore_leave==false)||
+            ((ignore_leave==true)&&(compile->control_stack->elements[temp_index].type!=FORTH_CONTROL_LEAVE)))
+        {
+            //Copy peeked element instead of setting pointer since memory may shift
+            *element=compile->control_stack->elements[temp_index];
+
+            return FORTH_ERROR_NONE;
+        }
+    }
 }
 
 int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile)
@@ -477,6 +510,28 @@ int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *c
     compile->control_stack->bytes_left-=sizeof(struct ForthControlElement);
 
     return FORTH_ERROR_NONE;
+}
+
+bool search_control_element(struct ForthCompileInfo *compile,uint8_t element_type)
+{
+    uint32_t temp_index=compile->control_stack->index; 
+    while(1)
+    {
+        if (temp_index==0)
+        {
+            //Element type not found - done searching
+            return false;
+        }
+
+        //Advance to next element
+        temp_index--;
+
+        if (compile->control_stack->elements[temp_index].type==element_type)
+        {
+            //Element type found - done searching
+            return true;
+        }
+    }
 }
 
 int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile)
@@ -952,6 +1007,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_J:
                             {
                                 int result=action_j(compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
+                            case FORTH_ACTION_LEAVE:
+                            {
+                                int result=action_leave(compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
