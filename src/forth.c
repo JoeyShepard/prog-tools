@@ -868,8 +868,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 100 20 do i . 15 10 do i . leave 999 . loop i . loop 42 ;\nfoo";
     //const char *debug_keys=": foo dup 0 do cr dup 0 do i j = if dup 1 - i = if leave then .\" .\" else i j + . then loop loop drop ;\n3 foo";
     //const char *debug_keys=": foo 6 3 do cr i begin dup while dup . leave 1 - repeat loop ;\nfoo";
-    const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
-    //const char *debug_keys="";
+    //const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
+    //const char *debug_keys=": foo 0x80 0 do i i c! loop ; foo\n";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

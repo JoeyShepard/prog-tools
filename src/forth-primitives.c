@@ -1766,10 +1766,49 @@ void prim_body_mod(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1%arg2;
 }
 
+//TODO: comments
 //MOVE
-//void prim_body_move(struct ForthEngine *engine){}
-//int prim_immediate_move(struct ForthEngine *engine){}
-//int prim_compile_move(struct ForthEngine *engine){}
+void prim_body_move(struct ForthEngine *engine)
+{
+    uintptr_t lower;
+    //Fetch values from stack
+    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
+    uint32_t dest=*(uint32_t*)((engine->stack_base)|lower);
+    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
+    uint32_t source=*(uint32_t*)((engine->stack_base)|lower);
+
+    //Limit count so copying loops through memory at most once
+    if (count>=engine->data_size) count=engine->data_size;
+
+    //Mask source and destination addresses for wrapping
+    dest&=engine->data_mask;
+    source&=engine->data_mask;
+
+    //Split up into two copies if either source or dest wraps during copying
+    uint32_t dest_count,source_count;
+    if (dest+count>engine->data_size) dest_count=engine->data_size-dest;
+    else dest_count=count;
+    if (source+count>engine->data_size) source_count=engine->data_size-source;
+    else source_count=count;
+
+    uint32_t bytes_copied;
+    if (dest_count<=source_count) bytes_copied=dest_count;
+    else bytes_copied=source_count;
+    memmove(engine->data+dest,engine->data+source,bytes_copied);
+
+    if (bytes_copied<count)
+    {
+        source=(source+bytes_copied)&engine->data_mask;
+        dest=(dest+bytes_copied)&engine->data_mask;
+        memmove(engine->data+dest,engine->data+source,count-bytes_copied);
+    }
+
+    //Update stack pointer
+    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
 
 //NEGATE
 void prim_body_negate(struct ForthEngine *engine)
@@ -2643,6 +2682,7 @@ void prim_body_printable(struct ForthEngine *engine)
     }
 }
 
+//TODO: optimize
 //ERASE
 void prim_body_erase(struct ForthEngine *engine)
 {
@@ -2652,18 +2692,17 @@ void prim_body_erase(struct ForthEngine *engine)
     uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
-    if (count>0)
+
+    //Limit count so it loops through memory at most once
+    if (count>=engine->data_size) count=engine->data_size;
+    for (uint32_t i=0;i<count;i++)
     {
-        //Limit count so it loops through memory at most once
-        if (count>=engine->data_size) count=engine->data_size;
-        for (uint32_t i=0;i<count;i++)
-        {
-            //Write byte to masked address
-            address&=engine->data_mask;
-            *(engine->data+address)=0;
-            address++;
-        }
+        //Write byte to masked address
+        address&=engine->data_mask;
+        *(engine->data+address)=0;
+        address++;
     }
+
     //Update stack pointer
     lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
@@ -2808,7 +2847,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"MAX",3,NULL,NULL,&prim_body_max},
     {"MIN",3,NULL,NULL,&prim_body_min},
     {"MOD",3,NULL,NULL,&prim_body_mod},
-    //{"MOVE",4,&prim_immediate_move,&prim_compile_move,&prim_body_move},
+    {"MOVE",4,NULL,NULL,&prim_body_move},
     {"NEGATE",6,NULL,NULL,&prim_body_negate},
     {"OR",2,NULL,NULL,&prim_body_or},
     {"OVER",4,NULL,NULL,&prim_body_over},
