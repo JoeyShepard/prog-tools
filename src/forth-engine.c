@@ -55,6 +55,9 @@ void forth_init_engine(struct ForthEngine *engine,
 
     //Reset stack pointers and compilation variables
     forth_reset_engine(engine);
+
+    //Clear performance counter value
+    engine->perf_value=0;
 }
 
 //Called on program switch
@@ -178,6 +181,9 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         //Logging
         log_push(LOGGING_FORTH_EXECUTE_SECONDARY,"execute_secondary");
 
+        //Start measuring performance in case needed by Forth word PERF
+        wrapper_perf_start(&engine->perf_counter); 
+
         //Execute primitives
         while(engine->executing)
         {
@@ -192,6 +198,9 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
             (*engine->address)(engine);
             engine->address++;
         }
+
+        //Record run-time from performance counter
+        engine->perf_value=wrapper_perf_stop(&engine->perf_counter); 
 
         //Clear address so interrupt doesn't set when ON pressed - address on engine->executing changes
         on_key_executing=NULL;

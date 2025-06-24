@@ -4,11 +4,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(prog-tools LANGUAGES ASM C)
 
-#include(GenerateG1A)
 include(GenerateG3A)
-#include(GenerateHH2Bin)
 include(Fxconv)
 find_package(Gint 2.9 REQUIRED)
+find_package(LibProf 2.4 REQUIRED)
 
 set(SOURCES
   src/compatibility.c
@@ -58,7 +57,7 @@ fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
 add_executable(prog-tools ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
 target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50)
-target_link_libraries(prog-tools Gint::Gint)
+target_link_libraries(prog-tools Gint::Gint LibProf::LibProf)
 
 generate_g3a(TARGET prog-tools OUTPUT "prog-tools.g3a"
     NAME "prog-tools" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)

@@ -83,6 +83,7 @@ gint font is truly 5x7 not 5x8 like mine
 
 Forth
 =====
+should add .\"
 change ->executing to pointer system
 - solves problem of still executing after ->executing false if only check every 5th time 
 - no longer need to mask!

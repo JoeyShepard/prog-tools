@@ -183,6 +183,8 @@
         uint8_t *word_bodies;
         uint32_t word_count;
         const char *error_word;
+        prof_t perf_counter;        //Performance counter on calculator
+        uint32_t perf_value;        //Result of running performance counter
 
         //Compilation
         bool state;

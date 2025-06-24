@@ -1141,7 +1141,7 @@ void prim_body_quit(struct ForthEngine *engine)
 {
     engine->executing=false;
 }
-int prim_immediate_quit(struct ForthEngine *engine)
+int prim_immediate_quit(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -1529,7 +1529,7 @@ void prim_body_execute(struct ForthEngine *engine)
 }
 
 //EXIT
-int prim_immediate_exit(struct ForthEngine *engine)
+int prim_immediate_exit(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
@@ -2764,6 +2764,17 @@ int prim_compile_undefined(UNUSED(struct ForthEngine *engine))
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
+//PERF
+void prim_body_perf(struct ForthEngine *engine)
+{
+    //Write stack count
+    *engine->stack=engine->perf_value;
+    //Advance stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+
 //Globals
 //=======
 const struct ForthPrimitive forth_primitives[]=
@@ -2899,9 +2910,6 @@ const struct ForthPrimitive forth_primitives[]=
     {"WORDSIZE",8,&prim_immediate_wordsize,&prim_compile_wordsize,NULL},
     {"BYE",3,NULL,NULL,&prim_body_bye},
     
-    //:NONAME
-    //SMUDGE
-
     //Words from here are not standard forth
     {"RESET",5,NULL,NULL,&prim_body_reset},
     {"WALIGN",6,NULL,NULL,&prim_body_walign},
@@ -2912,18 +2920,16 @@ const struct ForthPrimitive forth_primitives[]=
     {"PRIMITIVES",10,&prim_immediate_primitives,&prim_compile_primitives,NULL},
     {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL},
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL},
+    {"PERF",4,NULL,NULL,&prim_body_perf},
+    //{"SIZE",4,NULL,NULL,&prim_body_size},
+    //{"RESIZE",6,NULL,NULL,&prim_body_resize},
 
     //Word browser showing source or disassembly of all words
 
-    //DOES>
-        //leaving out since engine would need to see source
-        //if did do, would need anonymous code blob and reference count
     //DEBUG that steps through word
         //ON should also go to debugger
         //BREAKPOINT would be good
         //shouldnt need extra debug info unless compiling to machine code
-    //PERF for gint perf
-        //always use and perf just gets value
     //INCLUDE
     //action to change data size
     //help
@@ -2940,9 +2946,12 @@ const struct ForthPrimitive forth_primitives[]=
         //menu option?
         //RESET?
 
+
     //May add but not sure yet
     //cleave ??
     //search ??
+    //:NONAME
+    //SMUDGE
     //disasm - just see? edit?
         //better to have one name for both prim and secondaries
         //objdump -t shows function lengths

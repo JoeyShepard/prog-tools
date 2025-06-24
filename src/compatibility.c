@@ -14,9 +14,9 @@ volatile bool *on_key_pressed;
 //=============
 
     #include <gint/clock.h>
+    #include <gint/drivers/keydev.h>
     #include <gint/fs.h>
     #include <gint/gint.h>
-    #include <gint/drivers/keydev.h>
     #include <gint/timer.h>
 
     #include "exceptions.h"
@@ -28,6 +28,8 @@ volatile bool *on_key_pressed;
     uint8_t *yram=(uint8_t *)0xe5017000;
 
     volatile int tick_flag;
+
+    
 
     //Called by timer every TICK_MS
     static int timer_callback(volatile int *tick)
@@ -76,6 +78,9 @@ volatile bool *on_key_pressed;
         tick_flag=1;
         int t=timer_configure(TIMER_ANY, delay_ms*1000, GINT_CALL(timer_callback,&tick_flag));
         if (t>=0) timer_start(t);
+
+        //Initialize timer for measuring performance
+        prof_init();
     }
     
     void delay()
@@ -109,6 +114,20 @@ volatile bool *on_key_pressed;
     {
         return fs_path_normalize(path);
     }
+
+    void wrapper_perf_start(prof_t *time)
+    {
+        *time=prof_make();
+        //prof_enter is macro that assumes time is not pointer so use macro body here
+        time->elapsed+=*prof_tcnt;
+    }
+
+    uint32_t wrapper_perf_stop(prof_t *time)
+    {
+        time->elapsed-=*prof_tcnt;
+        return prof_time(*time);
+    }
+
 #else
 
 //PC specific
@@ -477,6 +496,18 @@ volatile bool *on_key_pressed;
         char *return_path=malloc(local_path_max);
         strcpy(return_path,result_path);
         return return_path;
+    }
+
+    void wrapper_perf_start(prof_t *time)
+    {
+        clock_gettime(CLOCK_MONOTONIC_RAW,time);
+    }
+
+    uint32_t wrapper_perf_stop(prof_t *time)
+    {
+        prof_t stop;
+        clock_gettime(CLOCK_MONOTONIC_RAW,&stop);
+        return (stop.tv_sec-time->tv_sec)*1000000+(stop.tv_nsec-time->tv_nsec)/1000;
     }
 
     //Replacements for gint functions

@@ -870,6 +870,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 6 3 do cr i begin dup while dup . leave 1 - repeat loop ;\nfoo";
     //const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
     //const char *debug_keys=": foo 0x80 0 do i i c! loop ; foo\n";
+    //const char *debug_keys=": foo 0 5000000 0 do i + loop . ;\nfoo";
     const char *debug_keys="";
 
     //Main loop

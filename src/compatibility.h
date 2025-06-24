@@ -6,6 +6,8 @@
 
     #include "types.h"
 
+    //TODO: test if all 6MB of heap available
+
     //Elements common to calculator and PC versions
     #define HEAP_SIZE       0x200000
     #define XRAM_SIZE       0x2000  //8K
@@ -57,14 +59,6 @@
     extern volatile bool *on_key_pressed;
     extern volatile bool *on_key_executing;
     
-    //Functions common to PC and CG50 (some are empty)
-    void setup(int scale_factor,int tick_ms);
-    void delay();
-    void wrapper_exit();
-    void wrapper_screenshot();
-    int wrapper_pc_key();
-    int wrapper_remap_key(int modifier,int key,struct KeyRemap *keys);
-    char *wrapper_normalize_path(const char *path,int local_path_max);
 
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
@@ -72,14 +66,21 @@
         #include <gint/display.h>
         #include <gint/gint.h>
         #include <gint/keyboard.h>
+        //Installed libprof manually since not included in gint 2.11.0
+        #include <libprof.h>
 
     #else
         //Compiling for PC using SDL2 wrapper
 
+        //Needed for struct timespec in engine.h used by performance counter
+        #include <time.h>
+
+        //Performance counter for wrapper_perf_start/stop
+        typedef struct timespec prof_t;
+        
         //Constants from gint
         #define DWIDTH          396
         #define DHEIGHT         224
-
         enum
         {
             KEY_F1		= 0x91,
@@ -214,8 +215,19 @@
         key_event_t getkey_opt(int options, volatile int *timeout);
         void gint_osmenu();
         void gint_poweroff(bool show_logo);
-        char *fs_path_normalize(char const *path);
 
     #endif
+
+    //Functions common to PC and CG50 (some are empty)
+    void setup(int scale_factor,int tick_ms);
+    void delay();
+    void wrapper_exit();
+    void wrapper_screenshot();
+    int wrapper_pc_key();
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *keys);
+    char *wrapper_normalize_path(const char *path,int local_path_max);
+    void wrapper_perf_start(prof_t *time);
+    uint32_t wrapper_perf_stop(prof_t *time);
+
 #endif
 
