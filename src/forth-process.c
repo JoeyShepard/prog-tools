@@ -658,6 +658,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 int result=int32_text(word_buffer,&num);
                 if (result!=FORTH_ERROR_NONE)
                 {
+                    //TODO: only error is range which does not print number?
                     compile->error_word=source+start;
                     return result;
                 }
@@ -921,6 +922,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             return FORTH_ERROR_ENGINE;
                         }
 
+
+                        //TODO: cleaner to move switch to forth-actions.c?
                         //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of the primitives for portability
                         switch (engine->word_action)
@@ -1142,7 +1145,7 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     //Logging
     log_push(LOGGING_FORTH_UPDATE_COMP_PTRS,"update_compile_pointers");
 
-    //Fetch pointer to definitions but change below after updating word headers pointer
+    //Fetch pointer to definitions but change below while updating word headers pointer
     struct ForthDefinitionsInfo *new_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile->heap_ptr);
 
     //Update pointer to word headers

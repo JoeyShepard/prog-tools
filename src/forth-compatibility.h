@@ -17,10 +17,10 @@
     #define FORTH_MAX_SPACES        1500    //Max for SPACES primitive
     #define FORTH_DUMP_MAX_LINES    20      //Max lines for DUMP
     #define FORTH_DUMP_BYTES        8       //Bytes for DUMP to show per line
-    #define FORTH_SCREEN_WIDTH      CONS_WHOLE_WIDTH    //Width in characters of screen for WORDS
     //TODO: input can't be larger than screen yet
     //max 54 chars wide and 11 lines tall but there MUST be text on at least first line
     #define FORTH_ACCEPT_MAX        500     //Max length in characters of buffer for ACCEPT
+    #define FORTH_MEM_DATA          0x2000  //Default size of Forth data memory
 
     extern struct ConsoleInfo *forth_console;
 

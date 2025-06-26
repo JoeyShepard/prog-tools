@@ -105,6 +105,9 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
     engine->loop_i_max=0;
     engine->loop_j=0;
     engine->loop_j_max=0;
+
+    //Reset Forth return stack
+    engine->rstack=engine->rstack_base+engine->rstack_count-1;
 }
 
 int32_t forth_stack_count(struct ForthEngine *engine)

@@ -40,10 +40,12 @@
     //Masks for aligning data access
     #define FORTH_MASK_16           (~1)
     #define FORTH_MASK_32           (~3)
+
+    //Max number of digits to include in error message about number out of range
+    #define ERROR_INT32_SIZE        12  //max 10 digits, 1 for - sign, 1 for terminator 
     
     //Actions for outer interpreter to perform
-    //TODO: some of these are not compile
-    enum ForthCompileActions
+    enum ForthActions
     {
         FORTH_ACTION_NONE,
         FORTH_ACTION_AGAIN,
@@ -74,6 +76,7 @@
         FORTH_ACTION_PLUS_LOOP,
         FORTH_ACTION_PRIMITIVES,
         FORTH_ACTION_REPEAT,
+        FORTH_ACTION_RESIZE,
         FORTH_ACTION_S_QUOTE,
         FORTH_ACTION_S_BACKSLASH_QUOTE,
         FORTH_ACTION_SECONDARIES,
@@ -92,10 +95,11 @@
     {
         FORTH_ENGINE_ERROR_NONE,
         FORTH_ENGINE_ERROR_COMPILE_ONLY,
-        FORTH_ENGINE_ERROR_EXECUTE,
+        FORTH_ENGINE_ERROR_EXECUTE_ID,
         FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE,
         FORTH_ENGINE_ERROR_EXECUTE_NO_BODY,
         FORTH_ENGINE_ERROR_INT32_RANGE,
+        FORTH_ENGINE_ERROR_HEX32_RANGE,
         FORTH_ENGINE_ERROR_INTERPRET_ONLY,
         FORTH_ENGINE_ERROR_RIGHT_BRACKET,
         FORTH_ENGINE_ERROR_RSTACK_FULL,
@@ -140,7 +144,7 @@
     {
         uint32_t value;
         uint32_t value_max;
-        uint32_t index;
+        uint32_t index;         //TODO: need? can probably delete
         uint8_t type;
     };
 
@@ -182,7 +186,6 @@
         struct ForthWordHeader *word_headers;
         uint8_t *word_bodies;
         uint32_t word_count;
-        const char *error_word;
         prof_t perf_counter;        //Performance counter on calculator
         uint32_t perf_value;        //Result of running performance counter
 
@@ -193,6 +196,8 @@
 
         //Errors - compilation or state error
         int error;
+        char error_num[ERROR_INT32_SIZE];    //Buffer to print number causing error (ie too long for >NUM)
+        const char *error_word;
 
         //Compatibility functions - set at initialization so engine can adapt to different platforms
         void (*print)(const char *text);

@@ -9,8 +9,9 @@
 //TODO - PRIORITY
 //===============
 /*
-- LEAVE with all structures
-- try perf on cg50
+GOT SEG FAULT PRESSING HOME!!!
+- control stack resized after compiling?
+  - seems like good idea if adding locals name stack
 - tail call improvements
   - get compiler to generate tail call
   - have stack underflow generate exception
@@ -18,9 +19,6 @@
   - at least try once
 - local variables
   - then can benchmark
-  - see 8 queens on wikipedia
-    - fits on one line though?
-    - best not to break up into words other than init
   - store names after word for browser
 */
 
@@ -83,6 +81,8 @@ gint font is truly 5x7 not 5x8 like mine
 
 Forth
 =====
+no spaces in primitives looks crowded
+shift arrow for home and end
 should add .\"
 change ->executing to pointer system
 - solves problem of still executing after ->executing false if only check every 5th time 
@@ -129,6 +129,7 @@ see assembly for body_dupe. redundant calculation optimized out?
 Forth optimizing
 ================
 compare various methods
+- calculated goto
 most used primitives in IRAM
 combined primitives
 constant folding

@@ -303,7 +303,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     }
 }
 
-static void output_error_source(int process_result,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
+static void output_error_source(int process_result,struct ForthEngine *engine,struct ForthCompileInfo *compile,struct ConsoleInfo *console)
 {
     //Output error messages from processing source
     switch (process_result)
@@ -352,8 +352,10 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
         case FORTH_ERROR_ELSE_WITHOUT_IF:
             console_text_default("ELSE without matching IF\n",console);
             break;
-        case FORTH_ERROR_EXECUTE:
-            console_text_default("Invalid ID for EXECUTE\n",console);
+        case FORTH_ERROR_EXECUTE_ID:
+            console_text_default("Invalid ID for EXECUTE: ",console);
+            console_text_default(engine->error_num,console);
+            console_text_default("\n",console);
             break;
         case FORTH_ERROR_EXECUTE_IN_EXECUTE:
             console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
@@ -420,7 +422,7 @@ static void output_error_source(int process_result,struct ConsoleInfo *console,s
     }
 }
 
-static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *console,struct ForthCompileInfo *compile)
+static void output_error_engine(struct ForthInfo *forth,struct ForthCompileInfo *compile,struct ConsoleInfo *console)
 {
     //Output message for error set in Forth engine - ie inside of primitive
     switch (forth->engine->error)
@@ -442,8 +444,10 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
                 console_char_default(compile->error_word[i],console);
             console_text_default("\n",console);
             break;
-        case FORTH_ENGINE_ERROR_EXECUTE:
-            console_text_default("Invalid ID for EXECUTE\n",console);
+        case FORTH_ENGINE_ERROR_EXECUTE_ID:
+            console_text_default("Invalid ID for EXECUTE: ",console);
+            console_text_default(forth->engine->error_num,console);
+            console_text_default("\n",console);
             break;
         case FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE:
             console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
@@ -454,8 +458,14 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
             console_text_default("\n",console);
             break;
         case FORTH_ENGINE_ERROR_INT32_RANGE:
-            //Number string not zero-terminated and number may have overwritten string so don't output
-            console_text_default("Number out of range\n",console);
+            console_text_default("Number out of range: ",console);
+            console_text_default(forth->engine->error_num,console);
+            console_text_default("...\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_HEX32_RANGE:
+            console_text_default("Hex number out of range: ",console);
+            console_text_default(forth->engine->error_num,console);
+            console_text_default("...\n",console);
             break;
         case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
             console_text_default("Word must occur in definition: ]\n",console);
@@ -533,12 +543,12 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     else if (process_result==FORTH_ERROR_ENGINE)
     {
         //Forth engine errors handled separately
-        output_error_engine(forth,console,compile);
+        output_error_engine(forth,compile,console);
     }
     else
     {
         //All other errors
-        output_error_source(process_result,console,compile);
+        output_error_source(process_result,forth->engine,compile,console);
     }
 
     //Check compile state - definition can't be left open
@@ -675,7 +685,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //Allocate space for Forth word definitions
-        compile.definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DATA,compile.heap_ptr);
+        compile.definitions=(struct ForthDefinitionsInfo *)add_object(FORTH_MEM_DEFINITIONS,compile.heap_ptr);
 
         //Make sure allocation succeeded
         if (compile.definitions==NULL)
@@ -780,6 +790,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             forth_update_screen,
             forth_update_modifiers,
             forth_clear_console,
+            //forth_resize_mem,
             FORTH_MAX_SPACES,
             CONS_WHOLE_WIDTH-FORTH_STACK_CHAR_WIDTH,
             CONS_WHOLE_HEIGHT);

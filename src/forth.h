@@ -46,7 +46,6 @@
     #define FORTH_ID_WORD_HEADERS   3
     #define FORTH_ID_WORD_NAMES     4
     #define FORTH_ID_CONTROL_STACK  5
-    #define FORTH_MEM_DATA          0x2000  //Initial value - can change programmatically
 
     //TODO: restore
     //#define FORTH_MEM_DEFINITIONS   1024    //For these four, allocate this amount initially then add this     
@@ -102,8 +101,9 @@
         FORTH_ERROR_DEFINTION_OPEN,
         FORTH_ERROR_ELSE_WITHOUT_IF,
         FORTH_ERROR_ENGINE,
-        FORTH_ERROR_EXECUTE,
+        FORTH_ERROR_EXECUTE_ID,
         FORTH_ERROR_EXECUTE_IN_EXECUTE,
+        FORTH_ERROR_HEX32_RANGE,
         FORTH_ERROR_INT32_RANGE,
         FORTH_ERROR_INTERNAL,
         FORTH_ERROR_INVALID_NAME,

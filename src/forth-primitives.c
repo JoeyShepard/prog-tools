@@ -843,6 +843,7 @@ void prim_body_to_number(struct ForthEngine *engine)
     int64_t result=0;
     bool negative=false;
     uint32_t unconverted_count=count;
+    uint32_t starting_address=address;
     for (uint32_t i=0;i<count;i++)
     {
         //Mask address
@@ -864,6 +865,24 @@ void prim_body_to_number(struct ForthEngine *engine)
             if ((result>UINT32_MAX)||(result<INT32_MIN))
             {
                 //Error - number is out of range
+                for (int j=0;j<TEXT_INT32_SIZE-1;j++)
+                {
+                    //Mask address
+                    starting_address&=engine->data_mask; 
+                    
+                    //Fetch character
+                    char character=*(engine->data+starting_address);
+                    
+                    if (((character=='-')&&(j==0))||((character>='0')&&(character<='9')))
+                    {
+                        //Store character in buffer for error message
+                        engine->error_num[j]=character;
+                        engine->error_num[j+1]=0;
+                    }
+
+                    //Next character
+                    starting_address++;
+                }
                 engine->error=FORTH_ENGINE_ERROR_INT32_RANGE;
                 engine->executing=false;
 
@@ -910,6 +929,7 @@ void prim_body_to_hex(struct ForthEngine *engine)
 
     bool negative;
     uint32_t unconverted_count=count;
+    uint32_t starting_address=address;
 
     //Check for preceding -
     if (count>=1)
@@ -974,7 +994,28 @@ void prim_body_to_hex(struct ForthEngine *engine)
         if ((result>UINT32_MAX)||(result<INT32_MIN))
         {
             //Error - number is out of range
-            engine->error=FORTH_ENGINE_ERROR_INT32_RANGE;
+            for (int j=0;j<TEXT_HEX32_SIZE-1;j++)
+            {
+                //Mask address
+                starting_address&=engine->data_mask; 
+                
+                //Fetch character
+                char character=*(engine->data+starting_address);
+                
+                if (((character=='-')&&(j==0))||
+                    ((character>='0')&&(character<='9'))||
+                    ((character>='A')&&(character<='F'))||
+                    ((character>='a')&&(character<='f')))
+                {
+                    //Store character in buffer for error message
+                    engine->error_num[j]=character;
+                    engine->error_num[j+1]=0;
+                }
+
+                //Next character
+                starting_address++;
+            }
+            engine->error=FORTH_ENGINE_ERROR_HEX32_RANGE;
             engine->executing=false;
 
             //Update stack pointer
@@ -1523,7 +1564,8 @@ void prim_body_execute(struct ForthEngine *engine)
     else
     {
         //Error - ID on stack is out of range
-        engine->error=FORTH_ENGINE_ERROR_EXECUTE;
+        text_uint32(word_ID,engine->error_num);
+        engine->error=FORTH_ENGINE_ERROR_EXECUTE_ID;
         engine->executing=false;
     }
 }
@@ -2767,11 +2809,51 @@ int prim_compile_undefined(UNUSED(struct ForthEngine *engine))
 //PERF
 void prim_body_perf(struct ForthEngine *engine)
 {
-    //Write stack count
+    //Write performance counter
     *engine->stack=engine->perf_value;
     //Advance stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+//SIZE
+void prim_body_size(struct ForthEngine *engine)
+{
+    //Write size of Forth data memory
+    *engine->stack=engine->data_size;
+    //Advance stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+}
+
+    //TODO: remove
+    /*
+    START HERE:
+    - added function pointer for resize but needs access to compile
+      - delete in multiple places if not using
+    - void pointer that gets passed to resize? messy
+    - interpret only!
+    - also, was allocating data mem size (8k) for definitions so test
+    */
+
+    /*
+    //Write size of Forth data memory
+    *engine->stack=engine->data_size;
+    //Advance stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    */
+
+//RESIZE
+int prim_immediate_resize(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_RESIZE;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+int prim_compile_resize(UNUSED(struct ForthEngine *engine))
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 
@@ -2921,8 +3003,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL},
     {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL},
     {"PERF",4,NULL,NULL,&prim_body_perf},
-    //{"SIZE",4,NULL,NULL,&prim_body_size},
-    //{"RESIZE",6,NULL,NULL,&prim_body_resize},
+    {"SIZE",4,NULL,NULL,&prim_body_size},
+    {"RESIZE",6,&prim_immediate_resize,prim_compile_resize,NULL},
 
     //Word browser showing source or disassembly of all words
 

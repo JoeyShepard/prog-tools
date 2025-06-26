@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-//TODO: remove
-#include "macros.h"
-#include "text.h"
-
-
-
 #include "error.h"
 #include "forth.h"
 #include "forth-engine.h"
@@ -15,6 +9,7 @@
 #include "forth-primitives.h"
 #include "logging.h"
 #include "mem.h"
+#include "text.h"
 #include "util.h"
 
 //Helper functions
@@ -561,7 +556,11 @@ int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompile
         uint32_t secondary_id=word_ID-forth_primitives_len;
         compile->secondary=&compile->words->header[secondary_id];
     }
-    else return FORTH_ERROR_EXECUTE;
+    else
+    {
+        text_uint32(word_ID,engine->error_num);
+        return FORTH_ERROR_EXECUTE_ID;
+    }
 
     return FORTH_ERROR_NONE;
 }
