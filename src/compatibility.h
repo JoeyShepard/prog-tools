@@ -13,6 +13,8 @@
     #define XRAM_SIZE       0x2000  //8K
     #define YRAM_SIZE       0x2000  //8K
 
+    #define ALIGNMENT       4       //Required for calculator
+
     #define COL_MAX         0x1F
     #define COL_1_4         0x8
     #define COL_MID         0x10

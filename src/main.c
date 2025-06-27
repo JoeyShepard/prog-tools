@@ -10,6 +10,8 @@
 //===============
 /*
 GOT SEG FAULT PRESSING HOME!!!
+- alt+tab no longer switches tabs!
+  - assign key
 - add spacing to primitives code
 - clean up actions
   - shorter switch

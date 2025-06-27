@@ -1127,6 +1127,9 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
             //Write character to data memory
             if (write_character==true)
             {
+                //Logging
+                log_text("writing to index %d (size: %d)\n",engine->data_index,engine->data_size);
+
                 //First character
                 *(engine->data+engine->data_index)=character;
                 bytes_written++;
@@ -1245,9 +1248,9 @@ int action_resize(struct ForthEngine *engine,struct ForthCompileInfo *compile)
         }
     }
     
-    //TODO: update_compile_pointers
-    //TODO: update data size in engine
-
+    //Update pointers and masks for data section
+    update_compile_pointers(compile);
+    forth_gen_masks(engine,data_size);
 
     return FORTH_ERROR_NONE;
 }

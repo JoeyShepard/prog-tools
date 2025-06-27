@@ -36,21 +36,22 @@
             LOGGING_FORTH_ACTION_SOURCE_PRE,
             LOGGING_FORTH_ACTION_SEMICOLON,
             LOGGING_FORTH_ACTION_VARIABLE,
+            LOGGING_FORTH_ALLOT,
             LOGGING_FORTH_COMPILE_PRIMITIVE,
             LOGGING_FORTH_EXECUTE_SECONDARY,
             LOGGING_FORTH_EXPAND_DEFINITIONS,
+            LOGGING_FORTH_OBJECT_ADDRESS,
             LOGGING_FORTH_PRIM_HIDDEN_DOT_QUOTE,
             LOGGING_FORTH_PRIM_HIDDEN_S_QUOTE,
+            LOGGING_FORTH_RESUME_REDRAW,
             LOGGING_FORTH_UPDATE_COMP_PTRS,
             LOGGING_FORTH_WRITE_DEF_PRIM,
 
+            LOGGING_MEM_EXPAND_OBJECT,
+            LOGGING_MEM_OBJECT_ADDRESS,
+
             //TODO:
             LOGGING_FORTH_KEYS,
-
-            //Testing only
-            LOGGING_A,
-            LOGGING_B,
-            LOGGING_C,
 
             //Count of points in enum 
             LOGGING_POINTS_COUNT

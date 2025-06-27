@@ -35,10 +35,7 @@ void forth_init_engine(struct ForthEngine *engine,
     engine->stack_count=stack_count;
     engine->rstack_count=rstack_count;
     //Size must be power of 2 for mask to work correctly
-    engine->data_size=data_size;
-    engine->data_mask=data_size-1;
-    engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
-    engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
+    forth_gen_masks(engine,data_size);
 
     //Compatiblity parameters that can be adjusted to work on other platforms
     engine->print=print;
@@ -58,6 +55,15 @@ void forth_init_engine(struct ForthEngine *engine,
 
     //Clear performance counter value
     engine->perf_value=0;
+}
+
+void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size)
+{
+    engine->data_size=data_size;
+    engine->data_mask=data_size-1;
+    engine->data_index&=engine->data_mask;
+    engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
+    engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
 }
 
 //Called on program switch

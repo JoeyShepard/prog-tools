@@ -815,6 +815,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     }
     else
     {
+        //Logging
+        log_push(LOGGING_FORTH_RESUME_REDRAW,"forth resume or redraw");
+
         //Resume or Redraw - reuse existing memory for console
         forth=(struct ForthInfo *)(object_address(FORTH_ID_CONSOLE,compile.heap_ptr)->data);
         console=&forth->console;
@@ -823,7 +826,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Restore Forth engine 
         *forth->engine=forth->engine_copy;
 
-        //TODO: why is forth_data global? I seem to have forgotten this existed and may have done less efficient things.
         //Restore pointers to word definitions, list of word headers, and control stack
         forth_data=object_address(FORTH_ID_DATA,compile.heap_ptr)->data;
         compile.definitions=(struct ForthDefinitionsInfo *)(object_address(FORTH_ID_DEFINITIONS,compile.heap_ptr)->data);
@@ -848,6 +850,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Restore stack memory
         memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);
         memcpy(FORTH_RSTACK_ADDRESS,forth->rstack_copy,FORTH_RSTACK_SIZE);
+
+        //Logging
+        log_pop();
     }
 
     //Compatibility layer settings
@@ -881,7 +886,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
 
     //TODO: move to tests
-    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
+    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
     //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
@@ -901,7 +906,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
     //const char *debug_keys=": foo 0x80 0 do i i c! loop ; foo\n";
     //const char *debug_keys=": foo 0 5000000 0 do i + loop . ;\nfoo";
-    //const char *debug_keys="";
+   // const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\nsize 4 * resize -4 allot\ns\" QRSTUVW\"\ndump\n";
+    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

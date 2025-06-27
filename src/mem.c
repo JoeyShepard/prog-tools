@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "error.h"
 #include "getkey.h"
+#include "logging.h"
 #include "manager.h"
 #include "macros.h"
 #include "mem.h"
@@ -49,14 +50,14 @@ uint8_t *write_heap_u8(uint8_t val,uint8_t *heap_ptr)
 uint8_t *new_split_mem(uint8_t tab,uint8_t split,uint8_t *heap_ptr)
 {
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
-    //Size of new memory record being created (struct size excludes objects[] so uint32_t for size of objects[0])
-    const uint32_t record_size=(int)(sizeof(struct HeapInfo)+sizeof(uint32_t));
+    //Size of new memory record being created - struct HeaderInfo with one object with its size member set to zero
+    const uint32_t record_size=(int)(sizeof(struct HeapInfo)+sizeof(struct ObjectInfo));
     //size: linked list - distance to next tab/split pair
     heap_info->size=record_size;
     heap_info->tab=tab;
     heap_info->split=split;
     //objects[]: linked list - distance to next object or 0 for end of list
-    heap_info->objects[0]=0;
+    ((struct ObjectInfo *)(heap_info->objects))->size=0;
 
     return heap_ptr+record_size;
 }
@@ -148,7 +149,7 @@ uint8_t *get_split_heap()
 //heap_ptr - address of split heap as returned by get_split_heap
 uint8_t *add_object(size_t size,uint8_t *heap_ptr)
 {
-    if (size%sizeof(uint32_t))
+    if (size%ALIGNMENT)
     {
         //Object size must be aligned
         error_exit(ERROR_UNALIGNED_WRITE);
@@ -183,17 +184,33 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
 //Base address function for object functions below
 struct ObjectInfo *object_address(int ID, uint8_t *heap_ptr)
 {
+    //Logging
+    log_push(LOGGING_FORTH_OBJECT_ADDRESS,"object_address");
+    log_text("heap_ptr: %p\n",heap_ptr);
+
     //Point past header data to beginning of object list
     heap_ptr=((struct HeapInfo *)heap_ptr)->objects;
+
+    //Logging
+    log_text("heap_ptr: %p (skipped Heap header)\n",heap_ptr);
+    log_text("Searching for ID %d\n",ID);
 
     //Skip over each object that comes before
     for (int i=0;i<ID;i++)
     {
+
         //Size of object to skip
         uint32_t obj_size=((struct ObjectInfo *)heap_ptr)->size;
 
+        //Logging
+        log_text("ID %d:",i);
+        log_text("Skipping %d bytes to next object\n",obj_size);
+
         if (obj_size==0)
         {
+            //Logging
+            log_pop();
+
             //Reached 0 marker at end unexpectedly so ID is wrong or memory is corrupted
             error_exit(ERROR_BAD_HEAP_ID);
         }
@@ -202,13 +219,20 @@ struct ObjectInfo *object_address(int ID, uint8_t *heap_ptr)
         heap_ptr+=obj_size;
     }
 
+    //Logging
+    log_pop();
+
     //Return base address of object STARTING AT uint32 holding its size
     return (struct ObjectInfo *)heap_ptr;
 }
 
 int expand_object(size_t size,int ID,uint8_t *heap_ptr)
 {
-    if (size%sizeof(uint32_t))
+    //Logging
+    log_push(LOGGING_MEM_EXPAND_OBJECT,"expand_object");
+    log_text("expanding ID %d by %d bytes\n",ID,size);
+
+    if (size%ALIGNMENT)
     {
         //Object size must be aligned
         return ERROR_UNALIGNED_WRITE;
@@ -233,12 +257,15 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     heap_info->size+=size;
     object_info->size+=size;
     
+    //Logging
+    log_pop();
+
     return ERROR_NONE;
 }
 
 int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
 {
-    if (size%sizeof(uint32_t))
+    if (size%ALIGNMENT)
     {
         //Object size must be aligned
         return ERROR_UNALIGNED_WRITE;
@@ -258,22 +285,35 @@ int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
     return ERROR_NONE;
 }
 
-//TODO: remove
-#include <stdio.h>
-
 //Call expand_object or reduce_object as necessary
 int resize_object(size_t new_size,int ID,uint8_t *heap_ptr)
 {
-    if (new_size%sizeof(uint32_t))
+    if (new_size%ALIGNMENT)
     {
         //Object size must be aligned
         return ERROR_UNALIGNED_WRITE;
     }
 
     //Check existing size 
-    //uint8_t *object=object_base_address(ID,heap_ptr);
-    
+    size_t data_size=object_data_size(object_address(ID,heap_ptr));
+    if (data_size==new_size)
+    {
+        //No change in size - nothing to do
+        return ERROR_NONE;
+    }
+    else if (data_size<new_size)
+    {
+        return expand_object(new_size-data_size,ID,heap_ptr);
+    }
+    else if (data_size>new_size)
+    {
+        return reduce_object(data_size-new_size,ID,heap_ptr);
+    }
+}
 
-    return ERROR_NONE;
+//Size of object EXCLUDING header - data only
+size_t object_data_size(struct ObjectInfo *object)
+{
+    return object->size-fldsiz(ObjectInfo,size);
 }
 

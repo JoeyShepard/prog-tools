@@ -1247,6 +1247,10 @@ void prim_body_aligned(struct ForthEngine *engine)
 //ALLOT
 void prim_body_allot(struct ForthEngine *engine)
 {
+    //Logging
+    log_push(LOGGING_FORTH_ALLOT,"allot");
+    log_text("data_index: %d\n",engine->data_index);
+
     uintptr_t lower;
     //Update stack pointer
     lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -1254,6 +1258,9 @@ void prim_body_allot(struct ForthEngine *engine)
     //Fetch amount of bytes to allot
     int32_t allot_count=*engine->stack;
     engine->data_index=(engine->data_index+allot_count)&(engine->data_mask);
+
+    log_text("new data_index: %d\n",engine->data_index);
+    log_pop();
 }
 
 //AND

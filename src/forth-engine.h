@@ -172,7 +172,7 @@
         //Data area - like dictionary but no definitions stored there
         uint8_t *data;          //Pointer to memory occupied by data area
         uint32_t data_size;
-        uint32_t data_index;    //Index into memory pointed to be *data
+        uint32_t data_index;    //Index into memory pointed to by *data
         uint32_t data_mask;
         uint32_t data_mask_16;
         uint32_t data_mask_32;
@@ -253,6 +253,7 @@
         int32_t max_spaces,
         int16_t screen_width,
         int16_t screen_height);
+    void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size);
     void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);

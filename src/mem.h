@@ -36,5 +36,6 @@
     int expand_object(size_t size,int ID,uint8_t *heap_ptr);
     int reduce_object(size_t size,int ID,uint8_t *heap_ptr);
     int resize_object(size_t new_size,int ID,uint8_t *heap_ptr);
+    size_t object_data_size(struct ObjectInfo *object);
 
 #endif
