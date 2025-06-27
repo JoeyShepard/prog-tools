@@ -311,15 +311,20 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_NONE:
             //No error - nothing to do
             break;
+        case FORTH_ERROR_HEX32_RANGE:
+        case FORTH_ERROR_INT32_RANGE:
         case FORTH_ERROR_INVALID_NAME:
         case FORTH_ERROR_MISSING_QUOTE:
         case FORTH_ERROR_NO_WORD:
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
         case FORTH_ERROR_NOT_FOUND:
         case FORTH_ERROR_TOO_LONG:
-        case FORTH_ERROR_INT32_RANGE:
             //All of these errors share code for printing out word that caused error
-            if (process_result==FORTH_ERROR_INVALID_NAME)
+            if (process_result==FORTH_ERROR_HEX32_RANGE)
+                console_text_default("Hex number out of range: ",console);
+            else if (process_result==FORTH_ERROR_INT32_RANGE)
+                console_text_default("Number out of range: ",console);
+            else if (process_result==FORTH_ERROR_INVALID_NAME)
                 console_text_default("Invalid word for operation: ",console);
             else if (process_result==FORTH_ERROR_MISSING_QUOTE)
                 console_text_default("Missing \" after ",console);
@@ -332,8 +337,6 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
                 console_text_default("Word not defined: ",console);
             else if (process_result==FORTH_ERROR_TOO_LONG)
                 console_text_default("Word too long: ",console);
-            else if (process_result==FORTH_ERROR_INT32_RANGE)
-                console_text_default("Number out of range: ",console);
 
             //Output word causing error
             uint32_t start=0;
@@ -360,6 +363,11 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_EXECUTE_IN_EXECUTE:
             console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
             break;
+        case FORTH_ERROR_INSUFFICIENT_MEMORY:
+            console_text_default("Insufficient memory to resize to ",console);
+            console_text_default(engine->error_num,console);
+            console_text_default(" bytes\n",console);
+            break;
         case FORTH_ERROR_LOOP_WITHOUT_DO:
             console_text_default("LOOP without matching DO\n",console);
             break;
@@ -380,6 +388,16 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             break;
         case FORTH_ERROR_REPEAT_WITHOUT_WHILE:
             console_text_default("REPEAT without matching WHILE\n",console);
+            break;
+        case FORTH_ERROR_RESIZE_MIN:
+            console_text_default("Requested memory size must be at least ",console);
+            console_text_default(engine->error_num,console);
+            console_text_default(" bytes\n",console);
+            break;
+        case FORTH_ERROR_RESIZE_POWER_OF_2:
+            console_text_default("Requested memory size is not power of two: ",console);
+            console_text_default(engine->error_num,console);
+            console_text_default("\n",console);
             break;
         case FORTH_ERROR_THEN_WITHOUT_IF:
             console_text_default("THEN without matching IF\n",console);
@@ -798,19 +816,20 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     else
     {
         //Resume or Redraw - reuse existing memory for console
-        forth=(struct ForthInfo *)object_address(FORTH_ID_CONSOLE,compile.heap_ptr);
+        forth=(struct ForthInfo *)(object_address(FORTH_ID_CONSOLE,compile.heap_ptr)->data);
         console=&forth->console;
         reset_console_pointers(console);
 
         //Restore Forth engine 
         *forth->engine=forth->engine_copy;
 
+        //TODO: why is forth_data global? I seem to have forgotten this existed and may have done less efficient things.
         //Restore pointers to word definitions, list of word headers, and control stack
-        forth_data=object_address(FORTH_ID_DATA,compile.heap_ptr);
-        compile.definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile.heap_ptr);
-        compile.words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,compile.heap_ptr);
-        compile.word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile.heap_ptr);
-        compile.control_stack=(struct ForthControlInfo *)object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr);
+        forth_data=object_address(FORTH_ID_DATA,compile.heap_ptr)->data;
+        compile.definitions=(struct ForthDefinitionsInfo *)(object_address(FORTH_ID_DEFINITIONS,compile.heap_ptr)->data);
+        compile.words=(struct ForthWordHeaderInfo *)(object_address(FORTH_ID_WORD_HEADERS,compile.heap_ptr)->data);
+        compile.word_names=(struct ForthWordNameInfo *)(object_address(FORTH_ID_WORD_NAMES,compile.heap_ptr)->data);
+        compile.control_stack=(struct ForthControlInfo *)(object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr)->data);
 
         //Recalculate pointers in word header
         struct ForthWordHeader *secondary=compile.words->header;
@@ -862,7 +881,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
 
     //TODO: move to tests
-    //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
+    const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\na\n: a\na\n: a g\na\n: a x ;\n: x\n";
     //const char *debug_keys=": asdfasdfasdf a b c d e f ;\n: a b ;\n: b 1 ;\na\nb\n: c d 1 + ;\n: d e 1 + ;\n: e f 1 + ;\n: f 3 ;\nc";
@@ -882,7 +901,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 20 0 do i . 3 +loop ;\nfoo";
     //const char *debug_keys=": foo 0x80 0 do i i c! loop ; foo\n";
     //const char *debug_keys=": foo 0 5000000 0 do i + loop . ;\nfoo";
-    const char *debug_keys="";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

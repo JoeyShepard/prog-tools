@@ -9,6 +9,9 @@
 
     //Mark function argument as unused to silence warnings from -Wunused-parameter
     #define UNUSED(x) __attribute__((unused)) x
+
+    //Get size of struct member
+    #define fldsiz(name, member) (sizeof(((struct name *)0)->member))
     
 #endif
 

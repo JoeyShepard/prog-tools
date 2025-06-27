@@ -10,6 +10,9 @@
 //===============
 /*
 GOT SEG FAULT PRESSING HOME!!!
+- add spacing to primitives code
+- clean up actions
+  - shorter switch
 - control stack resized after compiling?
   - seems like good idea if adding locals name stack
 - tail call improvements

@@ -26,8 +26,9 @@
     int action_plus_loop(struct ForthCompileInfo *compile);
     void action_primitives(struct ForthEngine *engine,bool *first_word,int *line_characters,bool redraw);
     int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *start,bool escape,bool definition,
-                                struct ForthCompileInfo *compile);
+                            struct ForthCompileInfo *compile);
     int action_repeat(struct ForthCompileInfo *compile);
+    int action_resize(struct ForthEngine *engine,struct ForthCompileInfo *compile);
     void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_characters,bool defined,bool redraw,
                             struct ForthCompileInfo *compile);
     int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile);

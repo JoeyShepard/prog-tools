@@ -276,7 +276,7 @@ int hex32_text(const char *word_buffer,int32_t *num)
         else if (negative==false) total+=digit;
         if ((total>UINT32_MAX)||(total<INT32_MIN))
         {
-            return FORTH_ERROR_INT32_RANGE;
+            return FORTH_ERROR_HEX32_RANGE;
         }
         word_buffer++;
     }
@@ -305,6 +305,9 @@ int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
                 return FORTH_ERROR_OUT_OF_MEMORY;
             else
             {
+                //Logging
+                log_pop();
+
                 //Some other type of allocation error like alignment
                 return FORTH_ERROR_MEMORY_OTHER;
             }
@@ -709,7 +712,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
-                    //Primitive
+                    //Primitive - execute
                     int (*immediate_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].immediate;
                     if (immediate_func!=NULL)
                     {
@@ -780,6 +783,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 action_primitives(engine,&first_word,&line_characters,true);
                                 break;
                             }
+                            case FORTH_ACTION_RESIZE:
+                            {
+                                int result=action_resize(engine,compile);
+                                if (result!=FORTH_ERROR_NONE) return result;
+                                break;
+                            }
                             case FORTH_ACTION_S_BACKSLASH_QUOTE:
                             {
                                 int result=action_quote_common(engine,source,&start,true,false,compile);
@@ -842,7 +851,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     }
                     else
                     {
-                        //No special immediate behavior - execute body
+                        //No special immediate behavior - execute primitive body
                         void (*body_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].body;
                         if (body_func!=NULL)
                         {
@@ -863,7 +872,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     on_key_pressed=&on_key_halted;
                     on_key_executing=&engine->executing;
 
-                    //Run secondary
+                    //Execute secondary
                     int result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,compile->words->header,
                                                         compile->words->index,compile->definitions->data);
 
@@ -905,7 +914,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     log_push(LOGGING_FORTH_COMPILE_PRIMITIVE,"Compile primitive");
                     log_text("name: %s\n",forth_primitives[compile->primitive_ID].name);
                     
-                    //Primitive
+                    //Primitive - compile
                     int (*compile_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].compile;
                     if (compile_func!=NULL)
                     {
@@ -924,6 +933,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
 
 
                         //TODO: cleaner to move switch to forth-actions.c?
+                        //TODO: replace int result and return with one at end?
                         //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of the primitives for portability
                         switch (engine->word_action)
@@ -1111,7 +1121,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
-                    //Compile pointer to pointer to secondary
+                    //Compile pointer to secondary
                     int result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                     result=write_definition_u32(compile->secondary->ID,compile);
@@ -1126,7 +1136,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
 
-                    //Compile pointer to pointer to secondary
+                    //Compile pointer to secondary
                     result=write_definition_primitive(&prim_hidden_secondary,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                     result=write_definition_u32(new_index,compile);
@@ -1146,10 +1156,10 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     log_push(LOGGING_FORTH_UPDATE_COMP_PTRS,"update_compile_pointers");
 
     //Fetch pointer to definitions but change below while updating word headers pointer
-    struct ForthDefinitionsInfo *new_definitions=(struct ForthDefinitionsInfo *)object_address(FORTH_ID_DEFINITIONS,compile->heap_ptr);
+    struct ForthDefinitionsInfo *new_definitions=(struct ForthDefinitionsInfo *)(object_address(FORTH_ID_DEFINITIONS,compile->heap_ptr)->data);
 
     //Update pointer to word headers
-    compile->words=(struct ForthWordHeaderInfo *)object_address(FORTH_ID_WORD_HEADERS,compile->heap_ptr);
+    compile->words=(struct ForthWordHeaderInfo *)(object_address(FORTH_ID_WORD_HEADERS,compile->heap_ptr)->data);
     if (compile->definitions!=new_definitions)
     {
         //Update pointer to definitions
@@ -1175,7 +1185,7 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     compile->secondary=compile->words->header+compile->secondary_index;
 
     //Update pointer to word names
-    struct ForthWordNameInfo *new_word_names=(struct ForthWordNameInfo *)object_address(FORTH_ID_WORD_NAMES,compile->heap_ptr);
+    struct ForthWordNameInfo *new_word_names=(struct ForthWordNameInfo *)(object_address(FORTH_ID_WORD_NAMES,compile->heap_ptr)->data);
     if (compile->word_names!=new_word_names)
     {
         //Update pointer to word names
@@ -1194,9 +1204,10 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     }
 
     //Update pointer to control stack
-    compile->control_stack=(struct ForthControlInfo *)object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+    compile->control_stack=(struct ForthControlInfo *)(object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr)->data);
 
     //Logging
+    log_text("done\n");
     log_pop();
 }
 

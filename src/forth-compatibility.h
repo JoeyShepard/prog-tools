@@ -20,7 +20,8 @@
     //TODO: input can't be larger than screen yet
     //max 54 chars wide and 11 lines tall but there MUST be text on at least first line
     #define FORTH_ACCEPT_MAX        500     //Max length in characters of buffer for ACCEPT
-    #define FORTH_MEM_DATA          0x2000  //Default size of Forth data memory
+    #define FORTH_MEM_DATA          0x10000 //Default size of Forth data memory
+    #define FORTH_MEM_DATA_MIN      0x400   //Min size of Forth data memory
 
     extern struct ConsoleInfo *forth_console;
 

@@ -92,6 +92,8 @@
     //enums
     //=====
 
+    //TODO: error message for each of these?
+    //TODO: each of these used?
     //Note different from enum ForthEngineErrors!
     enum ForthCompileError
     {
@@ -104,6 +106,7 @@
         FORTH_ERROR_EXECUTE_ID,
         FORTH_ERROR_EXECUTE_IN_EXECUTE,
         FORTH_ERROR_HEX32_RANGE,
+        FORTH_ERROR_INSUFFICIENT_MEMORY,    //Can't grant requested memory but memory not full. See FORTH_ERROR_OUT_OF_MEMORY.
         FORTH_ERROR_INT32_RANGE,
         FORTH_ERROR_INTERNAL,
         FORTH_ERROR_INVALID_NAME,
@@ -115,9 +118,11 @@
         FORTH_ERROR_NOT_BETWEEN_BRACKETS,
         FORTH_ERROR_NOT_FOUND,
         FORTH_ERROR_ON_KEY,
-        FORTH_ERROR_OUT_OF_MEMORY,
+        FORTH_ERROR_OUT_OF_MEMORY,          //Memory is completely full. See FORTH_ERROR_INSUFFICIENT_MEMORY.
         FORTH_ERROR_PLUS_LOOP_WITHOUT_DO,
         FORTH_ERROR_REPEAT_WITHOUT_WHILE,
+        FORTH_ERROR_RESIZE_MIN,
+        FORTH_ERROR_RESIZE_POWER_OF_2,
         FORTH_ERROR_THEN_WITHOUT_IF,
         FORTH_ERROR_TOO_LONG,
         FORTH_ERROR_UNTERMINATED_BEGIN,

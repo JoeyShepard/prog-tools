@@ -1221,7 +1221,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
     else
     {
         //Resume or Redraw - reuse existing memory for console
-        shell=(struct ShellInfo *)object_address(SHELL_ID_CONSOLE,heap_ptr);
+        shell=(struct ShellInfo *)(object_address(SHELL_ID_CONSOLE,heap_ptr)->data);
         console=&shell->console;
         reset_console_pointers(console);
     }

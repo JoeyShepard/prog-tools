@@ -26,3 +26,5 @@ differences from other forths
 - EXEC in word only works on body
 - strcasecmp doesn't treat as lowercase. already fixed in dev.
 - had to leave out DOES>
+- cannot redefine primitives
+- no vocabularies

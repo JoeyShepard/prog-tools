@@ -173,3 +173,805 @@ Primitive count: 137 of 148 (11 left)
 LOGGING RESTARTED
 =================
 Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x788b746176b6
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x788b746176c2
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x788b746176ca
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x788b746176d6
+update_compile_pointers
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x75a1940176b6
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x75a1940176c2
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x75a1940176ca
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x75a1940176d6
+update_compile_pointers
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+
+
+LOGGING RESTARTED
+=================
+Primitive count: 137 of 148 (11 left)
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176b6
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176c2
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176ca
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176d6
+update_compile_pointers
+- done
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176de
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176ea
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176f6
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8176fe
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db81770a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db817712
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db81771e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db817726
+write_definition_primitive
+  expand_definitions
+  - expanding
+    update_compile_pointers
+    - done
+- destination: 0x78b6db81772e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db817736
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db817742
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db81774e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db817756
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830126
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830132
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83013a
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830146
+update_compile_pointers
+- done
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83014e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83015a
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830166
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83016e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83017a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830182
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83018e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830196
+write_definition_primitive
+  expand_definitions
+  - expanding
+    update_compile_pointers
+    - done
+- destination: 0x78b6db83019e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301a6
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301b2
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301be
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301c6
+update_compile_pointers
+- done
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301ce
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db8301da
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830266
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830276
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830266
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+update_compile_pointers
+- done
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83024e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83025a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830276
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83028a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830292
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830276
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83028a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830292
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830276
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83028a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830292
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830276
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83028a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830292
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830262
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83026e
+expand_definitions
+- not expanding
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db83027a
+write_definition_primitive
+  expand_definitions
+  - not expanding
+- destination: 0x78b6db830282

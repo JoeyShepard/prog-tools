@@ -1188,6 +1188,70 @@ int action_repeat(struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
+int action_resize(struct ForthEngine *engine,struct ForthCompileInfo *compile)
+{
+    //Update stack pointer
+    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
+    engine->stack=(int32_t*)((engine->stack_base)|lower);
+
+    //Fetch new data stack size from stack
+    uint32_t data_size=*engine->stack;
+
+    //Enough memory left to resize?
+    if (data_size>(engine->data_size+heap_left()))
+    {
+        //Not enough memory left
+        text_uint32(data_size,engine->error_num);
+        return FORTH_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    //Requested memory size meets minimum?
+    if (data_size<FORTH_MEM_DATA_MIN)
+    {
+        //Requested size doesn't meet minimum
+        text_uint32(FORTH_MEM_DATA_MIN,engine->error_num);
+        return FORTH_ERROR_RESIZE_MIN;
+    }
+
+    //Requested memory size is power of two?
+    bool one_found=false;
+    uint32_t new_data_size=data_size;
+    while(new_data_size)
+    {
+        if (new_data_size&1)
+        {
+            if (one_found)
+            {
+                //Requested size is not power of 2
+                text_uint32(data_size,engine->error_num);
+                return FORTH_ERROR_RESIZE_POWER_OF_2; 
+            }
+            one_found=true;
+        }
+        new_data_size>>=1;
+    }
+
+    //Resize memory
+    int result=resize_object(data_size,FORTH_ID_DATA,compile->heap_ptr);
+    if (result!=ERROR_NONE)
+    {
+        //Error while resizing memory
+        if (result==ERROR_OUT_OF_MEMORY)
+            return FORTH_ERROR_OUT_OF_MEMORY;
+        else
+        {
+            //Some other type of allocation error like alignment
+            return FORTH_ERROR_MEMORY_OTHER;
+        }
+    }
+    
+    //TODO: update_compile_pointers
+    //TODO: update data size in engine
+
+
+    return FORTH_ERROR_NONE;
+}
+
 void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_characters,bool defined,bool redraw,
                         struct ForthCompileInfo *compile)
 {
@@ -1205,7 +1269,7 @@ void action_secondaries(struct ForthEngine *engine,bool *first_word,int *line_ch
 
     if (*first_word==true)
     {
-        //First word printed here is first word of output so start with newlin
+        //First word printed here is first word of output so start with newline
         action_words_print(engine,"\n",0);
     }
 
