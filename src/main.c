@@ -9,12 +9,12 @@
 //TODO - PRIORITY
 //===============
 /*
+- paren comments not working in word definition
+  - now can't reproduce
+  - got it more than once to include ) as undefined word
+
 - GOT SEG FAULT PRESSING HOME!!!
   - could not reproduce
-- alt+tab no longer switches tabs!
-  - made some progress but not exactly straightforward
-- clean up actions
-  - shorter switch
 - control stack resized after compiling?
   - seems like good idea if adding locals name stack
 - tail call improvements
@@ -23,6 +23,8 @@
 - local variables
   - then can benchmark
   - store names after word for browser
+- shift should stay on if held down
+- ON should break ACCEPT and KEY
 */
 
 
@@ -40,9 +42,7 @@ offsetof operator
   - make sanitize
 - valgrind
 
-use (-) in console as space too
-- anything else that's useful?
-
+switching tabs should be disabled if full screen instead of redrawing
 each character output should NOT update screen
 - wait for ticks to go by?
 remove unnecessary headers
@@ -111,6 +111,9 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - numbers out of range
 - wordsize
 - var, const, etc
+- at least try blue for primaries
+- compile only red if outside of word
+  - may need to replace compile only error with one generic function
 console - only copy to history if different from last
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY

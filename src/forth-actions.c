@@ -410,7 +410,7 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
 
     //Allocate address in data section for create
     uint32_t variable_address=align4(engine->data_index)&engine->data_mask_32;
-    engine->data_index=(variable_address+sizeof(int32_t))&engine->data_mask_32; 
+    engine->data_index=variable_address;
 
     //Add code to push create address
     result=write_definition_primitive(&prim_hidden_push,compile);

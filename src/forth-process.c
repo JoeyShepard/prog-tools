@@ -724,55 +724,42 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             //Error in word
                             engine->error=result;
 
-                            //Set pointer to word in case used in error message
+                            //Set pointer to word in source in case used in error message
                             compile->error_word=source+start-compile->word_len;
                             return FORTH_ERROR_ENGINE;
                         }
 
                         //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of primitives for portability
+                        result=FORTH_ERROR_NONE;
                         switch (engine->word_action)
                         {
                             case FORTH_ACTION_CHAR:
                                 int32_t index;
-                                int result=action_char_common(source,&start,&index,compile);
+                                result=action_char_common(source,&start,&index,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 forth_push(engine,index);
                                 break;
                             case FORTH_ACTION_COLON:
-                            {
-                                int result=action_colon(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_colon(engine,source,&start,compile);
                                 break;
-                            }
                             case FORTH_ACTION_COMMENT:
                                 action_comment(source,&start);
                                 break;
                             case FORTH_ACTION_CONSTANT:
-                            {
-                                int result=action_constant(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_constant(engine,source,&start,compile);
                                 break;
-                            }
                             case FORTH_ACTION_CREATE:
-                            {
-                                int result=action_create(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_create(engine,source,&start,compile);
                                 break;
-                            }
                             case FORTH_ACTION_DOT_QUOTE:
-                            {
-                                int result=action_dot_quote_interpret(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_dot_quote_interpret(engine,source,&start,compile);
                                 break;
-                            }
                             case FORTH_ACTION_EXECUTE:
-                            {
                                 //EXECUTE executing another EXECUTE not allowed in immediate mode
                                 //(no way to break processing with ON key and circular stack could hang)
                                 return FORTH_ERROR_EXECUTE_IN_EXECUTE;
                                 break;
-                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
@@ -784,23 +771,14 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_RESIZE:
-                            {
-                                int result=action_resize(engine,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_resize(engine,compile);
                                 break;
-                            }
                             case FORTH_ACTION_S_BACKSLASH_QUOTE:
-                            {
-                                int result=action_quote_common(engine,source,&start,true,false,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_quote_common(engine,source,&start,true,false,compile);
                                 break;
-                            }
                             case FORTH_ACTION_S_QUOTE:
-                            {
-                                int result=action_quote_common(engine,source,&start,false,false,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_quote_common(engine,source,&start,false,false,compile);
                                 break;
-                            }
                             case FORTH_ACTION_SECONDARIES:
                             {
                                 bool first_word=true;
@@ -827,11 +805,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_VARIABLE:
-                            {
-                                int result=action_variable(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_variable(engine,source,&start,compile);
                                 break;
-                            }
                             case FORTH_ACTION_WORDS:
                             {
                                 bool first_word=true;
@@ -842,12 +817,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_WORDSIZE:
-                            {
-                                int result=action_wordsize(engine,source,&start,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_wordsize(engine,source,&start,compile);
                                 break;
-                            }
                         }
+
+                        //Some actions above may set error code requiring halt to processing
+                        if (result!=FORTH_ERROR_NONE) return result;
                     }
                     else
                     {
@@ -931,30 +906,22 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             return FORTH_ERROR_ENGINE;
                         }
 
-
-                        //TODO: cleaner to move switch to forth-actions.c?
-                        //TODO: replace int result and return with one at end?
                         //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of the primitives for portability
+                        result=FORTH_ERROR_NONE;
                         switch (engine->word_action)
                         {
                             case FORTH_ACTION_AGAIN:
-                            {
-                                int result=action_again(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_again(compile);
                                 break;
-                            }
                             case FORTH_ACTION_BEGIN:
-                            {
-                                int result=action_begin(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_begin(compile);
                                 break;
-                            }
                             case FORTH_ACTION_BRACKET_CHAR:
                             {
                                 //Find value of first character in next word
                                 int32_t index;
-                                int result=action_char_common(source,&start,&index,compile);
+                                result=action_char_common(source,&start,&index,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
 
                                 //Write code to push value to stack
@@ -968,7 +935,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             {
                                 //Find ID or primitive and secondary if it exists
                                 uint32_t index;
-                                int result=action_tick_common(source,&start,&index,compile);
+                                result=action_tick_common(source,&start,&index,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
 
                                 //Write code to push value to stack
@@ -983,15 +950,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 action_comment(source,&start);
                                 break;
                             case FORTH_ACTION_DO:
-                            {
-                                int result=action_do(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_do(compile);
                                 break;
-                            }
                             case FORTH_ACTION_DOT_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
-                                int result=write_definition_primitive(&prim_hidden_dot_quote,compile);
+                                result=write_definition_primitive(&prim_hidden_dot_quote,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
 
                                 //Write characters to definition
@@ -1000,68 +964,44 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_ELSE:
-                            {
-                                int result=action_else(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_else(compile);
                                 break;
-                            }
                             case FORTH_ACTION_I:
-                            {
-                                int result=action_i(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_i(compile);
                                 break;
-                            }
                             case FORTH_ACTION_IF:
-                            {
-                                int result=action_if(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_if(compile);
                                 break;
-                            }
                             case FORTH_ACTION_J:
-                            {
-                                int result=action_j(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_j(compile);
                                 break;
-                            }
                             case FORTH_ACTION_LEAVE:
-                            {
-                                int result=action_leave(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_leave(compile);
                                 break;
-                            }
                             case FORTH_ACTION_LITERAL:
                             {
-                                int result=write_definition_primitive(&prim_hidden_push,compile);
+                                result=write_definition_primitive(&prim_hidden_push,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 result=write_definition_i32(forth_pop(engine),compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
                             case FORTH_ACTION_LOOP:
-                            {
-                                int result=action_loop(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_loop(compile);
                                 break;
-                            }
                             case FORTH_ACTION_PAREN:
                                 action_paren(source,&start);
                                 break;
                             case FORTH_ACTION_PLUS_LOOP:
-                            {
-                                int result=action_plus_loop(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_plus_loop(compile);
                                 break;
-                            }
                             case FORTH_ACTION_REPEAT:
-                            {
-                                int result=action_repeat(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_repeat(compile);
                                 break;
-                            }
                             case FORTH_ACTION_S_BACKSLASH_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
-                                int result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                                result=write_definition_primitive(&prim_hidden_s_quote,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
 
                                 //Write characters to definition
@@ -1072,7 +1012,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_S_QUOTE:
                             {
                                 //Write primitive that reads and prints characters
-                                int result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                                result=write_definition_primitive(&prim_hidden_s_quote,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
 
                                 //Write characters to definition
@@ -1081,30 +1021,21 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_SEMICOLON:
-                            {
-                                int result=action_semicolon(engine,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_semicolon(engine,compile);
                                 break;
-                            }
                             case FORTH_ACTION_THEN:
-                            {
-                                int result=action_then(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_then(compile);
                                 break;
-                            }
                             case FORTH_ACTION_UNTIL:
-                            {
-                                int result=action_until(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_until(compile);
                                 break;
-                            }
                             case FORTH_ACTION_WHILE:
-                            {
-                                int result=action_while(compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
+                                result=action_while(compile);
                                 break;
-                            }
                         }
+
+                        //Some actions above may set error code requiring halt to processing
+                        if (result!=FORTH_ERROR_NONE) return result;
                     }
                     else
                     {

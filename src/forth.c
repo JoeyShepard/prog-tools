@@ -974,9 +974,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
         else
         {
+            //Get key applying modifier and convert keys for easier typing if debugging on PC
             key=getkey_text(true,&console->modifier,forth_keys);
         
-            //Remap keys on keypad for Forth. Also, recognize PC keyboard keys for testing.
+            //Remap keys on keypad for Forth
             key=forth_key_remap(key);
             
             //Redraw modifiers (shift, alpha) next time through if they have changed

@@ -9,6 +9,7 @@
 #include "error.h"
 #include "getkey.h"
 #include "graphics.h"
+#include "key-remap.h"
 #include "macros.h"
 #include "text.h"
 #include "manager.h"
@@ -1270,6 +1271,9 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
         //Get key
         int old_modifier=console->modifier;
         int key=getkey_text(true,&console->modifier,NULL);
+    
+        //Remap keys on keypad
+        key=shell_key_remap(key);
 
         //Redraw modifiers (shift, alpha) next time through if they have changed
         if (old_modifier!=console->modifier) redraw_modifier=true;

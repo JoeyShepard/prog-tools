@@ -497,12 +497,17 @@ volatile bool *on_key_pressed;
 
     int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
     {
-        //First, apply key conversions that apply to all programs
-        int return_key=remap_key_helper(modifier,key,remapped_keys_all);
-        if (return_key!=0) return return_key;
+        //First, apply key conversions passed in as argument if they exist
+        int return_key=remap_key_helper(modifier,key,conversions);
+        if (return_key!=0)
+        {
+            //Conversion found - done searching
+            return return_key;
+        }
 
-        //Next, apply key conversions passed in as argument if they exist
-        return remap_key_helper(modifier,key,conversions);
+        //Next, apply default key conversions that apply to all programs
+        //Do second to provide default behavior here that conversions above can overwrite
+        return remap_key_helper(modifier,key,remapped_keys_all);
     }
 
     char *wrapper_normalize_path(const char *path,int local_path_max)

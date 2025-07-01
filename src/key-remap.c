@@ -2,7 +2,8 @@
 #include "getkey.h"
 #include "key-remap.h"
 
-int forth_key_remap(int key)
+//Default remapping that programs may share and overwrite as necessary
+static int default_key_remap(int key)
 {
     //Remap keys for characters not on keypad
     if (key==VKEY_XOT) key=VKEY_AT;
@@ -27,4 +28,20 @@ int forth_key_remap(int key)
     else if (key==key_shifted[VKEY_NEG]) key=VKEY_UNDERSCORE;
 
     return key;
+}
+
+int forth_key_remap(int key)
+{
+    //First, program specific remapping to overwrite default behavior of default_key_remap
+
+    //Second, fall back on default handler shared by programs that use a lot of text
+    return default_key_remap(key);
+}
+
+int shell_key_remap(int key)
+{
+    //First, program specific remapping to overwrite default behavior of default_key_remap
+
+    //Second, fall back on default handler shared by programs that use a lot of text
+    return default_key_remap(key);
 }
