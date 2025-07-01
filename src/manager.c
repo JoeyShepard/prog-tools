@@ -1,4 +1,5 @@
 #include "compatibility.h"
+#include "debug.h"
 #include "getkey.h"
 #include "graphics.h"
 #include "manager.h"
@@ -218,6 +219,11 @@ void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
 
     //Tab titles
     draw_titles(windows,selected_window);
+
+    //TODO: remove
+    debug_global("selected_window=%u",&selected_window,true);
+    debug_global("&selected_window=%p",&selected_window,true);
+
 
     //Outside border
     for (int j=0;j<BORDER_SIZE;j++)

@@ -1927,22 +1927,16 @@ void prim_body_move(struct ForthEngine *engine)
         if (source+count>engine->data_size) source_count=engine->data_size-source;
         else source_count=count;
        
-        printf("count: %d\n",count);
-
         //Copy non-wrapping section
         uint32_t bytes_copied;
         if (dest_count<=source_count) bytes_copied=dest_count;
         else bytes_copied=source_count;
-
-        printf("dest: %d, source: %d, bytes: %d\n",dest,source,bytes_copied);
-
         memmove(engine->data+dest,engine->data+source,bytes_copied);
 
         //Advance for next iteration
         count-=bytes_copied;
         dest+=bytes_copied;
         source+=bytes_copied;
-
     }
 
 
@@ -3162,5 +3156,5 @@ const struct ForthPrimitive forth_primitives[]=
 };
 
 //Can't determine length of array primitives in other files, so calculate here
-const int forth_primitives_len=(int)(ARRAY_SIZE(forth_primitives));
+const int forth_primitives_len=(int)(ARRAY_LEN(forth_primitives));
 

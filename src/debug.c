@@ -4,9 +4,96 @@
 #include "compatibility.h"
 #include "debug.h"
 #include "forth-primitives.h"
+#include "getkey.h"
 #include "macros.h"
 #include "manager.h"
 #include "mem.h"
+#include "text.h"
+
+//Debug functions common to CG50 and PC
+void debug_global(const char *msg,void *data,bool count)
+{
+    static struct Point pos={0,0};
+    static int counter=1;
+    static int color_index=0;
+
+    bool arg=false;
+    char text[TEXT_INT32_SIZE];
+    int colors[]={C_RGB(31,24,24),C_RGB(24,31,24),C_RGB(24,24,31),C_RGB(31,31,24),C_RGB(31,24,31),C_RGB(24,31,31)};
+    while(*msg)
+    {
+        bool print=true;
+        if (arg==true)
+        {
+            switch (*msg)
+            {
+                case 'd':
+                    text_int32(*(int32_t *)data,text);
+                    break;
+                case 'u':
+                    text_uint32(*(uint32_t *)data,text);
+                    break;
+                case 'X':
+                    text_hex32(*(uint32_t *)data,text);
+                    break;
+                case 'p':
+                    uintptr_t ptr=(uintptr_t)data;
+                    if (sizeof(ptr)>32)
+                    {
+                        text_hex32(ptr>>32,text);
+                        pos=draw_text(text,pos,COL_BLACK,colors[color_index],false,FONT_5x8);
+                    }
+                    text_hex32(ptr,text);
+
+                    //printf("%lX\n",ptr);
+
+                    break;
+                default:
+                    print=false;
+            }
+            
+            arg=false;
+        }
+        else
+        {
+            if (*msg=='%') 
+            {
+                arg=true;
+                print=false;
+            }
+            else
+            {
+                text[0]=*msg;
+                text[1]=0;
+            }
+        }
+
+        if (print==true)
+            pos=draw_text(text,pos,COL_BLACK,colors[color_index],false,FONT_5x8);
+        
+        msg++;
+    }
+
+    if (count==true)
+    {
+        pos=draw_text("(",pos,COL_BLACK,colors[color_index],false,FONT_5x8);
+        text_uint32(counter,text);
+        pos=draw_text(text,pos,COL_BLACK,colors[color_index],false,FONT_5x8);
+        pos=draw_text(")",pos,COL_BLACK,colors[color_index],false,FONT_5x8);
+        counter++;
+    }
+    
+    pos.x=color_index*16;
+    pos.y+=10;
+    if (pos.y>200)
+    {
+        pos.y=0;
+        color_index++;
+        color_index=color_index%ARRAY_LEN(colors);
+    }
+    dupdate();
+    getkey_wrapper(true);
+}
 
 #ifdef CG50
 

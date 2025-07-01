@@ -118,7 +118,7 @@ static void color_input(struct ConsoleInfo *console,bool color_highlighted,struc
                             word_color=FORTH_COL_PRIMITIVE;
 
                             //Start quoted string if word found
-                            for (int i=0;i<ARRAY_SIZE(quote_words);i++)
+                            for (int i=0;i<ARRAY_LEN(quote_words);i++)
                             {
                                 if (!strcasecmp(word_buffer,quote_words[i]))
                                 {
@@ -262,7 +262,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         };
         
         const int legend_row_height=CONS_ROW_HEIGHT+2;
-        for (int i=0;i<ARRAY_SIZE(key_texts);i++)
+        for (int i=0;i<ARRAY_LEN(key_texts);i++)
         {
             //Print out key
             pos.x=text_x+FORTH_LEGEND_OFFSET_X;

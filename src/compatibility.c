@@ -62,8 +62,10 @@ volatile bool *on_key_pressed;
     //On CG50, initialize timer and catch unaligned memory accesses
     void setup(UNUSED(int scale_factor),int delay_ms)
     {
+        //TODO: reenable? added at first but now it may be hiding errors
+
         //Exception handling for unaligned memory accesses
-        setup_exception_handling();
+        //setup_exception_handling();
 
         //Menu functionality so add-in doesn't crash if calculator left off for too long
         gint_setrestart(1);

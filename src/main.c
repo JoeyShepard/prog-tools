@@ -10,6 +10,7 @@
 //===============
 /*
 - GOT SEG FAULT PRESSING HOME!!!
+  - could not reproduce
 - alt+tab no longer switches tabs!
   - assign key
 - clean up actions
@@ -19,8 +20,6 @@
 - tail call improvements
   - get compiler to generate tail call
   - have stack underflow generate exception
-- vscode for debugging?
-  - at least try once
 - local variables
   - then can benchmark
   - store names after word for browser
@@ -86,6 +85,7 @@ gint font is truly 5x7 not 5x8 like mine
 Forth
 =====
 delete commented out primitives
+see assembly for primitives - any space saving slow downs?
 shift arrow for home and end
 should add .\"
 change ->executing to pointer system

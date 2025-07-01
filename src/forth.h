@@ -46,17 +46,20 @@
     #define FORTH_ID_WORD_HEADERS   3
     #define FORTH_ID_WORD_NAMES     4
     #define FORTH_ID_CONTROL_STACK  5
+    #define FORTH_ID_LOCALS         6
 
     //TODO: restore
-    //#define FORTH_MEM_DEFINITIONS   1024    //For these four, allocate this amount initially then add this     
+    //#define FORTH_MEM_DEFINITIONS   1024    //For these five, allocate this amount initially then add this     
     //#define FORTH_MEM_WORD_HEADERS  512     //much when memory runs out. Exact amount not important - prevents
     //#define FORTH_MEM_WORD_NAMES    512     //copying whole dictionary every time new word added.
+    //#define FORTH_MEM_CONTROL_STACK 512
+    //#define FORTH_MEM_LOCALS        512
 
-    #define FORTH_MEM_DEFINITIONS   128     //For these four, allocate this amount initially then add this     
+    #define FORTH_MEM_DEFINITIONS   128     //For these five, allocate this amount initially then add this     
     #define FORTH_MEM_WORD_HEADERS  128     //much when memory runs out. Exact amount not important - prevents
     #define FORTH_MEM_WORD_NAMES    64      //copying whole dictionary every time new word added.
-
-    #define FORTH_MEM_CONTROL_STACK 512
+    #define FORTH_MEM_CONTROL_STACK 64
+    #define FORTH_MEM_LOCALS        64
 
     //Console
     #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit

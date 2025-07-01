@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
+//TODO: need all these headers?
 #include "compatibility.h"
 #include "debug.h"
 #include "error.h"
@@ -10,6 +11,9 @@
 #include "manager.h"
 #include "macros.h"
 #include "mem.h"
+
+//TODO: remove
+#include "text.h"
 
 uint8_t *write_heap_i32(int32_t val,uint8_t *heap_ptr)
 {
@@ -81,6 +85,10 @@ void select_heap(int tab,int split)
     uint32_t *obj_end;
     uint32_t obj_size;
     uint32_t *heap_end;
+
+    //TODO:remove
+    debug_global("select_heap 1",NULL,true);
+
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
     {
         struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
@@ -88,11 +96,15 @@ void select_heap(int tab,int split)
         {
             //Selected heap found - record start and address
             obj_start=(uint32_t *)heap_ptr;
-            obj_end=(uint32_t *)(heap_ptr+*(uint32_t *)heap_ptr);
+            obj_end=(uint32_t *)(heap_ptr+((struct HeapInfo *)heap_ptr)->size);
             obj_size=obj_end-obj_start;
         }
-        heap_ptr+=*(uint32_t *)heap_ptr;
+        heap_ptr+=((struct HeapInfo *)heap_ptr)->size;
     }
+
+    //TODO: remove
+    debug_global("select_heap 2",NULL,true);
+
     //First word past end of data. Note no ending 0!
     heap_end=(uint32_t *)heap_ptr;
 
@@ -103,6 +115,8 @@ void select_heap(int tab,int split)
         //Copy chunk of next object to buffer
         if ((uintptr_t)(heap_end-obj_end)<XRAM_SIZE/sizeof(uint32_t)) copy_count=heap_end-obj_end;
         else copy_count=XRAM_SIZE/sizeof(uint32_t);
+
+        //TODO: memmove? this doesn't actually need to be fast
 
         for (uint32_t i=0;i<copy_count;i++)
         {
@@ -143,6 +157,10 @@ uint8_t *get_split_heap()
     uint8_t *heap_ptr=heap;
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT-1;i++)
         heap_ptr+=((struct HeapInfo *)heap_ptr)->size;
+
+    uintptr_t debug_offset=(uintptr_t)heap_ptr-(uintptr_t)heap;
+    debug_global("get_split_heap %u",&debug_offset,true);
+
     return heap_ptr;
 }
 
@@ -155,8 +173,15 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
         error_exit(ERROR_UNALIGNED_WRITE);
     }
 
+    //TODO:remove
+    uint32_t debug_size=(uint32_t)size;
+    debug_global("add_object 1 size %u",&debug_size,true);
+
     //Add space for address of next link in list of objects
-    size+=sizeof(fldsiz(ObjectInfo,size));
+    size+=fldsiz(ObjectInfo,size);
+
+    debug_size=(uint32_t)size;
+    debug_global("add_object 2 size %u",&debug_size,true);
 
     //Check if enough memory left
     if (size>heap_left()) return NULL;
@@ -164,18 +189,33 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
     //Add size of object to total size of all objects for that tab/split pair
     ((struct HeapInfo *)heap_ptr)->size+=size;
 
+    debug_global("add_object 3",NULL,true);
+
     //Point past header data to beginning of object list
     heap_ptr=((struct HeapInfo *)heap_ptr)->objects;
+
+    uintptr_t debug_ptr=(uintptr_t)heap_ptr-(uintptr_t)heap;
+    debug_global("add_object 3b heap_ptr %p",heap_ptr,true);
+    debug_global("offset %u",&debug_ptr,true);
+
+    debug_ptr=(uintptr_t)heap_ptr;
 
     //Skip over each object until end marked by size 0
     while(((struct ObjectInfo *)heap_ptr)->size)
         heap_ptr+=((struct ObjectInfo *)heap_ptr)->size;
 
+    debug_ptr=(uintptr_t)heap_ptr-debug_ptr;
+    debug_global("add_object 4 traveled %u bytes",&debug_ptr,true);
+
     //Change 0 marker for end of object list to size of new object
     ((struct ObjectInfo *)heap_ptr)->size=size;
 
+    debug_global("add_object 5",NULL,true);
+
     //Add 0 marker to mark new end of object list
     ((struct ObjectInfo *)(heap_ptr+size))->size=0;
+
+    debug_global("add_object 6",NULL,true);
 
     //Return address of data field of newly created object
     return ((struct ObjectInfo *)heap_ptr)->data;
@@ -309,6 +349,9 @@ int resize_object(size_t new_size,int ID,uint8_t *heap_ptr)
     {
         return reduce_object(data_size-new_size,ID,heap_ptr);
     }
+
+    //Should not reach here - silence error
+    return ERROR_NONE;
 }
 
 //Size of object EXCLUDING header - data only

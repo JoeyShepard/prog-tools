@@ -195,7 +195,7 @@ static int file_special(const char *path)
     };
 
     int path_len=strlen(path);
-    for (int i=0;i<ARRAY_SIZE(endings);i++)
+    for (int i=0;i<ARRAY_LEN(endings);i++)
     {
         //Skip ending if larger than path
         int ending_len=strlen(endings[i].text);
@@ -284,7 +284,7 @@ static int path_type(const char *path, int *result)
 static void show_help(const char *command,struct ConsoleInfo *console)
 {
     bool command_found=false;
-    for (int i=0;i<ARRAY_SIZE(commands);i++)
+    for (int i=0;i<ARRAY_LEN(commands);i++)
     {
         //Print help string if it matches search command or if search command is NULL (ie show all)
         bool print_help;
@@ -373,7 +373,7 @@ static int process_input(void *struct_args)
 
     //Match to commands
     int command_id=SHELL_CMD_NONE;
-    for (int i=0;i<ARRAY_SIZE(commands);i++)
+    for (int i=0;i<ARRAY_LEN(commands);i++)
     {
         bool command_found=true;
         int j;

@@ -32,7 +32,7 @@ void log_config()
         //LOGGING_MEM_EXPAND_OBJECT,
     };
 
-    for (int i=0;i<ARRAY_SIZE(log_points);i++)
+    for (int i=0;i<ARRAY_LEN(log_points);i++)
     {
         log_on(log_points[i]);
     }

@@ -1,6 +1,7 @@
 #ifndef __GUARD_PROG_TOOLS_MEM
     #define __GUARD_PROG_TOOLS_MEM
 
+    #include <stdalign.h>
     #include <stddef.h>
 
     struct HeapInfo
@@ -9,7 +10,7 @@
         uint8_t tab;
         uint8_t split;
         //Flexible Array Member
-        uint8_t objects[];
+        alignas(uint32_t) uint8_t objects[];
     };
 
     struct ObjectInfo

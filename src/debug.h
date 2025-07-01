@@ -7,6 +7,7 @@
     #include "forth-engine.h"
     #include "forth-process.h"
 
+    void debug_global(const char *msg,void *data,bool count);
     void debug_heap();
     void debug_dump(void *mem,uint32_t count);
     void debug_words(struct ForthCompileInfo *compile);

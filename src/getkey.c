@@ -501,7 +501,7 @@ const int vkey_printable[]={
     '?',    //VKEY_QUESTION,
 };
 
-const int vkey_printable_len=ARRAY_SIZE(vkey_printable);
+const int vkey_printable_len=ARRAY_LEN(vkey_printable);
 
 int getkey_wrapper(bool wait)
 {
