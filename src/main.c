@@ -12,7 +12,7 @@
 - GOT SEG FAULT PRESSING HOME!!!
   - could not reproduce
 - alt+tab no longer switches tabs!
-  - assign key
+  - made some progress but not exactly straightforward
 - clean up actions
   - shorter switch
 - control stack resized after compiling?

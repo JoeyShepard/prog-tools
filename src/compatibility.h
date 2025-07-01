@@ -226,7 +226,7 @@
     void wrapper_exit();
     void wrapper_screenshot();
     int wrapper_pc_key();
-    int wrapper_remap_key(int modifier,int key,struct KeyRemap *keys);
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions);
     char *wrapper_normalize_path(const char *path,int local_path_max);
     void wrapper_perf_start(prof_t *time);
     uint32_t wrapper_perf_stop(prof_t *time);

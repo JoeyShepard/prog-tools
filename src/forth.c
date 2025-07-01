@@ -9,6 +9,7 @@
 #include "getkey.h"
 #include "graphics.h"
 #include "key-remap.h"
+#include "key-remap-pc.h"
 #include "logging.h"
 #include "macros.h"
 #include "text.h"
@@ -390,12 +391,12 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             console_text_default("REPEAT without matching WHILE\n",console);
             break;
         case FORTH_ERROR_RESIZE_MIN:
-            console_text_default("Requested memory size must be at least ",console);
+            console_text_default("Memory size must be at least ",console);
             console_text_default(engine->error_num,console);
             console_text_default(" bytes\n",console);
             break;
         case FORTH_ERROR_RESIZE_POWER_OF_2:
-            console_text_default("Requested memory size is not power of two: ",console);
+            console_text_default("Memory size is not power of two: ",console);
             console_text_default(engine->error_num,console);
             console_text_default("\n",console);
             break;
@@ -908,8 +909,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 0 5000000 0 do i + loop . ;\nfoo";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\nsize 4 * resize -4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
-    const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
-    //const char *debug_keys="";
+    //const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
@@ -1072,6 +1073,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     }
             }
         }
+
         //If key or command sets exit flag, save stack to memory and exit
         if (save_exit)
         {

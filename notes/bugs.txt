@@ -1,3 +1,11 @@
+PENDING
+=======
+
+
+
+SOLVED
+======
+
 add-in crashes but PC version does not
 - happens with Forth but also dummy apps like text editor
 - added screen output statements to add-in and crashed after add_object 6
@@ -28,3 +36,5 @@ add-in crashes but PC version does not
 - see add_object calls and why 5 is skipped
 - disabled exception handling code I had added which was hiding alignment error!
   - tried to read 0x8C20008A at 303894 between debug messages add_object 3 and 4
+- alignment error was in ObjectInfo so added alignas
+  - SOLVED

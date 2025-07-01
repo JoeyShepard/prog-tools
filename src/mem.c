@@ -86,9 +86,6 @@ void select_heap(int tab,int split)
     uint32_t obj_size;
     uint32_t *heap_end;
 
-    //TODO:remove
-    debug_global("select_heap 1",NULL,true);
-
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
     {
         struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
@@ -101,9 +98,6 @@ void select_heap(int tab,int split)
         }
         heap_ptr+=((struct HeapInfo *)heap_ptr)->size;
     }
-
-    //TODO: remove
-    debug_global("select_heap 2",NULL,true);
 
     //First word past end of data. Note no ending 0!
     heap_end=(uint32_t *)heap_ptr;
@@ -157,10 +151,6 @@ uint8_t *get_split_heap()
     uint8_t *heap_ptr=heap;
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT-1;i++)
         heap_ptr+=((struct HeapInfo *)heap_ptr)->size;
-
-    uintptr_t debug_offset=(uintptr_t)heap_ptr-(uintptr_t)heap;
-    debug_global("get_split_heap %u",&debug_offset,true);
-
     return heap_ptr;
 }
 
@@ -173,15 +163,8 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
         error_exit(ERROR_UNALIGNED_WRITE);
     }
 
-    //TODO:remove
-    uint32_t debug_size=(uint32_t)size;
-    debug_global("add_object 1 size %u",&debug_size,true);
-
     //Add space for address of next link in list of objects
     size+=fldsiz(ObjectInfo,size);
-
-    debug_size=(uint32_t)size;
-    debug_global("add_object 2 size %u",&debug_size,true);
 
     //Check if enough memory left
     if (size>heap_left()) return NULL;
@@ -189,33 +172,18 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
     //Add size of object to total size of all objects for that tab/split pair
     ((struct HeapInfo *)heap_ptr)->size+=size;
 
-    debug_global("add_object 3",NULL,true);
-
     //Point past header data to beginning of object list
     heap_ptr=((struct HeapInfo *)heap_ptr)->objects;
-
-    uintptr_t debug_ptr=(uintptr_t)heap_ptr-(uintptr_t)heap;
-    debug_global("add_object 3b heap_ptr %p",heap_ptr,true);
-    debug_global("offset %u",&debug_ptr,true);
-
-    debug_ptr=(uintptr_t)heap_ptr;
 
     //Skip over each object until end marked by size 0
     while(((struct ObjectInfo *)heap_ptr)->size)
         heap_ptr+=((struct ObjectInfo *)heap_ptr)->size;
 
-    debug_ptr=(uintptr_t)heap_ptr-debug_ptr;
-    debug_global("add_object 4 traveled %u bytes",&debug_ptr,true);
-
     //Change 0 marker for end of object list to size of new object
     ((struct ObjectInfo *)heap_ptr)->size=size;
 
-    debug_global("add_object 5",NULL,true);
-
     //Add 0 marker to mark new end of object list
     ((struct ObjectInfo *)(heap_ptr+size))->size=0;
-
-    debug_global("add_object 6",NULL,true);
 
     //Return address of data field of newly created object
     return ((struct ObjectInfo *)heap_ptr)->data;

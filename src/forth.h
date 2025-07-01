@@ -87,8 +87,6 @@
     #define FORTH_SUGGESTION_OFFSET_Y       2
     #define FORTH_SUGGESTION_ROW_HEIGHT     10
 
-    //Forth memory
-
     //Forth primitives
     #define FORTH_PRIM_NOT_FOUND            -1
 

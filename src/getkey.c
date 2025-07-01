@@ -509,6 +509,7 @@ int getkey_wrapper(bool wait)
     {
         //Wait for keypress
 
+        //TODO: resolve
         //Worked on calculator but menu key didn't work
         //Later, problem reappeared so problem is not this code
         /*
@@ -714,9 +715,6 @@ int sys_key_handler(int key)
         case VKEY_F5:
         case VKEY_F6:
             return COMMAND_TAB1+key-VKEY_F1;
-        case VKEY_ANGLE:
-            //shift+XOT - switch selected window split
-            //Fallthrough!
         case VKEY_FRAC:
             return COMMAND_SWAP;
             break;

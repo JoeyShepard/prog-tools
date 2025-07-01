@@ -64,7 +64,7 @@
         VKEY_F6,
 
         //Virtual keys generated with modifier
-        //MUST BE SAME ORDER AS vkey_printable!
+        //MUST BE SAME ORDER AS vkey_printable IN getkey.c!
         VKEY_ACOFF,
         VKEY_IMAG,
         VKEY_EQUAL,

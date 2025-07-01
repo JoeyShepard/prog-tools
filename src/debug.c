@@ -40,12 +40,11 @@ void debug_global(const char *msg,void *data,bool count)
                     uintptr_t ptr=(uintptr_t)data;
                     if (sizeof(ptr)>32)
                     {
-                        text_hex32(ptr>>32,text);
+                        //ie shift by 32 but causes warning on sh-gcc
+                        text_hex32(ptr>>(sizeof(ptr)/2),text);
                         pos=draw_text(text,pos,COL_BLACK,colors[color_index],false,FONT_5x8);
                     }
                     text_hex32(ptr,text);
-
-                    //printf("%lX\n",ptr);
 
                     break;
                 default:

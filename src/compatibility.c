@@ -103,6 +103,7 @@ volatile bool *on_key_pressed;
 
     int wrapper_pc_key()
     {
+        //Empty function for compatibility
         return 0;
     }
 
@@ -141,6 +142,8 @@ volatile bool *on_key_pressed;
     #include <SDL2/SDL_image.h>
     #include <unistd.h>
 
+    #include "key-remap-pc.h"
+
     //Globals
     //=======
     uint16_t screen[DHEIGHT*DWIDTH];
@@ -167,6 +170,8 @@ volatile bool *on_key_pressed;
     //===================================
     static int wrapper_convert_key(int key)
     {
+        //Converts PC keys to calculator keys in a straightforward way since many don't require special treatment.
+        //For program specific key remapping of keys on calculator independent of PC, see key-remap.c
         const int key_table[]=
         {
             SDL_SCANCODE_A,             KEY_XOT,
@@ -210,7 +215,7 @@ volatile bool *on_key_pressed;
             SDL_SCANCODE_RETURN,        KEY_EXE,
             SDL_SCANCODE_ESCAPE,        KEY_EXIT,
             SDL_SCANCODE_BACKSPACE,     KEY_DEL,
-            SDL_SCANCODE_TAB,           KEY_XOT,
+            SDL_SCANCODE_TAB,           0,
             SDL_SCANCODE_SPACE,         KEY_DOT,
 
             SDL_SCANCODE_MINUS,         KEY_SUB,
@@ -466,13 +471,14 @@ volatile bool *on_key_pressed;
         return pc_scancode;
     }
 
-    int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
+    static int remap_key_helper(int modifier,int key,struct KeyRemap *conversions)
     {
         if (conversions==NULL)
         {
-            //No list of conversions
+            //No list of key conversions to apply
             return 0;
         }
+
         while (1)
         {
             if ((conversions->key==0)&&(conversions->modifier==0))
@@ -487,6 +493,16 @@ volatile bool *on_key_pressed;
             }
             conversions++;
         }
+    }
+
+    int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
+    {
+        //First, apply key conversions that apply to all programs
+        int return_key=remap_key_helper(modifier,key,remapped_keys_all);
+        if (return_key!=0) return return_key;
+
+        //Next, apply key conversions passed in as argument if they exist
+        return remap_key_helper(modifier,key,conversions);
     }
 
     char *wrapper_normalize_path(const char *path,int local_path_max)

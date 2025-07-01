@@ -54,23 +54,12 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
     int modifier=MODIFIER_NONE;
     bool redraw=true;
 
-    //TODO:remove
-    debug_global("dummy 1",NULL,true);
-
     //Heap memory
     select_heap(window.tab_index,drawn_split);
     uint8_t *heap_ptr=get_split_heap();
 
-
-    //TODO:remove
-    debug_global("dummy 2",NULL,true);
-
     if (command_ID==COMMAND_START) 
         add_object((window.tab_index*2+window.selected_split)*40,heap_ptr);
-
-    //TODO:remove
-    debug_global("dummy 3",NULL,true);
-
 
     while (1)
     {

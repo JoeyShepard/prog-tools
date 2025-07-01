@@ -104,7 +104,7 @@ void window_manager()
                 selected_window=return_command-COMMAND_TAB1;
                 break;
             case COMMAND_SWAP:
-                //shift+XOT - switch selected window split
+                //Fraction key - switch selected window split
                 if (windows[selected_window].split_state!=WINDOW_WHOLE)
                 {
                     windows[selected_window].selected_split^=1;
@@ -219,11 +219,6 @@ void draw_manager(struct WindowInfo windows[],int modifier,int selected_window)
 
     //Tab titles
     draw_titles(windows,selected_window);
-
-    //TODO: remove
-    debug_global("selected_window=%u",&selected_window,true);
-    debug_global("&selected_window=%p",&selected_window,true);
-
 
     //Outside border
     for (int j=0;j<BORDER_SIZE;j++)

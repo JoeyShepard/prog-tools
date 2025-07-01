@@ -2,7 +2,9 @@
 
 #include "console.h"
 #include "forth-compatibility.h"
+#include "getkey.h"
 #include "key-remap.h"
+#include "key-remap-pc.h"
 #include "manager.h"
 #include "structs.h"
 
