@@ -537,7 +537,7 @@ bool search_control_element(struct ForthCompileInfo *compile,uint8_t element_typ
     }
 }
 
-int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile)
+int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct ForthCompileInfo *compile)
 {
     //Pointer to new secondary
     struct ForthWordHeader *secondary=&(compile->words->header[compile->words->index]);
@@ -612,7 +612,7 @@ int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileI
     secondary->ID=compile->words->index;
     secondary->type=word_type;
     secondary->last=false;
-    secondary->done=false;
+    secondary->done=done;
 
     //Advance index in preparation of next header
     compile->words->index++;
@@ -857,6 +857,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     //Abort if ON key was pressed
                     if (on_key_halted==true) return FORTH_ERROR_ON_KEY;
 
+                    //TODO: don't these also need to be set if on_key_halted?
                     //ON key detection no longer needed
                     on_key_pressed=NULL;
                     on_key_executing=NULL;
@@ -1064,7 +1065,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     uint16_t new_index=compile->words->index;
                     
                     //Unknown symbol - add word header but don't error
-                    int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,compile);
+                    int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,false,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
 
                     //Compile pointer to secondary
@@ -1136,6 +1137,9 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
 
     //Update pointer to control stack
     compile->control_stack=(struct ForthControlInfo *)(object_address(FORTH_ID_CONTROL_STACK,compile->heap_ptr)->data);
+
+    //Update pointer to locals
+    compile->locals=(struct ForthLocalsInfo *)(object_address(FORTH_ID_LOCALS,compile->heap_ptr)->data);
 
     //Logging
     log_text("done\n");

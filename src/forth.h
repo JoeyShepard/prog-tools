@@ -178,6 +178,7 @@
     {
         uint32_t index;
         uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds definition data
         struct ForthWordHeader header[];
     };
 
@@ -185,6 +186,7 @@
     {
         uint32_t index;
         uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds definition data
         char names[];
     };
 
@@ -198,7 +200,16 @@
     {
         uint32_t index;
         uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds definition data
         struct ForthControlElement elements[];
+    };
+
+    struct ForthLocalsInfo
+    {
+        uint32_t index;
+        uint32_t bytes_left;
+        //Flexible Array Member - memory allocated after struct holds definition data
+        char names[];
     };
 
     struct ForthCompileInfo
@@ -209,6 +220,7 @@
         struct ForthWordHeaderInfo *words;
         struct ForthWordNameInfo *word_names;
         struct ForthControlInfo *control_stack;
+        struct ForthLocalsInfo *locals;
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;

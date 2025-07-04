@@ -9,14 +9,16 @@
 //TODO - PRIORITY
 //===============
 /*
+
+***TYPING IN NQUEENS AS MUCH AS WILL FIT THEN HITTING ENTER (unterminated word)
+RESULTS IN a, r, AND s NOT BEING FOUND ANYMORE
+
 - paren comments not working in word definition
   - now can't reproduce
   - got it more than once to include ) as undefined word
 
 - GOT SEG FAULT PRESSING HOME!!!
   - could not reproduce
-- control stack resized after compiling?
-  - seems like good idea if adding locals name stack
 - tail call improvements
   - get compiler to generate tail call
   - have stack underflow generate exception
@@ -25,6 +27,7 @@
   - store names after word for browser
 - shift should stay on if held down
 - ON should break ACCEPT and KEY
+- CASE
 */
 
 
@@ -42,6 +45,7 @@ offsetof operator
   - make sanitize
 - valgrind
 
+don't show cursor if window doesn't have focus like in tmux
 switching tabs should be disabled if full screen instead of redrawing
 each character output should NOT update screen
 - wait for ticks to go by?
@@ -81,9 +85,14 @@ C like language
 review code on github - better to see in second light
 gint font is truly 5x7 not 5x8 like mine
 - shrink my font? might fit 2-3 more lines on screen
+combine all errors into one range instead of 3
+- there was a reason for doing it this way but can't remember now
+- I remember - FORTH should be modular and not tied to rest of program
 
 Forth
 =====
+XOT as X? keep coming back to it
+
 delete commented out primitives
 see assembly for primitives - any space saving slow downs?
 shift arrow for home and end

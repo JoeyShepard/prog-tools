@@ -112,7 +112,7 @@ static int action_prepare_word(const char *word_buffer,int word_type,uint8_t sec
         compile->colon_word_index=compile->words->index;
 
         //Word not found - create header for new word
-        int result=new_secondary(word_buffer,secondary_type,compile);
+        int result=new_secondary(word_buffer,secondary_type,true,compile);
         if (result!=FORTH_ERROR_NONE) return result;
     }
 
@@ -316,7 +316,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         compile->colon_word_exists=false;
 
         //Word not found - create header for new word
-        int result=new_secondary(word_buffer,FORTH_SECONDARY_WORD,compile);
+        int result=new_secondary(word_buffer,FORTH_SECONDARY_WORD,false,compile);
         if (result!=FORTH_ERROR_NONE) return result;
     }
 

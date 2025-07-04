@@ -539,10 +539,12 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     draw_console(console);
     dupdate();
 
-    //Initialize control stack for processing input
+    //Initialize control stack and locals for processing input
     //(Handle outside of process_source since may call elsewhere for multiline input)
     compile->control_stack->index=0;
     compile->control_stack->bytes_left=FORTH_MEM_CONTROL_STACK-sizeof(struct ForthControlInfo);
+    compile->locals->index=0;
+    compile->locals->bytes_left=FORTH_MEM_LOCALS-sizeof(struct ForthLocalsInfo);
 
     //Process input
     char input_buffer[FORTH_INPUT_MAX];
@@ -551,13 +553,38 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
 
     //TODO: check engine->exit_program set by BYE and exit
 
+    //TODO: remove
+    debug_words(compile);
+
     //Show input line again
     console_text_default("\n",console);
     console->input.visible=true;
 
+    //Restore control flow stack size if it was expanded
+    int result=resize_object(FORTH_MEM_CONTROL_STACK,FORTH_ID_CONTROL_STACK,compile->heap_ptr);
+    if (result!=ERROR_NONE)
+    {
+        //Should never happen since only error would be ERROR_UNALIGNED_WRITE which isn't possible here.
+        //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
+        process_result=FORTH_ERROR_MEMORY_OTHER;
+    }
+
+    //Restore locals size if it was expanded
+    result=resize_object(FORTH_MEM_LOCALS,FORTH_ID_LOCALS,compile->heap_ptr);
+    if (result!=ERROR_NONE)
+    {
+        //Should never happen since only error would be ERROR_UNALIGNED_WRITE which isn't possible here.
+        //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
+        process_result=FORTH_ERROR_MEMORY_OTHER;
+    }
+
+    //TODO: remove
+    debug_words(compile);
+
+    //Process any errors from processing source or resizing control stack or locals
     if (process_result==FORTH_ERROR_NONE)
     {
-        //No error - nothing to do
+        //No error from processing source - nothing to do
     }
     else if (process_result==FORTH_ERROR_ENGINE)
     {
@@ -583,6 +610,9 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         bool looping=true;
         while(looping==true)
         {
+            
+            printf("name: %s, last: %d, done: %d\n",secondary->name,secondary->last,secondary->done);
+
             //Check if at end of list first since ->done not valid unless ->last is false
             if (secondary->last==false)
             {
@@ -612,6 +642,9 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
             //Advance to next word header
             secondary++;
         }
+
+        //TODO: remove
+        debug_words(compile);
 
         //Restore header information to state before aborted word began
         compile->words->index-=header_count;
@@ -758,8 +791,20 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
             return COMMAND_EXIT;
         }
 
-        //No need to initialize control stack - reinitialized every time source is processed
+        //No need to initialize control stack - reinitialized every time source begins to be processed
         
+        //Allocate space for locals 
+        compile.locals=(struct ForthLocalsInfo *)add_object(FORTH_MEM_LOCALS,compile.heap_ptr);
+
+        //Make sure allocation succeeded
+        if (compile.locals==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+        //No need to initialize locals - reinitialized every time source begins to be processed
+
 
         //Init console
         console=&forth->console;
@@ -833,6 +878,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.words=(struct ForthWordHeaderInfo *)(object_address(FORTH_ID_WORD_HEADERS,compile.heap_ptr)->data);
         compile.word_names=(struct ForthWordNameInfo *)(object_address(FORTH_ID_WORD_NAMES,compile.heap_ptr)->data);
         compile.control_stack=(struct ForthControlInfo *)(object_address(FORTH_ID_CONTROL_STACK,compile.heap_ptr)->data);
+        compile.locals=(struct ForthLocalsInfo *)(object_address(FORTH_ID_LOCALS,compile.heap_ptr)->data);
 
         //Recalculate pointers in word header
         struct ForthWordHeader *secondary=compile.words->header;
@@ -910,7 +956,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\nsize 4 * resize -4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
-    const char *debug_keys="";
+    const char *debug_keys="8 const r : nqueens\n";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

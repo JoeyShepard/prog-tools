@@ -64,7 +64,7 @@
     int pop_control_element(struct ForthControlElement *element,struct ForthCompileInfo *compile,bool ignore_leave);
     int push_control_element(uint32_t offset,uint8_t type,struct ForthCompileInfo *compile);
     bool search_control_element(struct ForthCompileInfo *compile,uint8_t element_type);
-    int new_secondary(const char *word_buffer,uint8_t word_type,struct ForthCompileInfo *compile);
+    int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct ForthCompileInfo *compile);
     int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile);
     void update_compile_pointers(struct ForthCompileInfo *compile);
 
