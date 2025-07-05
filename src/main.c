@@ -9,9 +9,15 @@
 //TODO - PRIORITY
 //===============
 /*
+- local variables
+  - then can benchmark
+  - store names after word for browser
 
-***TYPING IN NQUEENS AS MUCH AS WILL FIT THEN HITTING ENTER (unterminated word)
-RESULTS IN a, r, AND s NOT BEING FOUND ANYMORE
+- try blue for primitives
+  - color by primitive type too?
+
+- autocomplete
+  - use arrow key - don't need special characters in source
 
 - paren comments not working in word definition
   - now can't reproduce
@@ -19,15 +25,21 @@ RESULTS IN a, r, AND s NOT BEING FOUND ANYMORE
 
 - GOT SEG FAULT PRESSING HOME!!!
   - could not reproduce
+
 - tail call improvements
   - get compiler to generate tail call
   - have stack underflow generate exception
-- local variables
-  - then can benchmark
-  - store names after word for browser
+
+
 - shift should stay on if held down
+
 - ON should break ACCEPT and KEY
+
 - CASE
+
+- rework key
+  - two words rather than word w arg
+  - sys_key word
 */
 
 
@@ -194,7 +206,7 @@ switch case as mentioned online?
 //Constants
 //=========
 #define TICK_MS         40  //25 FPS
-#define SCALE_FACTOR    3
+#define SCALE_FACTOR    4
 
 //Functions
 //=========

@@ -10,7 +10,6 @@
 
 //Internal primitives - not visible to user
 //=========================================
-
 void prim_hidden_do(struct ForthEngine *engine)
 {
     uintptr_t lower;
@@ -403,6 +402,16 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     }
 }
 
+int prim_compile_only(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
+}
+
+int prim_interpret_only(struct ForthEngine *engine)
+{
+    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
+}
+
 //Primitives visible to user
 //==========================
 
@@ -479,10 +488,6 @@ int prim_immediate_tick(UNUSED(struct ForthEngine *engine))
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_TICK;
     return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_tick(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //PAREN
@@ -588,11 +593,6 @@ void prim_body_plus(struct ForthEngine *engine)
 }
 
 //PLUS_LOOP
-int prim_immediate_plus_loop(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_plus_loop(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -807,16 +807,8 @@ int prim_immediate_colon(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_COLON;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_colon(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //SEMICOLON
-int prim_immediate_semicolon(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_semicolon(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1245,10 +1237,6 @@ void prim_body_quit(struct ForthEngine *engine)
 {
     engine->executing=false;
 }
-int prim_immediate_quit(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 
 //ABS
 void prim_body_abs(struct ForthEngine *engine)
@@ -1350,11 +1338,6 @@ void prim_body_and(struct ForthEngine *engine)
 }
 
 //BEGIN
-int prim_immediate_begin(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_begin(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1405,10 +1388,6 @@ int prim_immediate_char(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_CHAR;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_char(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //CONSTANT
 int prim_immediate_constant(struct ForthEngine *engine)
@@ -1416,10 +1395,6 @@ int prim_immediate_constant(struct ForthEngine *engine)
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_CONSTANT;
     return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_constant(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //C_R
@@ -1432,16 +1407,12 @@ void prim_body_c_r(struct ForthEngine *engine)
     }
 }
 
-//CONSTANT
+//CREATE
 int prim_immediate_create(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_CREATE;
     return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_create(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //DEPTH
@@ -1456,10 +1427,6 @@ void prim_body_depth(struct ForthEngine *engine)
 }
 
 //DO
-int prim_immediate_do(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_do(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1516,10 +1483,6 @@ void prim_body_two_dupe(struct ForthEngine *engine)
 }
 
 //ELSE
-int prim_immediate_else(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_else(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1654,11 +1617,9 @@ void prim_body_execute(struct ForthEngine *engine)
     }
 }
 
-//EXIT
-int prim_immediate_exit(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
+//EXIT - Reuse existing code elsewhere
+//Interpreting - prim_compile_only
+//Compiling - prim_hidden_done
 
 //FILL
 void prim_body_fill(struct ForthEngine *engine)
@@ -1706,10 +1667,6 @@ void prim_body_here(struct ForthEngine *engine)
 }
 
 //I
-int prim_immediate_i(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_i(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1718,11 +1675,6 @@ int prim_compile_i(struct ForthEngine *engine)
 }
 
 //IF
-int prim_immediate_if(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_if(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1739,10 +1691,6 @@ void prim_body_invert(struct ForthEngine *engine)
 }
 
 //J
-int prim_immediate_j(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_j(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1775,11 +1723,6 @@ void prim_body_key(struct ForthEngine *engine)
 }
 
 //LEAVE
-int prim_immediate_leave(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_leave(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1788,11 +1731,6 @@ int prim_compile_leave(struct ForthEngine *engine)
 }
 
 //LITERAL
-int prim_immediate_literal(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_literal(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -1801,11 +1739,6 @@ int prim_compile_literal(struct ForthEngine *engine)
 }
 
 //LOOP
-int prim_immediate_loop(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_loop(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2018,11 +1951,6 @@ void prim_body_page(struct ForthEngine *engine)
 }
 
 //REPEAT
-int prim_immediate_repeat(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_repeat(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2184,11 +2112,6 @@ void prim_body_two_swap(struct ForthEngine *engine)
 }
 
 //THEN
-int prim_immediate_then(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_then(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2268,11 +2191,6 @@ void prim_body_u_greater_than(struct ForthEngine *engine)
 }
 
 //UNTIL
-int prim_immediate_until(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_until(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2287,17 +2205,8 @@ int prim_immediate_variable(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_VARIABLE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_variable(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //WHILE
-int prim_immediate_while(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_while(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2323,11 +2232,6 @@ void prim_body_x_or(struct ForthEngine *engine)
 }
 
 //LEFT_BRACKET
-int prim_immediate_left_bracket(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_left_bracket(struct ForthEngine *engine)
 {
     engine->state=FORTH_STATE_INTERPRET;
@@ -2349,10 +2253,6 @@ int prim_immediate_right_bracket(struct ForthEngine *engine)
         return FORTH_ENGINE_ERROR_NONE;
     }
 }
-int prim_compile_right_bracket(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //BRACKET_TICK
 int prim_compile_bracket_tick(struct ForthEngine *engine)
@@ -2361,16 +2261,8 @@ int prim_compile_bracket_tick(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_BRACKET_TICK;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_immediate_bracket_tick(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 
 //BRACKET_CHAR
-int prim_immediate_bracket_char(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
 int prim_compile_bracket_char(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2501,11 +2393,6 @@ void prim_body_not_equals(struct ForthEngine *engine)
 }
 
 //AGAIN
-int prim_immediate_again(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
 int prim_compile_again(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2783,21 +2670,13 @@ int prim_immediate_words(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_WORDS;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_words(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
-//WORDS
+//WORDSIZE
 int prim_immediate_wordsize(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_WORDSIZE;
     return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_wordsize(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //BYE
@@ -2907,10 +2786,6 @@ int prim_immediate_primitives(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_PRIMITIVES;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_primitives(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //SECONDARIES
 int prim_immediate_secondaries(struct ForthEngine *engine)
@@ -2919,10 +2794,6 @@ int prim_immediate_secondaries(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_SECONDARIES;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_secondaries(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 //UNDEFINED
 int prim_immediate_undefined(struct ForthEngine *engine)
@@ -2930,10 +2801,6 @@ int prim_immediate_undefined(struct ForthEngine *engine)
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_UNDEFINED;
     return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_undefined(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
 
 //PERF
@@ -2965,160 +2832,156 @@ int prim_immediate_resize(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_RESIZE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-int prim_compile_resize(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
 
 
 //Globals
 //=======
 const struct ForthPrimitive forth_primitives[]=
 {
-    {"!",1,NULL,NULL,&prim_body_store},
-    {"C!",2,NULL,NULL,&prim_body_c_store},
-    {"W!",2,NULL,NULL,&prim_body_w_store},
-    {"'",1,&prim_immediate_tick,&prim_compile_tick,NULL},
-    {"(",1,&prim_immediate_paren,&prim_compile_paren,NULL},
-    {"*",1,NULL,NULL,&prim_body_star},
-    {"*/",2,NULL,NULL,&prim_body_star_slash},
-    {"*/MOD",5,NULL,NULL,&prim_body_star_slash_mod},
-    {"+",1,NULL,NULL,&prim_body_plus},
-    {"+LOOP",5,&prim_immediate_plus_loop,&prim_compile_plus_loop,NULL},
-    {",",1,NULL,NULL,&prim_body_comma},
-    {"C,",2,NULL,NULL,&prim_body_c_comma},
-    {"W,",2,NULL,NULL,&prim_body_w_comma},
-    {"-",1,NULL,NULL,&prim_body_minus},
-    {"\\",1,&prim_immediate_backslash,&prim_compile_backslash,NULL},
-    {".",1,NULL,NULL,&prim_body_dot},
-    {"U.",2,NULL,NULL,&prim_body_u_dot},
-    {"X.",2,NULL,NULL,&prim_body_x_dot},
-    {".\"",2,&prim_immediate_dot_quote,&prim_compile_dot_quote,NULL},
-    {"/",1,NULL,NULL,&prim_body_slash},
-    {"/MOD",4,NULL,NULL,&prim_body_slash_mod},
-    {":",1,&prim_immediate_colon,&prim_compile_colon,NULL},
-    {";",1,&prim_immediate_semicolon,&prim_compile_semicolon,NULL},
-    {"<",1,NULL,NULL,&prim_body_less_than},
-    {"=",1,NULL,NULL,&prim_body_equals},
-    {">",1,NULL,NULL,&prim_body_greater_than},
-    {">NUMBER",7,NULL,NULL,&prim_body_to_number},
-    {">NUM",4,NULL,NULL,&prim_body_to_number},
-    {"NUMBER>",7,NULL,NULL,&prim_body_number_to},
-    {"NUM>",4,NULL,NULL,&prim_body_number_to},
-    {">HEX",4,NULL,NULL,&prim_body_to_hex},
-    {"HEX>",4,NULL,NULL,&prim_body_hex_to},
-    {"?DUP",4,NULL,NULL,&prim_body_question_dupe},
-    {"@",1,NULL,NULL,&prim_body_fetch},
-    {"C@",2,NULL,NULL,&prim_body_c_fetch},
-    {"W@",2,NULL,NULL,&prim_body_w_fetch},
-    {"QUIT",4,&prim_immediate_quit,NULL,&prim_body_quit},
-    {"ABS",3,NULL,NULL,&prim_body_abs},
-    {"ACCEPT",6,NULL,NULL,&prim_body_accept},
-    {"ALIGN",5,NULL,NULL,&prim_body_align},
-    {"ALIGNED",7,NULL,NULL,&prim_body_aligned},
-    {"ALLOT",5,NULL,NULL,&prim_body_allot},
-    {"AND",3,NULL,NULL,&prim_body_and},
-    {"BEGIN",5,&prim_immediate_begin,&prim_compile_begin,NULL},
-    {"BL",2,NULL,NULL,&prim_body_b_l},
-    {"BOUNDS",6,NULL,NULL,&prim_body_bounds},
-    {"CELLS",5,NULL,NULL,&prim_body_cells},
-    {"CHAR",4,&prim_immediate_char,&prim_compile_char,NULL},
-    {"CONSTANT",8,&prim_immediate_constant,&prim_compile_constant,NULL},
-    {"CONST",5,&prim_immediate_constant,&prim_compile_constant,NULL},
-    {"CR",2,NULL,NULL,&prim_body_c_r},
-    {"CREATE",6,&prim_immediate_create,&prim_compile_create,NULL},
-    {"DEPTH",5,NULL,NULL,&prim_body_depth},
-    {"DO",2,&prim_immediate_do,&prim_compile_do,NULL},
-    {"DROP",4,NULL,NULL,&prim_body_drop},
-    {"2DROP",5,NULL,NULL,&prim_body_two_drop},
-    {"DUP",3,NULL,NULL,&prim_body_dupe},
-    {"2DUP",4,NULL,NULL,&prim_body_two_dupe},
-    {"ELSE",4,&prim_immediate_else,&prim_compile_else,NULL},
-    {"EMIT",4,NULL,NULL,&prim_body_emit},
-    {"ERASE",5,NULL,NULL,&prim_body_erase},
-    {"EXECUTE",7,&prim_immediate_execute,NULL,&prim_body_execute},
-    {"EXEC",4,&prim_immediate_execute,NULL,&prim_body_execute},
-    {"EXIT",4,&prim_immediate_exit,NULL,&prim_hidden_done},
-    {"FILL",4,NULL,NULL,&prim_body_fill},
-    {"HERE",4,NULL,NULL,&prim_body_here},
-    {"I",1,&prim_immediate_i,&prim_compile_i,NULL},
-    {"IF",2,&prim_immediate_if,&prim_compile_if,NULL},
-    {"INVERT",6,NULL,NULL,&prim_body_invert},
-    {"J",1,&prim_immediate_j,&prim_compile_j,NULL},
-    {"KEY",3,NULL,NULL,&prim_body_key},
-    {"LEAVE",5,&prim_immediate_leave,&prim_compile_leave,NULL},
-    {"LITERAL",7,&prim_immediate_literal,&prim_compile_literal,NULL},
-    {"LIT",3,&prim_immediate_literal,&prim_compile_literal,NULL},
-    {"LOOP",4,&prim_immediate_loop,&prim_compile_loop,NULL},
-    {"LSHIFT",6,NULL,NULL,&prim_body_l_shift},
-    {"MAX",3,NULL,NULL,&prim_body_max},
-    {"MIN",3,NULL,NULL,&prim_body_min},
-    {"MOD",3,NULL,NULL,&prim_body_mod},
-    {"MOVE",4,NULL,NULL,&prim_body_move},
-    {"NEGATE",6,NULL,NULL,&prim_body_negate},
-    {"OR",2,NULL,NULL,&prim_body_or},
-    {"OVER",4,NULL,NULL,&prim_body_over},
-    {"2OVER",5,NULL,NULL,&prim_body_two_over},
-    {"PAGE",4,NULL,NULL,&prim_body_page},
-    {"REPEAT",6,&prim_immediate_repeat,&prim_compile_repeat,NULL},
-    {"ROT",3,NULL,NULL,&prim_body_rote},
-    {"-ROT",4,NULL,NULL,&prim_body_minus_rote},
-    {"RSHIFT",6,NULL,NULL,&prim_body_r_shift},
-    {"S\"",2,&prim_immediate_s_quote,&prim_compile_s_quote,NULL},
-    {"SPACE",5,NULL,NULL,&prim_body_space},
-    {"SPACES",6,NULL,NULL,&prim_body_spaces},
-    {"SWAP",4,NULL,NULL,&prim_body_swap},
-    {"2SWAP",5,NULL,NULL,&prim_body_two_swap},
-    {"THEN",4,&prim_immediate_then,&prim_compile_then,NULL},
-    {"TYPE",4,NULL,NULL,&prim_body_type},
-    {"U<",2,NULL,NULL,&prim_body_u_less_than},
-    {"U>",2,NULL,NULL,&prim_body_u_greater_than},
-    {"UNTIL",5,&prim_immediate_until,&prim_compile_until,NULL},
-    {"VARIABLE",8,&prim_immediate_variable,&prim_compile_variable,NULL},
-    {"VAR",3,&prim_immediate_variable,&prim_compile_variable,NULL},
-    {"WHILE",5,&prim_immediate_while,&prim_compile_while,NULL},
-    {"XOR",3,NULL,NULL,&prim_body_x_or},
-    {"[",1,&prim_immediate_left_bracket,&prim_compile_left_bracket,NULL},
-    {"]",1,&prim_immediate_right_bracket,&prim_compile_right_bracket,NULL},
-    {"[']",3,&prim_immediate_bracket_tick,&prim_compile_bracket_tick,NULL},
-    {"[CHAR]",6,&prim_immediate_bracket_char,&prim_compile_bracket_char,NULL},
-    {".R",2,NULL,NULL,&prim_body_dot_r},
-    {"U.R",3,NULL,NULL,&prim_body_u_dot_r},
-    {"X.R",3,NULL,NULL,&prim_body_x_dot_r},
-    {"<>",2,NULL,NULL,&prim_body_not_equals},
-    {"AGAIN",5,&prim_immediate_again,&prim_compile_again,NULL},
-    //{"CASE",4,&prim_immediate_case,&prim_compile_case,&prim_body_case},
-    //{"ENDCASE",7,&prim_immediate_endcase,&prim_compile_endcase,&prim_body_endcase},
-    //{"OF",2,&prim_immediate_of,&prim_compile_of,&prim_body_of},
-    //{"ENDOF",5,&prim_immediate_endof,&prim_compile_endof,&prim_body_endof},
-    {"FALSE",5,NULL,NULL,&prim_body_false},
-    {"NIP",3,NULL,NULL,&prim_body_nip},
-    {"S\\\"",3,&prim_immediate_s_backslash_quote,&prim_compile_s_backslash_quote,NULL},
-    {"TRUE",4,NULL,NULL,&prim_body_true},
-    {"TUCK",4,NULL,NULL,&prim_body_tuck},
-    {"UNUSED",6,NULL,NULL,&prim_body_unused},
-    {"WITHIN",6,NULL,NULL,&prim_body_within},
-    {".S",2,NULL,NULL,&prim_body_dot_s},
-    {"?",1,NULL,NULL,&prim_body_question},
-    {"DUMP",4,NULL,NULL,&prim_body_dump},
-    //{"SEE",3,&prim_immediate_see,&prim_compile_see,&prim_body_see,&prim_optimize_see},
-    {"WORDS",5,&prim_immediate_words,&prim_compile_words,NULL},
-    {"WORDSIZE",8,&prim_immediate_wordsize,&prim_compile_wordsize,NULL},
-    {"BYE",3,NULL,NULL,&prim_body_bye},
+    {"!",1,NULL,NULL,prim_body_store},
+    {"C!",2,NULL,NULL,prim_body_c_store},
+    {"W!",2,NULL,NULL,prim_body_w_store},
+    {"'",1,prim_immediate_tick,prim_interpret_only,NULL},
+    {"(",1,prim_immediate_paren,prim_compile_paren,NULL},
+    {"*",1,NULL,NULL,prim_body_star},
+    {"*/",2,NULL,NULL,prim_body_star_slash},
+    {"*/MOD",5,NULL,NULL,prim_body_star_slash_mod},
+    {"+",1,NULL,NULL,prim_body_plus},
+    {"+LOOP",5,prim_compile_only,prim_compile_plus_loop,NULL},
+    {",",1,NULL,NULL,prim_body_comma},
+    {"C,",2,NULL,NULL,prim_body_c_comma},
+    {"W,",2,NULL,NULL,prim_body_w_comma},
+    {"-",1,NULL,NULL,prim_body_minus},
+    {"\\",1,prim_immediate_backslash,prim_compile_backslash,NULL},
+    {".",1,NULL,NULL,prim_body_dot},
+    {"U.",2,NULL,NULL,prim_body_u_dot},
+    {"X.",2,NULL,NULL,prim_body_x_dot},
+    {".\"",2,prim_immediate_dot_quote,prim_compile_dot_quote,NULL},
+    {"/",1,NULL,NULL,prim_body_slash},
+    {"/MOD",4,NULL,NULL,prim_body_slash_mod},
+    {":",1,prim_immediate_colon,prim_interpret_only,NULL},
+    {";",1,prim_compile_only,prim_compile_semicolon,NULL},
+    {"<",1,NULL,NULL,prim_body_less_than},
+    {"=",1,NULL,NULL,prim_body_equals},
+    {">",1,NULL,NULL,prim_body_greater_than},
+    {">NUMBER",7,NULL,NULL,prim_body_to_number},
+    {">NUM",4,NULL,NULL,prim_body_to_number},
+    {"NUMBER>",7,NULL,NULL,prim_body_number_to},
+    {"NUM>",4,NULL,NULL,prim_body_number_to},
+    {">HEX",4,NULL,NULL,prim_body_to_hex},
+    {"HEX>",4,NULL,NULL,prim_body_hex_to},
+    {"?DUP",4,NULL,NULL,prim_body_question_dupe},
+    {"@",1,NULL,NULL,prim_body_fetch},
+    {"C@",2,NULL,NULL,prim_body_c_fetch},
+    {"W@",2,NULL,NULL,prim_body_w_fetch},
+    {"QUIT",4,prim_compile_only,NULL,prim_body_quit},
+    {"ABS",3,NULL,NULL,prim_body_abs},
+    {"ACCEPT",6,NULL,NULL,prim_body_accept},
+    {"ALIGN",5,NULL,NULL,prim_body_align},
+    {"ALIGNED",7,NULL,NULL,prim_body_aligned},
+    {"ALLOT",5,NULL,NULL,prim_body_allot},
+    {"AND",3,NULL,NULL,prim_body_and},
+    {"BEGIN",5,prim_compile_only,prim_compile_begin,NULL},
+    {"BL",2,NULL,NULL,prim_body_b_l},
+    {"BOUNDS",6,NULL,NULL,prim_body_bounds},
+    {"CELLS",5,NULL,NULL,prim_body_cells},
+    {"CHAR",4,prim_immediate_char,prim_interpret_only,NULL},
+    {"CONSTANT",8,prim_immediate_constant,prim_interpret_only,NULL},
+    {"CONST",5,prim_immediate_constant,prim_interpret_only,NULL},
+    {"CR",2,NULL,NULL,prim_body_c_r},
+    {"CREATE",6,prim_immediate_create,prim_interpret_only,NULL},
+    {"DEPTH",5,NULL,NULL,prim_body_depth},
+    {"DO",2,prim_compile_only,prim_compile_do,NULL},
+    {"DROP",4,NULL,NULL,prim_body_drop},
+    {"2DROP",5,NULL,NULL,prim_body_two_drop},
+    {"DUP",3,NULL,NULL,prim_body_dupe},
+    {"2DUP",4,NULL,NULL,prim_body_two_dupe},
+    {"ELSE",4,prim_compile_only,prim_compile_else,NULL},
+    {"EMIT",4,NULL,NULL,prim_body_emit},
+    {"ERASE",5,NULL,NULL,prim_body_erase},
+    {"EXECUTE",7,prim_immediate_execute,NULL,prim_body_execute},
+    {"EXEC",4,prim_immediate_execute,NULL,prim_body_execute},
+    {"EXIT",4,prim_compile_only,NULL,prim_hidden_done},
+    {"FILL",4,NULL,NULL,prim_body_fill},
+    {"HERE",4,NULL,NULL,prim_body_here},
+    {"I",1,prim_compile_only,prim_compile_i,NULL},
+    {"IF",2,prim_compile_only,prim_compile_if,NULL},
+    {"INVERT",6,NULL,NULL,prim_body_invert},
+    {"J",1,prim_compile_only,prim_compile_j,NULL},
+    {"KEY",3,NULL,NULL,prim_body_key},
+    {"LEAVE",5,prim_compile_only,prim_compile_leave,NULL},
+    {"LITERAL",7,prim_compile_only,prim_compile_literal,NULL},
+    {"LIT",3,prim_compile_only,prim_compile_literal,NULL},
+    {"LOOP",4,prim_compile_only,prim_compile_loop,NULL},
+    {"LSHIFT",6,NULL,NULL,prim_body_l_shift},
+    {"MAX",3,NULL,NULL,prim_body_max},
+    {"MIN",3,NULL,NULL,prim_body_min},
+    {"MOD",3,NULL,NULL,prim_body_mod},
+    {"MOVE",4,NULL,NULL,prim_body_move},
+    {"NEGATE",6,NULL,NULL,prim_body_negate},
+    {"OR",2,NULL,NULL,prim_body_or},
+    {"OVER",4,NULL,NULL,prim_body_over},
+    {"2OVER",5,NULL,NULL,prim_body_two_over},
+    {"PAGE",4,NULL,NULL,prim_body_page},
+    {"REPEAT",6,prim_compile_only,prim_compile_repeat,NULL},
+    {"ROT",3,NULL,NULL,prim_body_rote},
+    {"-ROT",4,NULL,NULL,prim_body_minus_rote},
+    {"RSHIFT",6,NULL,NULL,prim_body_r_shift},
+    {"S\"",2,prim_immediate_s_quote,prim_compile_s_quote,NULL},
+    {"SPACE",5,NULL,NULL,prim_body_space},
+    {"SPACES",6,NULL,NULL,prim_body_spaces},
+    {"SWAP",4,NULL,NULL,prim_body_swap},
+    {"2SWAP",5,NULL,NULL,prim_body_two_swap},
+    {"THEN",4,prim_compile_only,prim_compile_then,NULL},
+    {"TYPE",4,NULL,NULL,prim_body_type},
+    {"U<",2,NULL,NULL,prim_body_u_less_than},
+    {"U>",2,NULL,NULL,prim_body_u_greater_than},
+    {"UNTIL",5,prim_compile_only,prim_compile_until,NULL},
+    {"VARIABLE",8,prim_immediate_variable,prim_interpret_only,NULL},
+    {"VAR",3,prim_immediate_variable,prim_interpret_only,NULL},
+    {"WHILE",5,prim_compile_only,prim_compile_while,NULL},
+    {"XOR",3,NULL,NULL,prim_body_x_or},
+    {"[",1,prim_compile_only,prim_compile_left_bracket,NULL},
+    {"]",1,prim_immediate_right_bracket,prim_interpret_only,NULL},
+    {"[']",3,prim_compile_only,prim_compile_bracket_tick,NULL},
+    {"[CHAR]",6,prim_compile_only,prim_compile_bracket_char,NULL},
+    {".R",2,NULL,NULL,prim_body_dot_r},
+    {"U.R",3,NULL,NULL,prim_body_u_dot_r},
+    {"X.R",3,NULL,NULL,prim_body_x_dot_r},
+    {"<>",2,NULL,NULL,prim_body_not_equals},
+    {"AGAIN",5,prim_compile_only,prim_compile_again,NULL},
+    //{"CASE",4,prim_immediate_case,prim_compile_case,prim_body_case},
+    //{"ENDCASE",7,prim_immediate_endcase,prim_compile_endcase,prim_body_endcase},
+    //{"OF",2,prim_immediate_of,prim_compile_of,prim_body_of},
+    //{"ENDOF",5,prim_immediate_endof,prim_compile_endof,prim_body_endof},
+    {"FALSE",5,NULL,NULL,prim_body_false},
+    {"NIP",3,NULL,NULL,prim_body_nip},
+    {"S\\\"",3,prim_immediate_s_backslash_quote,prim_compile_s_backslash_quote,NULL},
+    {"TRUE",4,NULL,NULL,prim_body_true},
+    {"TUCK",4,NULL,NULL,prim_body_tuck},
+    {"UNUSED",6,NULL,NULL,prim_body_unused},
+    {"WITHIN",6,NULL,NULL,prim_body_within},
+    {".S",2,NULL,NULL,prim_body_dot_s},
+    {"?",1,NULL,NULL,prim_body_question},
+    {"DUMP",4,NULL,NULL,prim_body_dump},
+    //{"SEE",3,prim_immediate_see,prim_compile_see,prim_body_see,prim_optimize_see},
+    {"WORDS",5,prim_immediate_words,prim_interpret_only,NULL},
+    {"WORDSIZE",8,prim_immediate_wordsize,prim_interpret_only,NULL},
+    {"BYE",3,NULL,NULL,prim_body_bye},
     
     //Words from here are not standard forth
-    {"RESET",5,NULL,NULL,&prim_body_reset},
-    {"WALIGN",6,NULL,NULL,&prim_body_walign},
-    {"WALIGNED",8,NULL,NULL,&prim_body_waligned},
-    {"PRINTABLE",9,NULL,NULL,&prim_body_printable},
-    {"CXT",3,NULL,NULL,&prim_body_cxt},
-    {"WXT",3,NULL,NULL,&prim_body_wxt},
-    {"PRIMITIVES",10,&prim_immediate_primitives,&prim_compile_primitives,NULL},
-    {"SECONDARIES",11,&prim_immediate_secondaries,&prim_compile_secondaries,NULL},
-    {"UNDEFINED",9,&prim_immediate_undefined,&prim_compile_undefined,NULL},
-    {"PERF",4,NULL,NULL,&prim_body_perf},
-    {"SIZE",4,NULL,NULL,&prim_body_size},
-    {"RESIZE",6,&prim_immediate_resize,prim_compile_resize,NULL},
+    {"RESET",5,NULL,NULL,prim_body_reset},
+    {"WALIGN",6,NULL,NULL,prim_body_walign},
+    {"WALIGNED",8,NULL,NULL,prim_body_waligned},
+    {"PRINTABLE",9,NULL,NULL,prim_body_printable},
+    {"CXT",3,NULL,NULL,prim_body_cxt},
+    {"WXT",3,NULL,NULL,prim_body_wxt},
+    {"PRIMITIVES",10,prim_immediate_primitives,prim_interpret_only,NULL},
+    {"SECONDARIES",11,prim_immediate_secondaries,prim_interpret_only,NULL},
+    {"UNDEFINED",9,prim_immediate_undefined,prim_interpret_only,NULL},
+    {"PERF",4,NULL,NULL,prim_body_perf},
+    {"SIZE",4,NULL,NULL,prim_body_size},
+    {"RESIZE",6,prim_immediate_resize,prim_interpret_only,NULL},
 
     //Word browser showing source or disassembly of all words
     //DEBUG that steps through word
@@ -3144,6 +3007,7 @@ const struct ForthPrimitive forth_primitives[]=
 
     //May add but not sure yet
     //1+@! etc
+        //see +! which I think is @1+!
     //FIND ??
         //Note commented out definition!
     //cleave ??

@@ -23,7 +23,7 @@
     //EXECUTE primitive has special handling so expose function externally
     int prim_immediate_execute(struct ForthEngine *engine);
 
-    //Primitives visible externally (but hidden from from user)
+    //Primitives visible externally (but hidden from user)
     void prim_hidden_do(struct ForthEngine *engine);
     void prim_hidden_done(struct ForthEngine *engine);
     void prim_hidden_dot_quote(struct ForthEngine *engine);
@@ -37,5 +37,9 @@
     void prim_hidden_push(struct ForthEngine *engine);
     void prim_hidden_s_quote(struct ForthEngine *engine);
     void prim_hidden_secondary(struct ForthEngine *engine);
+
+    //Primitives called at compile time and visible externally (but hidden from user)
+    int prim_compile_only(struct ForthEngine *engine);
+    int prim_interpret_only(struct ForthEngine *engine);
 
 #endif

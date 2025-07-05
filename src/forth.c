@@ -553,9 +553,6 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
 
     //TODO: check engine->exit_program set by BYE and exit
 
-    //TODO: remove
-    debug_words(compile);
-
     //Show input line again
     console_text_default("\n",console);
     console->input.visible=true;
@@ -577,9 +574,6 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
         process_result=FORTH_ERROR_MEMORY_OTHER;
     }
-
-    //TODO: remove
-    debug_words(compile);
 
     //Process any errors from processing source or resizing control stack or locals
     if (process_result==FORTH_ERROR_NONE)
@@ -642,9 +636,6 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
             //Advance to next word header
             secondary++;
         }
-
-        //TODO: remove
-        debug_words(compile);
 
         //Restore header information to state before aborted word began
         compile->words->index-=header_count;
@@ -956,8 +947,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\nsize 4 * resize -4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
-    const char *debug_keys="8 const r : nqueens\n";
-    //const char *debug_keys="";
+    //const char *debug_keys="8 const r : nqueens\n";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;
