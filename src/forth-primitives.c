@@ -402,12 +402,12 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     }
 }
 
-int prim_compile_only(struct ForthEngine *engine)
+int prim_compile_only(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_COMPILE_ONLY;
 }
 
-int prim_interpret_only(struct ForthEngine *engine)
+int prim_interpret_only(UNUSED(struct ForthEngine *engine))
 {
     return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
 }
@@ -2686,6 +2686,15 @@ void prim_body_bye(struct ForthEngine *engine)
     engine->executing=false;
 }
 
+
+//LOCALS
+int prim_compile_locals(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_LOCALS;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
 //RESET
 void prim_body_reset(struct ForthEngine *engine)
 {
@@ -2968,6 +2977,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"WORDS",5,prim_immediate_words,prim_interpret_only,NULL},
     {"WORDSIZE",8,prim_immediate_wordsize,prim_interpret_only,NULL},
     {"BYE",3,NULL,NULL,prim_body_bye},
+    {"{",1,prim_compile_only,prim_compile_locals,NULL},
     
     //Words from here are not standard forth
     {"RESET",5,NULL,NULL,prim_body_reset},
@@ -3019,6 +3029,6 @@ const struct ForthPrimitive forth_primitives[]=
         //objdump -t shows function lengths
 };
 
-//Can't determine length of array primitives in other files, so calculate here
+//Can't determine length of primitives array using sizeof in other files, so calculate here
 const int forth_primitives_len=(int)(ARRAY_LEN(forth_primitives));
 

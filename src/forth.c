@@ -424,6 +424,9 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_UNTERMINATED_WHILE:
             console_text_default("WHILE without matching REPEAT\n",console);
             break;
+        case FORTH_ERROR_UNTERMINATED_LOCALS:
+            console_text_default("{ without matching }\n",console);
+            break;
         case FORTH_ERROR_UNTIL_WITHOUT_BEGIN:
             console_text_default("UNTIL without matching BEGIN\n",console);
             break;
@@ -539,12 +542,10 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     draw_console(console);
     dupdate();
 
-    //Initialize control stack and locals for processing input
+    //Initialize control stack for processing input
     //(Handle outside of process_source since may call elsewhere for multiline input)
     compile->control_stack->index=0;
     compile->control_stack->bytes_left=FORTH_MEM_CONTROL_STACK-sizeof(struct ForthControlInfo);
-    compile->locals->index=0;
-    compile->locals->bytes_left=FORTH_MEM_LOCALS-sizeof(struct ForthLocalsInfo);
 
     //Process input
     char input_buffer[FORTH_INPUT_MAX];
@@ -604,9 +605,6 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         bool looping=true;
         while(looping==true)
         {
-            
-            printf("name: %s, last: %d, done: %d\n",secondary->name,secondary->last,secondary->done);
-
             //Check if at end of list first since ->done not valid unless ->last is false
             if (secondary->last==false)
             {

@@ -266,12 +266,20 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         return FORTH_ERROR_NOT_BETWEEN_BRACKETS;
     }
 
+    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
     int word_type;
     int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
     if (result!=FORTH_ERROR_NONE) return result;
-    
+
+    //Reset locals memory for new word
+    compile->locals->index=0;
+    struct ObjectInfo *locals_info=object_address(FORTH_ID_LOCALS,compile->heap_ptr);
+    compile->locals->bytes_left=object_data_size(locals_info)-sizeof(struct ForthLocalsInfo);
+    compile->locals->total_count=0;
+    compile->locals->names[0]=0;
+ 
     //Logging
     log_text("name: %s\n",word_buffer);
 
@@ -627,6 +635,56 @@ int action_leave(struct ForthCompileInfo *compile)
     if (result!=FORTH_ERROR_NONE) return result;
 
     return FORTH_ERROR_NONE;
+}
+
+//TODO: doesn't support locals list spanning more than one line
+//TODO: also, quotes face the same problem
+int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len;
+    int word_type;
+
+    //Keep count of local names starting now. (Separate from total count since {} may appear more than once.)
+    compile->locals->current_count=0;
+
+    //Loop through list creating locals until } marking end of list found
+    while(1)
+    {
+        int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
+        if (result!=FORTH_ERROR_NONE)
+        {
+            if (result==FORTH_ERROR_NO_WORD)
+            {
+                //Error - end of line found with no terminating }
+                return FORTH_ERROR_UNTERMINATED_LOCALS;
+            }
+            else
+            {
+                //Error - name too long or name is primitive
+                return result;
+            }
+        }
+
+        if (!strcmp(word_buffer,"}"))
+        {
+            //Found end of locals list - done looping
+
+
+            HERE: print out names of locals added
+
+            return FORTH_ERROR_NONE;
+        }
+        else
+        {
+            //Word name is valid - create local
+
+            HERE: call add_local
+
+            printf("%s\n",word_buffer);
+        }
+    }
 }
 
 int action_loop(struct ForthCompileInfo *compile)

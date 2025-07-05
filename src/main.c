@@ -13,6 +13,9 @@
   - then can benchmark
   - store names after word for browser
 
+- move actions to array for primitives?
+  - are there actually any prim_compile_ functions that do anything other than return action?
+
 - try blue for primitives
   - color by primitive type too?
 
@@ -37,7 +40,7 @@
 
 - CASE
 
-- rework key
+- rework word key
   - two words rather than word w arg
   - sys_key word
 */
@@ -206,7 +209,7 @@ switch case as mentioned online?
 //Constants
 //=========
 #define TICK_MS         40  //25 FPS
-#define SCALE_FACTOR    4
+#define SCALE_FACTOR    3
 
 //Functions
 //=========

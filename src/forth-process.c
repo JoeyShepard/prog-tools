@@ -625,6 +625,42 @@ int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct For
     return FORTH_ERROR_NONE;
 }
 
+int add_local(const char *word_buffer,struct ForthCompileInfo *compile)
+{
+    int word_len=strlen(word_buffer);
+    if (compile->locals->bytes_left<word_len+1)
+    {
+        //Not enough room left to push local name - expand memory
+        int result=expand_object(FORTH_MEM_LOCALS,FORTH_ID_LOCALS,compile->heap_ptr);
+        if (result!=ERROR_NONE)
+        {
+            //Error while allocating memory
+            if (result==ERROR_OUT_OF_MEMORY)
+                return FORTH_ERROR_OUT_OF_MEMORY;
+            else
+            {
+                //Some other type of allocation error like alignment
+                return FORTH_ERROR_MEMORY_OTHER;
+            }
+        }
+
+        //Update count of bytes left
+        compile->locals->bytes_left+=FORTH_MEM_LOCALS;
+
+        //Update pointers since shifted by expand_object above
+        update_compile_pointers(compile);
+    }
+
+    //Write new local name to locals memory
+    strcpy(compile->locals->names+compile->locals->index,word_buffer);
+    compile->locals->index+=word_len+1;
+    compile->locals->bytes_left-=word_len+1;
+    compile->locals->current_count++;
+    compile->locals->total_count++;
+
+    return FORTH_ERROR_NONE;
+}
+
 int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile)
 {
     //Primitive like BYE may set flag to request that caller close program
@@ -987,6 +1023,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
                             }
+                            case FORTH_ACTION_LOCALS:
+                                result=action_locals(engine,source,&start,compile);
+                                break;
                             case FORTH_ACTION_LOOP:
                                 result=action_loop(compile);
                                 break;

@@ -133,6 +133,7 @@
         FORTH_ERROR_UNTERMINATED_IF,
         FORTH_ERROR_UNTERMINATED_ELSE,
         FORTH_ERROR_UNTERMINATED_WHILE,
+        FORTH_ERROR_UNTERMINATED_LOCALS,
         FORTH_ERROR_UNTIL_WITHOUT_BEGIN,
         FORTH_ERROR_WHILE_WITHOUT_BEGIN,
     };
@@ -208,6 +209,8 @@
     {
         uint32_t index;
         uint32_t bytes_left;
+        uint32_t current_count;
+        uint32_t total_count;
         //Flexible Array Member - memory allocated after struct holds definition data
         char names[];
     };
