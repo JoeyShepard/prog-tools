@@ -9,8 +9,10 @@ void forth_init_engine(struct ForthEngine *engine,
     //Stacks
     void *stack_base,
     void *rstack_base,
+    void *locals_base,
     uint32_t stack_count,
     uint32_t rstack_count,
+    uint32_t locals_count,
     //Data area
     uint32_t data_size,
     //Compatibility function pointers
@@ -34,6 +36,7 @@ void forth_init_engine(struct ForthEngine *engine,
     //Init Forth engine parameters
     engine->stack_count=stack_count;
     engine->rstack_count=rstack_count;
+    engine->locals_count=locals_count;
     //Size must be power of 2 for mask to work correctly
     forth_gen_masks(engine,data_size);
 
@@ -66,6 +69,7 @@ void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size)
     engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
 }
 
+//TODO: move code here or remove?
 //Called on program switch
 void forth_reload_engine(struct ForthEngine *engine,uint8_t *data)
 {
@@ -90,6 +94,7 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
     //Reset stack pointers
     engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
     engine->rstack=engine->rstack_base+engine->rstack_count-1;
+    engine->locals_stack=engine->locals_base+engine->locals_count-1;
 }
 
 //Called before executing word in outer interpreter (ie process_source in forth.c)
@@ -112,8 +117,9 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
     engine->loop_j=0;
     engine->loop_j_max=0;
 
-    //Reset Forth return stack
+    //Reset Forth return and locals stacks
     engine->rstack=engine->rstack_base+engine->rstack_count-1;
+    engine->locals_stack=engine->locals_base+engine->locals_count-1;
 }
 
 int32_t forth_stack_count(struct ForthEngine *engine)

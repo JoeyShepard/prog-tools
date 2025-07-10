@@ -11,10 +11,15 @@
 /*
 - local variables
   - then can benchmark
-  - store names after word for browser
+  - store names after word for debugger and browser
+
+- number words: -1, 0, 1, etc
 
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
+
+- stack_item_t? no
+  - already have FORTH_CELL_SIZE but forgot. replace sizeof(int32_t) elsewhere?
 
 - try blue for primitives
   - color by primitive type too?

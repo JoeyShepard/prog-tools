@@ -315,6 +315,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_HEX32_RANGE:
         case FORTH_ERROR_INT32_RANGE:
         case FORTH_ERROR_INVALID_NAME:
+        case FORTH_ERROR_LOCAL_EXISTS:
         case FORTH_ERROR_MISSING_QUOTE:
         case FORTH_ERROR_NO_WORD:
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
@@ -327,6 +328,8 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
                 console_text_default("Number out of range: ",console);
             else if (process_result==FORTH_ERROR_INVALID_NAME)
                 console_text_default("Invalid word for operation: ",console);
+            else if (process_result==FORTH_ERROR_LOCAL_EXISTS)
+                console_text_default("Local variable already exists: ",console);
             else if (process_result==FORTH_ERROR_MISSING_QUOTE)
                 console_text_default("Missing \" after ",console);
             else if (process_result==FORTH_ERROR_NO_WORD)
@@ -343,7 +346,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             uint32_t start=0;
             uint32_t word_len=next_word_source(compile->error_word,&start);
             for (uint32_t i=0;i<word_len;i++)
-                console_char_default(compile->error_word[i],console);
+                console_char_default(compile->error_word[i+start],console);
             console_text_default("\n",console);
             break;
         case FORTH_ERROR_AGAIN_WITHOUT_BEGIN:
@@ -832,8 +835,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         forth_init_engine(forth->engine,
             FORTH_STACK_ADDRESS,
             FORTH_RSTACK_ADDRESS,
+            FORTH_LOCALS_ADDRESS,
             FORTH_STACK_ELEMENTS,
             FORTH_RSTACK_ELEMENTS,
+            FORTH_LOCALS_ELEMENTS,
             FORTH_MEM_DATA,
             forth_print,
             forth_print_color,
@@ -946,7 +951,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
     //const char *debug_keys="8 const r : nqueens\n";
-    const char *debug_keys="";
+    const char *debug_keys=": foo { B a b c } { x y z }\n";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

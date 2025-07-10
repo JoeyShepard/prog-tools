@@ -9,7 +9,7 @@
     #define FORTH_TRUE              -1
 
     #define FORTH_CELL_SIZE         ((int)sizeof(int32_t))
-    struct ForthRStackElement;
+    struct ForthRStackElement;          //Forward declaration for struct for return stack element
     #define FORTH_RSTACK_ELEMENT_SIZE   sizeof(struct ForthRStackElement)
 
     //Primitves assume stacks are aligned to their sizes, so calculated size here must be power of two
@@ -164,6 +164,11 @@
         struct ForthRStackElement *rstack;      //Points to currently free stack element
         uint32_t rstack_count;                  //Count of elements allocated for stack
 
+        //Locals stack
+        int32_t *locals_base;
+        int32_t *locals_stack;
+        uint32_t locals_count;
+
         //Loop counters
         int32_t loop_i;
         int32_t loop_i_max;
@@ -225,9 +230,11 @@
         uint32_t name_len;
         char *name;
         uint16_t ID;                        //ID assigned to each user-defined word
+        uint16_t locals_size;               //Size in bytes of locals memory that word uses
         uint8_t type;                       //User-defined word, variable, constant, etc
         bool last;                          //Whether this header is empty header marking end of list
         bool done;                          //Whether word is done being processed. Used to rewind if error in word.
+        
     };
 
 
@@ -237,8 +244,10 @@
         //Stacks
         void *stack_base,
         void *rstack_base,
+        void *locals_stack_base,
         uint32_t stack_count,
         uint32_t rstack_count,
+        uint32_t locals_stack_count,
         //Data area
         uint32_t data_size,
         //Function pointers

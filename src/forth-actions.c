@@ -141,11 +141,17 @@ static int action_source_pre(const char *source,uint32_t *start,char *word_buffe
     }
     else if (*word_len==0)
     {
+        //Logging
+        log_pop();
+
         //Error - no word name after primitive
         compile->error_word=source+prior_start-compile->word_len;
         *start=prior_start;
         return FORTH_ERROR_NO_WORD;
     }
+
+    //Logging
+    log_text("word_len: %d\n",*word_len);
 
     //Make sure name of new word is not primitive or number
     strncpy(word_buffer,source+*start,*word_len);
@@ -165,6 +171,7 @@ static int action_source_pre(const char *source,uint32_t *start,char *word_buffe
     }
 
     //Logging
+    log_text("done\n");
     log_pop();
 
     return FORTH_ERROR_NONE;
@@ -277,7 +284,7 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     compile->locals->index=0;
     struct ObjectInfo *locals_info=object_address(FORTH_ID_LOCALS,compile->heap_ptr);
     compile->locals->bytes_left=object_data_size(locals_info)-sizeof(struct ForthLocalsInfo);
-    compile->locals->total_count=0;
+    compile->locals->count=0;
     compile->locals->names[0]=0;
  
     //Logging
@@ -570,6 +577,8 @@ int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompile
         return FORTH_ERROR_EXECUTE_ID;
     }
 
+    //Rest of processing occurs in process_source which calls action_execute
+
     return FORTH_ERROR_NONE;
 }
 
@@ -641,17 +650,19 @@ int action_leave(struct ForthCompileInfo *compile)
 //TODO: also, quotes face the same problem
 int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
 {
-    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
+    //Keep count of local names starting. (Separate from total count since {} may appear more than once.)
+    uint16_t initial_count=compile->locals->count;
+
+    //Loop through list creating locals until } marking end of list found
     char word_buffer[FORTH_WORD_MAX+1];
     uint32_t word_len;
     int word_type;
-
-    //Keep count of local names starting now. (Separate from total count since {} may appear more than once.)
-    compile->locals->current_count=0;
-
-    //Loop through list creating locals until } marking end of list found
     while(1)
     {
+        //Save *start since advanced by action_source_pre below
+        uint32_t prior_start=*start;
+
+        //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
         int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
         if (result!=FORTH_ERROR_NONE)
         {
@@ -670,19 +681,23 @@ int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,
         if (!strcmp(word_buffer,"}"))
         {
             //Found end of locals list - done looping
-
-
-            HERE: print out names of locals added
-
             return FORTH_ERROR_NONE;
         }
         else
         {
             //Word name is valid - create local
+            int result=add_local(word_buffer,compile);
+            if (result!=FORTH_ERROR_NONE)
+            {
+                if (result==FORTH_ERROR_LOCAL_EXISTS)
+                {
+                    //Error - local name already in use
+                    compile->error_word=source+prior_start;
+                }
 
-            HERE: call add_local
-
-            printf("%s\n",word_buffer);
+                //Error while adding local name to list
+                return result;
+            }
         }
     }
 }
@@ -1508,6 +1523,9 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
         //Compact memory of old definition
         action_compact(compile->delete_offset,compile->delete_size,compile);
     }
+
+    //Set number of bytes of locals memory used by word
+    compile->colon_word->locals_size=compile->locals->count*FORTH_CELL_SIZE;
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;

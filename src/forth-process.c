@@ -651,14 +651,59 @@ int add_local(const char *word_buffer,struct ForthCompileInfo *compile)
         update_compile_pointers(compile);
     }
 
+    //Local name already used?
+    for (int i=0;i<compile->locals->count;i++)
+    {
+        if (local_id(word_buffer,compile)!=-1)
+        {
+            //Error - local name already in use
+            return FORTH_ERROR_LOCAL_EXISTS;
+        }
+    }
+
     //Write new local name to locals memory
     strcpy(compile->locals->names+compile->locals->index,word_buffer);
     compile->locals->index+=word_len+1;
     compile->locals->bytes_left-=word_len+1;
-    compile->locals->current_count++;
-    compile->locals->total_count++;
+    compile->locals->count++;
 
     return FORTH_ERROR_NONE;
+}
+
+int local_id(const char *word_buffer,struct ForthCompileInfo *compile)
+{
+    //Loop through locals names looking for match
+    const char *names=compile->locals->names;
+    for (int i=0;i<compile->locals->count;i++)
+    {
+        if (!strcasecmp(names,word_buffer))
+        {
+            //Match to name found - return ID
+            return i;
+        }
+
+        //Advance to next local name in list
+        names+=strlen(names)+1;
+    }
+
+    //No match found
+    return -1;
+}
+
+const char *local_name(uint16_t id,struct ForthCompileInfo *compile)
+{
+    if (id>=compile->locals->count)
+    {
+        //Error - ID number is greater than number of locals
+        return NULL;
+    }
+
+    //Loop through names to find name specificed by ID
+    const char *names=compile->locals->names;
+    for (int i=0;i<id;i++) names+=strlen(names)+1;
+
+    //Return pointer to word specificed by ID
+    return names;
 }
 
 int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile)

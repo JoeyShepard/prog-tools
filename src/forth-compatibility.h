@@ -11,6 +11,7 @@
     
     //Element counts must be power of 2!
     #define FORTH_STACK_ELEMENTS    256     //int32_t                   1K
+    //TODO: double check sizeof struct
     #define FORTH_RSTACK_ELEMENTS   256     //struct ForthRStackElement 2k
     #define FORTH_LOCALS_ELEMENTS   512     //int32_t                   2k
     #define FORTH_COMPAT_STACKS     xram    //Pointer to memory where stacks are stored

@@ -2,597 +2,77 @@
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
+action_source_pre
+- word_len: 517083564
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
+action_source_pre
+- word_len: 3
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
+action_source_pre
+- word_len: 3
+- done
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
+action_source_pre
+- word_len: 3
+- done
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 137 of 148 (11 left)
+Primitive count: 138 of 148 (10 left)
 
 
 LOGGING RESTARTED

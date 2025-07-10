@@ -112,6 +112,7 @@
         FORTH_ERROR_INTERNAL,
         FORTH_ERROR_INVALID_NAME,
         FORTH_ERROR_LEAVE_WITHOUT_DO,
+        FORTH_ERROR_LOCAL_EXISTS,
         FORTH_ERROR_LOOP_WITHOUT_DO,
         FORTH_ERROR_MEMORY_OTHER,
         FORTH_ERROR_MISSING_QUOTE,
@@ -209,8 +210,7 @@
     {
         uint32_t index;
         uint32_t bytes_left;
-        uint32_t current_count;
-        uint32_t total_count;
+        uint32_t count;
         //Flexible Array Member - memory allocated after struct holds definition data
         char names[];
     };

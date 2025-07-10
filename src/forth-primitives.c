@@ -1600,6 +1600,8 @@ void prim_body_execute(struct ForthEngine *engine)
                 //Decrease R-stack pointer to next element
                 engine->rstack--;
 
+                //START HERE - locals
+
                 //Set new execution address to address of secondary stored in word header list
                 engine->address=secondary->address;
 
