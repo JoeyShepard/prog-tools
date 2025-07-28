@@ -20,6 +20,7 @@ set(SOURCES
   src/forth.c
   src/forth-compatibility.c
   src/forth-engine.c
+  src/forth-locals.c
   src/forth-primitives.c
   src/forth-process.c
   src/getkey.c

@@ -3,12 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-//TODO: remove
-#include "text.h"
-
 #include "error.h"
 #include "forth.h"
 #include "forth-actions.h"
+#include "forth-locals.h"
 #include "forth-primitives.h"
 #include "forth-process.h"
 #include "logging.h"
@@ -627,7 +625,7 @@ int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct For
 
 int add_local(const char *word_buffer,struct ForthCompileInfo *compile)
 {
-    int word_len=strlen(word_buffer);
+    unsigned int word_len=strlen(word_buffer);
     if (compile->locals->bytes_left<word_len+1)
     {
         //Not enough room left to push local name - expand memory
@@ -651,15 +649,18 @@ int add_local(const char *word_buffer,struct ForthCompileInfo *compile)
         update_compile_pointers(compile);
     }
 
-    //Local name already used?
-    for (int i=0;i<compile->locals->count;i++)
+    if (local_id(word_buffer,compile)!=-1)
     {
-        if (local_id(word_buffer,compile)!=-1)
-        {
-            //Error - local name already in use
-            return FORTH_ERROR_LOCAL_EXISTS;
-        }
+        //Error - local name already in use
+        return FORTH_ERROR_LOCAL_EXISTS;
     }
+
+    if (compile->locals->count==FORTH_LOCALS_WORD_MAX)
+    {
+        //Error - exceeded max number of locals allowed in a word
+        return FORTH_ERROR_MAX_LOCALS;
+    }
+
 
     //Write new local name to locals memory
     strcpy(compile->locals->names+compile->locals->index,word_buffer);
@@ -674,7 +675,7 @@ int local_id(const char *word_buffer,struct ForthCompileInfo *compile)
 {
     //Loop through locals names looking for match
     const char *names=compile->locals->names;
-    for (int i=0;i<compile->locals->count;i++)
+    for (unsigned int i=0;i<compile->locals->count;i++)
     {
         if (!strcasecmp(names,word_buffer))
         {
@@ -1035,7 +1036,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 result=action_do(compile);
                                 break;
                             case FORTH_ACTION_DOT_QUOTE:
-                            {
                                 //Write primitive that reads and prints characters
                                 result=write_definition_primitive(&prim_hidden_dot_quote,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
@@ -1044,7 +1044,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 result=action_quote_common(engine,source,&start,false,true,compile);
                                 if (result!=FORTH_ERROR_NONE) return result;
                                 break;
-                            }
                             case FORTH_ACTION_ELSE:
                                 result=action_else(compile);
                                 break;
@@ -1069,7 +1068,10 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 break;
                             }
                             case FORTH_ACTION_LOCALS:
-                                result=action_locals(engine,source,&start,compile);
+                                result=action_locals(source,&start,false,compile);
+                                break;
+                            case FORTH_ACTION_LOCALS_0:
+                                result=action_locals(source,&start,true,compile);
                                 break;
                             case FORTH_ACTION_LOOP:
                                 result=action_loop(compile);
@@ -1111,6 +1113,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             case FORTH_ACTION_THEN:
                                 result=action_then(compile);
                                 break;
+                            case FORTH_ACTION_TO:
+                                result=action_to(source,&start,compile);
+                                break;
                             case FORTH_ACTION_UNTIL:
                                 result=action_until(compile);
                                 break;
@@ -1135,28 +1140,41 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     //Stop logging
                     log_pop();
                 }
-                else if (word_type==FORTH_TYPE_SECONDARY)
+                else
                 {
-                    //Compile pointer to secondary
-                    int result=write_definition_primitive(&prim_hidden_secondary,compile);
-                    if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32(compile->secondary->ID,compile);
-                    if (result!=FORTH_ERROR_NONE) return result;
-                }
-                else if (word_type==FORTH_TYPE_NOT_FOUND)
-                {
-                    //Save copy of index of header where new word will be
-                    uint16_t new_index=compile->words->index;
-                    
-                    //Unknown symbol - add word header but don't error
-                    int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,false,compile);
-                    if (result!=FORTH_ERROR_NONE) return result;
+                    //Check if word is local before checking if secondary
+                    int id=local_id(word_buffer,compile);
+                    if (id!=-1)
+                    {
+                        //Word is local
 
-                    //Compile pointer to secondary
-                    result=write_definition_primitive(&prim_hidden_secondary,compile);
-                    if (result!=FORTH_ERROR_NONE) return result;
-                    result=write_definition_u32(new_index,compile);
-                    if (result!=FORTH_ERROR_NONE) return result;
+                        //Write primitive to push local value to stack
+                        int result=write_definition_primitive(forth_locals_fetch[id],compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
+                    else if (word_type==FORTH_TYPE_SECONDARY)
+                    {
+                        //Compile pointer to secondary
+                        int result=write_definition_primitive(&prim_hidden_secondary,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                        result=write_definition_u32(compile->secondary->ID,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
+                    else if (word_type==FORTH_TYPE_NOT_FOUND)
+                    {
+                        //Save copy of index of header where new word will be
+                        uint16_t new_index=compile->words->index;
+                        
+                        //Unknown symbol - add word header but don't error
+                        int result=new_secondary(word_buffer,FORTH_SECONDARY_UNDEFINED,false,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+
+                        //Compile pointer to secondary
+                        result=write_definition_primitive(&prim_hidden_secondary,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                        result=write_definition_u32(new_index,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
                 }
             }
         }

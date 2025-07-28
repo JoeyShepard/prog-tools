@@ -320,6 +320,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_NO_WORD:
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
         case FORTH_ERROR_NOT_FOUND:
+        case FORTH_ERROR_TO_INVALID:
         case FORTH_ERROR_TOO_LONG:
             //All of these errors share code for printing out word that caused error
             if (process_result==FORTH_ERROR_HEX32_RANGE)
@@ -377,6 +378,13 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             break;
         case FORTH_ERROR_LEAVE_WITHOUT_DO:
             console_text_default("LEAVE without matching DO\n",console);
+            break;
+        case FORTH_ERROR_MAX_LOCALS:
+            console_text_default("Max ",console);
+            char count_buffer[TEXT_UINT32_SIZE];
+            text_uint32(FORTH_LOCALS_WORD_MAX,count_buffer);
+            console_text_default(count_buffer,console);
+            console_text_default(" locals allowed per word\n ",console);
             break;
         case FORTH_ERROR_MEMORY_OTHER:
             console_text_default("Memory allocation error such as alignment\n",console);
@@ -491,6 +499,9 @@ static void output_error_engine(struct ForthInfo *forth,struct ForthCompileInfo 
             console_text_default("Hex number out of range: ",console);
             console_text_default(forth->engine->error_num,console);
             console_text_default("...\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_LOCAL_STACK_FULL:
+            console_text_default("Break - out of local stack space\n",console);
             break;
         case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
             console_text_default("Word must occur in definition: ]\n",console);
@@ -951,8 +962,14 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": a 4 ;\n: b 5 ;\n: c a b ;\n: d c + c * * ;\n: e d d * ;\ne .\n-4 allot\ns\" QRSTUVW\"\ndump\n";
     //const char *debug_keys="-10 allot s\" ABCDEFGHIJKLMNOPQRSTUVWXYZ\" -4 swap move -16 64 dump\n";
     //const char *debug_keys="8 const r : nqueens\n";
-    const char *debug_keys=": foo { B a b c } { x y z }\n";
-    //const char *debug_keys="";
+    //const char *debug_keys=": foo { B a b c } { x y z }\n";
+    //const char *debug_keys=": foo { a b c d e f g h k l m n o p q r s t u v w x y z x1 x2 x3 x4 x5 x6 x7 x8 x9 } ;\n";
+    //const char *debug_keys=": foo { a b c } { x y z } z y x c a b ;\n1 2 3 4 5 6 7 foo\n";
+    //const char *debug_keys=": foo 1 2 3 { x y z } y 7 to y y ;\nfoo\n";
+    //const char *debug_keys=": foo 5 ;\n: bar 7 { foo } foo 9 to foo foo ;\nbar\n";
+    //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { a b c } b a * c - baz ;\n: baz { a } a a * ;\n1 2 3 foo\n";
+    //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { b c d } c b * d - baz ;\n: baz { c } c c * ;\n1 2 3 foo\n";
+    const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

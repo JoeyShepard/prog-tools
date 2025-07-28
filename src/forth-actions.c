@@ -5,6 +5,7 @@
 #include "error.h"
 #include "forth.h"
 #include "forth-engine.h"
+#include "forth-locals.h"
 #include "forth-process.h"
 #include "forth-primitives.h"
 #include "logging.h"
@@ -648,9 +649,9 @@ int action_leave(struct ForthCompileInfo *compile)
 
 //TODO: doesn't support locals list spanning more than one line
 //TODO: also, quotes face the same problem
-int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+int action_locals(const char *source,uint32_t *start,bool init_zero,struct ForthCompileInfo *compile)
 {
-    //Keep count of local names starting. (Separate from total count since {} may appear more than once.)
+    //Keep count of local names before starting. (Separate from total count since {} may appear more than once.)
     uint16_t initial_count=compile->locals->count;
 
     //Loop through list creating locals until } marking end of list found
@@ -659,7 +660,7 @@ int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,
     int word_type;
     while(1)
     {
-        //Save *start since advanced by action_source_pre below
+        //Save *start in case needed for error message since advanced by action_source_pre below
         uint32_t prior_start=*start;
 
         //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
@@ -680,7 +681,29 @@ int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,
 
         if (!strcmp(word_buffer,"}"))
         {
-            //Found end of locals list - done looping
+            //Found end of locals list
+            int final_count=compile->locals->count-initial_count;
+            if (final_count!=0)
+            {
+                //At least one local exists
+                if (init_zero==true)
+                {
+                    //Add primitive to initialize locals to zero
+                    int result=write_definition_primitive(&prim_locals_zero,compile);
+                    if (result!=FORTH_ERROR_NONE) return result;
+                }
+                else
+                {
+                    //Add primitive to copy values from stack to locals
+                    int result=write_definition_primitive(&prim_locals_copy,compile);
+                    if (result!=FORTH_ERROR_NONE) return result;
+                }
+
+                //Pack count and offset into one uint32 for primitive to use
+                result=write_definition_u32((final_count<<16)|(compile->locals->count-1),compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+            }
+
             return FORTH_ERROR_NONE;
         }
         else
@@ -1524,8 +1547,8 @@ int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile
         action_compact(compile->delete_offset,compile->delete_size,compile);
     }
 
-    //Set number of bytes of locals memory used by word
-    compile->colon_word->locals_size=compile->locals->count*FORTH_CELL_SIZE;
+    //Set number of locals used by word
+    compile->colon_word->locals_count=compile->locals->count;
 
     //Set compile state back to interpret
     engine->state=FORTH_STATE_INTERPRET;
@@ -1619,6 +1642,33 @@ int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct
         compile->error_word=source+*start;
         return FORTH_ERROR_INVALID_NAME;
     }
+}
+
+int action_to(const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    //Extract word name, len, and type. Also, catch errors - no name, name too long, name not primary or secondary.
+    char word_buffer[FORTH_WORD_MAX+1];
+    uint32_t word_len;
+    int word_type;
+    int result=action_source_pre(source,start,word_buffer,&word_len,&word_type,compile);
+    if (result!=FORTH_ERROR_NONE) return result;
+
+    //Check that local name is valid
+    int id=local_id(word_buffer,compile);
+    if (id!=-1)
+    {
+        //Local found - compile code to write stack value to word
+        int result=write_definition_primitive(forth_locals_store[id],compile);
+        if (result!=FORTH_ERROR_NONE) return result;
+    }
+    else
+    {
+        //Error - local not found
+        compile->error_word=source+*start-word_len;
+        return FORTH_ERROR_INVALID_NAME;
+    }
+
+    return FORTH_ERROR_NONE;
 }
 
 int action_until(struct ForthCompileInfo *compile)

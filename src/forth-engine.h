@@ -71,6 +71,7 @@
         FORTH_ACTION_LEAVE,
         FORTH_ACTION_LITERAL,
         FORTH_ACTION_LOCALS,
+        FORTH_ACTION_LOCALS_0,
         FORTH_ACTION_LOOP,
         FORTH_ACTION_OF,
         FORTH_ACTION_PAREN,
@@ -84,6 +85,7 @@
         FORTH_ACTION_SEMICOLON,
         FORTH_ACTION_THEN,
         FORTH_ACTION_TICK,
+        FORTH_ACTION_TO,
         FORTH_ACTION_UNDEFINED,
         FORTH_ACTION_UNTIL,
         FORTH_ACTION_VARIABLE,
@@ -102,6 +104,7 @@
         FORTH_ENGINE_ERROR_INT32_RANGE,
         FORTH_ENGINE_ERROR_HEX32_RANGE,
         FORTH_ENGINE_ERROR_INTERPRET_ONLY,
+        FORTH_ENGINE_ERROR_LOCAL_STACK_FULL,
         FORTH_ENGINE_ERROR_RIGHT_BRACKET,
         FORTH_ENGINE_ERROR_RSTACK_FULL,
         FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
@@ -146,6 +149,7 @@
         uint32_t value;
         uint32_t value_max;
         uint32_t index;         //TODO: need? can probably delete
+        uint16_t locals_count;
         uint8_t type;
     };
 
@@ -230,7 +234,7 @@
         uint32_t name_len;
         char *name;
         uint16_t ID;                        //ID assigned to each user-defined word
-        uint16_t locals_size;               //Size in bytes of locals memory that word uses
+        uint16_t locals_count;              //Count of local variables used
         uint8_t type;                       //User-defined word, variable, constant, etc
         bool last;                          //Whether this header is empty header marking end of list
         bool done;                          //Whether word is done being processed. Used to rewind if error in word.

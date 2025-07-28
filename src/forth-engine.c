@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+//TODO: remove
+#include <stdio.h>
+
 #include "forth-engine.h"
 #include "logging.h"
 #include "structs.h"
@@ -32,6 +35,7 @@ void forth_init_engine(struct ForthEngine *engine,
     //Init Forth engine pointers (these values never change)
     engine->stack_base=(uintptr_t)stack_base;
     engine->rstack_base=(struct ForthRStackElement *)rstack_base;
+    engine->locals_base=locals_base;
 
     //Init Forth engine parameters
     engine->stack_count=stack_count;
@@ -119,7 +123,7 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
 
     //Reset Forth return and locals stacks
     engine->rstack=engine->rstack_base+engine->rstack_count-1;
-    engine->locals_stack=engine->locals_base+engine->locals_count-1;
+    engine->locals_stack=engine->locals_base+engine->locals_count;
 }
 
 int32_t forth_stack_count(struct ForthEngine *engine)
@@ -186,6 +190,9 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         engine->word_headers=word_headers;
         engine->word_bodies=word_bodies;
         engine->word_count=word_count;
+
+        //Allocate room on locals stack
+        engine->locals_stack-=secondary->locals_count;
 
         //Mark end of R-stack so interpreter can stop executing when it returns from top-level word
         forth_rstack_push(0,0,FORTH_RSTACK_DONE,engine->word_index,engine);

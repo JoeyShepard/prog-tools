@@ -7,6 +7,7 @@
     #include "console.h"
     #include "forth-compatibility.h"
     #include "forth-engine.h"
+    #include "forth-locals.h"
 
     //Colors
     #define FORTH_COL_FG        COL_WHITE
@@ -114,6 +115,7 @@
         FORTH_ERROR_LEAVE_WITHOUT_DO,
         FORTH_ERROR_LOCAL_EXISTS,
         FORTH_ERROR_LOOP_WITHOUT_DO,
+        FORTH_ERROR_MAX_LOCALS,
         FORTH_ERROR_MEMORY_OTHER,
         FORTH_ERROR_MISSING_QUOTE,
         FORTH_ERROR_NO_WORD,
@@ -126,6 +128,7 @@
         FORTH_ERROR_RESIZE_MIN,
         FORTH_ERROR_RESIZE_POWER_OF_2,
         FORTH_ERROR_THEN_WITHOUT_IF,
+        FORTH_ERROR_TO_INVALID,
         FORTH_ERROR_TOO_LONG,
         FORTH_ERROR_UNTERMINATED_BEGIN,
         FORTH_ERROR_UNTERMINATED_CASE,

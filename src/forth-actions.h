@@ -21,7 +21,7 @@
     int action_if(struct ForthCompileInfo *compile);
     int action_j(struct ForthCompileInfo *compile);
     int action_leave(struct ForthCompileInfo *compile);
-    int action_locals(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+    int action_locals(const char *source,uint32_t *start,bool init_zero,struct ForthCompileInfo *compile);
     int action_loop(struct ForthCompileInfo *compile);
     void action_paren(const char *source,uint32_t *start);
     int action_plus_loop(struct ForthCompileInfo *compile);
@@ -35,6 +35,7 @@
     int action_semicolon(struct ForthEngine *engine,struct ForthCompileInfo *compile);
     int action_then(struct ForthCompileInfo *compile);
     int action_tick_common(const char *source,uint32_t *start,uint32_t *index,struct ForthCompileInfo *compile);
+    int action_to(const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_until(struct ForthCompileInfo *compile);
     int action_variable(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
     int action_while(struct ForthCompileInfo *compile);

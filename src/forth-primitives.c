@@ -67,6 +67,9 @@ void prim_hidden_done(struct ForthEngine *engine)
             //Return to calling word
             engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
 
+            //Restore any locals memory used
+            engine->locals_stack+=engine->rstack->locals_count;
+
             //Done searching
             break;
         }
@@ -376,7 +379,7 @@ void prim_hidden_secondary(struct ForthEngine *engine)
         //Push word return address to R-stack - faster to inline than call forth_rstack_push
         if (engine->rstack<engine->rstack_base)
         {
-            //Out of R-stack memory - abort
+            //Error - out of R-stack memory. Abort.
             engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
             engine->executing=false;
         }
@@ -388,7 +391,17 @@ void prim_hidden_secondary(struct ForthEngine *engine)
             //Push new values to R-stack
             engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
             engine->rstack->type=FORTH_RSTACK_RETURN;
-            engine->rstack->index=engine->word_index;;
+            engine->rstack->index=engine->word_index;
+            engine->rstack->locals_count=secondary->locals_count;
+
+            //Make room for locals
+            engine->locals_stack-=secondary->locals_count;
+            if (engine->locals_stack<engine->locals_base)
+            {
+                //Error - out of local stack memory. Abort.
+                engine->error=FORTH_ENGINE_ERROR_LOCAL_STACK_FULL;
+                engine->executing=false;
+            }
 
             //Decrease R-stack pointer to next element
             engine->rstack--;
@@ -1595,12 +1608,20 @@ void prim_body_execute(struct ForthEngine *engine)
                 //Push new values to R-stack
                 engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
                 engine->rstack->type=FORTH_RSTACK_RETURN;
-                engine->rstack->index=engine->word_index;;
+                engine->rstack->index=engine->word_index;
+                engine->rstack->locals_count=secondary->locals_count;
+
+                //Make room for locals
+                engine->locals_stack-=secondary->locals_count;
+                if (engine->locals_stack<engine->locals_base)
+                {
+                    //Error - out of local stack memory. Abort.
+                    engine->error=FORTH_ENGINE_ERROR_LOCAL_STACK_FULL;
+                    engine->executing=false;
+                }
 
                 //Decrease R-stack pointer to next element
                 engine->rstack--;
-
-                //START HERE - locals
 
                 //Set new execution address to address of secondary stored in word header list
                 engine->address=secondary->address;
@@ -2697,6 +2718,22 @@ int prim_compile_locals(struct ForthEngine *engine)
     return FORTH_ENGINE_ERROR_NONE;
 }
 
+//LOCALS INITIALIZED TO ZERO
+int prim_compile_locals_0(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_LOCALS_0;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
+//TO
+int prim_compile_to(struct ForthEngine *engine)
+{
+    //Request outer interpreter perform function so no platform specific code in this file
+    engine->word_action=FORTH_ACTION_TO;
+    return FORTH_ENGINE_ERROR_NONE;
+}
+
 //RESET
 void prim_body_reset(struct ForthEngine *engine)
 {
@@ -2980,6 +3017,8 @@ const struct ForthPrimitive forth_primitives[]=
     {"WORDSIZE",8,prim_immediate_wordsize,prim_interpret_only,NULL},
     {"BYE",3,NULL,NULL,prim_body_bye},
     {"{",1,prim_compile_only,prim_compile_locals,NULL},
+    {"0{",2,prim_compile_only,prim_compile_locals_0,NULL},
+    {"TO",2,prim_compile_only,prim_compile_to,NULL},
     
     //Words from here are not standard forth
     {"RESET",5,NULL,NULL,prim_body_reset},
@@ -3001,7 +3040,6 @@ const struct ForthPrimitive forth_primitives[]=
         //BREAKPOINT would be good
         //shouldnt need extra debug info unless compiling to machine code
     //INCLUDE
-    //action to change data size
     //help
         //with word and without
         //good to have whole different screen if without

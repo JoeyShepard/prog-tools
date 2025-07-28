@@ -15,6 +15,11 @@
 
 - number words: -1, 0, 1, etc
 
+- change names
+  - num>str, str>num
+  - actually, >num, >str is better
+  - but then what about >hex and hex>?
+
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
 
@@ -37,7 +42,6 @@
 - tail call improvements
   - get compiler to generate tail call
   - have stack underflow generate exception
-
 
 - shift should stay on if held down
 
@@ -143,6 +147,7 @@ recheck syntax highlighter for : since colors primitives as secondary name
 - at least try blue for primaries
 - compile only red if outside of word
   - may need to replace compile only error with one generic function
+- locals
 console - only copy to history if different from last
 double check all engine->print references check not NULL
 ON should break ACCEPT and KEY
