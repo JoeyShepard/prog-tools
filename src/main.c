@@ -10,21 +10,21 @@
 //===============
 /*
 - local variables
-  - then can benchmark
   - store names after word for debugger and browser
+  - need lots of shortcuts for locals like x 1 + to x, 0 to y
+    - standard has +TO, could add 1+TO but not if peepholing
+
+- wrapping calculation is big slowdown so only needed once per combined primitive
+  - thinking about generating machine code after all but how to run SDL2 for SH?
+  - store interpreted data for primitives and build up at runtime? still doesnt solve SH4 problem
+  - IMPORTANT: finish optimize.py even if it won't work
+
+- also, how to get graphics out from qemu sh4 user mode
 
 - number words: -1, 0, 1, etc
 
-- change names
-  - num>str, str>num
-  - actually, >num, >str is better
-  - but then what about >hex and hex>?
-
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
-
-- stack_item_t? no
-  - already have FORTH_CELL_SIZE but forgot. replace sizeof(int32_t) elsewhere?
 
 - try blue for primitives
   - color by primitive type too?
@@ -174,10 +174,10 @@ compare various methods
 most used primitives in IRAM
 combined primitives
 constant folding
-stack and engine in XRAM
 peepholing
 - tail call recursion!
 - could render asm with fixed address for ie MOVE but no benefit on RISC
+- big payoff of peepholing is only doing wrapping calculation once
 copy primitive bodies to RAM
 no stack wrapping and check every 10 primitives for overflow
 - only check so many instructions
@@ -185,6 +185,18 @@ no stack wrapping and check every 10 primitives for overflow
 - otoh, what if OOB then back in? wouldnt catch
   - could OR and AND one address in primitive but need stack to be aligned - wastes 2x stack
 - could work but not if NEXT is in each primitive
+new idea?
+- problem - how to exit from combined primitive on underflow? need constant checks
+  - check once at beginning and exit?
+- check stack wrapping by bit for under/overflow
+  - fast if set executing to result and change type
+- need buffer space above stack
+  - worse might be loading locals which pops up to 32 values
+  - could put stack that doesnt need to be aligned next so dont lose 2x memory
+- need buffer space below stack
+  - SP points to available memory so full stack would trigger underflow
+  - what pushes most values to stack? need that much buffer space
+    - s" is 2
 linked list for stack
 - probably slower than masking but could try
 - could also be index for each stack depth but slower than explicit check?

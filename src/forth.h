@@ -63,7 +63,10 @@
     #define FORTH_MEM_LOCALS        64
 
     //Console
-    #define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
+    //TODO: THIS WILL CRASH IF SCREEN SPLITS!!!
+    //#define FORTH_INPUT_MAX         248     //Eight full lines of text input if hsplit
+    #define FORTH_INPUT_MAX         500 //More room to fit benchmarking code into one word
+
     #define FORTH_CONSOLE_STRING    "Forth for fx-CG50\n"
     #define FORTH_PROMPT            ">" 
    
@@ -128,7 +131,6 @@
         FORTH_ERROR_RESIZE_MIN,
         FORTH_ERROR_RESIZE_POWER_OF_2,
         FORTH_ERROR_THEN_WITHOUT_IF,
-        FORTH_ERROR_TO_INVALID,
         FORTH_ERROR_TOO_LONG,
         FORTH_ERROR_UNTERMINATED_BEGIN,
         FORTH_ERROR_UNTERMINATED_CASE,

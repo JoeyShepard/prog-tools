@@ -320,7 +320,6 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_NO_WORD:
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
         case FORTH_ERROR_NOT_FOUND:
-        case FORTH_ERROR_TO_INVALID:
         case FORTH_ERROR_TOO_LONG:
             //All of these errors share code for printing out word that caused error
             if (process_result==FORTH_ERROR_HEX32_RANGE)
@@ -902,6 +901,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         //Restore stack memory
         memcpy(FORTH_STACK_ADDRESS,forth->stack_copy,FORTH_STACK_SIZE);
         memcpy(FORTH_RSTACK_ADDRESS,forth->rstack_copy,FORTH_RSTACK_SIZE);
+        memcpy(FORTH_LOCALS_ADDRESS,forth->locals_copy,FORTH_LOCALS_SIZE);
 
         //Logging
         log_pop();
@@ -1135,11 +1135,12 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         }
 
         //If key or command sets exit flag, save stack to memory and exit
-        if (save_exit)
+        if (save_exit==true)
         {
             //Save Forth stack memory before returning
             memcpy(forth->stack_copy,FORTH_STACK_ADDRESS,FORTH_STACK_SIZE);
             memcpy(forth->rstack_copy,FORTH_RSTACK_ADDRESS,FORTH_RSTACK_SIZE);
+            memcpy(forth->locals_copy,FORTH_LOCALS_ADDRESS,FORTH_LOCALS_SIZE);
 
             //Save Forth engine before returning
             forth->engine_copy=*forth->engine;
