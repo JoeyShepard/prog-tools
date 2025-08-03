@@ -29,8 +29,6 @@ volatile bool *on_key_pressed;
 
     volatile int tick_flag;
 
-    
-
     //Called by timer every TICK_MS
     static int timer_callback(volatile int *tick)
     {
