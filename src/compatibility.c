@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "compatibility.h"
 #include "macros.h"
+#include "sdl2-keys.h"
 
+//TODO: remove here and everywhere if not using
 //Common to cg50 and PC
 volatile bool *on_key_executing;
 volatile bool *on_key_pressed;
@@ -58,9 +61,10 @@ volatile bool *on_key_pressed;
     }
 
     //On CG50, initialize timer and catch unaligned memory accesses
-    void setup(UNUSED(int scale_factor),int delay_ms)
+    void setup(int delay_ms)
     {
         //TODO: reenable? added at first but now it may be hiding errors
+        //if not enabled, gint has own handler showing address
 
         //Exception handling for unaligned memory accesses
         //setup_exception_handling();
@@ -89,7 +93,7 @@ volatile bool *on_key_pressed;
         tick_flag=0;
     }
 
-    void wrapper_exit()
+    void wrapper_exit(UNUSED(int code))
     {
         //Empty function for compatibility
     }
@@ -134,35 +138,35 @@ volatile bool *on_key_pressed;
 //PC specific
 //===========
 
+    #include <arpa/inet.h>
     #include <linux/limits.h>
-    #include <pthread.h>
-    #include <SDL2/SDL.h>
-    #include <SDL2/SDL_image.h>
+    #include <netinet/in.h>
+    #include <poll.h>
+    #include <string.h>
+    #include <sys/mman.h>
+    #include <sys/socket.h>
     #include <unistd.h>
 
     #include "key-remap-pc.h"
+    #include "sdl2-keys.h"
 
     //Globals
     //=======
+    //Calculator
     uint16_t screen[DHEIGHT*DWIDTH];
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
-    int global_scale_factor;
+    uint8_t *heap;
+    uint8_t *xram;
+    uint8_t *yram;
+    uint8_t *xram_base;
+    uint8_t *yram_base;
     int global_delay_ms;
     #define KEYS_SIZE 100
     int keys[KEYS_SIZE];
     int pc_keys[KEYS_SIZE];
     int pc_scancode;
     int keys_start=0,keys_end=0;
-    uint8_t *heap;
-    uint8_t *xram;
-    uint8_t *yram;
-    uint8_t *xram_base;
-    uint8_t *yram_base;
-    pthread_mutex_t sdl_mutex;
-    pthread_t thread_id;
-    volatile bool exit_thread;
+    int sockfd;
+    bool frame_ready;
 
     //Static functions only in PC version
     //===================================
@@ -284,189 +288,112 @@ volatile bool *on_key_pressed;
         return 0;
     }
 
+    static int write_full(int fd,void *data,int size)
+    {
+        int bytes_sent=0;
+        while(size-bytes_sent>0)
+        {
+            int bytes_written=write(fd,data+bytes_sent,size-bytes_sent);
+            if (bytes_written<0) return -1;
+            bytes_sent+=bytes_written;
+        }
+        return size;
+    }
+
+    static int read_full(int fd,void *data,int size)
+    {
+        int bytes_received=0;
+        while(size-bytes_received>0)
+        {
+            int bytes_read=read(fd,data+bytes_received,size-bytes_received);
+            if (bytes_read<=0) return bytes_read;
+            bytes_received+=bytes_read;
+        }
+        return size;
+    }
+
     static void wrapper_events()
     {
-        //Also called by separate thread so lock here with mutex
-
-        pthread_mutex_lock(&sdl_mutex);
-
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
+        //Check TCP for messages
+        struct pollfd poll_client;
+        poll_client.fd=sockfd;
+        poll_client.events=POLLIN;
+        int event_count=poll(&poll_client,1,0);
+        if (event_count==0)
         {
-            switch (event.type)
-            {
-                case SDL_QUIT:
-
-                    //Unlock mutex before exiting
-                    pthread_mutex_unlock(&sdl_mutex);
-                    wrapper_exit();
-                    break;
-                case SDL_KEYDOWN:
-                    keys[keys_end]=wrapper_convert_key(event.key.keysym.scancode);
-                    pc_keys[keys_end]=event.key.keysym.scancode;
-                    keys_end=(keys_end+1)%KEYS_SIZE;
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    wrapper_screenshot();
-                    printf("screenshot saved to screenshot/screenshot.raw\n");
-                    break;
-            }
+            //No data from TCP
         }
-        
-        //Unlock mutex protecting SDL_PollEvent
-        pthread_mutex_unlock(&sdl_mutex);
-    }
-
-    //Thread function mirroring interrupt on cg50 that checks for ON key
-    static void *interrupt_thread(UNUSED(void *arg))
-    {
-        //Run for the life of the program
-        while(1)
+        else
         {
-            //Check for SDL_QUIT and new keypresses
-            wrapper_events();
-
-            //End thread if SDL_QUIT
-            if (exit_thread) return NULL;
-
-            //Check if ON key (mapped to HOME on PC) is down
-            const Uint8 *key_list=SDL_GetKeyboardState(NULL);
-            
-            if (key_list[SDL_SCANCODE_HOME]!=0)
+            if (poll_client.revents&POLLHUP)
             {
-                //Clear flag pointed to by this pointer if ON down. Halts interpreter if one is running.
-                if (on_key_executing!=NULL)
+                printf("Server disconnected by hang up\n");
+                wrapper_exit(EXIT_FAILURE);
+            }
+            else if (poll_client.revents&POLLIN)
+            {
+                //Data received from server
+                bool first_message=true;
+                int messages_left=1;
+                int tcp_type;
+                uint32_t message;
+                while (messages_left>0)
                 {
-                    *on_key_executing=false;
-
-                    //Also, set flag to tell interpreter ON key was source of halt
-                    if (on_key_pressed!=NULL) *on_key_pressed=true;
+                    int bytes_read=read_full(sockfd,&message,sizeof(message));
+                    if (bytes_read==0)
+                    {
+                        //No error available - just disconnection
+                        printf("Server disconnected\n");
+                        wrapper_exit(EXIT_FAILURE);
+                    }
+                    else if (bytes_read<0)
+                    {
+                        //Error - print error message for errno
+                        perror("Server disconnected");
+                        wrapper_exit(EXIT_FAILURE);
+                        break;
+                    }
+                    else
+                    {
+                        message=ntohl(message); 
+                        if (first_message==true)
+                        {
+                            tcp_type=message;
+                            switch (tcp_type)
+                            {
+                                case TCP_FRAME_READY:
+                                    frame_ready=true;
+                                    break;
+                                case TCP_KEYPRESS:
+                                    messages_left++;
+                                    break;
+                                default:
+                                    printf("Unknown TCP message type: 0x%X\n",message);    
+                                    wrapper_exit(EXIT_FAILURE);
+                            }
+                            first_message=false;
+                        }
+                        else
+                        {
+                            switch (tcp_type)
+                            {
+                                case TCP_KEYPRESS:
+                                    int32_t key=message;
+                                    keys[keys_end]=wrapper_convert_key(key);
+                                    pc_keys[keys_end]=key;
+                                    keys_end=(keys_end+1)%KEYS_SIZE;
+                                    break;
+                                default:
+                                    //Should never reach here unless error in messages_left calculation above
+                                    printf("Unexpected data from server 0x%X for message type 0x%X\n",message,tcp_type);
+                                    wrapper_exit(EXIT_FAILURE);
+                            }
+                        }
+                    }
+                    messages_left--;
                 }
             }
-            
-            //Check 5 times per second
-            usleep(200000);
         }
-
-        return NULL;
-    }
-
-    //Functions with separate copies for cg50 and PC
-    //==============================================
-    //On PC, start SDL2
-    void setup(int scale_factor, int delay_ms)
-    {
-        //Allocate 2MB heap to use like 2MB RAM on calculator
-        heap=malloc(HEAP_SIZE);
-        if (heap==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator heap.\n");
-            exit(1);
-        }
-
-        //Allocate 8K for XRAM memory on calculator plus padding so 8K can be aligned
-        xram_base=malloc(XRAM_SIZE*2);
-        if (xram_base==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator XRAM.\n");
-            exit(1);
-        }
-
-        //Round up xram to nearest 8K boundary keeping xram_base to pass to free later
-        uintptr_t xram_diff=XRAM_SIZE-((uintptr_t)(xram_base))%XRAM_SIZE;
-        xram=xram_base+xram_diff;
-
-        //Allocate 8K for YRAM memory on calculator plus 8K for padding so 8K can be aligned
-        yram_base=malloc(YRAM_SIZE*2);
-        if (yram_base==NULL)
-        {
-            printf("Error: failed to allocate memory for calculator YRAM.\n");
-            exit(1);
-        }
-
-        //Round up yram to nearest 8K boundary keeping yram_base to pass to free later
-        uintptr_t yram_diff=YRAM_SIZE-((uintptr_t)(yram_base))%YRAM_SIZE;
-        yram=yram_base+yram_diff;
-
-        //Save scale factor for use with dupdate
-        global_scale_factor=scale_factor;
-        global_delay_ms=delay_ms;
-
-        //Initialize SDL
-        if (SDL_Init(SDL_INIT_VIDEO)<0)
-        {
-            printf("Error: SDL2 did not initialize. SDL error: %s\n", SDL_GetError());
-            exit(1);
-        }
-        
-        //Create window
-        window=SDL_CreateWindow(WINDOW_TITLE,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,DWIDTH*scale_factor,DHEIGHT*scale_factor,SDL_WINDOW_SHOWN);
-        if (window==NULL)
-        {
-            printf("Error: SDL2 could not create window. SDL error: %s\n", SDL_GetError());
-            exit(1);
-        }
-
-        //Draw to texture
-        renderer=SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
-        texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGB565,SDL_TEXTUREACCESS_STREAMING,DWIDTH,DHEIGHT);
-
-        //Scancode of last key pressed
-        pc_scancode=0;
-
-        //Signal thread to exit when program ends
-        exit_thread=false;
-
-        //Create mutex for wrapper_events since it calls SDL_PollEvent and is called by main and second thread
-        pthread_mutex_init(&sdl_mutex,NULL);
-
-        //Thread sets target of this pointer to false when ON is pressed to halt interpreter if one is running
-        on_key_executing=NULL;
-
-        //Create separate thread to check for ON key (HOME on PC) mirroring interrupt on calculator
-        int result=pthread_create(&thread_id,NULL,interrupt_thread,NULL);
-    }
-
-    void delay()
-    {
-        wrapper_events();
-        SDL_Delay(global_delay_ms);
-    }
-
-    void wrapper_exit()
-    {
-        //Wait on thread to exit
-        pthread_mutex_lock(&sdl_mutex);
-        exit_thread=true;
-        pthread_mutex_unlock(&sdl_mutex);
-        pthread_join(thread_id,NULL);
-
-        //Free allocated memory
-        free(heap);
-        free(xram_base);
-        free(yram_base);
-
-        //Shut down SDL2
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-
-        exit(0);
-    }
-
-    void wrapper_screenshot()
-    {
-        //None of the examples with SDL_RenderReadPixels worked even when adjusted for 16bit format so output raw data
-        FILE *fptr=fopen("screenshot/screenshot.raw","w");
-        fwrite(screen,2,DWIDTH*DHEIGHT,fptr);
-        fclose(fptr);
-    }
-
-    int wrapper_pc_key()
-    {
-        //Return PC scancode of last returned by getkey_opt
-        return pc_scancode;
     }
 
     static int remap_key_helper(int modifier,int key,struct KeyRemap *conversions)
@@ -491,6 +418,136 @@ volatile bool *on_key_pressed;
             }
             conversions++;
         }
+    }
+
+
+    //Functions with separate copies for cg50 and PC
+    //==============================================
+    //On PC, set up TCP connection to SDL2 server
+    void setup(int delay_ms)
+    {
+        //Set pointers to NULL/MAP_FAILED since may be freed by wrapper_exit
+        heap=MAP_FAILED;
+        xram_base=NULL;
+        yram_base=NULL;
+
+        //Set socket file descriptor to error so wrapper_exit doesn't close until assigned
+        sockfd=-1;
+
+        //Ready to send frame of screen. Set to false after transmission then back to true when client signals ready
+        frame_ready=true;
+
+        //Allocate 2MB heap to use like 2MB RAM on calculator and make it executable
+        heap=mmap(NULL,HEAP_SIZE,PROT_EXEC|PROT_WRITE|PROT_READ,MAP_ANONYMOUS|MAP_PRIVATE,-1,0);
+        if (heap==MAP_FAILED)
+        {
+            printf("Error: failed to allocate memory for calculator heap.\n");
+            wrapper_exit(EXIT_FAILURE);
+        }
+
+        //Allocate 8K for XRAM memory on calculator plus padding so 8K can be aligned
+        xram_base=malloc(XRAM_SIZE*2);
+        if (xram_base==NULL)
+        {
+            printf("Error: failed to allocate memory for calculator XRAM.\n");
+            wrapper_exit(EXIT_FAILURE);
+        }
+
+        //Round up xram to nearest 8K boundary keeping xram_base to pass to free later
+        uintptr_t xram_diff=XRAM_SIZE-((uintptr_t)(xram_base))%XRAM_SIZE;
+        xram=xram_base+xram_diff;
+
+        //Allocate 8K for YRAM memory on calculator plus 8K for padding so 8K can be aligned
+        yram_base=malloc(YRAM_SIZE*2);
+        if (yram_base==NULL)
+        {
+            printf("Error: failed to allocate memory for calculator YRAM.\n");
+            exit(1);
+        }
+
+        //Round up yram to nearest 8K boundary keeping yram_base to pass to free later
+        uintptr_t yram_diff=YRAM_SIZE-((uintptr_t)(yram_base))%YRAM_SIZE;
+        yram=yram_base+yram_diff;
+
+        //Save ms to delay between frames
+        global_delay_ms=delay_ms;
+
+        //Scancode of last key pressed
+        pc_scancode=0;
+
+        //Open TCP socket
+        sockfd=socket(AF_INET,SOCK_STREAM,0);
+        if (sockfd==-1)
+        {
+            perror("Unable to open socket");
+            wrapper_exit(EXIT_FAILURE);
+        }
+        else printf("Socket opened\n");
+
+        //Connect to server
+        struct sockaddr_in server;
+        memset(&server,0,sizeof(server));
+        server.sin_family=AF_INET;
+        server.sin_addr.s_addr=inet_addr("127.0.0.1");
+        server.sin_port=htons(PORT);
+        int connect_result=connect(sockfd,(struct sockaddr *)&server,sizeof(server));
+        if (connect_result==-1) 
+        {
+            perror("Unable to connect to server");
+            wrapper_exit(EXIT_FAILURE);
+        }
+        else printf("Connected to server\n");
+
+        //Notify server of endianness
+        int endian_test=1;
+        int32_t message;
+        if (*((char *)&endian_test)==1) message=htonl(TCP_CLIENT_LITTLE_ENDIAN);
+        else message=htonl(TCP_CLIENT_BIG_ENDIAN);
+        int result=write_full(sockfd,&message,sizeof(message));
+        if (result<0)
+        {
+            perror("Unable to send endianness");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    void delay()
+    {
+        wrapper_events();
+        usleep(global_delay_ms*1000);
+    }
+
+    void wrapper_exit(int code)
+    {
+        //Free allocated memory
+        if (heap!=MAP_FAILED)
+            munmap(heap,HEAP_SIZE);
+        free(xram_base);
+        free(yram_base);
+
+        //Disconnect from server if connection exists
+        if (sockfd!=-1)
+        {
+            shutdown(sockfd,SHUT_RDWR);
+            close(sockfd);
+        }
+        printf("Disconnected from server\n");
+
+        exit(code);
+    }
+
+    void wrapper_screenshot()
+    {
+        //None of the examples with SDL_RenderReadPixels worked even when adjusted for 16bit format so output raw data
+        FILE *fptr=fopen("screenshot/screenshot.raw","w");
+        fwrite(screen,2,DWIDTH*DHEIGHT,fptr);
+        fclose(fptr);
+    }
+
+    int wrapper_pc_key()
+    {
+        //Return PC scancode of last returned by getkey_opt
+        return pc_scancode;
     }
 
     int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions)
@@ -552,9 +609,30 @@ volatile bool *on_key_pressed;
 
     void dupdate(void)
     {
-        SDL_UpdateTexture(texture,NULL,screen,DWIDTH*sizeof(uint16_t));
-        SDL_RenderCopy(renderer,texture,NULL,NULL);
-        SDL_RenderPresent(renderer);
+        //Send screen data over TCP
+        uint32_t message=htonl(TCP_FRAME_DATA);
+        int result=write_full(sockfd,&message,sizeof(message));
+        if (result<0)
+        {
+            perror("Error while writing screen data message");
+            wrapper_exit(EXIT_FAILURE);
+        }
+        result=write_full(sockfd,(char *)screen,sizeof(screen));
+        if (result<0)
+        {
+            perror("Error while writing screen data");
+            wrapper_exit(EXIT_FAILURE);
+        }
+
+        //Wait for client to acknowedge receipt of screen data
+        while(frame_ready==false)
+        {
+            //Check for TCP_FRAME message from server
+            wrapper_events();
+
+            //Wait 1ms between checking 
+            usleep(1000);
+        }
     }
 
     key_event_t getkey_opt(int options, volatile int *timeout)
@@ -572,9 +650,6 @@ volatile bool *on_key_pressed;
             {
                 wrapper_events();
 
-                //Lock with mutex since second thread also calls wrapper_events which modifies keys_end
-                pthread_mutex_lock(&sdl_mutex);
-
                 if (keys_start!=keys_end)
                 {
                     ret_val.type=KEYEV_DOWN;
@@ -582,21 +657,12 @@ volatile bool *on_key_pressed;
                     pc_scancode=pc_keys[keys_start];
                     keys_start=(keys_start+1)%KEYS_SIZE;
 
-                    //Unlock mutex before returning
-                    pthread_mutex_unlock(&sdl_mutex);
-
                     return ret_val;
                 }
-
-                //Unlock mutex if no key found
-                pthread_mutex_unlock(&sdl_mutex);
             }
         }
         else
         {
-            //Lock with mutex since second thread also calls wrapper_events which modifies keys_end
-            pthread_mutex_lock(&sdl_mutex);
-
             //Check for key and exit immediately
             if (keys_start!=keys_end)
             {
@@ -606,9 +672,6 @@ volatile bool *on_key_pressed;
                 keys_start=(keys_start+1)%KEYS_SIZE;
             }
             else ret_val.type=KEYEV_NONE;
-
-            //Unlock mutex
-            pthread_mutex_unlock(&sdl_mutex);
 
             return ret_val;
         }

@@ -231,10 +231,83 @@ switch case as mentioned online?
 //Constants
 //=========
 #define TICK_MS         40  //25 FPS
-#define SCALE_FACTOR    3
 
 //Functions
 //=========
+
+//TODO: remove
+#include <string.h>
+#include "getkey.h"
+#include "text.h"
+int test()
+{
+    return 42;
+}
+
+void jit_test()
+{
+    //Output text
+    char buffer[TEXT_INT32_SIZE];
+    dclear(COL_BLACK);
+    struct Point pos={20,20};
+    pos=draw_text("JIT test",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    dupdate();
+
+    //sh4eb machine code
+    char test_code[]={
+        0x00, 0x0B, //rts
+        0xE0, 0x2A, //mov #42,r0
+        };
+    
+    //Copy machine code to memory
+    memcpy(heap,test_code,sizeof(test_code));
+    
+    /*
+
+    //Output bytes just written to heap
+    pos.x=20;
+    pos.y+=12;
+    text_hex32((uintptr_t)heap,buffer);
+    pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    pos=draw_text(": ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    for (int i=0;i<4;i++)
+    {
+        text_hex32_padded(*(heap+i),buffer,2);
+        pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+        pos=draw_text(" ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    }
+
+    //Output bytes from test function which should be the same as bytes just written
+    pos.x=20;
+    pos.y+=12;
+    char *func_ptr=(char *)&test;
+    pos=draw_text("test:     ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    for (int i=0;i<4;i++)
+    {
+        text_hex32_padded(*(func_ptr+i),buffer,2);
+        pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+        pos=draw_text(" ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    }
+
+    */
+
+    //Necessary on calculator. Write cache?
+    for (volatile int i=0;i<10;i++);
+
+    //Jump to machine code
+    int result=((int (*)())heap)();
+
+    //Output result
+    pos.x=20;
+    pos.y+=12;
+    pos=draw_text("Result: ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    text_int32(result,buffer);
+    pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    dupdate();
+
+    //Wait for key
+    getkey_wrapper(true);
+}
 
 //int main(int argc, char *argv[])  //PC only
 int main(void)                      //cg50 and PC
@@ -246,14 +319,17 @@ int main(void)                      //cg50 and PC
     const int expected_count=148;
     log_none("Primitive count: %d of %d (%d left)\n",forth_primitives_len,expected_count,expected_count-forth_primitives_len);
 
-    //Configure device specific settings - SDL2 on PC and timer on calculator
-    setup(SCALE_FACTOR,TICK_MS);
+    //Configure device specific settings - TCP on PC and timer on calculator
+    setup(TICK_MS);
 
     //Initialize heap memory
     init_heap();
 
     //VRAM pointer for double buffering
     dgetvram(&vram_main,&vram_buffer);
+
+    //TODO: remove
+    jit_test();
 
     //Jump into window manager
     window_manager();

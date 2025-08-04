@@ -1,9 +1,9 @@
 PROJECT=test-client
 
-BUILD_DIR=build-sh4
+BUILD_DIR=build-x86
 SRC_DIR=src
 
-CC = sh4eb-linux-musl-gcc
+CC = gcc
 CFLAGS += -MMD -MP
 CFLAGS += -g
 CFLAGS += -static

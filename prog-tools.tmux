@@ -5,8 +5,9 @@ session prog-tools
 window vim src/main.c
 rename main
 
-window
+window sdl2-server/build/sdl2-server
 rename run
+vsplit
 
 window vim src/compatibility.h
 rename sdl2

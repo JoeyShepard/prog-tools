@@ -79,10 +79,24 @@
 
         //Performance counter for wrapper_perf_start/stop
         typedef struct timespec prof_t;
-        
+       
+        //TCP communication with SDL2 server
+        #define PORT        50505
+        #define BACKLOG     1   //Should only accept one connection at a time
+
+        enum TcpMsgType
+        {
+            TCP_FRAME_DATA=0x101,
+            TCP_FRAME_READY,
+            TCP_KEYPRESS,
+            TCP_CLIENT_BIG_ENDIAN,
+            TCP_CLIENT_LITTLE_ENDIAN,
+        };
+
         //Constants from gint
         #define DWIDTH          396
         #define DHEIGHT         224
+
         enum
         {
             KEY_F1		= 0x91,
@@ -151,9 +165,6 @@
         #define gint_world_switch(x) x
         #define GINT_CALL(x,y) x(y)
 
-        //Constants needed for wrapper
-        #define WINDOW_TITLE    "SDL2 wrapper for fx-CG50"
-        
         //structs
         #ifndef uint
             typedef unsigned int uint;
@@ -221,9 +232,9 @@
     #endif
 
     //Functions common to PC and CG50 (some are empty)
-    void setup(int scale_factor,int tick_ms);
+    void setup(int tick_ms);
     void delay();
-    void wrapper_exit();
+    void wrapper_exit(int code);
     void wrapper_screenshot();
     int wrapper_pc_key();
     int wrapper_remap_key(int modifier,int key,struct KeyRemap *conversions);

@@ -39,7 +39,7 @@ set(SOURCES
   src/util.c
 
   #Assembly file generated separately by GCC 15.1.0 for __attribute__((musttail))
-  src/custom/generated/test.s
+  #src/custom/generated/test.s
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS

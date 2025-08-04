@@ -18,9 +18,11 @@
 
     enum TcpMsgType
     {
-        TCP_SCREEN=0x101,
-        TCP_FRAME,
-        TCP_KEYPRESS
+        TCP_FRAME_DATA=0x101,
+        TCP_FRAME_READY,
+        TCP_KEYPRESS,
+        TCP_CLIENT_BIG_ENDIAN,
+        TCP_CLIENT_LITTLE_ENDIAN,
     };
 
     int write_full(int fd,void *data,int size);

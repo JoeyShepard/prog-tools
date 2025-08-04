@@ -1,0 +1,373 @@
+#include <stdint.h>
+#include <string.h>
+
+#define TEXT_INT32_SIZE 12
+#define C_RGB(r,g,b)    (((r) << 11) | ((g) << 6) | (b))
+#define COL_MAX         0x1F
+#define COL_WHITE       C_RGB(COL_MAX,COL_MAX,COL_MAX)
+#define COL_BLACK       C_RGB(0,0,0)
+#define COL_TRANS       -1
+#define FONT_5x8        1
+
+struct Point
+{
+    int x;
+    int y;
+};
+
+struct Point draw_text(const char *text, struct Point pos, int32_t fg, int32_t bg, bool invert, int font);
+void text_int32(int32_t num, char *text);
+void text_hex32(uint32_t num, char *text);
+void text_hex32_padded(uint32_t num, char *text, int digit);
+int getkey_wrapper(bool wait);
+
+uint8_t *heap;
+
+void dclear(uint16_t color);
+void dupdate(void);
+
+int test()
+{
+    return 42;
+}
+
+void jit_test()
+{
+    //Output text
+    char buffer[TEXT_INT32_SIZE];
+    dclear(COL_BLACK);
+    struct Point pos={20,20};
+    pos=draw_text("JIT test",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    dupdate();
+
+    //sh4eb machine code
+    char test_code[]={
+        0x00, 0x0B, //rts
+        0xE0, 0x2A, //mov #42,r0
+        };
+    
+    //Copy machine code to memory
+    memcpy(heap,test_code,sizeof(test_code));
+    
+    //Output bytes just written to heap
+    pos.x=20;
+    pos.y+=12;
+    text_hex32((uintptr_t)heap,buffer);
+    pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    pos=draw_text(": ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    for (int i=0;i<4;i++)
+    {
+        text_hex32_padded(*(heap+i),buffer,2);
+        pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+        pos=draw_text(" ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    }
+    
+    //Output bytes from test function which should be the same as bytes just written
+    pos.x=20;
+    pos.y+=12;
+    char *func_ptr=(char *)&test;
+    pos=draw_text("test:     ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    for (int i=0;i<4;i++)
+    {
+        text_hex32_padded(*(func_ptr+i),buffer,2);
+        pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+        pos=draw_text(" ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    }
+
+    //Jump to machine code
+    int result=((int (*)())heap)();
+
+    //Output result
+    pos.x=20;
+    pos.y+=12;
+    pos=draw_text("Result: ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    text_int32(result,buffer);
+    pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    dupdate();
+
+    //Wait for key
+    getkey_wrapper(true);
+}
+
+_test:
+        rts     
+        mov     #42,r0
+.LC0:
+        .string "JIT test"
+.LC1:
+        .string ": "
+.LC2:
+        .string " "
+.LC3:
+        .string "test:     "
+.LC4:
+        .string "Result: "
+_jit_test:
+        mov.l   r8,@-r15
+        mova    .L9,r0
+        mov.l   r9,@-r15
+        mov     #0,r4
+        mov.l   r10,@-r15
+        mov     #-1,r9
+        mov.l   r11,@-r15
+        mov     #0,r10
+        mov.l   r12,@-r15
+        mov     #1,r11
+        mov.l   .L9,r12
+        mov.l   r13,@-r15
+        add     r0,r12
+        mov.l   .L10,r0
+        mov.l   r14,@-r15
+        mov.l   @(r0,r12),r1
+        sts.l   pr,@-r15
+        jsr     @r1
+        add     #-52,r15
+        mov.l   .L30,r2
+        mov     #20,r5
+        mov.l   .L12,r4
+        add     r12,r2
+        mov.l   @r2,r8
+        mov     #20,r6
+        mov.l   .L37,r7
+        add     r12,r4
+        mov.l   r2,@(28,r15)
+        mov.l   r11,@(8,r15)
+        mov.l   r10,@(4,r15)
+        jsr     @r8
+        mov.l   r9,@r15
+        mov.l   .L38,r0
+        mov     r1,r13
+        mov.l   .L33,r14
+        mov.l   @(r0,r12),r1
+        jsr     @r1
+        add     r12,r14
+        mov.l   .L16,r0
+        mov     r15,r5
+        mov.l   .L17,r1
+        add     #36,r5
+        mov.l   @(r0,r12),r0
+        mov     #4,r6
+        mov.l   @r14,r4
+        jsr     @r0
+        mov.l   r1,@r5
+        mov.l   .L18,r0
+        mov     r15,r2
+        add     #40,r2
+        mov.l   @(r0,r12),r1
+        mov     r2,r5
+        mov.l   @r14,r4
+        jsr     @r1
+        mov.l   r2,@(16,r15)
+        mov     r13,r6
+        mov     r15,r4
+        mov.l   .L37,r7
+        mov     #20,r5
+        add     #12,r6
+        add     #40,r4
+        mov.l   r11,@(8,r15)
+        mov.l   r10,@(4,r15)
+        jsr     @r8
+        mov.l   r9,@r15
+        mov.l   .L20,r4
+        mov     r0,r5
+        mov.l   .L37,r7
+        mov     r1,r6
+        mov.l   r11,@(8,r15)
+        add     r12,r4
+        mov.l   r10,@(4,r15)
+        jsr     @r8
+        mov.l   r9,@r15
+        mov     r0,r8
+        mov.l   .L29,r0
+        mov.l   r8,@(20,r15)
+        mov     r14,r8
+        mov.l   @(r0,r12),r0
+        mov     #0,r14
+        mov.l   r0,@(32,r15)
+.L4:
+        mov     r14,r0
+        mov.l   @r8,r7
+        mov     r15,r5
+        mov.l   @(32,r15),r2
+        mov     #2,r6
+        mov.b   @(r0,r7),r4
+        add     #40,r5
+        mov.l   r1,@(12,r15)
+        jsr     @r2
+        extu.b  r4,r4
+        mov.l   @(28,r15),r3
+        mov     #1,r13
+        mov     #0,r11
+        mov.l   @r3,r9
+        mov     #-1,r10
+        mov     r15,r4
+        mov.l   .L37,r7
+        add     #40,r4
+        mov.l   @(20,r15),r5
+        add     #1,r14
+        mov.l   @(12,r15),r6
+        mov.l   r13,@(8,r15)
+        mov.l   r11,@(4,r15)
+        jsr     @r9
+        mov.l   r10,@r15
+        mov.l   .L24,r2
+        mov     r0,r5
+        mov.l   .L37,r7
+        add     r12,r2
+        mov.l   r2,@(24,r15)
+        mov     r1,r6
+        mov.l   r13,@(8,r15)
+        mov     r2,r4
+        mov.l   r11,@(4,r15)
+        jsr     @r9
+        mov.l   r10,@r15
+        mov.l   r0,@(20,r15)
+        mov     r14,r0
+        cmp/eq  #4,r0
+        bf      .L4
+        mov.l   .L26,r4
+        mov     r1,r6
+        mov.l   .L37,r7
+        mov     #20,r5
+        mov.l   r13,@(8,r15)
+        add     #12,r6
+        mov.l   r11,@(4,r15)
+        add     r12,r4
+        jsr     @r9
+        mov.l   r10,@r15
+        mov.l   .L28,r2
+        mov     r0,r8
+        mov.l   .L29,r0
+        add     r12,r2
+        mov     r2,r3
+        add     #4,r3
+        mov.l   r3,@(20,r15)
+        mov     r2,r9
+        mov.l   .L30,r3
+        mov.l   @(r0,r12),r0
+        add     r12,r3
+        mov.l   r3,@(32,r15)
+        mov.l   r0,@(28,r15)
+.L5:
+        mov     r15,r5
+        mov.l   @(28,r15),r2
+        mov     #2,r6
+        mov.b   @r9+,r4
+        add     #40,r5
+        jsr     @r2
+        mov.l   r1,@(12,r15)
+        mov.l   @(32,r15),r3
+        mov     #1,r14
+        mov.l   @(12,r15),r6
+        mov     #0,r13
+        mov.l   @r3,r10
+        mov     #-1,r11
+        mov     r15,r4
+        mov     r8,r5
+        mov.l   .L37,r7
+        add     #40,r4
+        mov.l   r14,@(8,r15)
+        mov.l   r13,@(4,r15)
+        jsr     @r10
+        mov.l   r11,@r15
+        mov.l   .L37,r7
+        mov     r0,r5
+        mov.l   @(24,r15),r4
+        mov     r1,r6
+        mov.l   r14,@(8,r15)
+        mov.l   r13,@(4,r15)
+        jsr     @r10
+        mov.l   r11,@r15
+        mov.l   @(20,r15),r2
+        mov     r0,r8
+        cmp/eq  r2,r9
+        bf      .L5
+        mov.l   .L33,r0
+        mov     r1,r9
+        mov.l   @(r0,r12),r1
+        jsr     @r1
+        nop
+        mov.l   .L34,r4
+        mov     r9,r6
+        mov.l   .L37,r7
+        mov     r0,r8
+        add     #12,r6
+        add     r12,r4
+        mov.l   r14,@(8,r15)
+        mov     #20,r5
+        mov.l   r13,@(4,r15)
+        jsr     @r10
+        mov.l   r11,@r15
+        mov     r0,r9
+        mov.l   .L36,r0
+        mov     r15,r5
+        mov.l   r1,@(12,r15)
+        mov     r8,r4
+        mov.l   @(r0,r12),r2
+        jsr     @r2
+        add     #40,r5
+        mov     r15,r4
+        mov.l   .L37,r7
+        mov     r9,r5
+        mov.l   @(12,r15),r6
+        add     #40,r4
+        mov.l   r14,@(8,r15)
+        mov.l   r13,@(4,r15)
+        jsr     @r10
+        mov.l   r11,@r15
+        mov.l   .L38,r0
+        mov.l   @(r0,r12),r1
+        jsr     @r1
+        nop
+        mov.l   .L39,r0
+        mov.l   @(r0,r12),r0
+        jsr     @r0
+        mov     #1,r4
+        add     #52,r15
+        lds.l   @r15+,pr
+        mov.l   @r15+,r14
+        mov.l   @r15+,r13
+        mov.l   @r15+,r12
+        mov.l   @r15+,r11
+        mov.l   @r15+,r10
+        mov.l   @r15+,r9
+        rts     
+        mov.l   @r15+,r8
+.L9:
+        .long   _GLOBAL_OFFSET_TABLE_
+.L10:
+        .long   _dclear@GOT
+.L30:
+        .long   _draw_text@GOT
+.L12:
+        .long   .LC0@GOTOFF
+.L37:
+        .long   65503
+.L38:
+        .long   _dupdate@GOT
+.L33:
+        .long   _heap@GOTOFF
+.L16:
+        .long   _memcpy@GOT
+.L17:
+        .long   719325952
+.L18:
+        .long   _text_hex32@GOT
+.L20:
+        .long   .LC1@GOTOFF
+.L29:
+        .long   _text_hex32_padded@GOT
+.L24:
+        .long   .LC2@GOTOFF
+.L26:
+        .long   .LC3@GOTOFF
+.L28:
+        .long   _test@GOTOFF
+.L34:
+        .long   .LC4@GOTOFF
+.L36:
+        .long   _text_int32@GOT
+.L39:
+        .long   _getkey_wrapper@GOT
+_heap:
+        .zero   4

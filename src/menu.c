@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "compatibility.h"
@@ -360,7 +361,7 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
                 break;
             case VKEY_EXIT:
                 //Exit if on PC
-                wrapper_exit();
+                wrapper_exit(EXIT_SUCCESS);
                 break;
             default:
                 //Handle system keys like MENU, OFF, etc in caller

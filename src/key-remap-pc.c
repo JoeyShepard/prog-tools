@@ -1,8 +1,7 @@
 //TODO: still need all of these? split off from key-remap.h
 
-#include <SDL2/SDL.h>
-
 #include "getkey.h"
+#include "sdl2-keys.h"
 
 //Applied to all programs including ones that have remappings below
 struct KeyRemap remapped_keys_all[]=

@@ -15,14 +15,9 @@
 
 uint16_t screen[DHEIGHT*DWIDTH];
 
-void info(const char *msg)
-{
-    printf("Client: %s\n",msg);
-}
-
 void error_exit(const char *msg)
 {
-    info(msg);
+    printf("%s",msg);
     exit(1);
 }
 
@@ -30,18 +25,30 @@ int main(int argc, char *argv[])
 {
     //Open socket
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
-    if (sockfd==-1) error_exit("unable to open socket");
-    else info("socket opened");
+    if (sockfd==-1) error_exit("Unable to open socket\n");
+    else printf("Socket opened\n");
 
-    //Bind address
+    //Connect to server
     struct sockaddr_in server;
     memset(&server,0,sizeof(server));
     server.sin_family=AF_INET;
     server.sin_addr.s_addr=inet_addr("127.0.0.1");
     server.sin_port=htons(PORT);
     int connect_result=connect(sockfd,(struct sockaddr *)&server,sizeof(server));
-    if (connect_result==-1) error_exit("unable to connect");
-    else info("connected");
+    if (connect_result==-1) error_exit("Unable to connect\n");
+    else printf("Connected to server\n");
+
+    //Notify server of endianness
+    int endian_test=1;
+    int32_t message;
+    if (*((char *)&endian_test)==1) message=htonl(TCP_CLIENT_LITTLE_ENDIAN);
+    else message=htonl(TCP_CLIENT_BIG_ENDIAN);
+    int result=write_full(sockfd,&message,sizeof(message));
+    if (result<0)
+    {
+        perror("Unable to send endianness");
+        exit(EXIT_FAILURE);
+    }
 
     //Polling structure
     struct pollfd poll_client;
@@ -69,7 +76,7 @@ int main(int argc, char *argv[])
     int ms_elapsed=0;
 
     //Usage message to user
-    info("Press ESC to exit...");
+    printf("Press ESC to exit...\n");
 
     //Send test screen patterns and receive key presses
     bool disconnect=false;
@@ -110,10 +117,18 @@ int main(int argc, char *argv[])
                 screen[i]=C_RGB(colors[0],colors[1],colors[2]);
 
             //Send screen data
-            int result=write_full(sockfd,(char *)screen,sizeof(screen));
+            uint32_t message=htonl(TCP_FRAME_DATA);
+            int result=write_full(sockfd,&message,sizeof(message));
             if (result<0)
             {
-                info("error while writing data");
+                perror("Error while writing data");
+                disconnect=true;
+                break;
+            }
+            result=write_full(sockfd,(char *)screen,sizeof(screen));
+            if (result<0)
+            {
+                perror("Error while writing data");
                 disconnect=true;
                 break;
             }
@@ -122,7 +137,7 @@ int main(int argc, char *argv[])
         //Exit loop and disconnect
         if (disconnect) break;
 
-        //Check for keypresses from server
+        //Check for messages from server
         int event_count=poll(&poll_client,1,0);
         if (event_count==0)
         {
@@ -132,7 +147,7 @@ int main(int argc, char *argv[])
         {
             if (poll_client.revents&POLLHUP)
             {
-                error_exit("server disconnected by hang up");
+                error_exit("Server disconnected by hang up\n");
             }
             else if (poll_client.revents&POLLIN)
             {
@@ -145,13 +160,13 @@ int main(int argc, char *argv[])
                     int bytes_read=read_full(sockfd,&message,sizeof(message));
                     if (bytes_read==0)
                     {
-                        info("server disconnected");
+                        printf("Server disconnected\n");
                         disconnect=true;
                         break;
                     }
                     else if (bytes_read<0)
                     {
-                        info("server disconnected with error");
+                        perror("Server disconnected with error");
                         disconnect=true;
                         break;
                     }
@@ -163,14 +178,14 @@ int main(int argc, char *argv[])
                             tcp_type=message;
                             switch (tcp_type)
                             {
-                                case TCP_FRAME:
+                                case TCP_FRAME_READY:
                                     frame_ready=true;
                                     break;
                                 case TCP_KEYPRESS:
                                     messages_left++;
                                     break;
                                 default:
-                                    printf("Client: unknown TCP message type: 0x%X\n",message);    
+                                    printf("Unknown TCP message type: 0x%X\n",message);    
                                     disconnect=true;
                             }
                             first_message=false;
@@ -180,19 +195,18 @@ int main(int argc, char *argv[])
                             switch (tcp_type)
                             {
                                 case TCP_KEYPRESS:
-                                    printf("Client: keypress from server - %d\n",message);
+                                    printf("Keypress from server - %d\n",message);
                                     if (message==41)
                                     {
-                                        info("ESC pressed - exiting");
+                                        printf("ESC pressed - exiting\n");
                                         disconnect=true;
                                     }
                                     break;
                                 default:
                                     //Should never reach here unless error in message_count calculation above
-                                    printf("Client: unexpected data from server - %d\n",message);
+                                    printf("Unexpected data from server - %d\n",message);
                                     disconnect=true;
                             }
-
                         }
                     }
                     messages_left--;

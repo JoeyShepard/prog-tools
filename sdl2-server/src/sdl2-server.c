@@ -12,31 +12,27 @@
 #include "common.h"
 
 
-#define WINDOW_TITLE "none for now"
+#define WINDOW_TITLE "SDL2 wrapper for fx-CG50"
 
+enum
+{
+    ENDIAN_NONE,
+    ENDIAN_LITTLE,
+    ENDIAN_BIG
+};
 
 uint16_t screen[DWIDTH*DHEIGHT];
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *texture;
 int scale_factor=3;
-
-void info(const char *msg)
-{
-    printf("Server: %s\n",msg);
-}
+int server_endian=ENDIAN_NONE;
+int client_endian=ENDIAN_NONE;
 
 void error_exit(const char *msg)
 {
-    info(msg);
-    exit(1);
-}
-
-void dupdate(void)
-{
-    SDL_UpdateTexture(texture,NULL,screen,DWIDTH*sizeof(uint16_t));
-    SDL_RenderCopy(renderer,texture,NULL,NULL);
-    SDL_RenderPresent(renderer);
+    printf("%s",msg);
+    exit(EXIT_FAILURE);
 }
 
 void create_window()
@@ -45,7 +41,7 @@ void create_window()
     window=SDL_CreateWindow(WINDOW_TITLE,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,DWIDTH*scale_factor,DHEIGHT*scale_factor,SDL_WINDOW_SHOWN);
     if (window==NULL)
     {
-        printf("Server: SDL2 could not create window. SDL error: %s\n", SDL_GetError());
+        printf("SDL2 could not create window. SDL error: %s\n", SDL_GetError());
         exit(1);
     }
 
@@ -63,17 +59,23 @@ void destroy_window()
 
 int main(int argc, char *argv[])
 {
+    //Determine local endianness to know whether grapics data from client needs to be swapped
+    //Generally better to use htonl etc but do processing here rather than on sh4 inside qemu
+    int endian_test=1;
+    if (*((char *)&endian_test)==1) server_endian=ENDIAN_LITTLE;
+    else server_endian=ENDIAN_BIG;
+
     //Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO)<0)
     {
-        printf("Server: SDL2 did not initialize. SDL error: %s\n", SDL_GetError());
+        printf("SDL2 did not initialize. SDL error: %s\n", SDL_GetError());
         exit(1);
     }
     
     //Open socket
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
-    if (sockfd==-1) error_exit("unable to open socket");
-    else info("socket opened");
+    if (sockfd==-1) error_exit("Unable to open socket\n");
+    else printf("Socket opened\n");
 
     //Stop "Address already in use" error when restarting server too quickly
     int option=1;
@@ -88,35 +90,36 @@ int main(int argc, char *argv[])
     int bind_result=bind(sockfd,(struct sockaddr *)&server,sizeof(server));
     if (bind_result==-1)
     {
-        perror("unable to bind address");
+        perror("Unable to bind address");
         exit(1);
     }
-    else info("address bound");
+    else printf("Address bound\n");
 
     while(1)
     {
         //Listen for connection
         int listen_result=listen(sockfd,1);
-        if (bind_result==-1) error_exit("unable to begin listening");
-        else info("listening for connection...");
+        if (bind_result==-1) error_exit("Unable to begin listening\n");
+        else printf("Listening for connection...\n");
         
         //Accept connection
         struct sockaddr_in client;
         int client_len=sizeof(client);
         int connfd=accept(sockfd,(struct sockaddr *)&client,&client_len);
-        if (connfd==-1) error_exit("unable to accept connection");
-        else info("accepted connection");
+        if (connfd==-1) error_exit("Unable to accept connection\n");
+        else printf("Connection accepted\n");
 
         //Create SDL2 window for each connection
-        info("creating SDL2 window");
+        printf("Creating SDL2 window\n");
         create_window();
-        info("SDL2 window created");
+        printf("SDL2 window created\n");
 
         //Wait for messages
         struct pollfd poll_server;
         poll_server.fd=connfd;
         poll_server.events=POLLIN; 
-        while(1)
+        bool disconnect=false;
+        while(disconnect==false)
         {
             //Check if screen data received
             int event_count=poll(&poll_server,1,0);
@@ -128,42 +131,115 @@ int main(int argc, char *argv[])
             {
                 if (poll_server.revents&POLLHUP)
                 {
-                    info("client disconnected by hang up");
+                    printf("Client disconnected by hang up\n");
+                    disconnect=true;
                     break;
                 }
                 else if (poll_server.revents&POLLIN)
                 {
-                    //Screen data received
-                    int bytes_read=read_full(connfd,(char *)screen,sizeof(screen));
-                    if (bytes_read==0)
+                    //Process messages from client
+                    bool first_message=true;
+                    int messages_left=1;
+                    int tcp_type;
+                    uint32_t message;
+                    void *message_ptr=&message;
+                    int message_size=sizeof(message);
+                    while (messages_left>0)
                     {
-                        info("client disconnected");
-                        break;
-                    }
-                    else if (bytes_read<0)
-                    {
-                        info("client disconnected with error");
-                        break;
-                    }
-                    else
-                    {
-                        //Screen data received - swap endianness
-                        for (int i=0;i<DWIDTH*DHEIGHT;i++)
+                        int bytes_read=read_full(connfd,message_ptr,message_size);
+                        if (bytes_read==0)
                         {
-                            uint16_t pixel=screen[i];
-                            pixel=pixel<<8|pixel>>8;
-                            screen[i]=pixel;
+                            //No error available - just disconnection
+                            printf("Client disconnected\n");
+                            disconnect=true;
+                            break;
                         }
+                        else if (bytes_read<0)
+                        {
+                            //Error - print error message for errno
+                            perror("Client disconnected");
+                            disconnect=true;
+                            break;
+                        }
+                        else
+                        {
+                            if (first_message==true)
+                            {
+                                tcp_type=ntohl(message);
+                                switch (tcp_type)
+                                {
+                                    case TCP_FRAME_DATA:
+                                        message_ptr=screen;
+                                        message_size=sizeof(screen);
+                                        messages_left++;
+                                        break;
+                                    case TCP_CLIENT_LITTLE_ENDIAN:
+                                        client_endian=ENDIAN_LITTLE;
+                                        break;
+                                    case TCP_CLIENT_BIG_ENDIAN:
+                                        client_endian=ENDIAN_BIG;
+                                        break;
+                                    default:
+                                        printf("Unknown TCP message type: 0x%X\n",message);    
+                                        exit(EXIT_FAILURE);
+                                }
+                                first_message=false;
+                            }
+                            else
+                            {
+                                switch (tcp_type)
+                                {
+                                    case TCP_FRAME_DATA:
+                                        //Screen data received
+                                        if (server_endian==ENDIAN_NONE)
+                                        {
+                                            error_exit("Server endianness not set\n");
+                                        }
+                                        else if (client_endian==ENDIAN_NONE)
+                                        {
+                                            error_exit("Client endianness not set\n");
+                                        }
 
-                        //Update screen
-                        dupdate();
+                                        //Swap endianness of screen data if endianness of client and server differ
+                                        if (client_endian!=server_endian)
+                                        {
+                                            for (int i=0;i<DWIDTH*DHEIGHT;i++)
+                                            {
+                                                uint16_t pixel=screen[i];
+                                                pixel=pixel<<8|pixel>>8;
+                                                screen[i]=pixel;
+                                            }
+                                        }
 
-                        //Request next frame
-                        int32_t message=htonl(TCP_FRAME);
-                        write_full(connfd,&message,sizeof(message));
+                                        //Update screen
+                                        SDL_UpdateTexture(texture,NULL,screen,DWIDTH*sizeof(uint16_t));
+                                        SDL_RenderCopy(renderer,texture,NULL,NULL);
+                                        SDL_RenderPresent(renderer);
+
+                                        //Ready to receive next frame
+                                        int32_t message=htonl(TCP_FRAME_READY);
+                                        int result=write_full(connfd,&message,sizeof(message));
+                                        if (result<0)
+                                        {
+                                            perror("Unable to send frame ready message");
+                                            exit(EXIT_FAILURE);
+                                        }
+
+                                        break;
+                                    default:
+                                        //Should never reach here unless error in messages_left calculation above
+                                        printf("Unexpected data from server 0x%X for message type 0x%X\n",message,tcp_type);
+                                        exit(EXIT_FAILURE);
+                                }
+                            }
+                        }
+                        messages_left--;
                     }
                 }
             }
+            
+            //Exit loop if no longer connected
+            if (disconnect==true) break;
 
             //Handle SDL events
             SDL_Event event;
@@ -173,19 +249,23 @@ int main(int argc, char *argv[])
                 switch (event.type)
                 {
                     case SDL_QUIT:
-                        /*
-                        //Exit program
-                        destroy_window();
-                        SDL_Quit();
-                        exit(0);
-                        */
                         disconnect_client=true;
                         break;
                     case SDL_KEYDOWN:
                         int32_t messages[]={htonl(TCP_KEYPRESS),htonl(event.key.keysym.scancode)};
-                        write_full(connfd,messages,sizeof(messages));
+                        int result=write_full(connfd,messages,sizeof(messages));
+                        if (result<0)
+                        {
+                            perror("Unable to send keypress data");
+                            exit(EXIT_FAILURE);
+                        }
                         break;
                     case SDL_MOUSEBUTTONDOWN:
+                        //None of the examples with SDL_RenderReadPixels worked even when adjusted for 16bit format so output raw data
+                        FILE *fptr=fopen("screenshot/screenshot.raw","w");
+                        fwrite(screen,2,DWIDTH*DHEIGHT,fptr);
+                        fclose(fptr);
+                        printf("Screenshot saved to screenshot/screenshot.raw\n");
                         break;
                 }
             }
@@ -195,7 +275,7 @@ int main(int argc, char *argv[])
             {
                 shutdown(connfd,SHUT_RDWR);
                 close(connfd);
-                info("closing window");
+                printf("Closing SDL2 window\n");
                 break;
             }
 

@@ -1,7 +1,0 @@
-files here have custom processing in Makefile or build script
-
-gcc-15/
-- compile with newer gcc 15 in container for __attribute__((musttail))
-
-generated/
-- place for assembly files generated from C files in gcc-15/

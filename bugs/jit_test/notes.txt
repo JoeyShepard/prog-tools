@@ -1,0 +1,6 @@
+jit_test in main.c returns 12 rather than 42 on calculator if two sections that print values written are skipped
+
+objdump on obj from fxsdk directory to see what assembly generated
+also output of godbolt
+- line 288 is jump to code
+- line 151 is memcpy

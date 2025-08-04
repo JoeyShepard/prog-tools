@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <unistd.h>
 
 int write_full(int fd,void *data,int size)
@@ -20,7 +21,7 @@ int read_full(int fd,void *data,int size)
     {
         //printf("read_full: reading\n");
         int bytes_read=read(fd,data+bytes_received,size-bytes_received);
-        //printf("read_full: read %d bytes\n");
+        //printf("read_full: read %d bytes\n",bytes_read);
         if (bytes_read<=0) return bytes_read;
         bytes_received+=bytes_read;
     }

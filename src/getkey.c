@@ -505,7 +505,7 @@ const int vkey_printable_len=ARRAY_LEN(vkey_printable);
 
 int getkey_wrapper(bool wait)
 {
-    if (wait)
+    if (wait==true)
     {
         //Wait for keypress
 

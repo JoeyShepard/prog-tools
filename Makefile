@@ -1,22 +1,16 @@
 PROJECT = cg50-sdl2
 
-BUILD_DIR=sdl2
+BUILD_DIR=build-sh4
 SRC_DIR=src
 
-CC = gcc
-CFLAGS = -O3 $(shell sdl2-config --cflags)
+CC = sh4eb-linux-musl-gcc
+CFLAGS = -O2 -g -static
 CFLAGS += -MMD -MP
-CFLAGS += -g
 CFLAGS += -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
-LIBS = -O3 $(shell sdl2-config --libs)
 C_FILES=$(wildcard $(SRC_DIR)/*.c)
 OBJS=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-#Compile C files needing __attribute__((musttail)) separately with containerized gcc 15
-C_FILES_GCC15=$(wildcard $(SRC_DIR)/custom/gcc-15/*.c)
-OBJS_GCC15=$(C_FILES_GCC15:$(SRC_DIR)/custom/gcc-15/%.c=$(BUILD_DIR)/%.o)
 
 DEPS=$(OBJS:.o=.d)
-DEPS+=$(OBJS_GCC15:.o=.d)
 
 run: $(BUILD_DIR)/$(PROJECT)
 	./$(BUILD_DIR)/$(PROJECT)
@@ -33,14 +27,11 @@ log: $(BUILD_DIR)/$(PROJECT)
 compile: $(BUILD_DIR)/$(PROJECT)
 	#Compile only
 
-$(BUILD_DIR)/$(PROJECT): $(OBJS) $(OBJS_GCC15)
-	$(CC) -o $(BUILD_DIR)/$(PROJECT) $^ $(CFLAGS) $(LIBS)
+$(BUILD_DIR)/$(PROJECT): $(OBJS)
+	$(CC) -o $(BUILD_DIR)/$(PROJECT) $^ $(CFLAGS)
 
 $(OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $< 
-
-$(OBJS_GCC15): $(BUILD_DIR)/%.o: $(SRC_DIR)/custom/gcc-15/%.c
-	gcc-15 $(CFLAGS) -c -o $@ $< 
 
 .PHONY: clean
 clean:
