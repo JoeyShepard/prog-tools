@@ -245,9 +245,9 @@ switch case as mentioned online?
 #include "test.h"
 #include "text.h"
 
-void foo(int x)
+int foo()
 {
-    printf("foo: %d\n",x);
+    return 5;
 }
 
 void jit_test()
@@ -267,7 +267,25 @@ void jit_test()
         //0x00, 0x0B, //rts
         //0xE0, 0x2A, //mov #42,r0
 
-    
+        //0xD0, 0x01, //mov.l @(4,PC),r0
+        //0x00, 0x0B, //rts
+        //0x00, 0x09, //nop
+        //0x00, 0x00, //alignment
+        //0x12, 0x34, //const 0x12345678
+        //0x56, 0x78
+
+        0x4F, 0x22, //sts.l pr,@-r15
+        0xD0, 0x03, //mov.l @(8,PC),r0
+        0x40, 0x0B, //jsr @r0
+        0x00, 0x09, //nop
+        0x4F, 0x26, //lds.l @r15+,pr
+        0x00, 0x0B, //rts
+        0x00, 0x09, //nop
+        0x00, 0x00, //alignment
+        ((uintptr_t)foo)>>24,           //&foo
+        (((uintptr_t)foo)>>16)&0xff,    //&foo
+        (((uintptr_t)foo)>>8)&0xff,     //&foo
+        ((uintptr_t)foo)&0xFF,          //&foo
 
         };
    
@@ -304,9 +322,7 @@ void jit_test()
     */
 
     //Jump to machine code
-    //int result=((int (*)())heap)();
-
-    int result=test();
+    int result=((int (*)())heap)();
 
     //Output result
     pos.x=20;
@@ -314,6 +330,10 @@ void jit_test()
     pos=draw_text("Result: ",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
     text_int32(result,buffer);
     pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    pos=draw_text(" (0x",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    text_hex32_padded(result,buffer,8);
+    pos=draw_text(buffer,pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
+    pos=draw_text(")",pos,COL_WHITE,COL_TRANS,false,FONT_5x8);
     dupdate();
 
     //Wait for key
