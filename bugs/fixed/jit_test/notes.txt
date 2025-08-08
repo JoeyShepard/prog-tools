@@ -4,3 +4,5 @@ objdump on obj from fxsdk directory to see what assembly generated
 also output of godbolt
 - line 288 is jump to code
 - line 151 is memcpy
+
+SOLVED: cache invalidation

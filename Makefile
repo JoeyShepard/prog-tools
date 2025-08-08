@@ -7,8 +7,11 @@ CC = sh4eb-linux-musl-gcc
 CFLAGS = -O2 -g -static
 CFLAGS += -MMD -MP
 CFLAGS += -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
+CFLAGS += -z noexecstack
 C_FILES=$(wildcard $(SRC_DIR)/*.c)
+ASM_FILES=$(wildcard $(SRC_DIR)/*.s)
 OBJS=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+OBJS_ASM=$(ASM_FILES:$(SRC_DIR)/%.s=$(BUILD_DIR)/%.o)
 
 DEPS=$(OBJS:.o=.d)
 
@@ -16,8 +19,8 @@ run: $(BUILD_DIR)/$(PROJECT)
 	./$(BUILD_DIR)/$(PROJECT)
 
 debug: $(BUILD_DIR)/$(PROJECT)
-	gdbserver localhost:2345 ./$(BUILD_DIR)/$(PROJECT) &
-	gdb ./$(BUILD_DIR)/$(PROJECT) -x gdb-options.txt
+	qemu-sh4eb-static -g 2345 ./$(BUILD_DIR)/$(PROJECT) &
+	gdb-multiarch --quiet -x gdb-options.txt ./$(BUILD_DIR)/$(PROJECT)
 
 log: $(BUILD_DIR)/$(PROJECT)
 	-./$(BUILD_DIR)/$(PROJECT)
@@ -27,10 +30,13 @@ log: $(BUILD_DIR)/$(PROJECT)
 compile: $(BUILD_DIR)/$(PROJECT)
 	#Compile only
 
-$(BUILD_DIR)/$(PROJECT): $(OBJS)
+$(BUILD_DIR)/$(PROJECT): $(OBJS) $(OBJS_ASM)
 	$(CC) -o $(BUILD_DIR)/$(PROJECT) $^ $(CFLAGS)
 
 $(OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $< 
+
+$(OBJS_ASM): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
 .PHONY: clean

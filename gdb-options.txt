@@ -1,6 +1,7 @@
-set debuginfod enabled off
+set arch sh4
+set endian big
+layout regs
+disp/i $pc
 target remote localhost:2345
-layout src
-list
 break main
 continue

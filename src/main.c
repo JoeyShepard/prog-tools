@@ -69,6 +69,9 @@ offsetof operator
   - make sanitize
 - valgrind
 
+for optimizing structs
+- https://dreamcast.wiki/Useful_programming_tips
+
 don't show cursor if window doesn't have focus like in tmux
 switching tabs should be disabled if full screen instead of redrawing
 each character output should NOT update screen
@@ -236,16 +239,17 @@ switch case as mentioned online?
 //=========
 
 //TODO: remove
+#include <stdio.h>
 #include <string.h>
 #include "getkey.h"
+#include "test.h"
 #include "text.h"
-int test()
-{
-    return 42;
-}
 
 void jit_test()
 {
+    test();
+
+
     //Output text
     char buffer[TEXT_INT32_SIZE];
     dclear(COL_BLACK);
@@ -258,7 +262,7 @@ void jit_test()
         0x00, 0x0B, //rts
         0xE0, 0x2A, //mov #42,r0
         };
-    
+   
     //Copy machine code to memory
     memcpy(heap,test_code,sizeof(test_code));
     
@@ -291,11 +295,10 @@ void jit_test()
 
     */
 
-    //Necessary on calculator. Write cache?
-    for (volatile int i=0;i<10;i++);
-
     //Jump to machine code
-    int result=((int (*)())heap)();
+    //int result=((int (*)())heap)();
+
+    int result=test();
 
     //Output result
     pos.x=20;
