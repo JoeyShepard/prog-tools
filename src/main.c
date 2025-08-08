@@ -245,6 +245,11 @@ switch case as mentioned online?
 #include "test.h"
 #include "text.h"
 
+void foo(int x)
+{
+    printf("foo: %d\n",x);
+}
+
 void jit_test()
 {
     test();
@@ -259,8 +264,11 @@ void jit_test()
 
     //sh4eb machine code
     char test_code[]={
-        0x00, 0x0B, //rts
-        0xE0, 0x2A, //mov #42,r0
+        //0x00, 0x0B, //rts
+        //0xE0, 0x2A, //mov #42,r0
+
+    
+
         };
    
     //Copy machine code to memory

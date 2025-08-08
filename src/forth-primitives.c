@@ -7,6 +7,9 @@
 #include "macros.h"
 #include "text.h"
 
+//TODO: remove
+#include "test.h"
+
 
 //Internal primitives - not visible to user
 //=========================================

@@ -5,9 +5,9 @@ SRC_DIR=src
 
 CC = sh4eb-linux-musl-gcc
 CFLAGS = -O2 -g -static
-CFLAGS += -MMD -MP
-CFLAGS += -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
-CFLAGS += -z noexecstack
+CFLAGS += -MMD -MP                                      #Recompile if file includes header that changed
+CFLAGS += -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst     #Assembly listing for each source file
+CFLAGS += -z noexecstack                                #Silence warning for assembly files re non-executable stack
 C_FILES=$(wildcard $(SRC_DIR)/*.c)
 ASM_FILES=$(wildcard $(SRC_DIR)/*.s)
 OBJS=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
