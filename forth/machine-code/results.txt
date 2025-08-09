@@ -1,0 +1,373 @@
+Test 1: x 3 + x 4 + 5 6 * 7 x + + + +
+=====================================
+SSA before optimizing:
+- SSA[0] (x[0] + #3)
+- SSA[1] (x[0] + #4)
+- SSA[2] (#5 * #6)
+- SSA[3] (#7 + x[0])
+- SSA[4] (SSA[2] + SSA[3])
+- SSA[5] (SSA[1] + SSA[4])
+- SSA[6] (SSA[0] + SSA[5])
+
+SSA after optimizing:
+- SSA[0] (#3 + x[0])
+- SSA[1] (#4 + x[0])
+- SSA[2] (#30)
+- SSA[3] (#7 + x[0])
+- SSA[4] (#30 + SSA[3])
+- SSA[5] (SSA[1] + SSA[1000])
+- SSA[6] (SSA[0] + SSA[5])
+- SSA[1000] (#37 + x[0])
+- SSA[1001] (#37 + x[0])
+
+Final output
+- load SSA[6] (SSA[0] + SSA[5])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 2: DUP
+===========
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load initial[7]
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 3: DROP
+============
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- SP+=-1
+- Done
+
+
+Test 4: DUP DROP
+================
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- Done
+
+
+Test 5: OVER OVER DUP
+=====================
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load initial[6]
+- store stack[8]
+- load initial[7]
+- store stack[9]
+- store stack[10]
+- SP+=3
+- Done
+
+
+Test 6: SWAP
+============
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load initial[7]
+- store stack[6]
+- load initial[6]
+- store stack[7]
+- Done
+
+
+Test 7: DUP SWAP DROP
+=====================
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- Done
+
+
+Test 8: 2 3 SWAP
+================
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load #3
+- store stack[8]
+- load #2
+- store stack[9]
+- SP+=2
+- Done
+
+
+Test 9: 2 3 NIP
+===============
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load #3
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 10: DUP AND DUP OR DUP XOR
+===============================
+SSA before optimizing:
+- SSA[0] (initial[7] and initial[7])
+- SSA[1] (SSA[0] or SSA[0])
+- SSA[2] (SSA[1] xor SSA[1])
+
+SSA after optimizing:
+- SSA[0] (initial[7])
+- SSA[1] (initial[7])
+- SSA[2] (#0)
+
+Final output
+- load SSA[2] (#0)
+- store stack[7]
+- Done
+
+
+Test 11: x 0 AND x 0 OR x 0 XOR
+===============================
+SSA before optimizing:
+- SSA[0] (x[0] and #0)
+- SSA[1] (x[0] or #0)
+- SSA[2] (x[0] xor #0)
+
+SSA after optimizing:
+- SSA[0] (#0)
+- SSA[1] (x[0])
+- SSA[2] (x[0])
+
+Final output
+- load SSA[0] (#0)
+- store stack[8]
+- load SSA[1] (x[0])
+- store stack[9]
+- load SSA[2] (x[0])
+- store stack[10]
+- SP+=3
+- Done
+
+
+Test 12: x -1 AND x -1 OR x -1 XOR
+==================================
+SSA before optimizing:
+- SSA[0] (x[0] and #-1)
+- SSA[1] (x[0] or #-1)
+- SSA[2] (x[0] xor #-1)
+
+SSA after optimizing:
+- SSA[0] (x[0])
+- SSA[1] (#-1)
+- SSA[2] (invert x[0])
+
+Final output
+- load SSA[0] (x[0])
+- store stack[8]
+- load SSA[1] (#-1)
+- store stack[9]
+- load SSA[2] (invert x[0])
+- store stack[10]
+- SP+=3
+- Done
+
+
+Test 13: 2 - x - - 5 -
+======================
+SSA before optimizing:
+- SSA[0] (initial[7] - #2)
+- SSA[1] (SSA[0] - x[0])
+- SSA[2] (initial[6] - SSA[1])
+- SSA[3] (SSA[2] - #5)
+
+SSA after optimizing:
+- SSA[0] (#-2 + initial[7])
+- SSA[1] (SSA[0] - x[0])
+- SSA[2] (initial[6] - SSA[1])
+- SSA[3] (#-5 + SSA[2])
+
+Final output
+- load SSA[3] (#-5 + SSA[2])
+- store stack[6]
+- SP+=-1
+- Done
+
+
+Test 14: x 3 + x 4 + 5 6 * 7 x + + + +
+======================================
+SSA before optimizing:
+- SSA[0] (x[0] + #3)
+- SSA[1] (x[0] + #4)
+- SSA[2] (#5 * #6)
+- SSA[3] (#7 + x[0])
+- SSA[4] (SSA[2] + SSA[3])
+- SSA[5] (SSA[1] + SSA[4])
+- SSA[6] (SSA[0] + SSA[5])
+
+SSA after optimizing:
+- SSA[0] (#3 + x[0])
+- SSA[1] (#4 + x[0])
+- SSA[2] (#30)
+- SSA[3] (#7 + x[0])
+- SSA[4] (#30 + SSA[3])
+- SSA[5] (SSA[1] + SSA[1000])
+- SSA[6] (SSA[0] + SSA[5])
+- SSA[1000] (#37 + x[0])
+- SSA[1001] (#37 + x[0])
+
+Final output
+- load SSA[6] (SSA[0] + SSA[5])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 15: x x
+============
+SSA before optimizing:
+- None
+
+SSA after optimizing:
+- None
+
+Final output
+- load x[0]
+- store stack[8]
+- store stack[9]
+- SP+=2
+- Done
+
+
+Test 16: x 2 + x y + 2 +
+========================
+SSA before optimizing:
+- SSA[0] (x[0] + #2)
+- SSA[1] (x[0] + y[0])
+- SSA[2] (SSA[1] + #2)
+
+SSA after optimizing:
+- SSA[0] (#2 + x[0])
+- SSA[1] (x[0] + y[0])
+- SSA[2] (#2 + SSA[1])
+
+Final output
+- load SSA[0] (#2 + x[0])
+- store stack[8]
+- load SSA[2] (#2 + SSA[1])
+- store stack[9]
+- SP+=2
+- Done
+
+
+Test 17: x 1 - dup 1 +
+======================
+SSA before optimizing:
+- SSA[0] (x[0] - #1)
+- SSA[1] (SSA[0] + #1)
+
+SSA after optimizing:
+- SSA[0] (x[0] - #1)
+- SSA[1] (#1 + SSA[0])
+
+Final output
+- load SSA[0] (x[0] - #1)
+- store stack[8]
+- load SSA[1] (#1 + SSA[0])
+- store stack[9]
+- SP+=2
+- Done
+
+
+Test 18: 1 x * x 0 * x 0 +
+==========================
+SSA before optimizing:
+- SSA[0] (#1 * x[0])
+- SSA[1] (x[0] * #0)
+- SSA[2] (x[0] + #0)
+
+SSA after optimizing:
+- SSA[0] (x[0])
+- SSA[1] (#0)
+- SSA[2] (x[0])
+
+Final output
+- load SSA[0] (x[0])
+- store stack[8]
+- load SSA[1] (#0)
+- store stack[9]
+- load SSA[2] (x[0])
+- store stack[10]
+- SP+=3
+- Done
+
+
+Test 19: 2 x 1 * + 3 +
+======================
+SSA before optimizing:
+- SSA[0] (x[0] * #1)
+- SSA[1] (#2 + SSA[0])
+- SSA[2] (SSA[1] + #3)
+
+SSA after optimizing:
+- SSA[0] (x[0])
+- SSA[1] (#2 + x[0])
+- SSA[2] (#3 + SSA[1])
+- SSA[1000] (#5 + x[0])
+- SSA[1001] (#5 + x[0])
+
+Final output
+- load SSA[2] (#3 + SSA[1])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 20: x 1 + to_x
+===================
+- Unknown: to_x
+- Aborting test
+
+
+Test 21: x 1 + to_x x
+=====================
+- Unknown: to_x
+- Aborting test
+
+
