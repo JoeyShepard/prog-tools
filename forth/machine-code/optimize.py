@@ -302,7 +302,6 @@ def ssa_replace(ssa,index,replacement):
         if xy!=[item.x,item.y]:
             ssa[i]=ObjClass("ssa",i,item.op,xy[0],xy[1])
 
-#TODO: long chains ie 2 x + x + x + x + x + 2 +
 def ssa_fold_constants(ssa):
     opt_name="fold_constants"
     triggered=False
