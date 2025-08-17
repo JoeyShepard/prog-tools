@@ -15,6 +15,7 @@ prim_mem=[
     "C@",
     "W@",
     "ALIGNED",
+    "BOUNDS",
     "CELLS",
     "WALIGNED",
     "CXT",
@@ -50,6 +51,7 @@ prim_math=[
     ]
 
 prim_stack=[
+    "?DUP",
     "DROP",
     "2DROP",
     "DUP",

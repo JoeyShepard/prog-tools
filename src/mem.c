@@ -12,9 +12,6 @@
 #include "macros.h"
 #include "mem.h"
 
-//TODO: remove
-#include "text.h"
-
 uint8_t *write_heap_i32(int32_t val,uint8_t *heap_ptr)
 {
     memcpy(heap_ptr,&val,sizeof(int32_t));

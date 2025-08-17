@@ -9,7 +9,7 @@
 #include "dummy.h"
 #include "manager.h"
 #include "mem.h"
-#include "memory_manager.h"
+#include "memory-manager.h"
 #include "menu.h"
 #include "structs.h"
 

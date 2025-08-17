@@ -1,0 +1,6 @@
+combined/
+- started to create combined primitives then stopped - not enough flash
+- keeping for now since has list of primitives
+
+machine-code/
+- generate machine code instead

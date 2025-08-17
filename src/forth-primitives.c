@@ -3051,16 +3051,10 @@ const struct ForthPrimitive forth_primitives[]=
                 //Lots of answers about how this Forth is different
             //C equivalency section
         //ALL remapped keys
-    //may need to add combined primitives back in depending on optimizer (0= 1+ etc)
-        //actually yes, this would probably help a lot
     //COLD or equivalent
         //menu option?
         //RESET?
 
-
-    //May add but not sure yet
-    //1+@! etc
-        //see +! which I think is @1+!
     //FIND ??
         //Note commented out definition!
     //cleave ??

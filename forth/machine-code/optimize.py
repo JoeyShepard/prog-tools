@@ -8,6 +8,7 @@
 #Constants
 STACK_DEPTH=8
 LOCALS_COUNT=3
+ops_commutative=["+","*","and","or","xor"]
 
 #Globals
 stack=[]    #Symbolic stack
@@ -19,7 +20,15 @@ locals_gen=[]
 tests=[
     #TODO: more organized tests
     #TODO: descriptions of tests
-    "x 3 + 4 x + 5 6 * 7 x + + + +",
+    #3x+2x???
+    "x x 5 + y - x + /",
+    "x x 5 * y / x * -",
+    "x x 5 * x / *",
+    "2 -3 - x DUP DUP - -",
+    "x x x x - DUP DUP - - - -",
+    "x 3 + 4 x + 5 6 * 7 x + + + + x -",
+    #TODO: same as above for mult
+    #TODO: mix + and *
     "DUP",
     "DROP",
     "DUP DROP",
@@ -42,71 +51,123 @@ tests=[
     "x 1 + to_x x",
     ]
 
+class SSA_Class:
+    def __init__(self,ssa_id,op,ssa_list,optimization=None):
+        self.id=ssa_id
+        self.op=op
+        self.ssa_list=ssa_list
+        self.optimization=optimization
+        self.opt_list=[]
+
+    def format(self):
+        ret_val=f"SSA[{self.id}] ("
+        first_arg=True
+        for arg in self.ssa_list:
+            if first_arg==False:
+                ret_val+=f" {self.op} "
+            else:
+                first_arg=False
+            if arg.type=="ssa":
+                prefix=""
+                if arg.negative==True:
+                    prefix+="-"
+                if arg.inverted==True:
+                    prefix+="1/"
+                ret_val+=f"{prefix}SSA[{arg.id}]"
+            else:
+                ret_val+=f"{arg.format()}"
+        ret_val+=")"
+        if self.optimization!=None:
+            ret_val+=f" from {self.optimization}"
+        return ret_val
+
+    def sort(self):
+        if self.op in ops_commutative:
+            self.ssa_list=sorted(self.ssa_list)
+
+    def opt_log(self,log):
+        self.opt_list.append(log)
+
+    def opt_clear(self):
+        self.opt_list=[]
+
+
 class ObjClass:
-    def __init__(self,item_type,a1=None,a2=None,a3=None,a4=None,a5=None):
+    def __init__(self,item_type,a1=None):
         self.type=item_type
-        if self.type=="none":
-            pass
-        elif self.type=="initial":
+        if self.type=="initial":
             self.id=a1
         elif self.type=="const":
             self.value=a1
         elif self.type=="local_fetch":
             self.id=a1
-            self.gen=locals_gen[self.id]
-            self.name="xyz"[self.id]
+            if self.id!=None:
+                self.gen=locals_gen[self.id]
+                self.name="xyz"[self.id]
         elif self.type=="ssa":
             self.id=a1
-            self.op=a2
-            self.x=a3
-            self.y=a4
-            self.optimization=a5
         else:
             print(f"ObjClass.__init__: unknown item type '{item_type}'")
             print("Exiting...")
             exit(1)
+        self.negative=False
+        self.inverted=False
 
-        self.opt_list=[]
+    def get_op(self):
+        return ssa[self.id].op
 
-    def types(self):
-        if self.type=="ssa":
-            return [self.x.type,self.y.type]
+    def get_ssa_list(self):
+        return ssa[self.id].ssa_list
+
+    def get_optimization(self):
+        return ssa[self.id].optimization
+
+    def copy(self):
+        new_obj=ObjClass(self.type)
+        if self.type=="initial":
+            new_obj.id=self.id
+        elif self.type=="const":
+            new_obj.value=self.value
+        elif self.type=="local_fetch":
+            new_obj.id=self.id
+            new_obj.gen=self.gen
+            new_obj.name=self.name
+        elif self.type=="ssa":
+            new_obj.id=self.id
+        new_obj.negative=self.negative
+        new_obj.inverted=self.inverted
+        return new_obj
+
+    def negate(self):
+        if self.type=="const":
+            self.value*=-1
         else:
-            return [None,None]
+            self.negative=not self.negative
+
+    def invert(self):
+        self.inverted=not self.inverted
 
     def format(self):
+        prefix=""
+        if self.negative==True:
+            prefix+="-"
+        if self.inverted==True:
+            prefix+="1/"
         if self.type=="initial":
-            return f"initial[{self.id}]"
+            return f"{prefix}initial[{self.id}]"
         elif self.type=="const":
-            return f"#{self.value}"
+            return f"#{prefix}{self.value}"
         elif self.type=="local_fetch":
-            return f"{self.name}"
+            return f"{prefix}{self.name}"
         elif self.type=="ssa":
-            arg_text=[]
-            for arg in [self.x,self.y]:
-                if self.type==None:
-                    pass
-                else:
-                    if arg.type=="ssa":
-                        arg_text.append(f"SSA[{arg.id}]")
-                    elif arg.type!="none":
-                        arg_text.append(arg.format())
-            
-            ret_val=f"SSA[{self.id}]"
-            if len(arg_text)==1:
-                #Single argument like INVERT
-                ret_val+=f" ({self.op} {arg_text[0]})"
-            else:
-                #Two arguments
-                ret_val+=f" ({arg_text[1]} {self.op} {arg_text[0]})"
-            if self.optimization!=None:
-                ret_val+=f" from {self.optimization}"
-            return ret_val
+            return f"{prefix}{ssa[self.id].format()}"
         else:
             print(f"ObjClass.format: unknown item type '{self.type}'")
             print("Exiting...")
             exit(1)
 
+    #Defining __eq__ without __hash__ makes object unhashable
+    #def __eq__(self,other):
     def equal(self,other):
         if self.type!=other.type:
             return False
@@ -114,10 +175,34 @@ class ObjClass:
             return self.id==other.id
         elif self.type=="const":
             return self.value==other.value
-        elif self.type=="local_feth":
+        elif self.type=="local_fetch":
             return self.id==other.id and self.gen==other.gen
         elif self.type=="ssa":
+            #TODO: look at elements since may be sorted and combined
             return self.id==other.id
+
+    #Less than operation for sorting
+    def __lt__(self,other):
+        types=["initial","const","local_fetch","ssa"]
+        self_rank=types.index(self.type)
+        other_rank=types.index(other.type)
+        if self_rank==other_rank:
+            if self.type=="initial":
+                return self.id<other.id
+            elif self.type=="const":
+                return self.value<other.value
+            elif self.type=="local_fetch":
+                if self.id==other.id:
+                    return self.gen<other.gen
+                else:
+                    return self.id<other.id
+            elif self.type=="ssa":
+                return self.id<other.id
+        else:
+            return self_rank<other_rank
+
+    def __repr__(self):
+        return self.format()
 
 def initialize():
     #Dictionary of Forth words to functions and optimizing functions
@@ -131,9 +216,9 @@ def initialize():
     words|={"or":(forth_or,const_or)}
     words|={"xor":(forth_xor,const_xor)}
     words|={"+":(add,const_add)}
-    words|={"-":(sub,const_sub)}
+    words|={"-":(sub,None)}
     words|={"*":(mult,const_mult)}
-    words|={"/":(div,const_div)}
+    words|={"/":(div,None)}
     words|={"x":(fetch_x,None)}
     words|={"y":(fetch_y,None)}
     words|={"z":(fetch_z,None)}
@@ -170,6 +255,7 @@ def print_stack(f,stack):
     items=[]
     for i,item in enumerate(stack):
         if item.type=="initial" and item.id==i:
+            #TODO:
             if started==True:
                 items.append(item)
         else:
@@ -215,48 +301,49 @@ def nip(stack):
     stack.append(x)
 
 def forth_and(stack):
-    stack.append(ssa_add("and",stack.pop(),stack.pop()))
+    t=stack.pop()
+    stack.append(ssa_add("and",stack.pop(),t))
 
 def const_and(x,y):
     return y & x
 
 def forth_or(stack):
-    stack.append(ssa_add("or",stack.pop(),stack.pop()))
+    t=stack.pop()
+    stack.append(ssa_add("or",stack.pop(),t))
 
 def const_or(x,y):
     return y | x
 
 def forth_xor(stack):
-    stack.append(ssa_add("xor",stack.pop(),stack.pop()))
+    t=stack.pop()
+    stack.append(ssa_add("xor",stack.pop(),t))
 
 def const_xor(x,y):
     return y ^ x
     
 def add(stack):
-    stack.append(ssa_add("+",stack.pop(),stack.pop()))
+    t=stack.pop()
+    stack.append(ssa_add("+",stack.pop(),t))
 
 def const_add(x,y):
     return y + x
 
 def sub(stack):
-    stack.append(ssa_add("-",stack.pop(),stack.pop()))
-
-def const_sub(x,y):
-    return y - x
+    t=stack.pop().copy()
+    t.negate()
+    stack.append(ssa_add("+",stack.pop(),t))
 
 def mult(stack):
-    stack.append(ssa_add("*",stack.pop(),stack.pop()))
+    t=stack.pop()
+    stack.append(ssa_add("*",stack.pop(),t))
 
 def const_mult(x,y):
     return y * x
 
 def div(stack):
-    stack.append(ssa_add("/",stack.pop(),stack.pop()))
-
-def const_div(x,y):
-    if x==0:
-        x=1
-    return int(y / x)
+    t=stack.pop().copy()
+    t.invert()
+    stack.append(ssa_add("*",stack.pop(),t))
 
 def fetch_x(stack):
     index=0
@@ -270,7 +357,8 @@ def fetch_z(stack):
     index=2
     stack.append(ObjClass("local_fetch",index))
 
-def print_ssa(f,ssa):
+def print_ssa(f):
+    global ssa
     if len(ssa)==0:
         f.write("- None\n")
     else:
@@ -283,12 +371,14 @@ def print_ssa(f,ssa):
 def ssa_add(op,x,y,optimization=None):
     global ssa
     global ssa_counter
-    new_ssa=ObjClass("ssa",ssa_counter,op,x,y,optimization)
+    new_ssa=SSA_Class(ssa_counter,op,[x,y],optimization)
     ssa[ssa_counter]=new_ssa
+    new_obj=ObjClass("ssa",ssa_counter)
     ssa_counter+=1
-    return new_ssa
+    return new_obj
 
-def ssa_replace(ssa,index,replacement):
+def ssa_replace(index,replacement):
+    global ssa
     ssa_ids=list(ssa.keys())
     ssa_ids.sort()
     for i in ssa_ids:
@@ -302,73 +392,141 @@ def ssa_replace(ssa,index,replacement):
         if xy!=[item.x,item.y]:
             ssa[i]=ObjClass("ssa",i,item.op,xy[0],xy[1])
 
-def ssa_fold_constants(ssa):
-    opt_name="fold_constants"
+def ssa_commutative():
+    global ssa
+    opt_name="commutative"
     triggered=False
     ssa_ids=list(ssa.keys())
     ssa_ids.sort()
     for i in ssa_ids:
         item=ssa[i]
         if opt_name not in item.opt_list:
-            item.opt_list.append(opt_name)
-            if item.types()==["const","const"]:
-                op,const_op=words[item.op]
-                if const_op!=None:
-                    #Replace all references with new constant
-                    ssa_replace(ssa,i,ObjClass("const",const_op(item.x.value,item.y.value)))
-
-                    #Found at least one fold
-                    triggered=True
+            if item.op in ["+","*"]:
+                new_list=[]
+                for element in item.ssa_list:
+                    new_element=element
+                    if element.type=="ssa":
+                        if element.get_op()==item.op:
+                            if element.get_op()=="+":
+                                for e in element.get_ssa_list():
+                                    new_element=e.copy()
+                                    if element.negative:
+                                        new_element.negate()
+                                    new_list.append(new_element)
+                                triggered=True
+                                item.opt_clear()
+                                new_element=None
+                            elif element.get_op()=="*":
+                                for e in element.get_ssa_list():
+                                    new_element=e.copy()
+                                    if element.inverted:
+                                        new_element.invert()
+                                    new_list.append(new_element)
+                                triggered=True
+                                item.opt_clear()
+                                new_element=None
+                    if new_element!=None:
+                        new_list.append(new_element)
+                item.ssa_list=new_list
+            item.opt_log(opt_name)
 
     return triggered
 
-#Put assignments in predictatble order if commutative - const, initial, ssa, all else, none
-def ssa_normalize(ssa):
-    weights={
-        "const":0,
-        "initial":1,
-        "ssa":2,
-        "other":3,
-        "none":99
-        }
-    opt_name="normalize"
+def ssa_sort():
+    global ssa
+    opt_name="sort"
     triggered=False
     ssa_ids=list(ssa.keys())
     ssa_ids.sort()
     for i in ssa_ids:
         item=ssa[i]
         if opt_name not in item.opt_list:
-            item.opt_list.append(opt_name)
-            if item.op in ["*","+","-","and","or","xor"]:
-                #Commutative - switch order if necessary
-                arg_weights=[]
-                arg_types=item.types()
-                for arg in [item.x,item.y]:
-                    if arg.type in weights:
-                        arg_weights.append(weights[arg.type])
+            unsorted=False
+            compare=item.ssa_list[0]
+            for i in item.ssa_list[1:]:
+                if i<compare:
+                    unsorted=True
+                    break
+                compare=i
+            if unsorted==True:
+                item.opt_clear()
+                item.sort()
+                triggered=True
+            item.opt_log(opt_name)
+
+    return triggered
+
+def ssa_simplify():
+    global ssa
+    opt_name="simplify"
+    triggered=False
+    ssa_ids=list(ssa.keys())
+    ssa_ids.sort()
+    for i in ssa_ids:
+        item=ssa[i]
+        if opt_name not in item.opt_list:
+            if item.op=="+":
+                new_list=[]
+                count=0
+                total=0
+                arg=None
+                for element in item.ssa_list:
+                    add_list=True
+                    if arg!=None and arg.type==element.type:
+                        if element.type=="const":
+                            total+=element.value
+                            add_list=False
+                        elif element.type in ["initial","ssa"]:
+                            if arg.id==element.id:
+                                add_list=False
+                        elif element.type=="local_fetch":
+                            if arg.id==element.id:
+                                if arg.gen==element.gen:
+                                    add_list=False
+                    if add_list==False:
+                        if element.negative==True:
+                            count-=1
+                        else:
+                            count+=1
+                        triggered=True
                     else:
-                        arg_weights.append(weights["other"])
+                        if arg!=None:
+                            if arg.type=="const":
+                                new_list.append(ObjClass("const",total))
+                            else:
+                                if count==0:
+                                    new_list.append(ObjClass("const",total))
+                                else:
+                                    temp=arg.copy()
+                                    temp.negative=count<0
+                                    for i in range(abs(count)):
+                                        new_list.append(temp)
+                        if element.type=="const":
+                            total=element.value
+                        else:
+                            if element.negative==True:
+                                count=-1
+                            else:
+                                count=1
+                    arg=element
+                if arg!=None:
+                    if arg.type=="const":
+                        new_list.append(ObjClass("const",total))
+                    else:
+                        if count==0:
+                            new_list.append(ObjClass("const",total))
+                        else:
+                            temp=arg.copy()
+                            temp.negative=count<0
+                            for i in range(abs(count)):
+                                new_list.append(temp)
+                item.ssa_list=new_list
+            item.opt_log(opt_name)
 
-                if item.op=="-":
-                    #Subtraction only commutative if subtracting constant
-                    #TODO: also local? list should be in one place
-                    if item.x.type=="const" and item.y.type in ["initial","ssa"]:
-                        ssa_replace(ssa,i,ssa_add("+",ObjClass("const",-item.x.value),item.y,opt_name))
-                        triggered=True
-                else:
-                    #All others ok to commute if neccesary
-                    if arg_weights[0]>arg_weights[1]:
-                        ssa_replace(ssa,i,ssa_add(item.op,item.y,item.x,opt_name))
-                        triggered=True
     return triggered
 
-#START HERE
-    #Need second ssa_replace that creates new SSA for each occurance - NO!
-    #Better than orphan? do need single value for ABS and INVERT unless remove
-    #ie #30 in test 1 should not replace but instead create new SSA every time ssa[2] referenced
-        #actually, not sure bc could do this for all of them but then count explodes
-
-def ssa_identities(ssa):
+def ssa_identities():
+    global ssa
     opt_name="identities"
     triggered=False
     ssa_ids=list(ssa.keys())
@@ -379,70 +537,52 @@ def ssa_identities(ssa):
             item.opt_list.append(opt_name)
             if item.op in ["+","-"]:
                 if item.x.type=="const" and item.x.value==0:
-                    ssa_replace(ssa,i,item.y)
+                    ssa_replace(i,item.y)
                     triggered=True
             elif item.op=="*":
                 if item.x.type=="const" and item.x.value==0:
-                    ssa_replace(ssa,i,item.x)
+                    ssa_replace(i,item.x)
                     triggered=True
                 elif item.x.type=="const" and item.x.value==1:
-                    ssa_replace(ssa,i,item.y)
+                    ssa_replace(i,item.y)
                     triggered=True
             elif item.op in ["and","or"]:
                 if item.x.equal(item.y):
-                    ssa_replace(ssa,i,item.x)
+                    ssa_replace(i,item.x)
                     triggered=True
                 else:
                     if item.op=="and":
                         if item.x.type=="const" and item.x.value==0:
-                            ssa_replace(ssa,i,item.x)
+                            ssa_replace(i,item.x)
                             triggered=True
                         elif item.x.type=="const" and item.x.value==-1:
-                            ssa_replace(ssa,i,item.y)
+                            ssa_replace(i,item.y)
                             triggered=True
                     elif item.op=="or":
                         if item.x.type=="const" and item.x.value==0:
-                            ssa_replace(ssa,i,item.y)
+                            ssa_replace(i,item.y)
                             triggered=True
                         elif item.x.type=="const" and item.x.value==-1:
-                            ssa_replace(ssa,i,item.x)
+                            ssa_replace(i,item.x)
                             triggered=True
             elif item.op=="xor":
                 if item.x.equal(item.y):
-                    ssa_replace(ssa,i,ObjClass("const",0))
+                    ssa_replace(i,ObjClass("const",0))
                     triggered=True
                 elif item.x.type=="const" and item.x.value==0:
-                    ssa_replace(ssa,i,item.y)
+                    ssa_replace(i,item.y)
                     triggered=True
                 #TODO: SSA with no y!
                 #elif item.x.type=="const" and item.x.value==-1:
-                #    ssa_replace(ssa,i,ssa_add("invert",item.y))
+                #    ssa_replace(i,ssa_add("invert",item.y))
                 #    triggered=True
     return triggered
 
-def ssa_commutative(ssa):
-    opt_name="commutative"
-    triggered=False
-    ssa_ids=list(ssa.keys())
-    ssa_ids.sort()
-    for i in ssa_ids:
-        item=ssa[i]
-        if opt_name not in item.opt_list:
-            item.opt_list.append(opt_name)
-            if item.op in "*+":
-                if item.types()==["const","ssa"]:
-                    if item.op==item.y.op:
-                        if item.y.x.type=="const":
-                            #TODO: should be one list for all functions
-                            if item.y.y.type in ["initial","local_fetch","ssa"]:
-                                _,func_opt=words[item.op]
-                                new_value=ObjClass("const",func_opt(item.x.value,item.y.x.value))
-                                ssa_replace(ssa,i,ssa_add(item.op,new_value,item.y.y,opt_name))
-                                triggered=True
-    return False
-    return triggered
 
-def ssa_optimize_all(ssa):
+def ssa_optimize_all():
+    global ssa
+
+    #TODO: used
     #Higher level IDs are new statements from optimizing
     global ssa_counter
     ssa_counter=1000
@@ -451,15 +591,15 @@ def ssa_optimize_all(ssa):
     triggered=True
     while triggered:
         triggered=False
-        triggered|=ssa_fold_constants(ssa)
-        triggered|=ssa_normalize(ssa)
-        triggered|=ssa_identities(ssa)
-        triggered|=ssa_commutative(ssa)
+        triggered|=ssa_commutative()
+        triggered|=ssa_sort()
+        triggered|=ssa_simplify()
+        #handle single values
+        #triggered|=ssa_identities(ssa)
+        #combine + and -
         #power_reduction
-        #commutative for local and initial
         #common_code
         #- see global/local value elimination
-        #prune_orphans or just prune everything
         #masking
         #review primitives
 
@@ -503,10 +643,10 @@ with open("results.txt","wt") as f:
             
             #Output SSA before optimizing
             f.write("SSA before optimizing:\n")
-            print_ssa(f,ssa)
+            print_ssa(f)
 
             #Optimize SSA
-            ssa_optimize_all(ssa)
+            ssa_optimize_all()
 
             #Stack after optimizing
             f.write("Stack after optimizing:\n")
@@ -514,7 +654,7 @@ with open("results.txt","wt") as f:
 
             #Output SSA after optimizing
             f.write("SSA after optimizing:\n")
-            print_ssa(f,ssa)
+            print_ssa(f)
 
             #TODO: variable writes
             #Find values on stack to be written

@@ -6,9 +6,3 @@
     _\name:
 .endm
 
-.text
-
-func test
-    rts
-    mov #47,r0
-

@@ -32,14 +32,15 @@ set(SOURCES
   src/main.c
   src/manager.c
   src/mem.c
-  src/memory_manager.c
+  src/memory-manager.c
   src/menu.c
   src/shell.c
   src/text.c
   src/util.c
 
-  src/cache.s
-  src/test.s
+  src/cache.S
+  src/macros.S
+  src/test.S
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS

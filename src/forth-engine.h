@@ -156,7 +156,7 @@
     //Declared here for struct ForthEngine and defined below
     struct ForthWordHeader;
 
-    struct ForthEngine
+    struct ForthEngine //No improvement with __attribute__ ((aligned(4)))
     {
         //Data stack
         uintptr_t stack_base;   //Store base as uintptr_t to do wrapping calculation on pointer
@@ -187,7 +187,6 @@
         uint32_t data_mask_16;
         uint32_t data_mask_32;
 
-        //TODO: see assembly - may need to change order so SH4 doesn't try to load byte by byte
         //Execution
         void (**address)(struct ForthEngine *engine);
         volatile bool executing;    //Set to false by ON in key filter - see compatibility.c

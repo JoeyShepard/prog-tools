@@ -9,17 +9,12 @@
 //TODO - PRIORITY
 //===============
 /*
+- align Forth structs! very easy
+
 - local variables
   - store names after word for debugger and browser
   - need lots of shortcuts for locals like x 1 + to x, 0 to y
     - standard has +TO, could add 1+TO but not if peepholing
-
-- wrapping calculation is big slowdown so only needed once per combined primitive
-  - thinking about generating machine code after all but how to run SDL2 for SH?
-  - store interpreted data for primitives and build up at runtime? still doesnt solve SH4 problem
-  - IMPORTANT: finish optimize.py even if it won't work
-
-- also, how to get graphics out from qemu sh4 user mode
 
 - number words: -1, 0, 1, etc
 
@@ -28,6 +23,7 @@
 
 - try blue for primitives
   - color by primitive type too?
+  - best may be to rotate through colors on button press
 
 - autocomplete
   - use arrow key - don't need special characters in source
@@ -35,9 +31,6 @@
 - paren comments not working in word definition
   - now can't reproduce
   - got it more than once to include ) as undefined word
-
-- GOT SEG FAULT PRESSING HOME!!!
-  - could not reproduce
 
 - tail call improvements
   - get compiler to generate tail call
@@ -49,7 +42,7 @@
 
 - CASE
 
-- rework word key
+- rework word KEY
   - two words rather than word w arg
   - sys_key word
 */
@@ -245,6 +238,9 @@ switch case as mentioned online?
 #include "test.h"
 #include "text.h"
 
+//Defined in test.S
+int test();
+
 int foo()
 {
     return 5;
@@ -252,9 +248,6 @@ int foo()
 
 void jit_test()
 {
-    test();
-
-
     //Output text
     char buffer[TEXT_INT32_SIZE];
     dclear(COL_BLACK);
@@ -353,14 +346,14 @@ int main(void)                      //cg50 and PC
     //Configure device specific settings - TCP on PC and timer on calculator
     setup(TICK_MS);
 
-    //Initialize heap memory
-    init_heap();
-
     //VRAM pointer for double buffering
     dgetvram(&vram_main,&vram_buffer);
 
     //TODO: remove
     jit_test();
+
+    //Initialize heap memory
+    init_heap();
 
     //Jump into window manager
     window_manager();
