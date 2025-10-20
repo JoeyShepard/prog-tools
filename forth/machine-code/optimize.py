@@ -4,6 +4,12 @@
 #Tests to HTML
 #Python console on page
 
+#TODO: DEFINITELY POSSIBLE TO GET INVERT ON ADD AND MINUS ON MULTIPLY
+#- need test with all possibilities
+#- (a+b)/c+(d+e)/c
+#  - a b + c / d e + c / +
+#  - S0=a b + , S1=S0 1/c *, S2=d e +, S3=S2 1/c *, S4=S1 S2 +
+#    - at least for this, look one level down to simplify
 
 #Constants
 STACK_DEPTH=8
@@ -18,37 +24,61 @@ ssa={}
 ssa_counter=0
 locals_gen=[]
 tests=[
-    #TODO: more organized tests
-    #TODO: descriptions of tests
     #3x+2x???
-    "x x 5 + y - x + /",
-    "x x 5 * y / x * -",
-    "x x 5 * x / *",
-    "2 -3 - x DUP DUP - -",
-    "x x x x - DUP DUP - - - -",
-    "x 3 + 4 x + 5 6 * 7 x + + + + x -",
+
+    ("x x x x x x + + + + + 2 / x x + -","Testing ssa_replace: (x+x+x+x+x+x)/2-(x+x) -> 3*x-2*x"),
+
+    ("y x * x / x /","Testing ssa_terms_multiply: y*x/x/x -> y/x"),
+    ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y*y"),
+
+    ("y x * y * x *","Testing ssa_terms_multiply: y*x*y*x -> x*x*y*y"),
+    ("y x * y * x /","Testing ssa_terms_multiply: y*x*y/x -> y*y"),
+    ("y x * y / x *","Testing ssa_terms_multiply: y*x/y*x -> x*x"),
+    ("y x * y / x /","Testing ssa_terms_multiply: y*x/y/x -> 1"),
+    ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y*y"),
+    ("y x / y * x /","Testing ssa_terms_multiply: y/x*y/x -> 1/x*1/x*y*y"),
+    ("y x / y / x *","Testing ssa_terms_multiply: y/x/y*x -> 1"),
+    ("y x / y / x /","Testing ssa_terms_multiply: y/x/y/x -> 1/x*1/x"),
+
+    #Empty list ie *0 or 1-1 or x/y*y or signs
+    #- all paths for add and multiply
+    #replace - neg and invert
+
+    ("0 1 - 1 / 5 +","Testing ssa_terms_add: (0-1)/1+5 -> 4"),
+    ("2 x * x 3 * *","Testing ssa_terms_multiply: (2*x)*(x*3) -> 6*x*x"),
+    ("2 x + 3 x + +","Testing ssa_terms_add: (2+x)+(3+x) -> 5+2*x"),
+    ("-3 x + x 3 + +","Testing ssa_terms_add: (-3+x)+(x+3) - > 2*x"),
+
+    ("x 2 + y / x 3 + y / +",""),
+    ("x x 5 + x 2 * + y - x + /",""),
+    ("x x 5 * y / x * -",""),
+    ("x x 5 * x / *",""),
+    ("2 -3 - x DUP DUP - -",""),
+    ("x x x x - DUP DUP - - - -",""),
+    ("x 3 + 4 x + 5 6 * 7 x + + + + x -",""),
+
     #TODO: same as above for mult
     #TODO: mix + and *
-    "DUP",
-    "DROP",
-    "DUP DROP",
-    "OVER OVER DUP",
-    "SWAP",
-    "DUP SWAP DROP",
-    "2 3 SWAP",
-    "2 3 NIP",
-    "DUP AND DUP OR DUP XOR",
-    "x 0 AND x 0 OR x 0 XOR",
-    "x -1 AND x -1 OR x -1 XOR",
-    "2 - x - - 5 -",
-    "x 3 + x 4 + 5 6 * 7 x + + + +",
-    "x x",
-    "x 2 + x y + 2 +",
-    "x 1 - dup 1 +",
-    "1 x * x 0 * x 0 +",
-    "2 x 1 * + 3 +",
-    "x 1 + to_x",
-    "x 1 + to_x x",
+    ("DUP",""),
+    ("DROP",""),
+    ("DUP DROP",""),
+    ("OVER OVER DUP",""),
+    ("SWAP",""),
+    ("DUP SWAP DROP",""),
+    ("2 3 SWAP",""),
+    ("2 3 NIP",""),
+    ("DUP AND DUP OR DUP XOR",""),
+    ("x 0 AND x 0 OR x 0 XOR",""),
+    ("x -1 AND x -1 OR x -1 XOR",""),
+    ("2 - x - - 5 -",""),
+    ("x 3 + x 4 + 5 6 * 7 x + + + +",""),
+    ("x x",""),
+    ("x 2 + x y + 2 +",""),
+    ("x 1 - dup 1 +",""),
+    ("1 x * x 0 * x 0 +",""),
+    ("2 x 1 * + 3 +",""),
+    ("x 1 + to_x",""),
+    ("x 1 + to_x x",""),
     ]
 
 class SSA_Class:
@@ -122,6 +152,21 @@ class ObjClass:
     def get_optimization(self):
         return ssa[self.id].optimization
 
+    def get_const(self):
+        total=self.value
+        if self.inverted:
+            if total==0:
+                #TODO: divide by zero!
+                total=1
+            elif total==1:
+                total=1
+            else:
+                #START HERE: not true for multiplication, ie 3*x*1/3
+                total=0
+        if self.negative:
+            total=-total
+        return total
+
     def copy(self):
         new_obj=ObjClass(self.type)
         if self.type=="initial":
@@ -188,15 +233,20 @@ class ObjClass:
         other_rank=types.index(other.type)
         if self_rank==other_rank:
             if self.type=="initial":
+                if self.id==other.id:
+                    return self.inverted<other.inverted
                 return self.id<other.id
             elif self.type=="const":
-                return self.value<other.value
+                return self.get_const()<other.get_const()
             elif self.type=="local_fetch":
                 if self.id==other.id:
+                    if self.gen==other.gen:
+                        return self.inverted<other.inverted
                     return self.gen<other.gen
-                else:
-                    return self.id<other.id
+                return self.id<other.id
             elif self.type=="ssa":
+                if self.id==other.id:
+                    return self.inverted<other.inverted
                 return self.id<other.id
         else:
             return self_rank<other_rank
@@ -237,7 +287,7 @@ def init_test():
     global ssa_counter
     ssa_counter=0
 
-    #Space for two test locals
+    #Space for three test locals
     global locals_gen
     locals_gen=[0]*LOCALS_COUNT
 
@@ -377,7 +427,8 @@ def ssa_add(op,x,y,optimization=None):
     ssa_counter+=1
     return new_obj
 
-def ssa_replace(index,replacement):
+#Old - for identities
+def ssa_replace_old(index,replacement):
     global ssa
     ssa_ids=list(ssa.keys())
     ssa_ids.sort()
@@ -392,6 +443,43 @@ def ssa_replace(index,replacement):
         if xy!=[item.x,item.y]:
             ssa[i]=ObjClass("ssa",i,item.op,xy[0],xy[1])
 
+#TODO: take into account negative and inverted
+def ssa_replace(index,replacement):
+    #First, process SSA list
+    global ssa
+    ssa_ids=list(ssa.keys())
+    ssa_ids.sort()
+    for i in ssa_ids:
+        new_list=[]
+        item=ssa[i]
+        for arg in item.ssa_list:
+            if arg.type=="ssa":
+                if arg.id==index:
+                    inverted=arg.inverted
+                    negative=arg.negative
+                    arg=replacement 
+                    if inverted:
+                        arg.inverted=not arg.inverted
+                    if negative:
+                        arg.negative=arg.negative
+
+            new_list.append(arg)
+        ssa[i].ssa_list=new_list
+
+    #Next, values on stack
+    global stack
+    for i,item in enumerate(stack):
+        if item.type=="ssa":
+            if item.id==index:
+                inverted=stack[i].inverted
+                negative=stack[i].negative
+                stack[i]=replacement 
+                if inverted:
+                    stack[i].inverted=not stack[i].inverted
+                if negative:
+                    stack[i].negative=stack[i].negative
+
+#Collapse commutative SSAs - ((a+b)+c) -> (a+b+c)
 def ssa_commutative():
     global ssa
     opt_name="commutative"
@@ -407,29 +495,20 @@ def ssa_commutative():
                     new_element=element
                     if element.type=="ssa":
                         if element.get_op()==item.op:
-                            if element.get_op()=="+":
-                                for e in element.get_ssa_list():
-                                    new_element=e.copy()
-                                    if element.negative:
-                                        new_element.negate()
-                                    new_list.append(new_element)
-                                triggered=True
-                                item.opt_clear()
-                                new_element=None
-                            elif element.get_op()=="*":
-                                for e in element.get_ssa_list():
-                                    new_element=e.copy()
-                                    if element.inverted:
-                                        new_element.invert()
-                                    new_list.append(new_element)
-                                triggered=True
-                                item.opt_clear()
-                                new_element=None
+                            for e in element.get_ssa_list():
+                                new_element=e.copy()
+                                if element.negative:
+                                    new_element.negate()
+                                if element.inverted:
+                                    new_element.invert()
+                                new_list.append(new_element)
+                            triggered=True
+                            item.opt_clear()
+                            new_element=None
                     if new_element!=None:
                         new_list.append(new_element)
                 item.ssa_list=new_list
             item.opt_log(opt_name)
-
     return triggered
 
 def ssa_sort():
@@ -453,7 +532,221 @@ def ssa_sort():
                 item.sort()
                 triggered=True
             item.opt_log(opt_name)
+    return triggered
 
+def ssa_terms_add():
+    global ssa
+    opt_name="terms_add"
+    triggered=False
+    ssa_ids=list(ssa.keys())
+    ssa_ids.sort()
+    for i in ssa_ids:
+        item=ssa[i]
+        if opt_name not in item.opt_list:
+            if item.op=="+":
+                new_list=[]
+                count=0
+                total=0
+                last_type=None
+                last_id=None
+                last_gen=None
+                last_name=""
+                last_inverted=None
+                #TODO: add last item to new_list
+                for element in item.ssa_list+[None]:
+                    if element==None:
+                        #Placeholder for end of loop - process last elements
+                        new_item=True
+                    else:
+                        #Process elements
+                        new_item=False
+                        if element.type==last_type:
+                            if element.type=="const":
+                                total+=element.get_const()
+                                triggered=True
+                            elif element.type in ["initial","ssa","local_fetch"]:
+                                new_item=True
+                                if element.id==last_id and element.inverted==last_inverted:
+                                    if element.type!="local_fetch" or (element.type=="local_fetch" and element.gen==last_gen and element.name==last_name):
+                                        #Same term as before! Increase count
+                                        if element.negative==False:
+                                            count+=1
+                                        else:
+                                            count-=1
+                                        new_item=False
+                                        triggered=True
+                        else:
+                            #Different term type
+                            new_item=True
+
+                    if new_item==True:
+                        #Process pending item
+                        if last_type=="const":
+                            if total==0:
+                                #Constants totalled 0 - nothing to do
+                                pass
+                            else:
+                                new_element=ObjClass(last_type,total)
+                                new_list.append(new_element)
+                        elif last_type in ["initial","ssa","local_fetch"]:
+                            if count==0:
+                                #Terms cancelled out 
+                                pass
+                            else:
+                                new_element=ObjClass(last_type,last_id)
+                                new_element.inverted=last_inverted
+                                if last_type=="local_fetch":
+                                    new_element.gen=last_gen
+                                    new_element.name=last_name
+                                if abs(count)==1:
+                                    #Only one term - no coefficient
+                                    new_element.negative=count<0
+                                    new_list.append(new_element)
+                                else:
+                                    #Coefficient other than 0 or 1 - create new SSA
+                                    new_ssa=ssa_add("*",ObjClass("const",count),new_element,opt_name)
+                                    new_list.append(new_ssa)
+
+                        #Keep track of newest item to compare to next item
+                        if element==None:
+                            #Placeholder value for end of loop - process pending elements only
+                            pass
+                        else:
+                            if element.type=="const":
+                                total=element.get_const()
+                            elif element.type in ["initial","ssa","local_fetch"]:
+                                count=1
+                                last_id=element.id
+                                last_inverted=element.inverted
+                                if element.type=="local_fetch":
+                                    last_gen=element.gen
+                                    last_name=element.name
+                            last_type=element.type
+
+                if len(new_list)==0:
+                    #All terms added up to 0
+                    item.ssa_list=[ObjClass("const",0)]
+                elif len(new_list)==1 and new_list[0].type=="ssa":
+                    #SSA list contains one SSA item - replace instead of having list in list
+                    ssa_replace(i,new_list[0])
+                else:
+                    item.ssa_list=new_list
+            item.opt_log(opt_name)
+    return triggered
+
+def ssa_terms_multiply():
+    global ssa
+    opt_name="terms_multiply"
+    triggered=False
+    ssa_ids=list(ssa.keys())
+    ssa_ids.sort()
+    for i in ssa_ids:
+        item=ssa[i]
+        if opt_name not in item.opt_list:
+            if item.op=="*":
+                new_list=[]
+                count=0
+                total=0
+                negative=False
+                last_type=None
+                last_id=None
+                last_gen=None
+                last_name=""
+                #TODO: add last item to new_list
+                for element in item.ssa_list+[None]:
+                    if element==None:
+                        #Placeholder for end of loop - process last elements
+                        new_item=True
+                    else:
+                        #Process elements
+                        new_item=False
+                        if element.type==last_type:
+                            if element.type=="const":
+                                total*=element.get_const()
+                                triggered=True
+                            elif element.type in ["initial","ssa","local_fetch"]:
+                                new_item=True
+                                if element.id==last_id:
+                                    if element.type!="local_fetch" or (element.type=="local_fetch" and element.gen==last_gen and element.name==last_name):
+                                        #Same term as before!
+                                        if element.negative==True:
+                                            negative=not negative
+                                        if element.inverted==False:
+                                            count+=1
+                                        else:
+                                            count-=1
+                                        new_item=False
+                                        triggered=True
+                        else:
+                            #Different term type
+                            new_item=True
+
+                    if new_item==True:
+                        #Process pending item
+                        if last_type=="const":
+                            if total==0:
+                                #Constants totalled 0 - term whole term is 0
+                                ssa_replace(i,ObjClass("const",0))
+                                break
+                            elif abs(total)==1:
+                                #Coefficient is 1 or -1 - eliminate
+                                if total==-1:
+                                    ssa[i].negative=not ssa[i].negative
+                            else:
+                                new_element=ObjClass(last_type,total)
+                                new_list.append(new_element)
+                        elif last_type in ["initial","ssa","local_fetch"]:
+                            if count==0:
+                                #Terms cancelled out 
+                                pass
+                            else:
+                                new_element=ObjClass(last_type,last_id)
+                                if count<0:
+                                    new_element.inverted=True
+                                if last_type=="local_fetch":
+                                    new_element.gen=last_gen
+                                    new_element.name=last_name
+
+                                for j in range(abs(count)):
+                                    new_list.append(new_element.copy())
+
+                        #Keep track of newest item to compare to next item
+                        if element==None:
+                            #Placeholder value for end of loop - process pending elements only
+                            pass
+                        else:
+                            if element.type=="const":
+                                total=element.get_const()
+                            elif element.type in ["initial","ssa","local_fetch"]:
+                                if element.inverted==False:
+                                    count=1
+                                else:
+                                    count=-1
+                                last_id=element.id
+                                if element.type=="local_fetch":
+                                    last_gen=element.gen
+                                    last_name=element.name
+                            last_type=element.type
+                        
+                print(f"multiply: SSA{i} ({item.format()}) - {new_list}")
+
+
+                if len(new_list)==0:
+                    #Terms all cancel - equal to 1
+                    ssa_replace(i,ObjClass("const",1))
+                    #Also set for orphaned item for debugging
+                    item.ssa_list=[ObjClass("const",1)]
+                elif len(new_list)==1 and new_list[0].type=="ssa":
+                    #SSA list contains one SSA item - replace instead of having list in list
+                    ssa_replace(i,new_list[0])
+                    #Also set for orphaned item for debugging
+                        #Not checking if this also results in one item left since orphaned item not used
+                    item.ssa_list=ssa[new_list[0].id].ssa_list
+                else:
+                    item.ssa_list=new_list
+
+                print(f"- SSA{i} ({ssa[i].format()}, {item.format()})")
+            item.opt_log(opt_name)
     return triggered
 
 def ssa_simplify():
@@ -497,6 +790,7 @@ def ssa_simplify():
                                 if count==0:
                                     new_list.append(ObjClass("const",total))
                                 else:
+                                    #TODO: insert multiply then combine?
                                     temp=arg.copy()
                                     temp.negative=count<0
                                     for i in range(abs(count)):
@@ -522,9 +816,9 @@ def ssa_simplify():
                                 new_list.append(temp)
                 item.ssa_list=new_list
             item.opt_log(opt_name)
-
     return triggered
 
+#TODO: assumes 2 args?
 def ssa_identities():
     global ssa
     opt_name="identities"
@@ -593,7 +887,12 @@ def ssa_optimize_all():
         triggered=False
         triggered|=ssa_commutative()
         triggered|=ssa_sort()
-        triggered|=ssa_simplify()
+        triggered|=ssa_terms_add()
+        triggered|=ssa_terms_multiply()
+        #triggered|=ssa_simplify()
+        #simplify should be several steps
+            #combine similar terms
+            #(a+b)*(a+b)
         #handle single values
         #triggered|=ssa_identities(ssa)
         #combine + and -
@@ -606,10 +905,15 @@ def ssa_optimize_all():
 initialize()
 with open("results.txt","wt") as f:
     test_num=1
-    for test in tests:
+    for test,description in tests:
         test_name=f"Test {test_num}: {test}"
         f.write(f"{test_name}\n")
         f.write(f"{'='*len(test_name)}\n")
+        if description!="":
+            f.write(f"({description})\n\n")
+
+        print(f"Test {test_num}")
+
 
         #New stack and SSA list for testing
         init_test()
@@ -670,7 +974,7 @@ with open("results.txt","wt") as f:
                     values[item].append(i)
 
             #Final output
-            f.write("Final output\n")
+            f.write("Final output:\n")
 
             #Write values back to stack
             for source,dests in values.items():

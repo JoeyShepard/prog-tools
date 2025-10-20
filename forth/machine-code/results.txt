@@ -1,32 +1,489 @@
-Test 1: x x 5 + y - x + /
-=========================
+Test 1: x x x x x x + + + + + 2 / x x + -
+=========================================
+(Testing ssa_replace: (x+x+x+x+x+x)/2-(x+x) -> 3*x-2*x)
+
 Stack before optimizing:
-- [0]: SSA[3] (x * 1/SSA[2])
+- [0]: SSA[7] (SSA[5] + -SSA[6])
 
 SSA before optimizing:
-- SSA[0] (x + #5)
-- SSA[1] (SSA[0] + -y)
-- SSA[2] (SSA[1] + x)
-- SSA[3] (x * 1/SSA[2])
+- SSA[0] (x + x)
+- SSA[1] (x + SSA[0])
+- SSA[2] (x + SSA[1])
+- SSA[3] (x + SSA[2])
+- SSA[4] (x + SSA[3])
+- SSA[5] (SSA[4] * #1/2)
+- SSA[6] (x + x)
+- SSA[7] (SSA[5] + -SSA[6])
 
 Stack after optimizing:
-- [0]: SSA[3] (x * 1/SSA[2])
+- [0]: #0
 
 SSA after optimizing:
-- SSA[0] (#5 + x)
-- SSA[1] (#5 + x + -y)
-- SSA[2] (#5 + x + x + -y)
-- SSA[3] (x * 1/SSA[2])
+- SSA[0] (x + x)
+- SSA[1] (x + x + x)
+- SSA[2] (x + x + x + x)
+- SSA[3] (x + x + x + x + x)
+- SSA[4] (x + x + x + x + x + x)
+- SSA[5] (#1)
+- SSA[6] (x + x)
+- SSA[7] (-x + -x + #0)
+- SSA[1000] (#2 * x) from terms_add
+- SSA[1001] (#3 * x) from terms_add
+- SSA[1002] (#4 * x) from terms_add
+- SSA[1003] (#5 * x) from terms_add
+- SSA[1004] (#6 * x) from terms_add
+- SSA[1005] (#2 * x) from terms_add
 
-Final output
-- load SSA[3] (x * 1/SSA[2])
+Final output:
+- load #0
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 2: x x 5 * y / x * -
-=========================
+Test 2: y x * x / x /
+=====================
+(Testing ssa_terms_multiply: y*x/x/x -> y/x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * 1/x)
+
+SSA before optimizing:
+- SSA[0] (y * x)
+- SSA[1] (SSA[0] * 1/x)
+- SSA[2] (SSA[1] * 1/x)
+
+Stack after optimizing:
+- [0]: SSA[2] (1/x * y)
+
+SSA after optimizing:
+- SSA[0] (x * y)
+- SSA[1] (y)
+- SSA[2] (1/x * y)
+
+Final output:
+- load SSA[2] (1/x * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 3: y x / y * x *
+=====================
+(Testing ssa_terms_multiply: y/x*y*x -> y*y)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * x)
+
+SSA before optimizing:
+- SSA[0] (y * 1/x)
+- SSA[1] (SSA[0] * y)
+- SSA[2] (SSA[1] * x)
+
+Stack after optimizing:
+- [0]: SSA[2] (y * y)
+
+SSA after optimizing:
+- SSA[0] (1/x * y)
+- SSA[1] (1/x * y * y)
+- SSA[2] (y * y)
+
+Final output:
+- load SSA[2] (y * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 4: y x * y * x *
+=====================
+(Testing ssa_terms_multiply: y*x*y*x -> x*x*y*y)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * x)
+
+SSA before optimizing:
+- SSA[0] (y * x)
+- SSA[1] (SSA[0] * y)
+- SSA[2] (SSA[1] * x)
+
+Stack after optimizing:
+- [0]: SSA[2] (x * x * y * y)
+
+SSA after optimizing:
+- SSA[0] (x * y)
+- SSA[1] (x * y * y)
+- SSA[2] (x * x * y * y)
+
+Final output:
+- load SSA[2] (x * x * y * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 5: y x * y * x /
+=====================
+(Testing ssa_terms_multiply: y*x*y/x -> y*y)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * 1/x)
+
+SSA before optimizing:
+- SSA[0] (y * x)
+- SSA[1] (SSA[0] * y)
+- SSA[2] (SSA[1] * 1/x)
+
+Stack after optimizing:
+- [0]: SSA[2] (y * y)
+
+SSA after optimizing:
+- SSA[0] (x * y)
+- SSA[1] (x * y * y)
+- SSA[2] (y * y)
+
+Final output:
+- load SSA[2] (y * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 6: y x * y / x *
+=====================
+(Testing ssa_terms_multiply: y*x/y*x -> x*x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * x)
+
+SSA before optimizing:
+- SSA[0] (y * x)
+- SSA[1] (SSA[0] * 1/y)
+- SSA[2] (SSA[1] * x)
+
+Stack after optimizing:
+- [0]: SSA[2] (x * x)
+
+SSA after optimizing:
+- SSA[0] (x * y)
+- SSA[1] (x)
+- SSA[2] (x * x)
+
+Final output:
+- load SSA[2] (x * x)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 7: y x * y / x /
+=====================
+(Testing ssa_terms_multiply: y*x/y/x -> 1)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * 1/x)
+
+SSA before optimizing:
+- SSA[0] (y * x)
+- SSA[1] (SSA[0] * 1/y)
+- SSA[2] (SSA[1] * 1/x)
+
+Stack after optimizing:
+- [0]: #1
+
+SSA after optimizing:
+- SSA[0] (x * y)
+- SSA[1] (x)
+- SSA[2] (#1)
+
+Final output:
+- load #1
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 8: y x / y * x *
+=====================
+(Testing ssa_terms_multiply: y/x*y*x -> y*y)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * x)
+
+SSA before optimizing:
+- SSA[0] (y * 1/x)
+- SSA[1] (SSA[0] * y)
+- SSA[2] (SSA[1] * x)
+
+Stack after optimizing:
+- [0]: SSA[2] (y * y)
+
+SSA after optimizing:
+- SSA[0] (1/x * y)
+- SSA[1] (1/x * y * y)
+- SSA[2] (y * y)
+
+Final output:
+- load SSA[2] (y * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 9: y x / y * x /
+=====================
+(Testing ssa_terms_multiply: y/x*y/x -> 1/x*1/x*y*y)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * 1/x)
+
+SSA before optimizing:
+- SSA[0] (y * 1/x)
+- SSA[1] (SSA[0] * y)
+- SSA[2] (SSA[1] * 1/x)
+
+Stack after optimizing:
+- [0]: SSA[2] (1/x * 1/x * y * y)
+
+SSA after optimizing:
+- SSA[0] (1/x * y)
+- SSA[1] (1/x * y * y)
+- SSA[2] (1/x * 1/x * y * y)
+
+Final output:
+- load SSA[2] (1/x * 1/x * y * y)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 10: y x / y / x *
+======================
+(Testing ssa_terms_multiply: y/x/y*x -> 1)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * x)
+
+SSA before optimizing:
+- SSA[0] (y * 1/x)
+- SSA[1] (SSA[0] * 1/y)
+- SSA[2] (SSA[1] * x)
+
+Stack after optimizing:
+- [0]: #1
+
+SSA after optimizing:
+- SSA[0] (1/x * y)
+- SSA[1] (1/x)
+- SSA[2] (#1)
+
+Final output:
+- load #1
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 11: y x / y / x /
+======================
+(Testing ssa_terms_multiply: y/x/y/x -> 1/x*1/x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] * 1/x)
+
+SSA before optimizing:
+- SSA[0] (y * 1/x)
+- SSA[1] (SSA[0] * 1/y)
+- SSA[2] (SSA[1] * 1/x)
+
+Stack after optimizing:
+- [0]: SSA[2] (1/x * 1/x)
+
+SSA after optimizing:
+- SSA[0] (1/x * y)
+- SSA[1] (1/x)
+- SSA[2] (1/x * 1/x)
+
+Final output:
+- load SSA[2] (1/x * 1/x)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 12: 0 1 - 1 / 5 +
+======================
+(Testing ssa_terms_add: (0-1)/1+5 -> 4)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[1] + #5)
+
+SSA before optimizing:
+- SSA[0] (#0 + #-1)
+- SSA[1] (SSA[0] * #1/1)
+- SSA[2] (SSA[1] + #5)
+
+Stack after optimizing:
+- [0]: SSA[2] (#4)
+
+SSA after optimizing:
+- SSA[0] (#-1)
+- SSA[1] (#-1)
+- SSA[2] (#4)
+
+Final output:
+- load SSA[2] (#4)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 13: 2 x * x 3 * *
+======================
+(Testing ssa_terms_multiply: (2*x)*(x*3) -> 6*x*x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[0] * SSA[1])
+
+SSA before optimizing:
+- SSA[0] (#2 * x)
+- SSA[1] (x * #3)
+- SSA[2] (SSA[0] * SSA[1])
+
+Stack after optimizing:
+- [0]: SSA[2] (#6 * x * x)
+
+SSA after optimizing:
+- SSA[0] (#2 * x)
+- SSA[1] (#3 * x)
+- SSA[2] (#6 * x * x)
+
+Final output:
+- load SSA[2] (#6 * x * x)
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 14: 2 x + 3 x + +
+======================
+(Testing ssa_terms_add: (2+x)+(3+x) -> 5+2*x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[0] + SSA[1])
+
+SSA before optimizing:
+- SSA[0] (#2 + x)
+- SSA[1] (#3 + x)
+- SSA[2] (SSA[0] + SSA[1])
+
+Stack after optimizing:
+- [0]: SSA[2] (#5 + SSA[1000])
+
+SSA after optimizing:
+- SSA[0] (#2 + x)
+- SSA[1] (#3 + x)
+- SSA[2] (#5 + SSA[1000])
+- SSA[1000] (#2 * x) from terms_add
+
+Final output:
+- load SSA[2] (#5 + SSA[1000])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 15: -3 x + x 3 + +
+=======================
+(Testing ssa_terms_add: (-3+x)+(x+3) - > 2*x)
+
+Stack before optimizing:
+- [0]: SSA[2] (SSA[0] + SSA[1])
+
+SSA before optimizing:
+- SSA[0] (#-3 + x)
+- SSA[1] (x + #3)
+- SSA[2] (SSA[0] + SSA[1])
+
+Stack after optimizing:
+- [0]: SSA[1000] (#2 * x) from terms_add
+
+SSA after optimizing:
+- SSA[0] (#-3 + x)
+- SSA[1] (#3 + x)
+- SSA[2] (#-3 + #3 + x + x)
+- SSA[1000] (#2 * x) from terms_add
+
+Final output:
+- load SSA[1000] (#2 * x) from terms_add
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 16: x 2 + y / x 3 + y / +
+==============================
+Stack before optimizing:
+- [0]: SSA[4] (SSA[1] + SSA[3])
+
+SSA before optimizing:
+- SSA[0] (x + #2)
+- SSA[1] (SSA[0] * 1/y)
+- SSA[2] (x + #3)
+- SSA[3] (SSA[2] * 1/y)
+- SSA[4] (SSA[1] + SSA[3])
+
+Stack after optimizing:
+- [0]: SSA[4] (SSA[1] + SSA[3])
+
+SSA after optimizing:
+- SSA[0] (#2 + x)
+- SSA[1] (1/y * SSA[0])
+- SSA[2] (#3 + x)
+- SSA[3] (1/y * SSA[2])
+- SSA[4] (SSA[1] + SSA[3])
+
+Final output:
+- load SSA[4] (SSA[1] + SSA[3])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 17: x x 5 + x 2 * + y - x + /
+==================================
+Stack before optimizing:
+- [0]: SSA[5] (x * 1/SSA[4])
+
+SSA before optimizing:
+- SSA[0] (x + #5)
+- SSA[1] (x * #2)
+- SSA[2] (SSA[0] + SSA[1])
+- SSA[3] (SSA[2] + -y)
+- SSA[4] (SSA[3] + x)
+- SSA[5] (x * 1/SSA[4])
+
+Stack after optimizing:
+- [0]: SSA[5] (x * 1/SSA[4])
+
+SSA after optimizing:
+- SSA[0] (#5 + x)
+- SSA[1] (#2 * x)
+- SSA[2] (#5 + x + SSA[1])
+- SSA[3] (#5 + x + y + SSA[1])
+- SSA[4] (#5 + SSA[1000] + y + SSA[1])
+- SSA[5] (x * 1/SSA[4])
+- SSA[1000] (#2 * x) from terms_add
+
+Final output:
+- load SSA[5] (x * 1/SSA[4])
+- store stack[8]
+- SP+=1
+- Done
+
+
+Test 18: x x 5 * y / x * -
+==========================
 Stack before optimizing:
 - [0]: SSA[3] (x + -SSA[2])
 
@@ -37,23 +494,23 @@ SSA before optimizing:
 - SSA[3] (x + -SSA[2])
 
 Stack after optimizing:
-- [0]: SSA[3] (x + -SSA[2])
+- [0]: SSA[3] (x + SSA[2])
 
 SSA after optimizing:
 - SSA[0] (#5 * x)
 - SSA[1] (#5 * x * 1/y)
 - SSA[2] (#5 * x * x * 1/y)
-- SSA[3] (x + -SSA[2])
+- SSA[3] (x + SSA[2])
 
-Final output
-- load SSA[3] (x + -SSA[2])
+Final output:
+- load SSA[3] (x + SSA[2])
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 3: x x 5 * x / *
-=====================
+Test 19: x x 5 * x / *
+======================
 Stack before optimizing:
 - [0]: SSA[2] (x * SSA[1])
 
@@ -63,22 +520,22 @@ SSA before optimizing:
 - SSA[2] (x * SSA[1])
 
 Stack after optimizing:
-- [0]: SSA[2] (#5 * x * x * 1/x)
+- [0]: SSA[2] (#5 * x)
 
 SSA after optimizing:
 - SSA[0] (#5 * x)
-- SSA[1] (#5 * x * 1/x)
-- SSA[2] (#5 * x * x * 1/x)
+- SSA[1] (#5)
+- SSA[2] (#5 * x)
 
-Final output
-- load SSA[2] (#5 * x * x * 1/x)
+Final output:
+- load SSA[2] (#5 * x)
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 4: 2 -3 - x DUP DUP - -
-============================
+Test 20: 2 -3 - x DUP DUP - -
+=============================
 Stack before optimizing:
 - [1]: SSA[0] (#2 + #3)
 - [0]: SSA[2] (x + -SSA[1])
@@ -97,7 +554,7 @@ SSA after optimizing:
 - SSA[1] (#0)
 - SSA[2] (x)
 
-Final output
+Final output:
 - load SSA[0] (#5)
 - store stack[8]
 - load SSA[2] (x)
@@ -106,8 +563,8 @@ Final output
 - Done
 
 
-Test 5: x x x x - DUP DUP - - - -
-=================================
+Test 21: x x x x - DUP DUP - - - -
+==================================
 Stack before optimizing:
 - [0]: SSA[4] (x + -SSA[3])
 
@@ -128,15 +585,15 @@ SSA after optimizing:
 - SSA[3] (x)
 - SSA[4] (#0)
 
-Final output
+Final output:
 - load SSA[4] (#0)
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 6: x 3 + 4 x + 5 6 * 7 x + + + + x -
-=========================================
+Test 22: x 3 + 4 x + 5 6 * 7 x + + + + x -
+==========================================
 Stack before optimizing:
 - [0]: SSA[7] (SSA[6] + -x)
 
@@ -151,27 +608,30 @@ SSA before optimizing:
 - SSA[7] (SSA[6] + -x)
 
 Stack after optimizing:
-- [0]: SSA[7] (#14 + x + x + SSA[2])
+- [0]: SSA[7] (#14 + SSA[1002] + SSA[2])
 
 SSA after optimizing:
 - SSA[0] (#3 + x)
 - SSA[1] (#4 + x)
-- SSA[2] (#5 * #6)
+- SSA[2] (#30)
 - SSA[3] (#7 + x)
 - SSA[4] (#7 + x + SSA[2])
-- SSA[5] (#11 + x + x + SSA[2])
-- SSA[6] (#14 + x + x + x + SSA[2])
-- SSA[7] (#14 + x + x + SSA[2])
+- SSA[5] (#11 + SSA[1000] + SSA[2])
+- SSA[6] (#14 + SSA[1001] + SSA[2])
+- SSA[7] (#14 + SSA[1002] + SSA[2])
+- SSA[1000] (#2 * x) from terms_add
+- SSA[1001] (#3 * x) from terms_add
+- SSA[1002] (#2 * x) from terms_add
 
-Final output
-- load SSA[7] (#14 + x + x + SSA[2])
+Final output:
+- load SSA[7] (#14 + SSA[1002] + SSA[2])
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 7: DUP
-===========
+Test 23: DUP
+============
 Stack before optimizing:
 - [0]: initial[7]
 
@@ -184,15 +644,15 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load initial[7]
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 8: DROP
-============
+Test 24: DROP
+=============
 Stack before optimizing:
 - Empty
 
@@ -205,13 +665,13 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - SP+=-1
 - Done
 
 
-Test 9: DUP DROP
-================
+Test 25: DUP DROP
+=================
 Stack before optimizing:
 - Empty
 
@@ -224,11 +684,11 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - Done
 
 
-Test 10: OVER OVER DUP
+Test 26: OVER OVER DUP
 ======================
 Stack before optimizing:
 - [2]: initial[6]
@@ -246,7 +706,7 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load initial[6]
 - store stack[8]
 - load initial[7]
@@ -256,7 +716,7 @@ Final output
 - Done
 
 
-Test 11: SWAP
+Test 27: SWAP
 =============
 Stack before optimizing:
 - [1]: initial[7]
@@ -272,7 +732,7 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load initial[7]
 - store stack[6]
 - load initial[6]
@@ -280,7 +740,7 @@ Final output
 - Done
 
 
-Test 12: DUP SWAP DROP
+Test 28: DUP SWAP DROP
 ======================
 Stack before optimizing:
 - Empty
@@ -294,11 +754,11 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - Done
 
 
-Test 13: 2 3 SWAP
+Test 29: 2 3 SWAP
 =================
 Stack before optimizing:
 - [1]: #3
@@ -314,7 +774,7 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load #3
 - store stack[8]
 - load #2
@@ -323,7 +783,7 @@ Final output
 - Done
 
 
-Test 14: 2 3 NIP
+Test 30: 2 3 NIP
 ================
 Stack before optimizing:
 - [0]: #3
@@ -337,14 +797,14 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load #3
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 15: DUP AND DUP OR DUP XOR
+Test 31: DUP AND DUP OR DUP XOR
 ===============================
 Stack before optimizing:
 - [0]: SSA[2] (SSA[1] xor SSA[1])
@@ -362,13 +822,13 @@ SSA after optimizing:
 - SSA[1] (SSA[0] or SSA[0])
 - SSA[2] (SSA[1] xor SSA[1])
 
-Final output
+Final output:
 - load SSA[2] (SSA[1] xor SSA[1])
 - store stack[7]
 - Done
 
 
-Test 16: x 0 AND x 0 OR x 0 XOR
+Test 32: x 0 AND x 0 OR x 0 XOR
 ===============================
 Stack before optimizing:
 - [2]: SSA[0] (x and #0)
@@ -390,7 +850,7 @@ SSA after optimizing:
 - SSA[1] (#0 or x)
 - SSA[2] (#0 xor x)
 
-Final output
+Final output:
 - load SSA[0] (#0 and x)
 - store stack[8]
 - load SSA[1] (#0 or x)
@@ -401,7 +861,7 @@ Final output
 - Done
 
 
-Test 17: x -1 AND x -1 OR x -1 XOR
+Test 33: x -1 AND x -1 OR x -1 XOR
 ==================================
 Stack before optimizing:
 - [2]: SSA[0] (x and #-1)
@@ -423,7 +883,7 @@ SSA after optimizing:
 - SSA[1] (#-1 or x)
 - SSA[2] (#-1 xor x)
 
-Final output
+Final output:
 - load SSA[0] (#-1 and x)
 - store stack[8]
 - load SSA[1] (#-1 or x)
@@ -434,7 +894,7 @@ Final output
 - Done
 
 
-Test 18: 2 - x - - 5 -
+Test 34: 2 - x - - 5 -
 ======================
 Stack before optimizing:
 - [0]: SSA[3] (SSA[2] + #-5)
@@ -446,22 +906,22 @@ SSA before optimizing:
 - SSA[3] (SSA[2] + #-5)
 
 Stack after optimizing:
-- [0]: SSA[3] (initial[6] + -initial[7] + #-3 + x)
+- [0]: SSA[3] (initial[6] + initial[7] + #-3 + x)
 
 SSA after optimizing:
 - SSA[0] (initial[7] + #-2)
-- SSA[1] (initial[7] + #-2 + -x)
-- SSA[2] (initial[6] + -initial[7] + #2 + x)
-- SSA[3] (initial[6] + -initial[7] + #-3 + x)
+- SSA[1] (initial[7] + #-2 + x)
+- SSA[2] (initial[6] + initial[7] + #2 + x)
+- SSA[3] (initial[6] + initial[7] + #-3 + x)
 
-Final output
-- load SSA[3] (initial[6] + -initial[7] + #-3 + x)
+Final output:
+- load SSA[3] (initial[6] + initial[7] + #-3 + x)
 - store stack[6]
 - SP+=-1
 - Done
 
 
-Test 19: x 3 + x 4 + 5 6 * 7 x + + + +
+Test 35: x 3 + x 4 + 5 6 * 7 x + + + +
 ======================================
 Stack before optimizing:
 - [0]: SSA[6] (SSA[0] + SSA[5])
@@ -476,25 +936,27 @@ SSA before optimizing:
 - SSA[6] (SSA[0] + SSA[5])
 
 Stack after optimizing:
-- [0]: SSA[6] (#14 + x + x + x + SSA[2])
+- [0]: SSA[6] (#14 + SSA[1001] + SSA[2])
 
 SSA after optimizing:
 - SSA[0] (#3 + x)
 - SSA[1] (#4 + x)
-- SSA[2] (#5 * #6)
+- SSA[2] (#30)
 - SSA[3] (#7 + x)
 - SSA[4] (#7 + x + SSA[2])
-- SSA[5] (#11 + x + x + SSA[2])
-- SSA[6] (#14 + x + x + x + SSA[2])
+- SSA[5] (#11 + SSA[1000] + SSA[2])
+- SSA[6] (#14 + SSA[1001] + SSA[2])
+- SSA[1000] (#2 * x) from terms_add
+- SSA[1001] (#3 * x) from terms_add
 
-Final output
-- load SSA[6] (#14 + x + x + x + SSA[2])
+Final output:
+- load SSA[6] (#14 + SSA[1001] + SSA[2])
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 20: x x
+Test 36: x x
 ============
 Stack before optimizing:
 - [1]: x
@@ -510,7 +972,7 @@ Stack after optimizing:
 SSA after optimizing:
 - None
 
-Final output
+Final output:
 - load x
 - store stack[8]
 - load x
@@ -519,7 +981,7 @@ Final output
 - Done
 
 
-Test 21: x 2 + x y + 2 +
+Test 37: x 2 + x y + 2 +
 ========================
 Stack before optimizing:
 - [1]: SSA[0] (x + #2)
@@ -539,7 +1001,7 @@ SSA after optimizing:
 - SSA[1] (x + y)
 - SSA[2] (#2 + x + y)
 
-Final output
+Final output:
 - load SSA[0] (#2 + x)
 - store stack[8]
 - load SSA[2] (#2 + x + y)
@@ -548,7 +1010,7 @@ Final output
 - Done
 
 
-Test 22: x 1 - dup 1 +
+Test 38: x 1 - dup 1 +
 ======================
 Stack before optimizing:
 - [1]: SSA[0] (x + #-1)
@@ -560,22 +1022,22 @@ SSA before optimizing:
 
 Stack after optimizing:
 - [1]: SSA[0] (#-1 + x)
-- [0]: SSA[1] (#0 + x)
+- [0]: SSA[1] (x)
 
 SSA after optimizing:
 - SSA[0] (#-1 + x)
-- SSA[1] (#0 + x)
+- SSA[1] (x)
 
-Final output
+Final output:
 - load SSA[0] (#-1 + x)
 - store stack[8]
-- load SSA[1] (#0 + x)
+- load SSA[1] (x)
 - store stack[9]
 - SP+=2
 - Done
 
 
-Test 23: 1 x * x 0 * x 0 +
+Test 39: 1 x * x 0 * x 0 +
 ==========================
 Stack before optimizing:
 - [2]: SSA[0] (#1 * x)
@@ -588,27 +1050,27 @@ SSA before optimizing:
 - SSA[2] (x + #0)
 
 Stack after optimizing:
-- [2]: SSA[0] (#1 * x)
-- [1]: SSA[1] (#0 * x)
-- [0]: SSA[2] (#0 + x)
+- [2]: SSA[0] (x)
+- [1]: #0
+- [0]: SSA[2] (x)
 
 SSA after optimizing:
-- SSA[0] (#1 * x)
-- SSA[1] (#0 * x)
-- SSA[2] (#0 + x)
+- SSA[0] (x)
+- SSA[1] (#1)
+- SSA[2] (x)
 
-Final output
-- load SSA[0] (#1 * x)
+Final output:
+- load SSA[0] (x)
 - store stack[8]
-- load SSA[1] (#0 * x)
+- load #0
 - store stack[9]
-- load SSA[2] (#0 + x)
+- load SSA[2] (x)
 - store stack[10]
 - SP+=3
 - Done
 
 
-Test 24: 2 x 1 * + 3 +
+Test 40: 2 x 1 * + 3 +
 ======================
 Stack before optimizing:
 - [0]: SSA[2] (SSA[1] + #3)
@@ -622,24 +1084,24 @@ Stack after optimizing:
 - [0]: SSA[2] (#5 + SSA[0])
 
 SSA after optimizing:
-- SSA[0] (#1 * x)
+- SSA[0] (x)
 - SSA[1] (#2 + SSA[0])
 - SSA[2] (#5 + SSA[0])
 
-Final output
+Final output:
 - load SSA[2] (#5 + SSA[0])
 - store stack[8]
 - SP+=1
 - Done
 
 
-Test 25: x 1 + to_x
+Test 41: x 1 + to_x
 ===================
 - Unknown: to_x
 - Aborting test
 
 
-Test 26: x 1 + to_x x
+Test 42: x 1 + to_x x
 =====================
 - Unknown: to_x
 - Aborting test

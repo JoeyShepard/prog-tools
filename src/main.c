@@ -9,8 +9,6 @@
 //TODO - PRIORITY
 //===============
 /*
-- align Forth structs! very easy
-
 - local variables
   - store names after word for debugger and browser
   - need lots of shortcuts for locals like x 1 + to x, 0 to y
