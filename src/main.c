@@ -241,7 +241,7 @@ int test();
 
 int foo()
 {
-    return 5;
+    return 0x12345678;
 }
 
 void jit_test()
