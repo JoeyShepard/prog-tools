@@ -6,19 +6,14 @@ from math import gcd
 #Tests to HTML
 #Python console on page
 
-#TODO: DEFINITELY POSSIBLE TO GET INVERT ON ADD AND MINUS ON MULTIPLY
-#- need test with all possibilities
-#- (a+b)/c+(d+e)/c
-#  - a b + c / d e + c / +
-#  - S0=a b + , S1=S0 1/c *, S2=d e +, S3=S2 1/c *, S4=S1 S2 +
-#    - at least for this, look one level down to simplify
-
 debug_list=[
     #"ssa_replace",
     #"ssa_commutative",
     #"terms_add",
-    "terms_multiply",
-    #"sort"
+    #"terms_multiply",
+    #"simplify",
+    #"sort",
+    #coalesce"
     ]
 
 #Constants
@@ -36,45 +31,43 @@ ssa_counter=0
 locals_gen=[]
 tests=[
 
-    ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y/x*x*y"),
+    ("3 x * 2 y * + 6 x * x * 2 / x / y y + +","Testing ssa_coalesce: (3*x+2*x) in two locations"),
 
-    ("x x x x x x + + + + + 2 / x x + -","Testing ssa_replace: (x+x+x+x+x+x)/2-(x+x) -> x"),
+    ("2 x * x * 3 y * + 4 x * + 5 y * + 6 x * - 7 x * +","Testing ssa_simplify: 2x^2+3y+4x+5y-6x+7x -> 2x^2+5x+8y"),
+    ("x 4 / x 2 / +","Testing ssa_simplify: x/4+x/2 -> same (not 3*x/4"),
+    ("3 x * 5 x * + x /","Testing ssa_simplify: (3x+5x)/x -> 8"),
+    ("y x * 3 * 4 / 3 x * y * 4 / x 5 * + +","Testing ssa_simplify: (y*x*3/4)+(3*x*y/4)+5x -> 3*x*y/2+5x"),
+    ("x x x x x x + + + + + 2 / x x + -","Testing ssa_simplify: (x+x+x+x+x+x)/2-(x+x) -> x"),
+    ("x 3 / x 5 / *","Testing ssa_simplify: x/3*x/5 -> same"),
+    ("x x + x + x x + +","Testing ssa_simplify: 3x+2x -> 5x"),  
 
     #Basically, multiplies can be rearranged with neighboring multiplies but divisions stay in place
     ("y x * x / x /","Testing ssa_terms_multiply: y*x/x/x -> y/x"),
     ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y/x*x*y"),
-
     ("y x * y * x *","Testing ssa_terms_multiply: y*x*y*x -> x*x*y*y"),
     ("y x * y * x /","Testing ssa_terms_multiply: y*x*y/x -> y*y"),
     ("y x * y / x *","Testing ssa_terms_multiply: y*x/y*x -> x*x"),
     ("y x * y / x /","Testing ssa_terms_multiply: y*x/y/x -> 1"),
-    ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y*1/x*y*x"),
+    ("y x / y * x *","Testing ssa_terms_multiply: y/x*y*x -> y*1/x*x*y"),
     ("y x / y * x /","Testing ssa_terms_multiply: y/x*y/x -> y*1/x*y*1/x"),
-    ("y x / y / x *","Testing ssa_terms_multiply: y/x/y*x -> y*1/x*1/y*x"),
-    ("y x / y / x /","Testing ssa_terms_multiply: y/x/y/x -> 1*1/x*1/x"),
+    ("y x / y / x *","Testing ssa_terms_multiply: y/x/y*x -> 1/x*x"),
+    ("y x / y / x /","Testing ssa_terms_multiply: y/x/y/x -> 1/x*1/x"),
 
     ("5 x * x * y * 7 * 5 / y / x / 6 /","Testing ssa_terms_multiply: 5*x*x*y*7/5/y/x/6 -> 7*x/6"),
-    ("x x + x + x x + +","Testing ssa_replace: 3x+2x -> 5x"),  
-
-    #Empty list ie *0 or 1-1 or x/y*y or signs
-    #- all paths for add and multiply
-    #replace - neg and invert
 
     ("0 1 - 1 / 5 +","Testing ssa_terms_add: (0-1)/1+5 -> 4"),
     ("2 x * x 3 * *","Testing ssa_terms_multiply: (2*x)*(x*3) -> 6*x*x"),
     ("2 x + 3 x + +","Testing ssa_terms_add: (2+x)+(3+x) -> 5+2*x"),
-    ("-3 x + x 3 + +","Testing ssa_terms_add: (-3+x)+(x+3) - > 2*x"),
+    ("-3 x + x 3 + +","Testing ssa_terms_add: (-3+x)+(x+3) -> 2*x"),
 
     ("x 2 + y / x 3 + y / +",""),
-    ("x x 5 + x 2 * + y - x + /",""),
+    ("x x 5 + x 2 * + y - x + /","Testing (x+5+2*x-y+x)/x -> x/(5+4x-y)"),
     ("x x 5 * y / x * -",""),
     ("x x 5 * x / *",""),
     ("2 -3 - x DUP DUP - -",""),
     ("x x x x - DUP DUP - - - -",""),
     ("x 3 + 4 x + 5 6 * 7 x + + + + x -",""),
 
-    #TODO: same as above for mult
-    #TODO: mix + and *
     ("DUP",""),
     ("DROP",""),
     ("DUP DROP",""),
@@ -103,27 +96,6 @@ class SSA_Class:
         self.op=op
         self.ssa_list=ssa_list
         self.optimization=optimization
-
-    def format(self):
-        ret_val=f"SSA[{self.id}] ("
-        first_arg=True
-        for arg in self.ssa_list:
-            if first_arg==False:
-                ret_val+=f" {self.op} "
-            else:
-                first_arg=False
-            if arg.type=="ssa":
-                if arg.negative==True:
-                    ret_val+="-"
-                ret_val+=f"SSA[{arg.id}]"
-                if arg.exponent!=1:
-                    ret_val+=f"^{arg.exponent}"
-            else:
-                ret_val+=f"{arg.format()}"
-        ret_val+=")"
-        if self.optimization!=None:
-            ret_val+=f" from {self.optimization}"
-        return ret_val
 
     def sort(self):
         if self.op=="*":
@@ -175,6 +147,27 @@ class SSA_Class:
                 return False
         else:
             return False
+
+    def format(self):
+        ret_val=f"SSA[{self.id}] ("
+        first_arg=True
+        for arg in self.ssa_list:
+            if first_arg==False:
+                ret_val+=f" {self.op} "
+            else:
+                first_arg=False
+            if arg.type=="ssa":
+                if arg.negative==True:
+                    ret_val+="-"
+                ret_val+=f"SSA[{arg.id}]"
+                if arg.exponent!=1:
+                    ret_val+=f"^{arg.exponent}"
+            else:
+                ret_val+=f"{arg.format()}"
+        ret_val+=")"
+        if self.optimization!=None:
+            ret_val+=f" from {self.optimization}"
+        return ret_val
 
 class ObjClass:
     def __init__(self,item_type,a1=None):
@@ -256,6 +249,22 @@ class ObjClass:
     def invert(self):
         self.exponent=-self.exponent
 
+    def coefficient(self):
+        if self.type!="ssa":
+            print("Error: coefficient() expected SSA object but found {self.type}")
+            exit(1)
+        element=ssa[self.id]
+        if element.op!="*":
+            print("Error: coefficient() expected SSA type * but found {item.op}")
+            exit(1)
+        else:
+            #Expects constant to be first item, which should be if sorted
+            item=element.ssa_list[0]
+            if item.type=="const":
+                if item.exponent>0:
+                    return item.get_const(),1
+            return 1,0
+
     def format(self):
         prefix=""
         postfix=""
@@ -279,16 +288,22 @@ class ObjClass:
     #Defining __eq__ without __hash__ makes object unhashable
     #def __eq__(self,other):
     def equal(self,other):
-        if self.type!=other.type:
+        if other==None:
             return False
-        elif self.type=="initial":
+        if self.type!=other.type or self.exponent!=other.exponent:
+            #Does not check negative!
+            return False
+        if self.type=="initial":
             return self.id==other.id
         elif self.type=="const":
-            return self.value==other.value
+            if (self.exponent<0 and other.exponent<0) or \
+                (self.exponent>=0 and other.exponent>=0):
+                return self.get_const_multiply()==other.get_const_multiply()
+            else:
+                return False
         elif self.type=="local_fetch":
             return self.id==other.id and self.gen==other.gen
         elif self.type=="ssa":
-            #TODO: look at elements since may be sorted and combined
             return self.id==other.id
 
     #Less than operation for sorting
@@ -429,28 +444,28 @@ def nip(stack):
 
 def forth_and(stack):
     t=stack.pop()
-    stack.append(ssa_add("and",stack.pop(),t))
+    stack.append(ssa_add("and",[stack.pop(),t]))
 
 def const_and(x,y):
     return y & x
 
 def forth_or(stack):
     t=stack.pop()
-    stack.append(ssa_add("or",stack.pop(),t))
+    stack.append(ssa_add("or",[stack.pop(),t]))
 
 def const_or(x,y):
     return y | x
 
 def forth_xor(stack):
     t=stack.pop()
-    stack.append(ssa_add("xor",stack.pop(),t))
+    stack.append(ssa_add("xor",[stack.pop(),t]))
 
 def const_xor(x,y):
     return y ^ x
     
 def add(stack):
     t=stack.pop()
-    stack.append(ssa_add("+",stack.pop(),t))
+    stack.append(ssa_add("+",[stack.pop(),t]))
 
 def const_add(x,y):
     return y + x
@@ -458,11 +473,11 @@ def const_add(x,y):
 def sub(stack):
     t=stack.pop().copy()
     t.negate()
-    stack.append(ssa_add("+",stack.pop(),t))
+    stack.append(ssa_add("+",[stack.pop(),t]))
 
 def mult(stack):
     t=stack.pop()
-    stack.append(ssa_add("*",stack.pop(),t))
+    stack.append(ssa_add("*",[stack.pop(),t]))
 
 def const_mult(x,y):
     return y * x
@@ -470,7 +485,7 @@ def const_mult(x,y):
 def div(stack):
     t=stack.pop().copy()
     t.invert()
-    stack.append(ssa_add("*",stack.pop(),t))
+    stack.append(ssa_add("*",[stack.pop(),t]))
 
 def fetch_x(stack):
     index=0
@@ -506,30 +521,14 @@ def print_removed_ssa(f):
             f.write(f"- {ssa_removed[s].format()}\n")
     f.write("\n")
 
-def ssa_add(op,x,y,optimization=None):
+def ssa_add(op,new_list,optimization=None):
     global ssa
     global ssa_counter
-    new_ssa=SSA_Class(ssa_counter,op,[x,y],optimization)
+    new_ssa=SSA_Class(ssa_counter,op,new_list,optimization)
     ssa[ssa_counter]=new_ssa
     new_obj=ObjClass("ssa",ssa_counter)
     ssa_counter+=1
     return new_obj
-
-#Old - for identities
-def ssa_replace_old(index,replacement):
-    global ssa
-    ssa_ids=list(ssa.keys())
-    ssa_ids.sort()
-    for i in ssa_ids:
-        item=ssa[i]
-        xy=[]
-        for arg in [item.x,item.y]:
-            if arg.type=="ssa":
-                if arg.id==index:
-                    arg=replacement 
-            xy.append(arg)
-        if xy!=[item.x,item.y]:
-            ssa[i]=ObjClass("ssa",i,item.op,xy[0],xy[1])
 
 def ssa_replace(index,replacement):
     #First, process SSA list
@@ -700,7 +699,7 @@ def ssa_terms_add():
                                 new_list.append(new_element)
                             else:
                                 #Coefficient other than 0 or 1 - create new SSA
-                                new_ssa=ssa_add("*",ObjClass("const",count),new_element,opt_name)
+                                new_ssa=ssa_add("*",[ObjClass("const",count),new_element],opt_name)
                                 debug("terms_add",f"adding coefficient term: {count}*{new_element.format()}")
                                 new_list.append(new_ssa)
 
@@ -729,8 +728,8 @@ def ssa_terms_add():
                 #All terms added up to 0
                 debug("terms_add","terms cancelled out - adding 0")
                 item.ssa_list=[ObjClass("const",0)]
-            elif len(new_list)==1 and new_list[0].type=="ssa":
-                #SSA list contains one SSA item - replace instead of having list in list
+            elif len(new_list)==1:
+                #SSA list contains one item - replace 
                 debug("terms_add","single SSA term - replacing")
                 ssa_replace(i,new_list[0])
             else:
@@ -759,6 +758,7 @@ def ssa_terms_multiply():
             exponent=0
             total=0
             negative=False
+            mul_div=None
             last_type=None
             last_id=None
             last_gen=None
@@ -775,24 +775,18 @@ def ssa_terms_multiply():
 
                     #Process elements
                     new_item=False
-                    if element.type=="const":
-                        if element.exponent<0:
-                            current_type="div"
-                        else:
-                            current_type="mul"
+                    if element.exponent<0:
+                        mul_div="div"
                     else:
-                        current_type=element.type
-                    if current_type==last_type:
-                        if current_type=="mul":
+                        mul_div="mul"
+                    if element.type==last_type and mul_div==last_mul_div:
+                        if element.type=="const":
                             total*=element.get_const_multiply()
                             triggered=True
-                        elif current_type=="div":
-                            total*=element.get_const_multiply()
-                            triggered=True
-                        elif current_type in ["initial","ssa","local_fetch"]:
+                        elif element.type in ["initial","ssa","local_fetch"]:
                             new_item=True
                             if element.id==last_id:
-                                if current_type!="local_fetch" or (current_type=="local_fetch" and element.gen==last_gen):
+                                if element.type!="local_fetch" or (element.type=="local_fetch" and element.gen==last_gen):
                                     #Same term as before!
                                     exponent+=element.exponent
                                     new_item=False
@@ -803,8 +797,11 @@ def ssa_terms_multiply():
 
                 if new_item==True:
                     #Process pending item
-                    if last_type=="mul":
+                    if last_type=="const":
                         if total==0:
+                            if last_type=="div":
+                                #TODO: divide by zero
+                                pass
                             #Coefficient is zero - add anyway and spot later
                             new_list.append(ObjClass("const",0))
                         elif abs(total)==1:
@@ -813,22 +810,12 @@ def ssa_terms_multiply():
                                 final_negative=not final_negative
                         else:
                             new_element=ObjClass("const",total)
-                            new_list.append(new_element)
-                    elif last_type=="div":
-                        if total==0:
-                            #TODO: divide by zero!
-                            new_list.append(ObjClass("const",0))
-                        elif abs(total)==1:
-                            #Coefficient is 1 or -1 - eliminate
-                            if total==-1:
-                                final_negative=not final_negative
-                        else:
-                            new_element=ObjClass("const",total)
-                            new_element.exponent=-1
+                            if last_mul_div=="div":
+                                new_element.exponent=-1
                             new_list.append(new_element)
                     elif last_type in ["initial","ssa","local_fetch"]:
                         if exponent==0:
-                            #Terms cancelled out 
+                            #Multiplying by one - nothing to do
                             pass
                         else:
                             new_element=ObjClass(last_type,last_id)
@@ -842,83 +829,24 @@ def ssa_terms_multiply():
                         #Placeholder value for end of loop - process pending elements only
                         pass
                     else:
-                        if current_type in ["mul","div"]:
+                        if element.type=="const":
                             total=element.get_const_multiply()
                         else:
-                            if current_type in ["initial","ssa","local_fetch"]:
+                            if element.type in ["initial","ssa","local_fetch"]:
                                 last_id=element.id
                                 exponent=element.exponent
-                                if current_type=="local_fetch":
+                                if element.type=="local_fetch":
                                     last_gen=element.gen
-                        last_type=current_type
+                        last_type=element.type
+                        last_mul_div=mul_div
                     
-            debug("terms_multiply",f"before cancelling: SSA{i} ({item.format()}) - {new_list}")
-
-            #Cancel out matching multiply and divide if possible
-            cancel_list=[]
-            for element in new_list:
-                if element.exponent<0:
-                    #Divide found - search for match
-                    done=False
-                    mul_found=False
-                    new_element=element
-                    for i in range(len(cancel_list)-1,-1,-1):
-                        e2=cancel_list[i]
-                        if e2.exponent<0:
-                            if mul_found==True:
-                                #Found another divide - stop searching
-                                done=True
-                            else:
-                                #Haven't found multiply term yet - ok to skip other divides
-                                pass
-                        else:
-                            mul_found=True
-                            if e2.exponent>0 and element.type==e2.type:
-                                if e2.type=="const":
-                                    divisor=gcd(e2.value,element.value)
-                                    if divisor==1:
-                                        #No common divisor
-                                        pass
-                                    else:
-                                        e2.value=int(e2.value/divisor)
-                                        if e2.value==1:
-                                            #Canceled out - remove
-                                            cancel_list.pop(i)
-                                        element.value=int(element.value/divisor)
-                                        if element.value==1:
-                                            #Canceled out - remove
-                                            element=None
-                                        triggered=True
-                                    done=True
-                                elif (e2.type=="inital" and e2.id==element.id) or \
-                                    (e2.type=="local_fetch" and e2.id==element.id and e2.gen==element.gen) or \
-                                    (e2.type=="ssa" and e2.id==element.id):
-                                        if e2.exponent==-element.exponent:
-                                            cancel_list.pop(i)
-                                            element=None
-                                        elif e2.exponent>-element.exponent:
-                                            e2.exponent+=element.exponent
-                                            element=None
-                                        elif e2.exponent<-element.exponent:
-                                            element.exponent+=e2.exponent
-                                            cancel_list.pop(i)
-                                        triggered=True
-                                        done=True
-                        if done==True:
-                            break
-                if element!=None:            
-                    cancel_list+=[element]
-            new_list=cancel_list
-
-            debug("terms_multiply",f"after cancelling: {new_list}")
-
             if len(new_list)==0:
                 #Terms all cancel - equal to 1
                 new_element=ObjClass("const",1)
                 new_element.negative=final_negative
                 item.ssa_list=[new_element]
-            elif len(new_list)==1 and new_list[0].type=="ssa":
-                #SSA list contains one SSA item - replace instead of having list in list
+            elif len(new_list)==1:
+                #SSA list contains one item - replace
                 new_list[0].negative=final_negative
                 ssa_replace(i,new_list[0])
             else:
@@ -930,6 +858,9 @@ def ssa_terms_multiply():
     return triggered
 
 def ssa_simplify():
+
+    debug("simplify","begin",indent=0)
+
     global ssa
     opt_name="simplify"
     triggered=False
@@ -937,63 +868,191 @@ def ssa_simplify():
     ssa_ids.sort()
     for i in ssa_ids:
         item=ssa[i]
-        if item.op=="+":
+        processed=False
+        if item.op=="*":
+            processed=True
             new_list=[]
-            count=0
-            total=0
-            arg=None
+            final_negative=False
+
+            debug("simplify",f"before cancelling: SSA{i} ({item.format()})")
+
+            #Cancel out matching multiply and divide if possible
             for element in item.ssa_list:
-                add_list=True
-                if arg!=None and arg.type==element.type:
-                    if element.type=="const":
-                        total+=element.value
-                        add_list=False
-                    elif element.type in ["initial","ssa"]:
-                        if arg.id==element.id:
-                            add_list=False
-                    elif element.type=="local_fetch":
-                        if arg.id==element.id:
-                            if arg.gen==element.gen:
-                                add_list=False
-                if add_list==False:
-                    if element.negative==True:
-                        count-=1
-                    else:
-                        count+=1
-                    triggered=True
-                else:
-                    if arg!=None:
-                        if arg.type=="const":
-                            new_list.append(ObjClass("const",total))
-                        else:
-                            if count==0:
-                                new_list.append(ObjClass("const",total))
+                #Handle sign
+                if element.negative==True:
+                    if element.type!="const" or (element.type=="const" and element.value!=0):
+                        final_negative=not final_negative
+
+                if element.exponent<0:
+                    #Divide found - search for match
+                    done=False
+                    mul_found=False
+                    new_element=element
+                    for j in range(len(new_list)-1,-1,-1):
+                        e2=new_list[j]
+                        debug("simplify",f"cancel: considering {e2}")
+                        if e2.exponent<0:
+                            if mul_found==True:
+                                #Found another divide - stop searching
+                                debug("simplify",f"cancel: divide - stopping")
+                                done=True
                             else:
-                                #TODO: insert multiply then combine?
-                                temp=arg.copy()
-                                temp.negative=count<0
-                                for i in range(abs(count)):
-                                    new_list.append(temp)
-                    if element.type=="const":
-                        total=element.value
-                    else:
-                        if element.negative==True:
-                            count=-1
+                                #Haven't found multiply term yet - ok to skip other divides
+                                debug("simplify",f"cancel: divide - ok to continue")
+                                pass
                         else:
-                            count=1
-                arg=element
-            if arg!=None:
-                if arg.type=="const":
-                    new_list.append(ObjClass("const",total))
-                else:
-                    if count==0:
-                        new_list.append(ObjClass("const",total))
-                    else:
-                        temp=arg.copy()
-                        temp.negative=count<0
-                        for i in range(abs(count)):
-                            new_list.append(temp)
-            item.ssa_list=new_list
+                            debug("simplify",f"multiply found")
+                            mul_found=True
+                            if e2.exponent>0 and element.type==e2.type:
+                                if e2.type=="const":
+                                    divisor=gcd(e2.value,element.value)
+                                    if divisor==1:
+                                        #No common divisor
+                                        pass
+                                    else:
+                                        e2.value=int(e2.value/divisor)
+                                        if e2.value==1:
+                                            #Canceled out - remove
+                                            new_list.pop(j)
+                                        element.value=int(element.value/divisor)
+                                        if element.value==1:
+                                            #Canceled out - remove
+                                            element=None
+                                        triggered=True
+                                    done=True
+                                elif (e2.type=="inital" and e2.id==element.id) or \
+                                    (e2.type=="local_fetch" and e2.id==element.id and e2.gen==element.gen) or \
+                                    (e2.type=="ssa" and e2.id==element.id):
+                                        if e2.exponent==-element.exponent:
+                                            new_list.pop(j)
+                                            element=None
+                                        elif e2.exponent>-element.exponent:
+                                            e2.exponent+=element.exponent
+                                            element=None
+                                        elif e2.exponent<-element.exponent:
+                                            element.exponent+=e2.exponent
+                                            new_list.pop(j)
+                                        triggered=True
+                                        done=True
+                        if done==True:
+                            break
+                if element!=None: 
+                    new_list+=[element]
+
+            if len(new_list)==0:
+                #Terms all cancel - equal to 1
+                new_element=ObjClass("const",1)
+                new_element.negative=final_negative
+                item.ssa_list=[new_element]
+            elif len(new_list)==1:
+                #SSA list contains one item - replace 
+                new_list[0].negative=final_negative
+                ssa_replace(i,new_list[0])
+            else:
+                new_list[0].negative=final_negative
+                item.ssa_list=new_list[:]
+
+        elif item.op=="+":
+            debug(opt_name,f"before combining terms: SSA{i} ({item.format()})")
+            
+            #Combine terms, ie 3x+2x -> 5x
+            exclude=[]
+            new_list=[]
+            for i1,e1 in enumerate(item.ssa_list):
+                element=e1
+                if i1 not in exclude:
+                    if e1.type=="ssa" and e1.get_op()=="*":
+                        total,start1=e1.coefficient()
+                        debug(opt_name,f"coefficient for e1 {e1}: {total},{start1}")
+                        e1_added=False
+                        found=False
+                        for i2,e2 in enumerate(item.ssa_list[i1+1:]):
+                            i2_absolute=i2+i1+1
+                            if i2_absolute not in exclude:
+                                if e2.type=="ssa" and e2.get_op()=="*":
+                                    coeff2,start2=e2.coefficient()
+                                    if e2.negative==True:
+                                        coeff2=-coeff2
+                                    e1_iter=iter(ssa[e1.id].ssa_list[start1:])
+                                    for e3 in ssa[e2.id].ssa_list[start2:]:
+                                        e4=next(e1_iter,None)
+                                        debug(opt_name,f"comparing {e4} and {e3} of {e2}")
+                                        if e4==None or e4.equal(e3)==False:
+                                            #Found term that doesn't match - abort
+                                            break
+                                    else:
+                                        if next(e1_iter,None)==None:
+                                            #Match found
+                                            debug(opt_name,f"match found :e1[{i1}]:{e1} = e2[{i2_absolute}]:{e2}") 
+                                            debug(opt_name,f"coefficient for e2 {e2}: {coeff2},{start2}")
+                                            total+=coeff2
+                                            #Offset for i2 since starts counting at i1+1
+                                            exclude+=[i1,i2_absolute]
+                                            found=True
+                                            debug(opt_name,f"excluding {[i1,i2_absolute]} ({exclude})")
+                                            triggered=True
+                        if found==True:
+                            debug(opt_name,f"Matching set: {total} {ssa[e1.id].ssa_list[start1:]}")
+                            if (total!=0):
+                                addition=ssa_add("*",[ObjClass("const",total)]+ssa[e1.id].ssa_list[start1:],opt_name)
+                                debug(opt_name,f"adding optimized {addition}")
+                                new_list+=[addition]
+                            element=None
+            
+                    if element!=None:
+                        debug(opt_name,f"unoptimized element {element}")
+                        new_list+=[element]
+
+            debug(opt_name,f"after combining terms: {new_list}")
+
+            if len(new_list)==0:
+                #Terms all cancel - equal to 1
+                new_element=ObjClass("const",1)
+                item.ssa_list=[new_element]
+            elif len(new_list)==1:
+                #SSA list contains one item - replace 
+                debug(opt_name,f"one item - replace SSA{i} ({ssa[i].format()}) with {new_list[0]}")
+                ssa_replace(i,new_list[0])
+            else:
+                item.ssa_list=new_list[:]
+
+    debug("simplify","done\n")
+
+    return triggered
+
+def ssa_coalesce():
+
+    debug("coalesce","begin",indent=0)
+    
+    global ssa
+    opt_name="coalesce"
+    triggered=False
+    ssa_ids=list(ssa.keys())
+    ssa_ids.sort()
+
+    for i1,e1 in enumerate(ssa_ids):
+        #Check if index still in SSA since replacement deletes
+        if e1 in ssa:
+            item=ssa[e1]
+            for i2,e2 in enumerate(ssa_ids[i1+1:]):
+                if e2 in ssa:
+                    i2_absolute=i2+i1+1
+                    if e1!=e2:
+                        if len(ssa[e1].ssa_list)==len(ssa[e2].ssa_list):
+                            for index in range(len(ssa[e1].ssa_list)):
+                                if ssa[e1].ssa_list[index].equal(ssa[e2].ssa_list[index])==False:
+                                    #Mismatch
+                                    break
+                            else:
+                                #All terms match        
+                                debug(opt_name,f"coalesce match: {ssa[e1].format()}={ssa[e2].format()}")
+                                ssa_replace(e1,ObjClass("ssa",e2))
+                                #Use e2 for comparison now since e1 was deleted by ssa_replace
+                                e1=e2
+                                triggered=True
+
+    debug(opt_name,"done\n")
+
     return triggered
 
 #TODO: assumes 2 args?
@@ -1083,21 +1142,14 @@ def ssa_optimize_all():
         triggered|=ssa_sort()
         triggered|=ssa_terms_add()
         triggered|=ssa_terms_multiply()
-        #triggered|=ssa_simplify()
+        triggered|=ssa_simplify()
+        #triggered|=ssa_factor() #skipped - 8x+4xy -> 4x(2+y)
+        #triggered|=ssa_identities() including getting rid of *1, +0, and *0
+        triggered|=ssa_sort() #Needed for coalesce
+        triggered|=ssa_coalesce()
 
-        triggered|=ssa_remove_unused()
-
-        #simplify should be several steps
-            #combine similar terms
-            #(a+b)*(a+b)
-        #handle single values
-        #triggered|=ssa_identities(ssa)
-        #combine + and -
-        #power_reduction
-        #common_code
-        #- see global/local value elimination
-        #masking
-        #review primitives
+        #Should not trigger new cycle
+        ssa_remove_unused()
 
 initialize()
 with open("results.txt","wt") as f:
@@ -1194,5 +1246,5 @@ with open("results.txt","wt") as f:
         test_num+=1
         f.write("\n")
 
-        exit()
+        #exit()
 
