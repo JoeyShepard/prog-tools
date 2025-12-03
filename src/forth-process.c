@@ -661,7 +661,6 @@ int add_local(const char *word_buffer,struct ForthCompileInfo *compile)
         return FORTH_ERROR_MAX_LOCALS;
     }
 
-
     //Write new local name to locals memory
     strcpy(compile->locals->names+compile->locals->index,word_buffer);
     compile->locals->index+=word_len+1;

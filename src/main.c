@@ -9,12 +9,20 @@
 //TODO - PRIORITY
 //===============
 /*
+- tail call elimination
+
+- more abbreviations
+  - << and >> for shift
+  - NEG for NEGATE
+  - INV for INVERT
+- add >= and <=
+
+- improve memory system
+  - need to add lots of different mem types so better to have list of mem segments
+    if they all work the same way. IIRC, all sections currently have custom update :(
+
 - local variables
   - store names after word for debugger and browser
-  - need lots of shortcuts for locals like x 1 + to x, 0 to y
-    - standard has +TO, could add 1+TO but not if peepholing
-
-- number words: -1, 0, 1, etc
 
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
@@ -165,9 +173,6 @@ Forth optimizing
 ================
 compare various methods
 - calculated goto
-most used primitives in IRAM
-combined primitives
-constant folding
 peepholing
 - tail call recursion!
 - could render asm with fixed address for ie MOVE but no benefit on RISC
@@ -196,9 +201,6 @@ linked list for stack
 - could also be index for each stack depth but slower than explicit check?
 explicit check
 - put in word and compare
-assembly? doesnt seem worth it for this
-- might be ok since already have C version for x86
-- how to do combined primitives? either or
 tests
 - fibonacci
 - N queens
@@ -212,11 +214,6 @@ words load next word?
   - OTOH, not needed if copying primitive body to RAM
 - ->executing=false exists very few times in source
 - -fno-PIC produces TCO!
-try code generation
-- doesnt have to be perfect
-- compare cycles to combined primitive at runtime to make sure worth it
-  - see cycle counting post
-  - separate add-on could check all combos and error if not as predicted
 switch case as mentioned online?
 - someone said this was fastest on x86 but how? switch in while?
 */

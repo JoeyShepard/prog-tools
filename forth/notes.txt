@@ -1,9 +1,14 @@
-combined/
+machine-code/
+- FILES THERE FOR TESTING OTHER THAN FORTH-OPITMIZE.C!
+- C version developed here including tests
+- forth-optimize.* here copied directly to main src/
+
+done/combined/
 - started to create combined primitives then stopped - not enough flash
 - keeping for now since has list of primitives
 
-machine-code/
-- generate machine code instead
+done/prototype/
+- Python prototype for optimizing
 - note, checked disassembly of whole project and GBR not used for anything
   - https://gcc.gnu.org/onlinedocs/gcc/SH-Built-in-Functions.html
     - GCC doesnt really use GBR except for threads

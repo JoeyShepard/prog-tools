@@ -630,6 +630,7 @@ volatile bool *on_key_pressed;
             //Check for TCP_FRAME message from server
             wrapper_events();
 
+            //TODO: probably smarter way
             //Wait 1ms between checking 
             usleep(1000);
         }
