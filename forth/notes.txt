@@ -4,3 +4,19 @@ combined/
 
 machine-code/
 - generate machine code instead
+- note, checked disassembly of whole project and GBR not used for anything
+  - https://gcc.gnu.org/onlinedocs/gcc/SH-Built-in-Functions.html
+    - GCC doesnt really use GBR except for threads
+
+CONCLUSION
+- clear now that doesn't make sense to do a lot of these on calculator
+  - sorting and rearranging especially can be avoided
+- can probably get most of the benefit from a subset
+  - model stack ops and initial
+  - keep track of last item processed to see if can combine with current
+    - like terms need to be contiguous
+  - identities - *0,+0,*1,and,or,xor
+  - rest of benefit not from optimizing
+    - load constants with #imm addressing
+    - GBR for temps and locals
+    - assign registers

@@ -13,7 +13,8 @@ debug_list=[
     #"terms_multiply",
     #"simplify",
     #"sort",
-    #coalesce"
+    #coalesce",
+    #"identities"
     ]
 
 #Constants
@@ -31,8 +32,10 @@ ssa_counter=0
 locals_gen=[]
 tests=[
 
-    ("3 x * 2 y * + 6 x * x * 2 / x / y y + +","Testing ssa_coalesce: (3*x+2*x) in two locations"),
+    ("x y * 0 *","Testing ssa_identities"),
+    ("x y dup - *","Testing ssa_identities"),
 
+    ("3 x * 2 y * + 6 x * x * 2 / x / y y + +","Testing ssa_coalesce: (3*x+2*x) in two locations"),
     ("2 x * x * 3 y * + 4 x * + 5 y * + 6 x * - 7 x * +","Testing ssa_simplify: 2x^2+3y+4x+5y-6x+7x -> 2x^2+5x+8y"),
     ("x 4 / x 2 / +","Testing ssa_simplify: x/4+x/2 -> same (not 3*x/4"),
     ("3 x * 5 x * + x /","Testing ssa_simplify: (3x+5x)/x -> 8"),
@@ -168,6 +171,9 @@ class SSA_Class:
         if self.optimization!=None:
             ret_val+=f" from {self.optimization}"
         return ret_val
+
+    def __repr__(self):
+        return self.format()
 
 class ObjClass:
     def __init__(self,item_type,a1=None):
@@ -645,7 +651,6 @@ def ssa_terms_add():
             last_gen=None
             last_name=""
             last_exponent=None
-            #TODO: add last item to new_list
             for element in item.ssa_list+[None]:
                 if element==None:
                     #Placeholder for end of loop - process last elements
@@ -1055,7 +1060,6 @@ def ssa_coalesce():
 
     return triggered
 
-#TODO: assumes 2 args?
 def ssa_identities():
     global ssa
     opt_name="identities"
@@ -1064,47 +1068,83 @@ def ssa_identities():
     ssa_ids.sort()
     for i in ssa_ids:
         item=ssa[i]
-        if item.op in ["+","-"]:
-            if item.x.type=="const" and item.x.value==0:
-                ssa_replace(i,item.y)
-                triggered=True
-        elif item.op=="*":
-            if item.x.type=="const" and item.x.value==0:
-                ssa_replace(i,item.x)
-                triggered=True
-            elif item.x.type=="const" and item.x.value==1:
-                ssa_replace(i,item.y)
-                triggered=True
-        elif item.op in ["and","or"]:
-            if item.x.equal(item.y):
-                ssa_replace(i,item.x)
-                triggered=True
+        modified=False
+        new_list=[]
+        if item.op=="+":
+            for i1,e1 in enumerate(item.ssa_list):
+                element=e1
+                if e1.exponent==0:
+                    #Term is 1 or -1
+                    if e1.negative==False:
+                        new_list+=[ObjClass("const",1)]
+                    elif e1.negative==True:
+                        new_list+=[ObjClass("const",-1)]
+                    element=None
+                elif e1.type=="const":
+                    if e1.get_const()==0:
+                        #Remove 0
+                        element=None
+                if element!=None:
+                    new_list+=[element]
+                else:
+                    triggered=True
+            if len(new_list)==0:
+                #All terms added up to 0
+                item.ssa_list=[ObjClass("const",0)]
+            elif len(new_list)==1:
+                #SSA list contains one item - replace 
+                ssa_replace(i,new_list[0])
             else:
-                if item.op=="and":
-                    if item.x.type=="const" and item.x.value==0:
-                        ssa_replace(i,item.x)
+                item.ssa_list=new_list[:]
+        elif item.op=="*":
+            for i1,e1 in enumerate(item.ssa_list):
+                element=e1
+                if e1.exponent==0:
+                    if e1.negative==False:
+                        #Term is 1 - remove
+                        element=None
+                    elif e1.negative==True:
+                        #Term is -1
+                        new_list+=[ObjClass("const",-1)]
+                        element=None
+                elif e1.type=="const":
+                    if e1.get_const_multiply()==1:
+                        # Multiply or divide by 1
+                        if e1.negative==False:
+                            #Term is 1 - remove
+                            element=None
+                        elif e1.negative==True:
+                            #Term is -1 - no change
+                            pass
+                    elif e1.get_const_multiply()==0:
+                        if e1.exponent<0:
+                            #TODO: divide by zero
+                            pass
+                        else:
+                            #Multiply by zero
+                            debug(opt_name,f"multiply by zero")
+                            new_list=[ObjClass("const",0)]
+                            triggered=0
+                            break
+                    if element!=None:
+                        new_list+=[element]
+                    else:
                         triggered=True
-                    elif item.x.type=="const" and item.x.value==-1:
-                        ssa_replace(i,item.y)
-                        triggered=True
-                elif item.op=="or":
-                    if item.x.type=="const" and item.x.value==0:
-                        ssa_replace(i,item.y)
-                        triggered=True
-                    elif item.x.type=="const" and item.x.value==-1:
-                        ssa_replace(i,item.x)
-                        triggered=True
+            if len(new_list)==0:
+                #Terms all cancel - equal to 1
+                new_element=ObjClass("const",1)
+                item.ssa_list=[new_element]
+            elif len(new_list)==1:
+                #SSA list contains one item - replace 
+                ssa_replace(i,new_list[0])
+            else:
+                item.ssa_list=new_list[:]
+        #TODO
+        """
+        elif item.op=="and":
+        elif item.op=="or":
         elif item.op=="xor":
-            if item.x.equal(item.y):
-                ssa_replace(i,ObjClass("const",0))
-                triggered=True
-            elif item.x.type=="const" and item.x.value==0:
-                ssa_replace(i,item.y)
-                triggered=True
-            #TODO: SSA with no y!
-            #elif item.x.type=="const" and item.x.value==-1:
-            #    ssa_replace(i,ssa_add("invert",item.y))
-            #    triggered=True
+        """
     return triggered
 
 def ssa_remove_unused():
@@ -1144,7 +1184,7 @@ def ssa_optimize_all():
         triggered|=ssa_terms_multiply()
         triggered|=ssa_simplify()
         #triggered|=ssa_factor() #skipped - 8x+4xy -> 4x(2+y)
-        #triggered|=ssa_identities() including getting rid of *1, +0, and *0
+        triggered|=ssa_identities() #including getting rid of *1, +0, and *0, also empty though should never happen
         triggered|=ssa_sort() #Needed for coalesce
         triggered|=ssa_coalesce()
 
