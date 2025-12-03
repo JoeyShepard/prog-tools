@@ -35,7 +35,7 @@ tests=[
     ("x y * 0 *","Testing ssa_identities"),
     ("x y dup - *","Testing ssa_identities"),
 
-    ("3 x * 2 y * + 6 x * x * 2 / x / y y + +","Testing ssa_coalesce: (3*x+2*x) in two locations"),
+    ("3 x * 2 y * + 6 x * x * 2 / x / y y + +","Testing ssa_coalesce: (3*x+2*y) in two locations"),
     ("2 x * x * 3 y * + 4 x * + 5 y * + 6 x * - 7 x * +","Testing ssa_simplify: 2x^2+3y+4x+5y-6x+7x -> 2x^2+5x+8y"),
     ("x 4 / x 2 / +","Testing ssa_simplify: x/4+x/2 -> same (not 3*x/4"),
     ("3 x * 5 x * + x /","Testing ssa_simplify: (3x+5x)/x -> 8"),
@@ -1124,12 +1124,12 @@ def ssa_identities():
                             #Multiply by zero
                             debug(opt_name,f"multiply by zero")
                             new_list=[ObjClass("const",0)]
-                            triggered=0
+                            triggered=True
                             break
-                    if element!=None:
-                        new_list+=[element]
-                    else:
-                        triggered=True
+                if element!=None:
+                    new_list+=[element]
+                else:
+                    triggered=True
             if len(new_list)==0:
                 #Terms all cancel - equal to 1
                 new_element=ObjClass("const",1)
