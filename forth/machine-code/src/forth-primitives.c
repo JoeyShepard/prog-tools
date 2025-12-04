@@ -1,15 +1,9 @@
-//SKELETON VERSION FOR TESTING!
-//=============================
-
 #include <stdio.h>
 #include <string.h>
 
 #include "forth-primitives.h"
 
-void prim_hidden_push(struct ForthEngine *engine)
-{
-    printf("prim_hidden_push\n");
-}
+void prim_hidden_push(struct ForthEngine *engine){}
 void prim_body_store(struct ForthEngine *engine){}
 void prim_body_c_store(struct ForthEngine *engine){}
 void prim_body_w_store(struct ForthEngine *engine){}

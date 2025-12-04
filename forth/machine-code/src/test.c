@@ -5,18 +5,32 @@
 //#include <strings.h>
 
 #include "forth-engine.h"
+#include "forth-locals.h"
 #include "forth-optimize.h"
 #include "forth-primitives.h"
+#include "logging.h"
 #include "macros.h"
 
+#define DATA_SIZE 4096
+#define OPT_SIZE 4096
 
+//Test cases
+struct TestInfo
+{
+    const char *title;
+    const char *test;
+};
+
+const struct TestInfo tests[]={
+    {"foo?","x 5 + x 2 + *"},
+    {"bar?","1 2 SWAP DROP x to Y z"},
+    };
 
 struct FuncInfo
 {
-    const char *word;
+    const char *name;
     void (*body)(struct ForthEngine *engine);
 };
-
 
 const struct FuncInfo functions[]=
 {
@@ -72,26 +86,16 @@ const struct FuncInfo functions[]=
 
 const char *locals[]={"X","Y","Z"};
 
-//Test cases
-struct TestInfo
-{
-    const char *title;
-    const char *test;
-};
-
-const struct TestInfo tests[]={
-    {"foo?","-1 2 3 rOt false"},
-    {"bar?","1 2 SWAP DROP"},
-    };
 
 //Compile and run test cases
-void compile(uint8_t *data,const char *code)
+int compile(uint8_t *data,const char *code)
 {
     int data_index=0;
     int code_index=0;
     char word[10];
     int word_index=0;
     char c;
+    bool store_local=false;
     do
     {
         c=code[code_index];
@@ -101,25 +105,19 @@ void compile(uint8_t *data,const char *code)
             {
                 bool found=false;
 
-                //Word is number?
+                //Number?
                 char *endptr;
                 int32_t result=strtol(word,&endptr,10);
                 if (*endptr==0)
                 {
-                    //Word is number
-                    printf("Number: %d\n",result);
-
-                    data[0]=0x12;
-                    data[1]=0x34;
-                    data[2]=0x56;
-                    data[3]=0x78;
-
-                    void (*func)(struct ForthEngine *)=&prim_hidden_push;
+                    //Found number
+					void (*func)(struct ForthEngine *)=&prim_hidden_push;
                     memcpy(data+data_index,&func,sizeof(&prim_hidden_push));
                     data_index+=sizeof(&prim_hidden_push);
-                    printf("%x %p\n",*(uint32_t*)data,func);
+                    memcpy(data+data_index,&result,sizeof(result));
+                    data_index+=sizeof(result);
 
-                    func(NULL);
+                    //(*((void (**)(struct ForthEngine *))data))(NULL);
 
                     found=true;
                 }
@@ -127,9 +125,11 @@ void compile(uint8_t *data,const char *code)
                 {
                     for (int i=0;i<ARRAY_LEN(functions);i++)
                     {
-                        if (strcasecmp(word,functions[i].word)==0)
+                        if (strcasecmp(word,functions[i].name)==0)
                         {
-                            printf("Word: %s\n",functions[i].word);
+                            //Found word
+                            memcpy(data+data_index,&functions[i].body,sizeof(&functions[i].body));
+                            data_index+=sizeof(&prim_hidden_push);
                             found=true;
                             break;
                         }
@@ -137,19 +137,38 @@ void compile(uint8_t *data,const char *code)
                 }
                 if (found==false)
                 {
-                    for (int i=0;i<ARRAY_LEN(functions);i++)
+                    for (int i=0;i<ARRAY_LEN(locals);i++)
                     {
                         if (strcasecmp(word,locals[i])==0)
                         {
-                            printf("Word: %s\n",locals[i]);
+                            //Found local
+                            if (store_local==true)
+                            {
+                                memcpy(data+data_index,&forth_locals_store[i],sizeof(&forth_locals_store[i]));
+                                store_local=false;
+                            }
+                            else
+                            {
+                                memcpy(data+data_index,&forth_locals_fetch[i],sizeof(&forth_locals_fetch[i]));
+                            }
+                            data_index+=sizeof(&prim_hidden_push);
                             found=true;
                             break;
                         }
+                    }
+                }
+                if (found==false)
+                {
+                    if (strcasecmp(word,"TO")==0)
+                    {
+                        store_local=true;
+                        found=true;
                     }
                 }
                 if (found==false)
                 {
                     printf("Unknown: %s\n",word);
+                    exit(1);
                 }
                 word_index=0;
             }
@@ -163,26 +182,94 @@ void compile(uint8_t *data,const char *code)
         code_index++;
     }
     while (c!=0);
+
+    return data_index;
 }
 
-void show_thread(uint8_t *data)
+void log_thread(uint8_t *data, int byte_count)
 {
+    log_text("Code: ");
+
+    int data_index=0;
+    while(data_index<byte_count)
+    {
+        bool found=false;
+        void (*func)(struct ForthEngine *)=*(void (**)(struct ForthEngine *))(data+data_index);
+        data_index+=sizeof(func);
+        if (found==false)
+        {
+            if (func==&prim_hidden_push)
+            {
+                int32_t result=*(int32_t *)(data+data_index);
+                data_index+=sizeof(result);
+                log_text_raw("%d ",result);
+                found=true;
+            }
+        }
+        if (found==false)
+        {
+            for (int i=0;i<ARRAY_LEN(functions);i++)
+            {
+                if (functions[i].body==func)
+                {
+                    log_text_raw("%s ",functions[i].name);
+                    found=true;
+                    break;
+                }
+            }
+        }
+        if (found==false)
+        {
+            for (int i=0;i<ARRAY_LEN(locals);i++)
+            {
+                if (forth_locals_fetch[i]==func)
+                {
+                    log_text_raw("%s ",locals[i]);
+                    found=true;
+                    break;
+                }
+                if (forth_locals_store[i]==func)
+                {
+                    log_text_raw("TO %s ",locals[i]);
+                    found=true;
+                    break;
+                }
+            }
+        }
+        if (found==false)
+        {
+            printf("log_text: UNKNOWN (%p)\n",func);
+            exit(0);
+        }
+    }
+    log_text_raw("\n");
 }
 
 void run_tests()
 {
-    uint8_t data[4096];
+    log_push(LOGGING_FORTH_OPT_RUN_TESTS,"run_tests");
+
+    uint8_t data[DATA_SIZE];
+    uint8_t optimized[OPT_SIZE];
     for (int i=0;i<ARRAY_LEN(tests);i++)
     {
-        printf("Test %d: %s - %s\n",i+1,tests[i].title,tests[i].test);
-        compile(data,tests[i].test);
-        show_thread(data);
-        printf("done\n\n");
+        printf("Test %d: %s\n",i+1,tests[i].title);
+
+        log_text("Test %d: %s\n",i+1,tests[i].title);
+        log_text("Code: %s\n",tests[i].test);
+        int byte_count=compile(data,tests[i].test);
+        log_thread(data,byte_count);
+        forth_optimize(optimized,OPT_SIZE,data,DATA_SIZE);
+        log_text("done\n\n");
     }
+
+    log_pop();
 }
 
 int main()
 {
+    init_logging("log.txt");
+
     run_tests();
 
     return 0;

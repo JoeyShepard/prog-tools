@@ -12,7 +12,6 @@
 #include "logging.h"
 #include "mem.h"
 
-//TODO: table look up if this is too slow
 int classify_char(char c)
 {
     if (c=='-') return FORTH_CHAR_MINUS; 
@@ -328,7 +327,6 @@ int expand_definitions(uint32_t size,struct ForthCompileInfo *compile)
     return FORTH_ERROR_NONE;
 }
 
-//Function pointer here should be 32 bit on calculator so write_dict_u32 would work but adding this for testing on x86.
 int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct ForthCompileInfo *compile)
 {
     //Logging

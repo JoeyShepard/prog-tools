@@ -17,12 +17,21 @@
   - INV for INVERT
 - add >= and <=
 
+- insert checks after the fact for stack
+  - at the top of each if block etc
+  - possible to eliminate for do loop if no branch or secondary inside?
+    - could keep track of whether each block or word is clean but then cant redefine
+  - CONST really should be unredefinable then easier to optimize
+  - could treat vars etc as const then go back and fix if reassigned? lots of work
+
 - improve memory system
   - need to add lots of different mem types so better to have list of mem segments
     if they all work the same way. IIRC, all sections currently have custom update :(
 
 - local variables
   - store names after word for debugger and browser
+
+- typedef for function pointers
 
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
@@ -33,6 +42,7 @@
 
 - autocomplete
   - use arrow key - don't need special characters in source
+  - other use would be to insert TO
 
 - paren comments not working in word definition
   - now can't reproduce
