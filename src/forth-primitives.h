@@ -6,13 +6,16 @@
     #include "forth-engine.h"
     #include "structs.h"
 
+    //Constants
+
+
     //structs
     struct ForthPrimitive
     {
         const char *name;
         uint8_t len;
-        int (*immediate)(struct ForthEngine *engine);
-        int (*compile)(struct ForthEngine *engine);
+        int immediate_action;
+        int compile_action;
         void (*body)(struct ForthEngine *engine);
     };
 
@@ -37,9 +40,5 @@
     void prim_hidden_push(struct ForthEngine *engine);
     void prim_hidden_s_quote(struct ForthEngine *engine);
     void prim_hidden_secondary(struct ForthEngine *engine);
-
-    //Primitives called at compile time and visible externally (but hidden from user)
-    int prim_compile_only(struct ForthEngine *engine);
-    int prim_interpret_only(struct ForthEngine *engine);
 
 #endif

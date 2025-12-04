@@ -3,6 +3,14 @@
 #include "forth-optimize.h"
 #include "forth-primitives.h"
 #include "logging.h"
+/*
+TODO:
+- add WITHIN
+
+
+
+*/
+
 
 
 int forth_optimize(uint8_t *optimized, int opt_size, uint8_t *data, int data_size)

@@ -35,8 +35,10 @@
 
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
-  - immediate_right_bracket has a few lines
-  - compile_left_bracket sets flag and changes state
+  - TODO:
+    - immediate_right_bracket has a few lines
+    - compile_left_bracket sets flag and changes state
+    - prim_immediate_execute is exposed externally - why? just returns action like all other immediates
 
 - need opt on and off for testing
 

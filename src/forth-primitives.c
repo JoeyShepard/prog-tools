@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "compatibility.h"
+#include "forth-actions.h" 
 #include "forth-primitives.h"
 #include "logging.h"
 #include "macros.h"
@@ -418,21 +419,11 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     }
 }
 
-int prim_compile_only(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_COMPILE_ONLY;
-}
-
-int prim_interpret_only(UNUSED(struct ForthEngine *engine))
-{
-    return FORTH_ENGINE_ERROR_INTERPRET_ONLY;
-}
-
 //Primitives visible to user
 //==========================
 
 //STORE
-void prim_body_store(struct ForthEngine *engine)
+void prim_store(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -453,7 +444,7 @@ void prim_body_store(struct ForthEngine *engine)
 }
 
 //C_STORE
-void prim_body_c_store(struct ForthEngine *engine)
+void prim_c_store(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -476,7 +467,7 @@ void prim_body_c_store(struct ForthEngine *engine)
 }
 
 //W_STORE
-void prim_body_w_store(struct ForthEngine *engine)
+void prim_w_store(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -498,29 +489,8 @@ void prim_body_w_store(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//TICK
-int prim_immediate_tick(UNUSED(struct ForthEngine *engine))
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_TICK;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//PAREN
-int prim_immediate_paren(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_PAREN;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_paren(struct ForthEngine *engine)
-{
-    //Same behavior as immediate
-    return prim_immediate_paren(engine);
-}
-
 //STAR
-void prim_body_star(struct ForthEngine *engine)
+void prim_star(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -537,7 +507,7 @@ void prim_body_star(struct ForthEngine *engine)
 }
 
 //STAR_SLASH
-void prim_body_star_slash(struct ForthEngine *engine)
+void prim_star_slash(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -563,7 +533,7 @@ void prim_body_star_slash(struct ForthEngine *engine)
 }
 
 //STAR_SLASH_MOD
-void prim_body_star_slash_mod(struct ForthEngine *engine)
+void prim_star_slash_mod(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -592,7 +562,7 @@ void prim_body_star_slash_mod(struct ForthEngine *engine)
 }
 
 //PLUS
-void prim_body_plus(struct ForthEngine *engine)
+void prim_plus(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -608,16 +578,8 @@ void prim_body_plus(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1+arg2;
 }
 
-//PLUS_LOOP
-int prim_compile_plus_loop(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_PLUS_LOOP;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //COMMA
-void prim_body_comma(struct ForthEngine *engine)
+void prim_comma(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -635,7 +597,7 @@ void prim_body_comma(struct ForthEngine *engine)
 }
 
 //C_COMMA
-void prim_body_c_comma(struct ForthEngine *engine)
+void prim_c_comma(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -653,7 +615,7 @@ void prim_body_c_comma(struct ForthEngine *engine)
 }
 
 //W_COMMA
-void prim_body_w_comma(struct ForthEngine *engine)
+void prim_w_comma(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -671,7 +633,7 @@ void prim_body_w_comma(struct ForthEngine *engine)
 }
 
 //MINUS
-void prim_body_minus(struct ForthEngine *engine)
+void prim_minus(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -687,21 +649,8 @@ void prim_body_minus(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1-arg2;
 }
 
-//BACKSLASH
-int prim_immediate_backslash(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_COMMENT;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_backslash(struct ForthEngine *engine)
-{
-    //Same behavior as immediate
-    return prim_immediate_backslash(engine);
-}
-
 //DOT
-void prim_body_dot(struct ForthEngine *engine)
+void prim_dot(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -722,7 +671,7 @@ void prim_body_dot(struct ForthEngine *engine)
 }
 
 //U_DOT
-void prim_body_u_dot(struct ForthEngine *engine)
+void prim_u_dot(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -743,7 +692,7 @@ void prim_body_u_dot(struct ForthEngine *engine)
 }
 
 //X_DOT
-void prim_body_x_dot(struct ForthEngine *engine)
+void prim_x_dot(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -763,23 +712,8 @@ void prim_body_x_dot(struct ForthEngine *engine)
     }
 }
 
-//DOT_QUOTE
-int prim_immediate_dot_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_DOT_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-int prim_compile_dot_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_DOT_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //SLASH
-void prim_body_slash(struct ForthEngine *engine)
+void prim_slash(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -797,7 +731,7 @@ void prim_body_slash(struct ForthEngine *engine)
 }
 
 //SLASH_MOD
-void prim_body_slash_mod(struct ForthEngine *engine)
+void prim_slash_mod(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -816,24 +750,8 @@ void prim_body_slash_mod(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg2%arg1;
 }
 
-//COLON
-int prim_immediate_colon(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_COLON;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//SEMICOLON
-int prim_compile_semicolon(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_SEMICOLON;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //LESS_THAN
-void prim_body_less_than(struct ForthEngine *engine)
+void prim_less_than(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -850,7 +768,7 @@ void prim_body_less_than(struct ForthEngine *engine)
 }
 
 //EQUALS
-void prim_body_equals(struct ForthEngine *engine)
+void prim_equals(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -867,7 +785,7 @@ void prim_body_equals(struct ForthEngine *engine)
 }
 
 //GREATER_THAN
-void prim_body_greater_than(struct ForthEngine *engine)
+void prim_greater_than(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -885,7 +803,7 @@ void prim_body_greater_than(struct ForthEngine *engine)
 
 //TO_NUMBER - Note differs from >NUMBER in standard!
 //(c-addr1 u1 - s2 c-addr2 u2) - no doubles or scratch space
-void prim_body_to_number(struct ForthEngine *engine)
+void prim_to_number(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -975,7 +893,7 @@ void prim_body_to_number(struct ForthEngine *engine)
 
 //TO_HEX
 //(c-addr1 u1 - s2 c-addr2 u2)
-void prim_body_to_hex(struct ForthEngine *engine)
+void prim_to_hex(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1103,7 +1021,7 @@ void prim_body_to_hex(struct ForthEngine *engine)
 
 //NUMBER>
 //(n c-addr - u)
-void prim_body_number_to(struct ForthEngine *engine)
+void prim_number_to(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1141,7 +1059,7 @@ void prim_body_number_to(struct ForthEngine *engine)
 
 //HEX>
 //(u c-addr - u) 
-void prim_body_hex_to(struct ForthEngine *engine)
+void prim_hex_to(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1178,7 +1096,7 @@ void prim_body_hex_to(struct ForthEngine *engine)
 }
 
 //QUESTION_DUPE
-void prim_body_question_dupe(struct ForthEngine *engine)
+void prim_question_dupe(struct ForthEngine *engine)
 {
     //Fetch value to duplicate
     uintptr_t lower;
@@ -1195,7 +1113,7 @@ void prim_body_question_dupe(struct ForthEngine *engine)
 }
 
 //FETCH
-void prim_body_fetch(struct ForthEngine *engine)
+void prim_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
     uintptr_t lower;
@@ -1213,7 +1131,7 @@ void prim_body_fetch(struct ForthEngine *engine)
 }
 
 //C_FETCH
-void prim_body_c_fetch(struct ForthEngine *engine)
+void prim_c_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
     uintptr_t lower;
@@ -1231,7 +1149,7 @@ void prim_body_c_fetch(struct ForthEngine *engine)
 }
 
 //W_FETCH
-void prim_body_w_fetch(struct ForthEngine *engine)
+void prim_w_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
     uintptr_t lower;
@@ -1249,13 +1167,13 @@ void prim_body_w_fetch(struct ForthEngine *engine)
 }
 
 //QUIT
-void prim_body_quit(struct ForthEngine *engine)
+void prim_quit(struct ForthEngine *engine)
 {
     engine->executing=false;
 }
 
 //ABS
-void prim_body_abs(struct ForthEngine *engine)
+void prim_abs(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
@@ -1263,7 +1181,7 @@ void prim_body_abs(struct ForthEngine *engine)
 }
 
 //ACCEPT
-void prim_body_accept(struct ForthEngine *engine)
+void prim_accept(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1288,7 +1206,7 @@ void prim_body_accept(struct ForthEngine *engine)
 }
 
 //ALIGN
-void prim_body_align(struct ForthEngine *engine)
+void prim_align(struct ForthEngine *engine)
 {
     int32_t remainder=engine->data_index%FORTH_CELL_SIZE;
     if (remainder>0)
@@ -1299,7 +1217,7 @@ void prim_body_align(struct ForthEngine *engine)
 }
 
 //ALIGNED
-void prim_body_aligned(struct ForthEngine *engine)
+void prim_aligned(struct ForthEngine *engine)
 {
     //Fetch address to align
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -1316,7 +1234,7 @@ void prim_body_aligned(struct ForthEngine *engine)
 }
 
 //ALLOT
-void prim_body_allot(struct ForthEngine *engine)
+void prim_allot(struct ForthEngine *engine)
 {
     //Logging
     log_push(LOGGING_FORTH_ALLOT,"allot");
@@ -1337,7 +1255,7 @@ void prim_body_allot(struct ForthEngine *engine)
 }
 
 //AND
-void prim_body_and(struct ForthEngine *engine)
+void prim_and(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1353,16 +1271,8 @@ void prim_body_and(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1&arg2;
 }
 
-//BEGIN
-int prim_compile_begin(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_BEGIN;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //B_L
-void prim_body_b_l(struct ForthEngine *engine)
+void prim_b_l(struct ForthEngine *engine)
 {
     //Write value for space character
     *engine->stack=32;
@@ -1373,7 +1283,7 @@ void prim_body_b_l(struct ForthEngine *engine)
 }
 
 //BOUNDS
-void prim_body_bounds(struct ForthEngine *engine)
+void prim_bounds(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1390,31 +1300,15 @@ void prim_body_bounds(struct ForthEngine *engine)
 }
 
 //CELLS
-void prim_body_cells(struct ForthEngine *engine)
+void prim_cells(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
     *(int32_t*)((engine->stack_base)|lower)=value*FORTH_CELL_SIZE;
 }
 
-//CHAR
-int prim_immediate_char(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_CHAR;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//CONSTANT
-int prim_immediate_constant(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_CONSTANT;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //C_R
-void prim_body_c_r(struct ForthEngine *engine)
+void prim_c_r(struct ForthEngine *engine)
 {
     if (engine->print!=NULL)
     {
@@ -1423,16 +1317,8 @@ void prim_body_c_r(struct ForthEngine *engine)
     }
 }
 
-//CREATE
-int prim_immediate_create(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_CREATE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //DEPTH
-void prim_body_depth(struct ForthEngine *engine)
+void prim_depth(struct ForthEngine *engine)
 {
     //Write stack count
     *engine->stack=forth_stack_count(engine);
@@ -1442,30 +1328,22 @@ void prim_body_depth(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//DO
-int prim_compile_do(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_DO;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //DROP
-void prim_body_drop(struct ForthEngine *engine)
+void prim_drop(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //2DROP
-void prim_body_two_drop(struct ForthEngine *engine)
+void prim_two_drop(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //DUPE
-void prim_body_dupe(struct ForthEngine *engine)
+void prim_dupe(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Write duplicated value
@@ -1478,7 +1356,7 @@ void prim_body_dupe(struct ForthEngine *engine)
 }
 
 //2DUPE
-void prim_body_two_dupe(struct ForthEngine *engine)
+void prim_two_dupe(struct ForthEngine *engine)
 {
     uintptr_t lower;
     //Write duplicated value
@@ -1498,16 +1376,8 @@ void prim_body_two_dupe(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//ELSE
-int prim_compile_else(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_ELSE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //EMIT
-void prim_body_emit(struct ForthEngine *engine)
+void prim_emit(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -1526,13 +1396,14 @@ void prim_body_emit(struct ForthEngine *engine)
 }
 
 //EXECUTE
+//TODO: needs to be exposed externally - how to handle?
 int prim_immediate_execute(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
     engine->word_action=FORTH_ACTION_EXECUTE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-void prim_body_execute(struct ForthEngine *engine)
+void prim_execute(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -1648,7 +1519,7 @@ void prim_body_execute(struct ForthEngine *engine)
 //Compiling - prim_hidden_done
 
 //FILL
-void prim_body_fill(struct ForthEngine *engine)
+void prim_fill(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1682,7 +1553,7 @@ void prim_body_fill(struct ForthEngine *engine)
 //int prim_compile_find(struct ForthEngine *engine){}
 
 //HERE
-void prim_body_here(struct ForthEngine *engine)
+void prim_here(struct ForthEngine *engine)
 {
     //Write stack count
     *engine->stack=engine->data_index;
@@ -1692,40 +1563,16 @@ void prim_body_here(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//I
-int prim_compile_i(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_I;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//IF
-int prim_compile_if(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_IF;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //INVERT
-void prim_body_invert(struct ForthEngine *engine)
+void prim_invert(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
     *(int32_t*)((engine->stack_base)|lower)=value^-1;
 }
 
-//J
-int prim_compile_j(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_J;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //KEY
-void prim_body_key(struct ForthEngine *engine)
+void prim_key(struct ForthEngine *engine)
 {
     //Fetch flag - true for blocking key input, false for non-blocking
     uintptr_t lower;
@@ -1748,32 +1595,8 @@ void prim_body_key(struct ForthEngine *engine)
     }
 }
 
-//LEAVE
-int prim_compile_leave(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_LEAVE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//LITERAL
-int prim_compile_literal(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_LITERAL;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//LOOP
-int prim_compile_loop(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_LOOP;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //L_SHIFT
-void prim_body_l_shift(struct ForthEngine *engine)
+void prim_l_shift(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1790,7 +1613,7 @@ void prim_body_l_shift(struct ForthEngine *engine)
 }
 
 //MAX
-void prim_body_max(struct ForthEngine *engine)
+void prim_max(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1814,7 +1637,7 @@ void prim_body_max(struct ForthEngine *engine)
 }
 
 //MIN
-void prim_body_min(struct ForthEngine *engine)
+void prim_min(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1839,7 +1662,7 @@ void prim_body_min(struct ForthEngine *engine)
 }
 
 //MOD
-void prim_body_mod(struct ForthEngine *engine)
+void prim_mod(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1859,7 +1682,7 @@ void prim_body_mod(struct ForthEngine *engine)
 }
 
 //MOVE
-void prim_body_move(struct ForthEngine *engine)
+void prim_move(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1905,7 +1728,7 @@ void prim_body_move(struct ForthEngine *engine)
 }
 
 //NEGATE
-void prim_body_negate(struct ForthEngine *engine)
+void prim_negate(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
@@ -1913,7 +1736,7 @@ void prim_body_negate(struct ForthEngine *engine)
 }
 
 //OR
-void prim_body_or(struct ForthEngine *engine)
+void prim_or(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -1930,7 +1753,7 @@ void prim_body_or(struct ForthEngine *engine)
 }
 
 //OVER
-void prim_body_over(struct ForthEngine *engine)
+void prim_over(struct ForthEngine *engine)
 {
     //Write duplicated value
     uintptr_t lower;
@@ -1943,7 +1766,7 @@ void prim_body_over(struct ForthEngine *engine)
 }
 
 //2OVER
-void prim_body_two_over(struct ForthEngine *engine)
+void prim_two_over(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -1964,7 +1787,7 @@ void prim_body_two_over(struct ForthEngine *engine)
 }
 
 //PAGE
-void prim_body_page(struct ForthEngine *engine)
+void prim_page(struct ForthEngine *engine)
 {
     if (engine->clear_console!=NULL)
     {
@@ -1976,16 +1799,8 @@ void prim_body_page(struct ForthEngine *engine)
     }
 }
 
-//REPEAT
-int prim_compile_repeat(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_REPEAT;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //ROTE
-void prim_body_rote(struct ForthEngine *engine)
+void prim_rote(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2006,7 +1821,7 @@ void prim_body_rote(struct ForthEngine *engine)
 }
 
 //MINUS_ROTE
-void prim_body_minus_rote(struct ForthEngine *engine)
+void prim_minus_rote(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2027,7 +1842,7 @@ void prim_body_minus_rote(struct ForthEngine *engine)
 }
 
 //R_SHIFT
-void prim_body_r_shift(struct ForthEngine *engine)
+void prim_r_shift(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2043,22 +1858,8 @@ void prim_body_r_shift(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1>>arg2;
 }
 
-//S_QUOTE
-int prim_immediate_s_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_S_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_s_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_S_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //SPACE
-void prim_body_space(struct ForthEngine *engine)
+void prim_space(struct ForthEngine *engine)
 {
     if (engine->print!=NULL)
     {
@@ -2068,7 +1869,7 @@ void prim_body_space(struct ForthEngine *engine)
 }
 
 //SPACES
-void prim_body_spaces(struct ForthEngine *engine)
+void prim_spaces(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2095,7 +1896,7 @@ void prim_body_spaces(struct ForthEngine *engine)
 }
 
 //SWAP
-void prim_body_swap(struct ForthEngine *engine)
+void prim_swap(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2112,7 +1913,7 @@ void prim_body_swap(struct ForthEngine *engine)
 }
 
 //2SWAP
-void prim_body_two_swap(struct ForthEngine *engine)
+void prim_two_swap(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2136,16 +1937,8 @@ void prim_body_two_swap(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg2;
 }
 
-//THEN
-int prim_compile_then(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_THEN;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //TYPE
-void prim_body_type(struct ForthEngine *engine)
+void prim_type(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -2183,7 +1976,7 @@ void prim_body_type(struct ForthEngine *engine)
 }
 
 //U_LESS_THAN
-void prim_body_u_less_than(struct ForthEngine *engine)
+void prim_u_less_than(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2200,7 +1993,7 @@ void prim_body_u_less_than(struct ForthEngine *engine)
 }
 
 //U_GREATER_THAN
-void prim_body_u_greater_than(struct ForthEngine *engine)
+void prim_u_greater_than(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2216,32 +2009,8 @@ void prim_body_u_greater_than(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=-(arg1>arg2);
 }
 
-//UNTIL
-int prim_compile_until(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_UNTIL;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//VARIABLE
-int prim_immediate_variable(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_VARIABLE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//WHILE
-int prim_compile_while(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_WHILE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //X_OR
-void prim_body_x_or(struct ForthEngine *engine)
+void prim_x_or(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2257,6 +2026,8 @@ void prim_body_x_or(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1^arg2;
 }
 
+//TODO: delete after creating ACTION
+/*
 //LEFT_BRACKET
 int prim_compile_left_bracket(struct ForthEngine *engine)
 {
@@ -2279,25 +2050,10 @@ int prim_immediate_right_bracket(struct ForthEngine *engine)
         return FORTH_ENGINE_ERROR_NONE;
     }
 }
-
-//BRACKET_TICK
-int prim_compile_bracket_tick(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_BRACKET_TICK;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//BRACKET_CHAR
-int prim_compile_bracket_char(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_BRACKET_CHAR;
-    return FORTH_ENGINE_ERROR_NONE;
-}
+*/
 
 //DOT_R
-void prim_body_dot_r(struct ForthEngine *engine)
+void prim_dot_r(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -2332,7 +2088,7 @@ void prim_body_dot_r(struct ForthEngine *engine)
 }
 
 //U_DOT_R
-void prim_body_u_dot_r(struct ForthEngine *engine)
+void prim_u_dot_r(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -2367,7 +2123,7 @@ void prim_body_u_dot_r(struct ForthEngine *engine)
 }
 
 //X_DOT_R
-void prim_body_x_dot_r(struct ForthEngine *engine)
+void prim_x_dot_r(struct ForthEngine *engine)
 {
     //Fetch arguments
     uintptr_t lower;
@@ -2402,7 +2158,7 @@ void prim_body_x_dot_r(struct ForthEngine *engine)
 }
 
 //NOT_EQUALS
-void prim_body_not_equals(struct ForthEngine *engine)
+void prim_not_equals(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2418,21 +2174,13 @@ void prim_body_not_equals(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=-(arg1!=arg2);
 }
 
-//AGAIN
-int prim_compile_again(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_AGAIN;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //CASE
 //void prim_body_case(struct ForthEngine *engine){}
 //int prim_immediate_case(struct ForthEngine *engine){}
 //int prim_compile_case(struct ForthEngine *engine){}
 
 //FALSE
-void prim_body_false(struct ForthEngine *engine)
+void prim_false(struct ForthEngine *engine)
 {
     //Write value for space character
     *engine->stack=FORTH_FALSE;
@@ -2443,7 +2191,7 @@ void prim_body_false(struct ForthEngine *engine)
 }
 
 //NIP
-void prim_body_nip(struct ForthEngine *engine)
+void prim_nip(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2455,22 +2203,8 @@ void prim_body_nip(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=*engine->stack;
 }
 
-//S_BACKSLASH_QUOTE
-int prim_immediate_s_backslash_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_S_BACKSLASH_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-int prim_compile_s_backslash_quote(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_S_BACKSLASH_QUOTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //TRUE
-void prim_body_true(struct ForthEngine *engine)
+void prim_true(struct ForthEngine *engine)
 {
     //Write value for space character
     *engine->stack=FORTH_TRUE;
@@ -2481,7 +2215,7 @@ void prim_body_true(struct ForthEngine *engine)
 }
 
 //TUCK
-void prim_body_tuck(struct ForthEngine *engine)
+void prim_tuck(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2503,7 +2237,7 @@ void prim_body_tuck(struct ForthEngine *engine)
 }
 
 //UNUSED
-void prim_body_unused(struct ForthEngine *engine)
+void prim_unused(struct ForthEngine *engine)
 {
     //Write memory amount left
     *engine->stack=engine->data_size-engine->data_index;
@@ -2515,7 +2249,7 @@ void prim_body_unused(struct ForthEngine *engine)
 }
 
 //WITHIN
-void prim_body_within(struct ForthEngine *engine)
+void prim_within(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2537,7 +2271,7 @@ void prim_body_within(struct ForthEngine *engine)
 }
 
 //DOT_S
-void prim_body_dot_s(struct ForthEngine *engine)
+void prim_dot_s(struct ForthEngine *engine)
 {
     if (engine->print!=NULL)
     {
@@ -2562,7 +2296,7 @@ void prim_body_dot_s(struct ForthEngine *engine)
 }
 
 //QUESTION
-void prim_body_question(struct ForthEngine *engine)
+void prim_question(struct ForthEngine *engine)
 {
     //Update stack pointer
     uintptr_t lower;
@@ -2590,7 +2324,7 @@ void prim_body_question(struct ForthEngine *engine)
 }
 
 //DUMP
-void prim_body_dump(struct ForthEngine *engine)
+void prim_dump(struct ForthEngine *engine)
 {
     uintptr_t lower;
     if (engine->print!=NULL)
@@ -2688,69 +2422,29 @@ void prim_body_dump(struct ForthEngine *engine)
 //int prim_immediate_see(struct ForthEngine *engine){}
 //int prim_compile_see(struct ForthEngine *engine){}
 
-//WORDS
-int prim_immediate_words(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_WORDS;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//WORDSIZE
-int prim_immediate_wordsize(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_WORDSIZE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //BYE
-void prim_body_bye(struct ForthEngine *engine)
+void prim_bye(struct ForthEngine *engine)
 {
     engine->exit_program=true;
     engine->executing=false;
 }
 
-//LOCALS
-int prim_compile_locals(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_LOCALS;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//LOCALS INITIALIZED TO ZERO
-int prim_compile_locals_0(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_LOCALS_0;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//TO
-int prim_compile_to(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_TO;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //RESET
-void prim_body_reset(struct ForthEngine *engine)
+void prim_reset(struct ForthEngine *engine)
 {
     //Reset Forth data stack
     engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
 }
 
 //WALIGN
-void prim_body_walign(struct ForthEngine *engine)
+void prim_walign(struct ForthEngine *engine)
 {
     //Round up to even address
     engine->data_index=(engine->data_index+(engine->data_index&1))&engine->data_mask_16;
 }
 
 //WALIGNED
-void prim_body_waligned(struct ForthEngine *engine)
+void prim_waligned(struct ForthEngine *engine)
 {
     //Fetch address to align
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -2764,7 +2458,7 @@ void prim_body_waligned(struct ForthEngine *engine)
 }
 
 //PRINTABLE
-void prim_body_printable(struct ForthEngine *engine)
+void prim_printable(struct ForthEngine *engine)
 {
     //Fetch key to look up
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
@@ -2784,7 +2478,7 @@ void prim_body_printable(struct ForthEngine *engine)
 
 //TODO: optimize
 //ERASE
-void prim_body_erase(struct ForthEngine *engine)
+void prim_erase(struct ForthEngine *engine)
 {
     //Fetch values from stack
     uintptr_t lower;
@@ -2809,7 +2503,7 @@ void prim_body_erase(struct ForthEngine *engine)
 }
 
 //CXT
-void prim_body_cxt(struct ForthEngine *engine)
+void prim_cxt(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
@@ -2819,7 +2513,7 @@ void prim_body_cxt(struct ForthEngine *engine)
 }
 
 //WXT
-void prim_body_wxt(struct ForthEngine *engine)
+void prim_wxt(struct ForthEngine *engine)
 {
     uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
     int32_t value=*(int32_t*)((engine->stack_base)|lower);
@@ -2828,32 +2522,8 @@ void prim_body_wxt(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=value;
 }
 
-//PRIMITIVES
-int prim_immediate_primitives(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_PRIMITIVES;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//SECONDARIES
-int prim_immediate_secondaries(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_SECONDARIES;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//UNDEFINED
-int prim_immediate_undefined(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_UNDEFINED;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
 //PERF
-void prim_body_perf(struct ForthEngine *engine)
+void prim_perf(struct ForthEngine *engine)
 {
     //Write performance counter
     *engine->stack=engine->perf_value;
@@ -2864,7 +2534,7 @@ void prim_body_perf(struct ForthEngine *engine)
 }
 
 //SIZE
-void prim_body_size(struct ForthEngine *engine)
+void prim_size(struct ForthEngine *engine)
 {
     //Write size of Forth data memory
     *engine->stack=engine->data_size;
@@ -2874,166 +2544,163 @@ void prim_body_size(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-//RESIZE
-int prim_immediate_resize(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_RESIZE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
+START HERE
+- need to change forth_process to match this
+- move ACTION switch to forth-action and out of forth-process
+- address multiple issues: execute, commented out code above with no action assigned
+- see main.c
 
 //Globals
 //=======
 const struct ForthPrimitive forth_primitives[]=
 {
-    {"!",1,NULL,NULL,prim_body_store},
-    {"C!",2,NULL,NULL,prim_body_c_store},
-    {"W!",2,NULL,NULL,prim_body_w_store},
-    {"'",1,prim_immediate_tick,prim_interpret_only,NULL},
-    {"(",1,prim_immediate_paren,prim_compile_paren,NULL},
-    {"*",1,NULL,NULL,prim_body_star},
-    {"*/",2,NULL,NULL,prim_body_star_slash},
-    {"*/MOD",5,NULL,NULL,prim_body_star_slash_mod},
-    {"+",1,NULL,NULL,prim_body_plus},
-    {"+LOOP",5,prim_compile_only,prim_compile_plus_loop,NULL},
-    {",",1,NULL,NULL,prim_body_comma},
-    {"C,",2,NULL,NULL,prim_body_c_comma},
-    {"W,",2,NULL,NULL,prim_body_w_comma},
-    {"-",1,NULL,NULL,prim_body_minus},
-    {"\\",1,prim_immediate_backslash,prim_compile_backslash,NULL},
-    {".",1,NULL,NULL,prim_body_dot},
-    {"U.",2,NULL,NULL,prim_body_u_dot},
-    {"X.",2,NULL,NULL,prim_body_x_dot},
-    {".\"",2,prim_immediate_dot_quote,prim_compile_dot_quote,NULL},
-    {"/",1,NULL,NULL,prim_body_slash},
-    {"/MOD",4,NULL,NULL,prim_body_slash_mod},
-    {":",1,prim_immediate_colon,prim_interpret_only,NULL},
-    {";",1,prim_compile_only,prim_compile_semicolon,NULL},
-    {"<",1,NULL,NULL,prim_body_less_than},
-    {"=",1,NULL,NULL,prim_body_equals},
-    {">",1,NULL,NULL,prim_body_greater_than},
-    {">NUMBER",7,NULL,NULL,prim_body_to_number},
-    {">NUM",4,NULL,NULL,prim_body_to_number},
-    {"NUMBER>",7,NULL,NULL,prim_body_number_to},
-    {"NUM>",4,NULL,NULL,prim_body_number_to},
-    {">HEX",4,NULL,NULL,prim_body_to_hex},
-    {"HEX>",4,NULL,NULL,prim_body_hex_to},
-    {"?DUP",4,NULL,NULL,prim_body_question_dupe},
-    {"@",1,NULL,NULL,prim_body_fetch},
-    {"C@",2,NULL,NULL,prim_body_c_fetch},
-    {"W@",2,NULL,NULL,prim_body_w_fetch},
-    {"QUIT",4,prim_compile_only,NULL,prim_body_quit},
-    {"ABS",3,NULL,NULL,prim_body_abs},
-    {"ACCEPT",6,NULL,NULL,prim_body_accept},
-    {"ALIGN",5,NULL,NULL,prim_body_align},
-    {"ALIGNED",7,NULL,NULL,prim_body_aligned},
-    {"ALLOT",5,NULL,NULL,prim_body_allot},
-    {"AND",3,NULL,NULL,prim_body_and},
-    {"BEGIN",5,prim_compile_only,prim_compile_begin,NULL},
-    {"BL",2,NULL,NULL,prim_body_b_l},
-    {"BOUNDS",6,NULL,NULL,prim_body_bounds},
-    {"CELLS",5,NULL,NULL,prim_body_cells},
-    {"CHAR",4,prim_immediate_char,prim_interpret_only,NULL},
-    {"CONSTANT",8,prim_immediate_constant,prim_interpret_only,NULL},
-    {"CONST",5,prim_immediate_constant,prim_interpret_only,NULL},
-    {"CR",2,NULL,NULL,prim_body_c_r},
-    {"CREATE",6,prim_immediate_create,prim_interpret_only,NULL},
-    {"DEPTH",5,NULL,NULL,prim_body_depth},
-    {"DO",2,prim_compile_only,prim_compile_do,NULL},
-    {"DROP",4,NULL,NULL,prim_body_drop},
-    {"2DROP",5,NULL,NULL,prim_body_two_drop},
-    {"DUP",3,NULL,NULL,prim_body_dupe},
-    {"2DUP",4,NULL,NULL,prim_body_two_dupe},
-    {"ELSE",4,prim_compile_only,prim_compile_else,NULL},
-    {"EMIT",4,NULL,NULL,prim_body_emit},
-    {"ERASE",5,NULL,NULL,prim_body_erase},
-    {"EXECUTE",7,prim_immediate_execute,NULL,prim_body_execute},
-    {"EXEC",4,prim_immediate_execute,NULL,prim_body_execute},
-    {"EXIT",4,prim_compile_only,NULL,prim_hidden_done},
-    {"FILL",4,NULL,NULL,prim_body_fill},
-    {"HERE",4,NULL,NULL,prim_body_here},
-    {"I",1,prim_compile_only,prim_compile_i,NULL},
-    {"IF",2,prim_compile_only,prim_compile_if,NULL},
-    {"INVERT",6,NULL,NULL,prim_body_invert},
-    {"J",1,prim_compile_only,prim_compile_j,NULL},
-    {"KEY",3,NULL,NULL,prim_body_key},
-    {"LEAVE",5,prim_compile_only,prim_compile_leave,NULL},
-    {"LITERAL",7,prim_compile_only,prim_compile_literal,NULL},
-    {"LIT",3,prim_compile_only,prim_compile_literal,NULL},
-    {"LOOP",4,prim_compile_only,prim_compile_loop,NULL},
-    {"LSHIFT",6,NULL,NULL,prim_body_l_shift},
-    {"MAX",3,NULL,NULL,prim_body_max},
-    {"MIN",3,NULL,NULL,prim_body_min},
-    {"MOD",3,NULL,NULL,prim_body_mod},
-    {"MOVE",4,NULL,NULL,prim_body_move},
-    {"NEGATE",6,NULL,NULL,prim_body_negate},
-    {"OR",2,NULL,NULL,prim_body_or},
-    {"OVER",4,NULL,NULL,prim_body_over},
-    {"2OVER",5,NULL,NULL,prim_body_two_over},
-    {"PAGE",4,NULL,NULL,prim_body_page},
-    {"REPEAT",6,prim_compile_only,prim_compile_repeat,NULL},
-    {"ROT",3,NULL,NULL,prim_body_rote},
-    {"-ROT",4,NULL,NULL,prim_body_minus_rote},
-    {"RSHIFT",6,NULL,NULL,prim_body_r_shift},
-    {"S\"",2,prim_immediate_s_quote,prim_compile_s_quote,NULL},
-    {"SPACE",5,NULL,NULL,prim_body_space},
-    {"SPACES",6,NULL,NULL,prim_body_spaces},
-    {"SWAP",4,NULL,NULL,prim_body_swap},
-    {"2SWAP",5,NULL,NULL,prim_body_two_swap},
-    {"THEN",4,prim_compile_only,prim_compile_then,NULL},
-    {"TYPE",4,NULL,NULL,prim_body_type},
-    {"U<",2,NULL,NULL,prim_body_u_less_than},
-    {"U>",2,NULL,NULL,prim_body_u_greater_than},
-    {"UNTIL",5,prim_compile_only,prim_compile_until,NULL},
-    {"VARIABLE",8,prim_immediate_variable,prim_interpret_only,NULL},
-    {"VAR",3,prim_immediate_variable,prim_interpret_only,NULL},
-    {"WHILE",5,prim_compile_only,prim_compile_while,NULL},
-    {"XOR",3,NULL,NULL,prim_body_x_or},
-    {"[",1,prim_compile_only,prim_compile_left_bracket,NULL},
-    {"]",1,prim_immediate_right_bracket,prim_interpret_only,NULL},
-    {"[']",3,prim_compile_only,prim_compile_bracket_tick,NULL},
-    {"[CHAR]",6,prim_compile_only,prim_compile_bracket_char,NULL},
-    {".R",2,NULL,NULL,prim_body_dot_r},
-    {"U.R",3,NULL,NULL,prim_body_u_dot_r},
-    {"X.R",3,NULL,NULL,prim_body_x_dot_r},
-    {"<>",2,NULL,NULL,prim_body_not_equals},
-    {"AGAIN",5,prim_compile_only,prim_compile_again,NULL},
-    //{"CASE",4,prim_immediate_case,prim_compile_case,prim_body_case},
-    //{"ENDCASE",7,prim_immediate_endcase,prim_compile_endcase,prim_body_endcase},
-    //{"OF",2,prim_immediate_of,prim_compile_of,prim_body_of},
-    //{"ENDOF",5,prim_immediate_endof,prim_compile_endof,prim_body_endof},
-    {"FALSE",5,NULL,NULL,prim_body_false},
-    {"NIP",3,NULL,NULL,prim_body_nip},
-    {"S\\\"",3,prim_immediate_s_backslash_quote,prim_compile_s_backslash_quote,NULL},
-    {"TRUE",4,NULL,NULL,prim_body_true},
-    {"TUCK",4,NULL,NULL,prim_body_tuck},
-    {"UNUSED",6,NULL,NULL,prim_body_unused},
-    {"WITHIN",6,NULL,NULL,prim_body_within},
-    {".S",2,NULL,NULL,prim_body_dot_s},
-    {"?",1,NULL,NULL,prim_body_question},
-    {"DUMP",4,NULL,NULL,prim_body_dump},
+    {"!",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_store},
+    {"C!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_store},
+    {"W!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_store},
+    {"'",1,             FORTH_ACTION_TICK,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE},
+    {"(",1,             FORTH_ACTION_PAREN,             FORTH_ACTION_PAREN,             FORTH_ACTION_NONE},
+    {"*",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star},
+    {"*/",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star_slash},
+    {"*/MOD",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star_slash_mod},
+    {"+",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_plus},
+    {"+LOOP",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_PLUS_LOOP,         FORTH_ACTION_NONE},
+    {",",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_comma},
+    {"C,",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_comma},
+    {"W,",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_comma},
+    {"-",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_minus},
+    {"\\",1,            FORTH_ACTION_COMMENT,           FORTH_ACTION_COMMENT,           FORTH_ACTION_NONE},
+    {".",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot},
+    {"U.",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_dot},
+    {"X.",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_dot},
+    {".\"",2,           FORTH_ACTION_DOT_QUOTE,         FORTH_ACTION_DOT_QUOTE,         FORTH_ACTION_NONE},
+    {"/",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_slash},
+    {"/MOD",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_slash_mod},
+    {":",1,             FORTH_ACTION_COLON,             FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {";",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_SEMICOLON,         FORTH_ACTION_NONE},
+    {"<",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_less_than},
+    {"=",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_equals},
+    {">",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_greater_than},
+    {">NUMBER",7,       FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_to_number},
+    {">NUM",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_to_number},
+    {"NUMBER>",7,       FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_number_to},
+    {"NUM>",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_number_to},
+    {">HEX",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_to_hex},
+    {"HEX>",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hex_to},
+    {"?DUP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_question_dupe},
+    {"@",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_fetch},
+    {"C@",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_fetch},
+    {"W@",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_fetch},
+    {"QUIT",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_NONE,              prim_quit},
+    {"ABS",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_abs},
+    {"ACCEPT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_accept},
+    {"ALIGN",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_align},
+    {"ALIGNED",7,       FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_aligned},
+    {"ALLOT",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_allot},
+    {"AND",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_and},
+    {"BEGIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BEGIN,             FORTH_ACTION_NONE},
+    {"BL",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_b_l},
+    {"BOUNDS",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              primb_bounds},
+    {"CELLS",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_cells},
+    {"CHAR",4,          FORTH_ACTION_CHAR,              FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"CONSTANT",8,      FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"CONST",5,         FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"CR",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_r},
+    {"CREATE",6,        FORTH_ACTION_CREATE,            FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"DEPTH",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_depth},
+    {"DO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_DO,                FORTH_ACTION_NONE},
+    {"DROP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_drop},
+    {"2DROP",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_drop},
+    {"DUP",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dupe},
+    {"2DUP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_dupe},
+    {"ELSE",4,F         FORTH_ACTION_NONE,              FORTH_ACTION_ELSE,              FORTH_ACTION_NONE},
+    {"EMIT",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_emit},
+    {"ERASE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_erase},
+    {"EXECUTE",7,       FORTH_ACTION_EXECUTE,           FORTH_ACTION_NONE,              prim_execute},
+    {"EXEC",4,          FORTH_ACTION_EXECUTE,           FORTH_ACTION_NONE,              prim_execute},
+    {"EXIT",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_NONE,              prim_hidden_done},
+    {"FILL",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_fill},
+    {"HERE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_here},
+    {"I",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_I,                 FORTH_ACTION_NONE},
+    {"IF",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_IF,                FORTH_ACTION_NONE},
+    {"INVERT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_invert},
+    {"J",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_J,                 FORTH_ACTION_NONE},
+    {"KEY",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_key},
+    {"LEAVE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEAVE,             FORTH_ACTION_NONE},
+    {"LITERAL",7,       FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           FORTH_ACTION_NONE},
+    {"LIT",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           FORTH_ACTION_NONE},
+    {"LOOP",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOOP,              FORTH_ACTION_NONE},
+    {"LSHIFT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_l_shift},
+    {"MAX",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_max},
+    {"MIN",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_min},
+    {"MOD",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_mod},
+    {"MOVE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_move},
+    {"NEGATE",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_negate},
+    {"OR",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_or},
+    {"OVER",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_over},
+    {"2OVER",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_over},
+    {"PAGE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_page},
+    {"REPEAT",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_REPEAT,            FORTH_ACTION_NONE},
+    {"ROT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_rote},
+    {"-ROT",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_minus_rote},
+    {"RSHIFT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_r_shift},
+    {"S\"",2,           FORTH_ACTION_S_QUOTE,           FORTH_ACTION_S_QUOTE,           FORTH_ACTION_NONE},
+    {"SPACE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_space},
+    {"SPACES",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_spaces},
+    {"SWAP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_swap},
+    {"2SWAP",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_swap},
+    {"THEN",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_THEN,              FORTH_ACTION_NONE},
+    {"TYPE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_type},
+    {"U<",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_less_than},
+    {"U>",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_greater_than},
+    {"UNTIL",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_UNTIL,             FORTH_ACTION_NONE},
+    {"VARIABLE",8,      FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"VAR",3,           FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"WHILE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_WHILE,             FORTH_ACTION_NONE},
+    {"XOR",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_or},
+    {"[",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEFT_BRACKET,      FORTH_ACTION_NONE},
+    {"]",1,             FORTH_ACTION_RIGHT_BRACKET,     FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"[']",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_TICK,      FORTH_ACTION_NONE},
+    {"[CHAR]",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_CHAR,      FORTH_ACTION_NONE},
+    {".R",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot_r},
+    {"U.R",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_dot_r},
+    {"X.R",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_dot_r},
+    {"<>",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_not_equals},
+    {"AGAIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_AGAIN,             FORTH_ACTION_NONE},
+    //{"CASE",4,prim_immediate_case,prim_compile_case,prim_case},
+    //{"ENDCASE",7,prim_immediate_endcase,prim_compile_endcase,prim_endcase},
+    //{"OF",2,prim_immediate_of,prim_compile_of,prim_of},
+    //{"ENDOF",5,prim_immediate_endof,prim_compile_endof,prim_endof},
+    {"FALSE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_false},
+    {"NIP",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_nip},
+    {"S\\\"",3,         FORTH_ACTION_S_BACKSLASH_QUOTE, FORTH_ACTION_S_BACKSLASH_QUOTE, FORTH_ACTION_NONE},
+    {"TRUE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_true},
+    {"TUCK",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_tuck},
+    {"UNUSED",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_unused},
+    {"WITHIN",          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_within},
+    {".S",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot_s},
+    {"?",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_question},
+    {"DUMP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dump},
     //{"SEE",3,prim_immediate_see,prim_compile_see,prim_body_see,prim_optimize_see},
-    {"WORDS",5,prim_immediate_words,prim_interpret_only,NULL},
-    {"WORDSIZE",8,prim_immediate_wordsize,prim_interpret_only,NULL},
-    {"BYE",3,NULL,NULL,prim_body_bye},
-    {"{",1,prim_compile_only,prim_compile_locals,NULL},
-    {"0{",2,prim_compile_only,prim_compile_locals_0,NULL},
-    {"TO",2,prim_compile_only,prim_compile_to,NULL},
+    {"WORDS",5,         FORTH_ACTION_WORDS,             FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"WORDSIZE",8,      FORTH_ACTION_WORDSIZE,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"BYE",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_bye},
+    {"{",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS,            FORTH_ACTION_NONE},
+    {"0{",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS_0,          FORTH_ACTION_NONE},
+    {"TO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_TO,                FORTH_ACTION_NONE},
     
     //Words from here are not standard forth
-    {"RESET",5,NULL,NULL,prim_body_reset},
-    {"WALIGN",6,NULL,NULL,prim_body_walign},
-    {"WALIGNED",8,NULL,NULL,prim_body_waligned},
-    {"PRINTABLE",9,NULL,NULL,prim_body_printable},
-    {"CXT",3,NULL,NULL,prim_body_cxt},
-    {"WXT",3,NULL,NULL,prim_body_wxt},
-    {"PRIMITIVES",10,prim_immediate_primitives,prim_interpret_only,NULL},
-    {"SECONDARIES",11,prim_immediate_secondaries,prim_interpret_only,NULL},
-    {"UNDEFINED",9,prim_immediate_undefined,prim_interpret_only,NULL},
-    {"PERF",4,NULL,NULL,prim_body_perf},
-    {"SIZE",4,NULL,NULL,prim_body_size},
-    {"RESIZE",6,prim_immediate_resize,prim_interpret_only,NULL},
+    {"RESET",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_reset},
+    {"WALIGN",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_walign},
+    {"WALIGNED",8,      FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_waligned},
+    {"PRINTABLE",9,     FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_printable},
+    {"CXT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_cxt},
+    {"WXT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_wxt},
+    {"PRIMITIVES",10,   FORTH_ACTION_PRIMITIVES,        FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"SECONDARIES",11,  FORTH_ACTION_SECONDARIES,       FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"UNDEFINED",9,     FORTH_ACTION_UNDEFINED,         FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
+    {"PERF",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_perf},
+    {"SIZE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_size},
+    {"RESIZE",6,        FORTH_ACTION_RESIZE,            FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
 
     //Word browser showing source or disassembly of all words
     //DEBUG that steps through word
