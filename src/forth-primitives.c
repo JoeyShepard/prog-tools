@@ -2050,7 +2050,6 @@ int prim_immediate_s_quote(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_S_QUOTE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-
 int prim_compile_s_quote(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2144,6 +2143,7 @@ int prim_compile_then(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_THEN;
     return FORTH_ENGINE_ERROR_NONE;
 }
+
 //TYPE
 void prim_body_type(struct ForthEngine *engine)
 {
@@ -2462,7 +2462,6 @@ int prim_immediate_s_backslash_quote(struct ForthEngine *engine)
     engine->word_action=FORTH_ACTION_S_BACKSLASH_QUOTE;
     return FORTH_ENGINE_ERROR_NONE;
 }
-
 int prim_compile_s_backslash_quote(struct ForthEngine *engine)
 {
     //Request outer interpreter perform function so no platform specific code in this file
@@ -2711,7 +2710,6 @@ void prim_body_bye(struct ForthEngine *engine)
     engine->exit_program=true;
     engine->executing=false;
 }
-
 
 //LOCALS
 int prim_compile_locals(struct ForthEngine *engine)

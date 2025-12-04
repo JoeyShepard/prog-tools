@@ -35,6 +35,12 @@
 
 - move actions to array for primitives?
   - are there actually any prim_compile_ functions that do anything other than return action?
+  - immediate_right_bracket has a few lines
+  - compile_left_bracket sets flag and changes state
+
+- need opt on and off for testing
+
+- color code )
 
 - try blue for primitives
   - color by primitive type too?
@@ -355,7 +361,7 @@ int main(void)                      //cg50 and PC
     dgetvram(&vram_main,&vram_buffer);
 
     //TODO: remove
-    jit_test();
+    //jit_test();
 
     //Initialize heap memory
     init_heap();
