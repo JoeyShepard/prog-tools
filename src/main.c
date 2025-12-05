@@ -17,12 +17,13 @@
   - INV for INVERT
 - add >= and <=
 
+- EXECUTE
+  - disabled EXEC in EXEC bc circular stack but enabled now that stack no longer circular
+
 - insert checks after the fact for stack
   - at the top of each if block etc
   - possible to eliminate for do loop if no branch or secondary inside?
     - could keep track of whether each block or word is clean but then cant redefine
-  - CONST really should be unredefinable then easier to optimize
-  - could treat vars etc as const then go back and fix if reassigned? lots of work
 
 - improve memory system
   - need to add lots of different mem types so better to have list of mem segments
@@ -32,13 +33,6 @@
   - store names after word for debugger and browser
 
 - typedef for function pointers
-
-- move actions to array for primitives?
-  - are there actually any prim_compile_ functions that do anything other than return action?
-  - TODO:
-    - immediate_right_bracket has a few lines
-    - compile_left_bracket sets flag and changes state
-    - prim_immediate_execute is exposed externally - why? just returns action like all other immediates
 
 - need opt on and off for testing
 

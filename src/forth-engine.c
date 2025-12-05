@@ -3,6 +3,7 @@
 //TODO: remove
 #include <stdio.h>
 
+#include "forth-action-list.h"
 #include "forth-engine.h"
 #include "logging.h"
 #include "structs.h"

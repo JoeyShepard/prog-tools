@@ -4,6 +4,7 @@
 
 #include "error.h"
 #include "forth.h"
+#include "forth-action-list.h"
 #include "forth-engine.h"
 #include "forth-locals.h"
 #include "forth-process.h"
@@ -1814,3 +1815,235 @@ int action_wordsize(struct ForthEngine *engine,const char *source,uint32_t *star
     }
 }
 
+int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile)
+{
+    int result=FORTH_ERROR_NONE;
+    switch (action)
+    {
+        case FORTH_ACTION_AGAIN:
+            result=action_again(compile);
+            break;
+        case FORTH_ACTION_BEGIN:
+            result=action_begin(compile);
+            break;
+        case FORTH_ACTION_BRACKET_CHAR:
+        {
+            //Find value of first character in next word
+            int32_t index;
+            result=action_char_common(source,start,&index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Write code to push value to stack
+            result=write_definition_primitive(&prim_hidden_push,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            result=write_definition_i32(index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            break;
+        }
+        case FORTH_ACTION_BRACKET_TICK:
+        {
+            //Find ID or primitive and secondary if it exists
+            uint32_t index;
+            result=action_tick_common(source,start,&index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Write code to push value to stack
+            if (result!=FORTH_ERROR_NONE) return result;
+            result=write_definition_primitive(&prim_hidden_push,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            result=write_definition_i32(index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            break;
+        }
+        case FORTH_ACTION_CHAR:
+            int32_t index;
+            result=action_char_common(source,start,&index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            forth_push(engine,index);
+            break;
+        case FORTH_ACTION_COLON:
+            result=action_colon(engine,source,start,compile);
+            break;
+        case FORTH_ACTION_COMMENT:
+            action_comment(source,start);
+            break;
+        case FORTH_ACTION_CONSTANT:
+            result=action_constant(engine,source,start,compile);
+            break;
+        case FORTH_ACTION_CREATE:
+            result=action_create(engine,source,start,compile);
+            break;
+        case FORTH_ACTION_DO:
+            result=action_do(compile);
+            break;
+        case FORTH_ACTION_DOT_QUOTE:
+            if (compile_mode==true)
+            {
+                //Write primitive that reads and prints characters
+                result=write_definition_primitive(&prim_hidden_dot_quote,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+
+                //Write characters to definition
+                result=action_quote_common(engine,source,start,false,true,compile);
+            }
+            else
+            {
+                result=action_dot_quote_interpret(engine,source,start,compile);
+            }
+            break;
+        case FORTH_ACTION_ELSE:
+            result=action_else(compile);
+            break;
+        case FORTH_ACTION_I:
+            result=action_i(compile);
+            break;
+        case FORTH_ACTION_IF:
+            result=action_if(compile);
+            break;
+        case FORTH_ACTION_J:
+            result=action_j(compile);
+            break;
+        case FORTH_ACTION_LEAVE:
+            result=action_leave(compile);
+            break;
+        case FORTH_ACTION_LEFT_BRACKET:
+            engine->state=FORTH_STATE_INTERPRET;
+            engine->in_bracket=true;
+            break;
+        case FORTH_ACTION_LITERAL:
+        {
+            result=write_definition_primitive(&prim_hidden_push,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            result=write_definition_i32(forth_pop(engine),compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+            break;
+        }
+        case FORTH_ACTION_LOCALS:
+            result=action_locals(source,start,false,compile);
+            break;
+        case FORTH_ACTION_LOCALS_0:
+            result=action_locals(source,start,true,compile);
+            break;
+        case FORTH_ACTION_LOOP:
+            result=action_loop(compile);
+            break;
+        case FORTH_ACTION_PAREN:
+            action_paren(source,start);
+            break;
+        case FORTH_ACTION_PLUS_LOOP:
+            result=action_plus_loop(compile);
+            break;
+        case FORTH_ACTION_PRIMITIVES:
+        {
+            bool first_word=true;
+            int line_characters=0;
+            action_primitives(engine,&first_word,&line_characters,true);
+            break;
+        }
+        case FORTH_ACTION_REPEAT:
+            result=action_repeat(compile);
+            break;
+        case FORTH_ACTION_RESIZE:
+            result=action_resize(engine,compile);
+            break;
+        case FORTH_ACTION_RIGHT_BRACKET:
+            if (engine->in_bracket==false) 
+            {
+                //No matching opening [
+                return FORTH_ERROR_RIGHT_BRACKET;
+            }
+            else
+            {
+                engine->state=FORTH_STATE_COMPILE;
+                return FORTH_ERROR_NONE;
+            }
+            break;
+        case FORTH_ACTION_S_BACKSLASH_QUOTE:
+            if (compile_mode==true)
+            {
+                //Write primitive that reads and prints characters
+                result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+
+                //Write characters to definition
+                result=action_quote_common(engine,source,start,true,true,compile);
+            }
+            else
+            {
+                result=action_quote_common(engine,source,start,true,false,compile);
+            }
+            break;
+        case FORTH_ACTION_S_QUOTE:
+            if (compile_mode==true)
+            {
+                //Write primitive that reads and prints characters
+                result=write_definition_primitive(&prim_hidden_s_quote,compile);
+                if (result!=FORTH_ERROR_NONE) return result;
+
+                //Write characters to definition
+                result=action_quote_common(engine,source,start,false,true,compile);
+            }
+            else
+            {
+                result=action_quote_common(engine,source,start,false,false,compile);
+            }
+            break;
+        case FORTH_ACTION_SECONDARIES:
+        {
+            bool first_word=true;
+            int line_characters=0;
+            action_secondaries(engine,&first_word,&line_characters,true,true,compile);
+            break;
+        }
+        case FORTH_ACTION_SEMICOLON:
+            result=action_semicolon(engine,compile);
+            break;
+        case FORTH_ACTION_THEN:
+            result=action_then(compile);
+            break;
+        case FORTH_ACTION_TICK:
+        {
+            //Find ID or primitive and secondary if it exists
+            uint32_t index;
+            int result=action_tick_common(source,start,&index,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+
+            //Push tick ID of word to stack
+            forth_push(engine,index);
+            break;
+        }
+        case FORTH_ACTION_TO:
+            result=action_to(source,start,compile);
+            break;
+        case FORTH_ACTION_UNDEFINED:
+        {
+            bool first_word=true;
+            int line_characters=0;
+            action_secondaries(engine,&first_word,&line_characters,false,true,compile);
+            break;
+        }
+        case FORTH_ACTION_UNTIL:
+            result=action_until(compile);
+            break;
+        case FORTH_ACTION_VARIABLE:
+            result=action_variable(engine,source,start,compile);
+            break;
+        case FORTH_ACTION_WHILE:
+            result=action_while(compile);
+            break;
+        case FORTH_ACTION_WORDS:
+        {
+            bool first_word=true;
+            int line_characters=0;
+            action_primitives(engine,&first_word,&line_characters,false);
+            action_secondaries(engine,&first_word,&line_characters,true,false,compile);
+            action_secondaries(engine,&first_word,&line_characters,false,true,compile);
+            break;
+        }
+        case FORTH_ACTION_WORDSIZE:
+            result=action_wordsize(engine,source,start,compile);
+            break;
+    }
+
+    return result;
+}

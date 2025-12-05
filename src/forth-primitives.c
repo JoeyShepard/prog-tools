@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "compatibility.h"
-#include "forth-actions.h" 
+#include "forth-action-list.h" 
 #include "forth-primitives.h"
 #include "logging.h"
 #include "macros.h"
@@ -349,6 +349,7 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
     log_pop();
 }
 
+//TODO: IMPORTANT - any changes here also apply to inlined copy in prim_exec!
 //Call secondary which may be user-defined word or variable
 void prim_hidden_secondary(struct ForthEngine *engine)
 {
@@ -803,6 +804,10 @@ void prim_greater_than(struct ForthEngine *engine)
 
 //TO_NUMBER - Note differs from >NUMBER in standard!
 //(c-addr1 u1 - s2 c-addr2 u2) - no doubles or scratch space
+    //c-addr1 u1 - string to convert
+    //s2 - int result
+    //c-addr2 - first character not converted (or past end if converted all)
+    //u2 - number of unconverted characters
 void prim_to_number(struct ForthEngine *engine)
 {
     //Fetch values from stack
@@ -1396,13 +1401,6 @@ void prim_emit(struct ForthEngine *engine)
 }
 
 //EXECUTE
-//TODO: needs to be exposed externally - how to handle?
-int prim_immediate_execute(struct ForthEngine *engine)
-{
-    //Request outer interpreter perform function so no platform specific code in this file
-    engine->word_action=FORTH_ACTION_EXECUTE;
-    return FORTH_ENGINE_ERROR_NONE;
-}
 void prim_execute(struct ForthEngine *engine)
 {
     //Update stack pointer
@@ -1418,21 +1416,13 @@ void prim_execute(struct ForthEngine *engine)
         void (*body_func)(struct ForthEngine *engine)=forth_primitives[word_ID].body;
         if (body_func!=NULL)
         {
-            if (body_func==&prim_body_execute)
-            {
-                //Error - can't execute EXECUTE from EXECUTE
-                engine->error=FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE;
-                engine->executing=false;
-            }
-            else
-            {
-                //Primitive has body - ok to execute
-                body_func(engine);
-            }
+            //TODO: EXEC chain will take stack space! TCO?
+            //Primitive has body - ok to execute
+            body_func(engine);
         }
         else
         {
-            //Error - no body present for primitive so only has interpret and compile behavior
+            //Error - no body present for primitive so only has immediate and/or compile behavior
             engine->error=FORTH_ENGINE_ERROR_EXECUTE_NO_BODY;
             engine->error_word=forth_primitives[word_ID].name;
             engine->executing=false;
@@ -2026,32 +2016,6 @@ void prim_x_or(struct ForthEngine *engine)
     *(int32_t*)((engine->stack_base)|lower)=arg1^arg2;
 }
 
-//TODO: delete after creating ACTION
-/*
-//LEFT_BRACKET
-int prim_compile_left_bracket(struct ForthEngine *engine)
-{
-    engine->state=FORTH_STATE_INTERPRET;
-    engine->in_bracket=true;
-    return FORTH_ENGINE_ERROR_NONE;
-}
-
-//RIGHT_BRACKET
-int prim_immediate_right_bracket(struct ForthEngine *engine)
-{
-    if (engine->in_bracket==false) 
-    {
-        //No matching opening [
-        return FORTH_ENGINE_ERROR_RIGHT_BRACKET;
-    }
-    else
-    {
-        engine->state=FORTH_STATE_COMPILE;
-        return FORTH_ENGINE_ERROR_NONE;
-    }
-}
-*/
-
 //DOT_R
 void prim_dot_r(struct ForthEngine *engine)
 {
@@ -2544,14 +2508,9 @@ void prim_size(struct ForthEngine *engine)
     engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
-START HERE
-- need to change forth_process to match this
-- move ACTION switch to forth-action and out of forth-process
-- address multiple issues: execute, commented out code above with no action assigned
-- see main.c
-
 //Globals
 //=======
+//TODO: alphabetic order
 const struct ForthPrimitive forth_primitives[]=
 {
     {"!",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_store},
@@ -2599,7 +2558,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"AND",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_and},
     {"BEGIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BEGIN,             FORTH_ACTION_NONE},
     {"BL",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_b_l},
-    {"BOUNDS",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              primb_bounds},
+    {"BOUNDS",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_bounds},
     {"CELLS",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_cells},
     {"CHAR",4,          FORTH_ACTION_CHAR,              FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
     {"CONSTANT",8,      FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    FORTH_ACTION_NONE},
@@ -2612,7 +2571,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"2DROP",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_drop},
     {"DUP",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dupe},
     {"2DUP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_dupe},
-    {"ELSE",4,F         FORTH_ACTION_NONE,              FORTH_ACTION_ELSE,              FORTH_ACTION_NONE},
+    {"ELSE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_ELSE,              FORTH_ACTION_NONE},
     {"EMIT",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_emit},
     {"ERASE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_erase},
     {"EXECUTE",7,       FORTH_ACTION_EXECUTE,           FORTH_ACTION_NONE,              prim_execute},
@@ -2637,7 +2596,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"NEGATE",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_negate},
     {"OR",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_or},
     {"OVER",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_over},
-    {"2OVER",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_over},
+    {"2OVER",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_over},
     {"PAGE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_page},
     {"REPEAT",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_REPEAT,            FORTH_ACTION_NONE},
     {"ROT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_rote},
@@ -2676,7 +2635,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"TRUE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_true},
     {"TUCK",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_tuck},
     {"UNUSED",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_unused},
-    {"WITHIN",          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_within},
+    {"WITHIN",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_within},
     {".S",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot_s},
     {"?",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_question},
     {"DUMP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dump},

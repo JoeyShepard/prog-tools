@@ -312,6 +312,21 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_NONE:
             //No error - nothing to do
             break;
+        case FORTH_ERROR_COMPILE_ONLY:
+        case FORTH_ERROR_INTERPRET_ONLY:
+        {
+            if (process_result==FORTH_ERROR_INTERPRET_ONLY)
+                console_text_default("Word is interpret only: ",console);
+            else if (process_result==FORTH_ERROR_COMPILE_ONLY)
+                console_text_default("Word is compile only: ",console);
+            //All of these errors share code for printing out word that caused error
+            uint32_t start=0;
+            uint32_t word_len=next_word_source(compile->error_word,&start);
+            for (uint32_t i=0;i<word_len;i++)
+                console_char_default(compile->error_word[i],console);
+            console_text_default("\n",console);
+            break;
+        }
         case FORTH_ERROR_HEX32_RANGE:
         case FORTH_ERROR_INT32_RANGE:
         case FORTH_ERROR_INVALID_NAME:
@@ -321,6 +336,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_NOT_BETWEEN_BRACKETS:
         case FORTH_ERROR_NOT_FOUND:
         case FORTH_ERROR_TOO_LONG:
+        {
             //All of these errors share code for printing out word that caused error
             if (process_result==FORTH_ERROR_HEX32_RANGE)
                 console_text_default("Hex number out of range: ",console);
@@ -349,6 +365,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
                 console_char_default(compile->error_word[i+start],console);
             console_text_default("\n",console);
             break;
+        }
         case FORTH_ERROR_AGAIN_WITHOUT_BEGIN:
             console_text_default("AGAIN without matching BEGIN\n",console);
             break;
@@ -363,9 +380,6 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             console_text_default("Invalid ID for EXECUTE: ",console);
             console_text_default(engine->error_num,console);
             console_text_default("\n",console);
-            break;
-        case FORTH_ERROR_EXECUTE_IN_EXECUTE:
-            console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
             break;
         case FORTH_ERROR_INSUFFICIENT_MEMORY:
             console_text_default("Insufficient memory to resize to ",console);
@@ -409,6 +423,9 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             console_text_default("Memory size is not power of two: ",console);
             console_text_default(engine->error_num,console);
             console_text_default("\n",console);
+            break;
+        case FORTH_ERROR_RIGHT_BRACKET:
+            console_text_default("Word must occur in definition: ]\n",console);
             break;
         case FORTH_ERROR_THEN_WITHOUT_IF:
             console_text_default("THEN without matching IF\n",console);
@@ -463,26 +480,10 @@ static void output_error_engine(struct ForthInfo *forth,struct ForthCompileInfo 
             //Should never happen but just in case
             console_text_default("Engine error but code not set\n",console);
             break;
-        case FORTH_ENGINE_ERROR_COMPILE_ONLY:
-        case FORTH_ENGINE_ERROR_INTERPRET_ONLY:
-            if (forth->engine->error==FORTH_ENGINE_ERROR_INTERPRET_ONLY)
-                console_text_default("Word is interpret only: ",console);
-            else if (forth->engine->error==FORTH_ENGINE_ERROR_COMPILE_ONLY)
-                console_text_default("Word is compile only: ",console);
-            //All of these errors share code for printing out word that caused error
-            uint32_t start=0;
-            uint32_t word_len=next_word_source(compile->error_word,&start);
-            for (uint32_t i=0;i<word_len;i++)
-                console_char_default(compile->error_word[i],console);
-            console_text_default("\n",console);
-            break;
         case FORTH_ENGINE_ERROR_EXECUTE_ID:
             console_text_default("Invalid ID for EXECUTE: ",console);
             console_text_default(forth->engine->error_num,console);
             console_text_default("\n",console);
-            break;
-        case FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE:
-            console_text_default("EXECUTE cannot execute another EXECUTE\n",console);
             break;
         case FORTH_ENGINE_ERROR_EXECUTE_NO_BODY:
             console_text_default("Word has no run-time behavior for EXECUTE: ",console);
@@ -501,9 +502,6 @@ static void output_error_engine(struct ForthInfo *forth,struct ForthCompileInfo 
             break;
         case FORTH_ENGINE_ERROR_LOCAL_STACK_FULL:
             console_text_default("Break - out of local stack space\n",console);
-            break;
-        case FORTH_ENGINE_ERROR_RIGHT_BRACKET:
-            console_text_default("Word must occur in definition: ]\n",console);
             break;
         case FORTH_ENGINE_ERROR_RSTACK_FULL:
             console_text_default("Break - out of return stack space\n",console);

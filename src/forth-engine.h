@@ -44,70 +44,14 @@
     //Max number of digits to include in error message about number out of range
     #define ERROR_INT32_SIZE        12  //max 10 digits, 1 for - sign, 1 for terminator 
     
-    //Actions for outer interpreter to perform
-    enum ForthActions
-    {
-        FORTH_ACTION_NONE,
-        FORTH_ACTION_COMPILE_ONLY,
-        FORTH_ACTION_INTERPRET_ONLY,
-        FORTH_ACTION_AGAIN,
-        FORTH_ACTION_BEGIN,
-        FORTH_ACTION_BRACKET_CHAR,
-        FORTH_ACTION_BRACKET_TICK,
-        FORTH_ACTION_CASE,
-        FORTH_ACTION_CHAR,
-        FORTH_ACTION_COLON,
-        FORTH_ACTION_COMMENT,
-        FORTH_ACTION_CONSTANT,
-        FORTH_ACTION_CREATE,
-        FORTH_ACTION_DO,
-        FORTH_ACTION_DOT_QUOTE,
-        FORTH_ACTION_ELSE,
-        FORTH_ACTION_END,
-        FORTH_ACTION_ENDCASE,
-        FORTH_ACTION_ENDOF,
-        FORTH_ACTION_EXECUTE,
-        FORTH_ACTION_I,
-        FORTH_ACTION_IF,
-        FORTH_ACTION_J,
-        FORTH_ACTION_LEAVE,
-        FORTH_ACTION_LITERAL,
-        FORTH_ACTION_LOCALS,
-        FORTH_ACTION_LOCALS_0,
-        FORTH_ACTION_LOOP,
-        FORTH_ACTION_OF,
-        FORTH_ACTION_PAREN,
-        FORTH_ACTION_PLUS_LOOP,
-        FORTH_ACTION_PRIMITIVES,
-        FORTH_ACTION_REPEAT,
-        FORTH_ACTION_RESIZE,
-        FORTH_ACTION_S_QUOTE,
-        FORTH_ACTION_S_BACKSLASH_QUOTE,
-        FORTH_ACTION_SECONDARIES,
-        FORTH_ACTION_SEMICOLON,
-        FORTH_ACTION_THEN,
-        FORTH_ACTION_TICK,
-        FORTH_ACTION_TO,
-        FORTH_ACTION_UNDEFINED,
-        FORTH_ACTION_UNTIL,
-        FORTH_ACTION_VARIABLE,
-        FORTH_ACTION_WHILE,
-        FORTH_ACTION_WORDS,
-        FORTH_ACTION_WORDSIZE,
-    };
-
     enum ForthEngineErrors
     {
         FORTH_ENGINE_ERROR_NONE,
-        FORTH_ENGINE_ERROR_COMPILE_ONLY,
         FORTH_ENGINE_ERROR_EXECUTE_ID,
-        FORTH_ENGINE_ERROR_EXECUTE_IN_EXECUTE,
         FORTH_ENGINE_ERROR_EXECUTE_NO_BODY,
         FORTH_ENGINE_ERROR_INT32_RANGE,
         FORTH_ENGINE_ERROR_HEX32_RANGE,
-        FORTH_ENGINE_ERROR_INTERPRET_ONLY,
         FORTH_ENGINE_ERROR_LOCAL_STACK_FULL,
-        FORTH_ENGINE_ERROR_RIGHT_BRACKET,
         FORTH_ENGINE_ERROR_RSTACK_FULL,
         FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
         FORTH_ENGINE_ERROR_UNDEFINED,
@@ -239,7 +183,6 @@
         uint8_t type;                       //User-defined word, variable, constant, etc
         bool last;                          //Whether this header is empty header marking end of list
         bool done;                          //Whether word is done being processed. Used to rewind if error in word.
-        
     };
 
 

@@ -5,6 +5,7 @@
 
 #include "error.h"
 #include "forth.h"
+#include "forth-action-list.h"
 #include "forth-actions.h"
 #include "forth-locals.h"
 #include "forth-primitives.h"
@@ -775,7 +776,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 //Interpret mode
                 if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
-                    if (forth_primitives[compile->primitive_ID].immediate==&prim_immediate_execute)
+                    if (forth_primitives[compile->primitive_ID].immediate_action==FORTH_ACTION_EXECUTE)
                     {
                         //Special handling for EXECUTE to reuse word processing below
                         int result=action_execute(engine,&word_type,compile);
@@ -792,118 +793,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {
                     //Primitive - execute
-                    int (*immediate_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].immediate;
-                    if (immediate_func!=NULL)
-                    {
-                        //Primitive has special immediate behavior
-                        forth_engine_pre_exec(engine);
-                        int result=immediate_func(engine);
-                        if (result!=FORTH_ENGINE_ERROR_NONE)
-                        {
-                            //Error in word
-                            engine->error=result;
-
-                            //Set pointer to word in source in case used in error message
-                            compile->error_word=source+start-compile->word_len;
-                            return FORTH_ERROR_ENGINE;
-                        }
-
-                        //Process outer interpreter action requested by word if present
-                        //This keeps platform specific code out of primitives for portability
-                        result=FORTH_ERROR_NONE;
-                        switch (engine->word_action)
-                        {
-                            case FORTH_ACTION_CHAR:
-                                int32_t index;
-                                result=action_char_common(source,&start,&index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                forth_push(engine,index);
-                                break;
-                            case FORTH_ACTION_COLON:
-                                result=action_colon(engine,source,&start,compile);
-                                break;
-                            case FORTH_ACTION_COMMENT:
-                                action_comment(source,&start);
-                                break;
-                            case FORTH_ACTION_CONSTANT:
-                                result=action_constant(engine,source,&start,compile);
-                                break;
-                            case FORTH_ACTION_CREATE:
-                                result=action_create(engine,source,&start,compile);
-                                break;
-                            case FORTH_ACTION_DOT_QUOTE:
-                                result=action_dot_quote_interpret(engine,source,&start,compile);
-                                break;
-                            case FORTH_ACTION_EXECUTE:
-                                //EXECUTE executing another EXECUTE not allowed in immediate mode
-                                //(no way to break processing with ON key and circular stack could hang)
-                                return FORTH_ERROR_EXECUTE_IN_EXECUTE;
-                                break;
-                            case FORTH_ACTION_PAREN:
-                                action_paren(source,&start);
-                                break;
-                            case FORTH_ACTION_PRIMITIVES:
-                            {
-                                bool first_word=true;
-                                int line_characters=0;
-                                action_primitives(engine,&first_word,&line_characters,true);
-                                break;
-                            }
-                            case FORTH_ACTION_RESIZE:
-                                result=action_resize(engine,compile);
-                                break;
-                            case FORTH_ACTION_S_BACKSLASH_QUOTE:
-                                result=action_quote_common(engine,source,&start,true,false,compile);
-                                break;
-                            case FORTH_ACTION_S_QUOTE:
-                                result=action_quote_common(engine,source,&start,false,false,compile);
-                                break;
-                            case FORTH_ACTION_SECONDARIES:
-                            {
-                                bool first_word=true;
-                                int line_characters=0;
-                                action_secondaries(engine,&first_word,&line_characters,true,true,compile);
-                                break;
-                            }
-                            case FORTH_ACTION_TICK:
-                            {
-                                //Find ID or primitive and secondary if it exists
-                                uint32_t index;
-                                int result=action_tick_common(source,&start,&index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Push tick ID of word to stack
-                                forth_push(engine,index);
-                                break;
-                            }
-                            case FORTH_ACTION_UNDEFINED:
-                            {
-                                bool first_word=true;
-                                int line_characters=0;
-                                action_secondaries(engine,&first_word,&line_characters,false,true,compile);
-                                break;
-                            }
-                            case FORTH_ACTION_VARIABLE:
-                                result=action_variable(engine,source,&start,compile);
-                                break;
-                            case FORTH_ACTION_WORDS:
-                            {
-                                bool first_word=true;
-                                int line_characters=0;
-                                action_primitives(engine,&first_word,&line_characters,false);
-                                action_secondaries(engine,&first_word,&line_characters,true,false,compile);
-                                action_secondaries(engine,&first_word,&line_characters,false,true,compile);
-                                break;
-                            }
-                            case FORTH_ACTION_WORDSIZE:
-                                result=action_wordsize(engine,source,&start,compile);
-                                break;
-                        }
-
-                        //Some actions above may set error code requiring halt to processing
-                        if (result!=FORTH_ERROR_NONE) return result;
-                    }
-                    else
+                    int immediate_action=forth_primitives[compile->primitive_ID].immediate_action;
+                    if (immediate_action==FORTH_ACTION_NONE)
                     {
                         //No special immediate behavior - execute primitive body
                         void (*body_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].body;
@@ -917,6 +808,24 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                 return FORTH_ERROR_ENGINE;
                             }
                         }
+                    }
+                    else if (immediate_action==FORTH_ACTION_COMPILE_ONLY)
+                    {
+                        //Error - word is compile only
+                        engine->error=FORTH_ERROR_COMPILE_ONLY;
+
+                        //Set pointer to word in source for error message
+                        compile->error_word=source+start-compile->word_len;
+                        return FORTH_ERROR_ENGINE;
+                    }
+                    else
+                    {
+                        //Process outer interpreter action requested by word if present
+                        //This keeps platform specific code out of primitives for portability
+                        int result=handle_action(immediate_action,false,engine,source,&start,compile);
+
+                        //Some actions above may set error code requiring halt to processing
+                        if (result!=FORTH_ERROR_NONE) return result;
                     }
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
@@ -970,167 +879,32 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     log_text("name: %s\n",forth_primitives[compile->primitive_ID].name);
                     
                     //Primitive - compile
-                    int (*compile_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].compile;
-                    if (compile_func!=NULL)
-                    {
-                        //Primitive has special compile behavior
-                        forth_engine_pre_exec(engine);
-                        int result=compile_func(engine);
-                        if (result!=FORTH_ENGINE_ERROR_NONE)
-                        {
-                            //Error in word
-                            engine->error=result;
-                            
-                            //Set pointer to word in case used in error message
-                            compile->error_word=source+start-compile->word_len;
-                            return FORTH_ERROR_ENGINE;
-                        }
-
-                        //Process outer interpreter action requested by word if present
-                        //This keeps platform specific code out of the primitives for portability
-                        result=FORTH_ERROR_NONE;
-                        switch (engine->word_action)
-                        {
-                            case FORTH_ACTION_AGAIN:
-                                result=action_again(compile);
-                                break;
-                            case FORTH_ACTION_BEGIN:
-                                result=action_begin(compile);
-                                break;
-                            case FORTH_ACTION_BRACKET_CHAR:
-                            {
-                                //Find value of first character in next word
-                                int32_t index;
-                                result=action_char_common(source,&start,&index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Write code to push value to stack
-                                result=write_definition_primitive(&prim_hidden_push,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                result=write_definition_i32(index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
-                            case FORTH_ACTION_BRACKET_TICK:
-                            {
-                                //Find ID or primitive and secondary if it exists
-                                uint32_t index;
-                                result=action_tick_common(source,&start,&index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Write code to push value to stack
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                result=write_definition_primitive(&prim_hidden_push,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                result=write_definition_i32(index,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
-                            case FORTH_ACTION_COMMENT:
-                                action_comment(source,&start);
-                                break;
-                            case FORTH_ACTION_DO:
-                                result=action_do(compile);
-                                break;
-                            case FORTH_ACTION_DOT_QUOTE:
-                                //Write primitive that reads and prints characters
-                                result=write_definition_primitive(&prim_hidden_dot_quote,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Write characters to definition
-                                result=action_quote_common(engine,source,&start,false,true,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            case FORTH_ACTION_ELSE:
-                                result=action_else(compile);
-                                break;
-                            case FORTH_ACTION_I:
-                                result=action_i(compile);
-                                break;
-                            case FORTH_ACTION_IF:
-                                result=action_if(compile);
-                                break;
-                            case FORTH_ACTION_J:
-                                result=action_j(compile);
-                                break;
-                            case FORTH_ACTION_LEAVE:
-                                result=action_leave(compile);
-                                break;
-                            case FORTH_ACTION_LITERAL:
-                            {
-                                result=write_definition_primitive(&prim_hidden_push,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                result=write_definition_i32(forth_pop(engine),compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
-                            case FORTH_ACTION_LOCALS:
-                                result=action_locals(source,&start,false,compile);
-                                break;
-                            case FORTH_ACTION_LOCALS_0:
-                                result=action_locals(source,&start,true,compile);
-                                break;
-                            case FORTH_ACTION_LOOP:
-                                result=action_loop(compile);
-                                break;
-                            case FORTH_ACTION_PAREN:
-                                action_paren(source,&start);
-                                break;
-                            case FORTH_ACTION_PLUS_LOOP:
-                                result=action_plus_loop(compile);
-                                break;
-                            case FORTH_ACTION_REPEAT:
-                                result=action_repeat(compile);
-                                break;
-                            case FORTH_ACTION_S_BACKSLASH_QUOTE:
-                            {
-                                //Write primitive that reads and prints characters
-                                result=write_definition_primitive(&prim_hidden_s_quote,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Write characters to definition
-                                result=action_quote_common(engine,source,&start,true,true,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
-                            case FORTH_ACTION_S_QUOTE:
-                            {
-                                //Write primitive that reads and prints characters
-                                result=write_definition_primitive(&prim_hidden_s_quote,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-
-                                //Write characters to definition
-                                result=action_quote_common(engine,source,&start,false,true,compile);
-                                if (result!=FORTH_ERROR_NONE) return result;
-                                break;
-                            }
-                            case FORTH_ACTION_SEMICOLON:
-                                result=action_semicolon(engine,compile);
-                                break;
-                            case FORTH_ACTION_THEN:
-                                result=action_then(compile);
-                                break;
-                            case FORTH_ACTION_TO:
-                                result=action_to(source,&start,compile);
-                                break;
-                            case FORTH_ACTION_UNTIL:
-                                result=action_until(compile);
-                                break;
-                            case FORTH_ACTION_WHILE:
-                                result=action_while(compile);
-                                break;
-                        }
-
-                        //Some actions above may set error code requiring halt to processing
-                        if (result!=FORTH_ERROR_NONE) return result;
-                    }
-                    else
+                    int compile_action=forth_primitives[compile->primitive_ID].compile_action;
+                    if (compile_action==FORTH_ACTION_NONE)
                     {
                         //Logging
                         log_text("body only\n"); 
 
                         //No special compile behavior - compile address
                         int result=write_definition_primitive(forth_primitives[compile->primitive_ID].body,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                    }
+                    else if (compile_action==FORTH_ACTION_INTERPRET_ONLY)
+                    {
+                        //Error - word is compile only
+                        engine->error=FORTH_ERROR_INTERPRET_ONLY;
+
+                        //Set pointer to word in source for error message
+                        compile->error_word=source+start-compile->word_len;
+                        return FORTH_ERROR_ENGINE;
+                    }
+                    else
+                    {
+                        //Process outer interpreter action requested by word if present
+                        //This keeps platform specific code out of the primitives for portability
+                        int result=handle_action(compile_action,true,engine,source,&start,compile);
+
+                        //Some actions above may set error code requiring halt to processing
                         if (result!=FORTH_ERROR_NONE) return result;
                     }
 

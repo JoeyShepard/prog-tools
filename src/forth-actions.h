@@ -41,4 +41,6 @@
     int action_while(struct ForthCompileInfo *compile);
     int action_wordsize(struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
 
+    int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const char *source,uint32_t *start,struct ForthCompileInfo *compile);
+
 #endif

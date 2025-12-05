@@ -6,9 +6,6 @@
     #include "forth-engine.h"
     #include "structs.h"
 
-    //Constants
-
-
     //structs
     struct ForthPrimitive
     {
@@ -22,9 +19,6 @@
     //Globals
     extern const struct ForthPrimitive forth_primitives[];
     extern const int forth_primitives_len;
-
-    //EXECUTE primitive has special handling so expose function externally
-    int prim_immediate_execute(struct ForthEngine *engine);
 
     //Primitives visible externally (but hidden from user)
     void prim_hidden_do(struct ForthEngine *engine);
