@@ -98,6 +98,7 @@ int classify_word(const char *word)
 int find_primitive(const char *word)
 {
     int word_len=strlen(word);
+    if (word_len==0) return FORTH_PRIM_NOT_FOUND;
     for (int i=0;i<forth_primitives_len;i++)
     {
         if (forth_primitives[i].len==word_len)
@@ -111,6 +112,7 @@ int find_primitive(const char *word)
 struct ForthWordHeader *find_secondary(const char *word,struct ForthWordHeaderInfo *words)
 {
     struct ForthWordHeader *secondary=words->header;
+    if (strlen(word)==0) return NULL;
     while(1)
     {
         if (secondary->last==true)
@@ -800,6 +802,13 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         void (*body_func)(struct ForthEngine *engine)=forth_primitives[compile->primitive_ID].body;
                         if (body_func!=NULL)
                         {
+                            if (forth_primitives[compile->primitive_ID].end_block==false)
+                            {
+                                //Word does not contain any stack checking - check manually
+
+                                //TODO: checks here
+
+                            }
                             forth_engine_pre_exec(engine);
                             body_func(engine);
                             if (engine->error!=FORTH_ENGINE_ERROR_NONE)
@@ -950,7 +959,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
             }
         }
     }while(compile->word_len>0);
-
 
     return FORTH_ERROR_NONE;
 }

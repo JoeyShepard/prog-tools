@@ -471,7 +471,7 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
     }
 }
 
-static void output_error_engine(struct ForthInfo *forth,struct ForthCompileInfo *compile,struct ConsoleInfo *console)
+static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *console)
 {
     //Output message for error set in Forth engine - ie inside of primitive
     switch (forth->engine->error)
@@ -595,7 +595,7 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     else if (process_result==FORTH_ERROR_ENGINE)
     {
         //Forth engine errors handled separately
-        output_error_engine(forth,compile,console);
+        output_error_engine(forth,console);
     }
     else
     {

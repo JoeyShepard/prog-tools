@@ -52,9 +52,11 @@
         FORTH_ENGINE_ERROR_INT32_RANGE,
         FORTH_ENGINE_ERROR_HEX32_RANGE,
         FORTH_ENGINE_ERROR_LOCAL_STACK_FULL,
+        FORTH_ENGINE_ERROR_OVERFLOW,
         FORTH_ENGINE_ERROR_RSTACK_FULL,
         FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
         FORTH_ENGINE_ERROR_UNDEFINED,
+        FORTH_ENGINE_ERROR_UNDERFLOW,
     };
 
     enum ForthState
@@ -104,9 +106,16 @@
 
     struct ForthEngine //No improvement with __attribute__ ((aligned(4)))
     {
+        //Members accessible to optimizer
+        //***DO NOT MOVE!!!***
+        int32_t stack_index; 
+        int32_t *stack_base;
+
         //Data stack
-        uintptr_t stack_base;   //Store base as uintptr_t to do wrapping calculation on pointer
-        int32_t *stack;         //Points to currently free stack element
+        //TODO: remove
+        //uintptr_t stack_base;   //Store base as uintptr_t to do wrapping calculation on pointer
+        //int32_t *stack;         //Points to currently free stack element
+        
         uint32_t stack_count;   //Count of elements allocated for stack
 
         //Return stack

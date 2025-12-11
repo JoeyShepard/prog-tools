@@ -14,6 +14,9 @@
         int immediate_action;
         int compile_action;
         void (*body)(struct ForthEngine *engine);
+        bool end_block;
+        int pop_count;
+        int push_count;
     };
 
     //Globals

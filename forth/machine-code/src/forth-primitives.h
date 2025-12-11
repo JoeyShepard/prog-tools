@@ -52,7 +52,6 @@
     void prim_nip(struct ForthEngine *engine);
     void prim_true(struct ForthEngine *engine);
     void prim_tuck(struct ForthEngine *engine);
-    int prim_compile_to(struct ForthEngine *engine);
     void prim_cxt(struct ForthEngine *engine);
     void prim_wxt(struct ForthEngine *engine);
 
