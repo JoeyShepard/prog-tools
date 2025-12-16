@@ -389,7 +389,10 @@ int action_constant(struct ForthEngine *engine,const char *source,uint32_t *star
     //Add code to push constant value
     result=write_definition_primitive(&prim_hidden_push,compile);
     if (result!=FORTH_ERROR_NONE) return result;
-    result=write_definition_i32(forth_pop(engine),compile);
+    int32_t value;
+    result=forth_pop(engine,&value);
+    if (result!=FORTH_ERROR_NONE) return result;
+    result=write_definition_i32(value,compile);
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Add primitive to word to stop exectuing
@@ -555,10 +558,8 @@ int action_else(struct ForthCompileInfo *compile)
 int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompileInfo *compile)
 {
     //EXECUTE while interpreting
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    uint32_t word_ID=*engine->stack;
+    engine->stack_index--;
+    uint32_t word_ID=engine->stack[engine->stack_index];
 
     if (word_ID<(uint32_t)forth_primitives_len)
     {
@@ -1069,13 +1070,10 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
                 else
                 {
                     //Writing to data memory - write return values
-                    *engine->stack=address;
-                    uintptr_t lower;
-                    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-                    engine->stack=(int32_t*)((engine->stack_base)|lower);
-                    *engine->stack=bytes_written;
-                    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-                    engine->stack=(int32_t*)((engine->stack_base)|lower);
+                    engine->stack[engine->stack_index]=address;
+                    engine->stack_index++;
+                    engine->stack[engine->stack_index]=bytes_written;
+                    engine->stack_index++;
                 }
 
                 //Logging
@@ -1291,11 +1289,10 @@ int action_repeat(struct ForthCompileInfo *compile)
 int action_resize(struct ForthEngine *engine,struct ForthCompileInfo *compile)
 {
     //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
 
     //Fetch new data stack size from stack
-    uint32_t data_size=*engine->stack;
+    uint32_t data_size=engine->stack[engine->stack_index];
 
     //Enough memory left to resize?
     if (data_size>(engine->data_size+heap_left()))
@@ -1801,10 +1798,8 @@ int action_wordsize(struct ForthEngine *engine,const char *source,uint32_t *star
     if (word_type==FORTH_TYPE_SECONDARY)
     {
         //Write word size to stack
-        *engine->stack=compile->secondary->definition_size;
-        uintptr_t lower;
-        lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-        engine->stack=(int32_t*)((engine->stack_base)|lower);
+        engine->stack[engine->stack_index]=compile->secondary->definition_size;
+        engine->stack_index++;
         return FORTH_ERROR_NONE;
     }
     else
@@ -1859,7 +1854,7 @@ int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const 
             int32_t index;
             result=action_char_common(source,start,&index,compile);
             if (result!=FORTH_ERROR_NONE) return result;
-            forth_push(engine,index);
+            result=forth_push(engine,index);
             break;
         case FORTH_ACTION_COLON:
             result=action_colon(engine,source,start,compile);
@@ -1914,7 +1909,10 @@ int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const 
         {
             result=write_definition_primitive(&prim_hidden_push,compile);
             if (result!=FORTH_ERROR_NONE) return result;
-            result=write_definition_i32(forth_pop(engine),compile);
+            int32_t value;
+            result=forth_pop(engine,&value);
+            if (result!=FORTH_ERROR_NONE) return result;
+            result=write_definition_i32(value,compile);
             if (result!=FORTH_ERROR_NONE) return result;
             break;
         }
@@ -2003,13 +2001,13 @@ int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const 
             break;
         case FORTH_ACTION_TICK:
         {
-            //Find ID or primitive and secondary if it exists
+            //Find ID of primitive and secondary if it exists
             uint32_t index;
             int result=action_tick_common(source,start,&index,compile);
             if (result!=FORTH_ERROR_NONE) return result;
 
             //Push tick ID of word to stack
-            forth_push(engine,index);
+            result=forth_push(engine,index);
             break;
         }
         case FORTH_ACTION_TO:

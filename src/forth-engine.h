@@ -109,7 +109,9 @@
         //Members accessible to optimizer
         //***DO NOT MOVE!!!***
         int32_t stack_index; 
-        int32_t *stack_base;
+        int32_t *stack;
+        int32_t loop_i;
+        int32_t loop_j;
 
         //Data stack
         //TODO: remove
@@ -129,9 +131,7 @@
         uint32_t locals_count;
 
         //Loop counters
-        int32_t loop_i;
         int32_t loop_i_max;
-        int32_t loop_j;
         int32_t loop_j_max;
 
         //Data area - like dictionary but no definitions stored there
@@ -226,8 +226,8 @@
     void forth_reset_engine_stacks(struct ForthEngine *engine);
     void forth_engine_pre_exec(struct ForthEngine *engine);
     int32_t forth_stack_count(struct ForthEngine *engine);
-    void forth_push(struct ForthEngine *engine,int32_t value);
-    int32_t forth_pop(struct ForthEngine *engine);
+    int forth_push(struct ForthEngine *engine,int32_t value);
+    int forth_pop(struct ForthEngine *engine,int32_t *value);
     void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
     int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
                                 struct ForthWordHeader *word_headers,uint32_t word_count,uint8_t *word_bodies);

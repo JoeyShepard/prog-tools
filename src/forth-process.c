@@ -790,7 +790,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
                 {
                     //Number or hex - push to stack
-                    forth_push(engine,num);
+                    int result=forth_push(engine,num);
+                    if (result!=FORTH_ERROR_NONE) return result;
                 }
                 else if (word_type==FORTH_TYPE_PRIMITIVE)
                 {

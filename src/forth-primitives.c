@@ -16,17 +16,20 @@
 //=========================================
 void prim_hidden_do(struct ForthEngine *engine)
 {
-    uintptr_t lower;
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
     //Fetch loop values
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t loop_min=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t loop_max=*(int32_t*)((engine->stack_base)|lower);
+    int32_t loop_min=engine->stack[engine->stack_index-1];
+    int32_t loop_max=engine->stack[engine->stack_index-2];
     
     //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index-=2;
 
     //Push existing J counter to R-stack
     if (engine->rstack<engine->rstack_base)
@@ -153,18 +156,24 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
 void prim_hidden_i(struct ForthEngine *engine)
 {
     //Push number to stack
-    *engine->stack=engine->loop_i;
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=engine->loop_i;
+    engine->stack_index++;
 }
 
 //Test value on stack and jump if not 0
 void prim_hidden_if(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch value from stack to test
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    int32_t test_value=*engine->stack;
+    engine->stack_index--;
+    int32_t test_value=engine->stack[engine->stack_index];
 
     //Skip to ELSE or THEN if stack value not true
     if (test_value==0)
@@ -184,9 +193,8 @@ void prim_hidden_if(struct ForthEngine *engine)
 void prim_hidden_j(struct ForthEngine *engine)
 {
     //Push number to stack
-    *engine->stack=engine->loop_j;
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=engine->loop_j;
+    engine->stack_index++;
 }
 
 //Jump to different part of thread
@@ -243,12 +251,17 @@ void prim_hidden_loop(struct ForthEngine *engine)
 
 void prim_hidden_plus_loop(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
     //Increment loop counter
-    engine->loop_i+=*engine->stack;
+    engine->stack_index--;
+    engine->loop_i+=engine->stack[engine->stack_index];
 
     //Jump back to DO if done looping
     if (engine->loop_i<engine->loop_i_max)
@@ -283,14 +296,21 @@ void prim_hidden_push(struct ForthEngine *engine)
     engine->address=(void (**)(struct ForthEngine *engine))(((int32_t *)engine->address)+1);
 
     //Push number to stack
-    *engine->stack=num;
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=num;
+    engine->stack_index++;
 }
 
 //Write characters to data memory
 void prim_hidden_s_quote(struct ForthEngine *engine)
 {
+    if (engine->stack_index>=(FORTH_STACK_ELEMENTS-1))
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Length of quote appears after primitive
     uint32_t quote_length=*(uint32_t *)(engine->address+1);
 
@@ -337,13 +357,10 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
     log_text("new engine->address: %p\n",engine->address);
 
     //Write return values to stack
-    *engine->stack=address;
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    *engine->stack=quote_length;
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=address;
+    engine->stack_index++;
+    engine->stack[engine->stack_index]=quote_length;
+    engine->stack_index++;
 
     //Logging
     log_pop();
@@ -372,12 +389,20 @@ void prim_hidden_secondary(struct ForthEngine *engine)
             (secondary->type==FORTH_SECONDARY_VARIABLE))
     {
         //These are actually words that can be executed but faster to extract value and push here manually instead
+        if (engine->stack_index>=(FORTH_STACK_ELEMENTS))
+        {
+            //Overflow
+            engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+            engine->executing=false;
+            return;
+        }
+
+        //Extract number
         int32_t num=*(int32_t *)(secondary->address+1);
         
         //Push number to stack
-        *engine->stack=num;
-        uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-        engine->stack=(int32_t*)((engine->stack_base)|lower);
+        engine->stack[engine->stack_index]=num;
+        engine->stack_index++;
     }
     else
     {
@@ -427,123 +452,94 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 void prim_store(struct ForthEngine *engine)
 {
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    uint32_t address=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
 
     //Mask address
     address&=engine->data_mask_32;
     
     //Write value to address
     *(int32_t*)(engine->data+address)=value;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //C_STORE
 void prim_c_store(struct ForthEngine *engine)
 {
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    uint32_t address=engine->stack[engine->stack_index];
     
     //Read 32-bit value here so no endian problems
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
     
     //Mask address
     address&=engine->data_mask;
     
     //Write value to address
     *(engine->data+address)=value;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //W_STORE
 void prim_w_store(struct ForthEngine *engine)
 {
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    uint32_t address=engine->stack[engine->stack_index];
     
     //Read 32-bit value here so no endian problems
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
     
     //Mask address
     address&=engine->data_mask_16;
     
     //Write value to address
     *(int16_t*)(engine->data+address)=value;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //STAR
 void prim_star(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
+    //TODO: time -- vs offset vs -- then ++ vs pointer from array
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1*arg2;
+    engine->stack[engine->stack_index-1]=arg1*arg2;
 }
 
 //STAR_SLASH
 void prim_star_slash(struct ForthEngine *engine)
 {
-    //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t divisor=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
-    
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t divisor=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Calculate
     if (divisor==0) divisor=1;
     int64_t product=(int64_t)arg1*(int64_t)arg2;
     int32_t quotient=product/(int64_t)divisor;
     
-    //Write values to stack
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=quotient;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    //Write result
+    engine->stack[engine->stack_index-1]=quotient;
 }
 
 //STAR_SLASH_MOD
 void prim_star_slash_mod(struct ForthEngine *engine)
 {
-    //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t divisor=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t divisor=engine->stack[engine->stack_index];
+    int32_t arg2=engine->stack[engine->stack_index-1];
+    int32_t arg1=engine->stack[engine->stack_index-2];
 
     //Calculate
     if (divisor==0) divisor=1;
@@ -551,47 +547,33 @@ void prim_star_slash_mod(struct ForthEngine *engine)
     int32_t remainder=product%(int64_t)divisor;
     int32_t quotient=product/(int64_t)divisor;
     
-    //Write values to stack
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=remainder;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=quotient;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    //Write results to stack
+    engine->stack[engine->stack_index-1]=quotient;
+    engine->stack[engine->stack_index-2]=remainder;
 }
 
 //PLUS
 void prim_plus(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1+arg2;
+    engine->stack[engine->stack_index-1]=arg1+arg2;
 }
 
 //COMMA
 void prim_comma(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Mask destination address
     engine->data_index&=engine->data_mask_32;
     
     //Write value
-    *(int32_t*)(engine->data+engine->data_index)=*engine->stack;
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
+    *(int32_t*)(engine->data+engine->data_index)=value;
     
     //Advance data pointer
     engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32;
@@ -600,16 +582,13 @@ void prim_comma(struct ForthEngine *engine)
 //C_COMMA
 void prim_c_comma(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Mask destination address
     engine->data_index&=engine->data_mask;
     
     //Write value
-    *(engine->data+engine->data_index)=*engine->stack;
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
+    *(int8_t*)(engine->data+engine->data_index)=value;
     
     //Advance data pointer
     engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask;
@@ -618,49 +597,50 @@ void prim_c_comma(struct ForthEngine *engine)
 //W_COMMA
 void prim_w_comma(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Mask destination address
     engine->data_index&=engine->data_mask_16;
     
     //Write value
-    *(int16_t*)(engine->data+engine->data_index)=*engine->stack;
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
+    *(int16_t*)(engine->data+engine->data_index)=value;
     
     //Advance data pointer
-    engine->data_index=(engine->data_index+sizeof(int16_t))&engine->data_mask_16;
+    engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask_16;
 }
 
 //MINUS
 void prim_minus(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1-arg2;
+    engine->stack[engine->stack_index-1]=arg1-arg2;
 }
 
 //DOT
 void prim_dot(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+
+    //Print if print function defined
     if (engine->print!=NULL)
     {
         //Output number
         char text_buffer[TEXT_INT32_SIZE];
-        text_int32(*engine->stack,text_buffer);
+        text_int32(engine->stack[engine->stack_index],text_buffer);
         engine->print(text_buffer);
 
         //Output space
@@ -674,14 +654,23 @@ void prim_dot(struct ForthEngine *engine)
 //U_DOT
 void prim_u_dot(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+
+    //Print if print function defined
     if (engine->print!=NULL)
     {
         //Output number
         char text_buffer[TEXT_UINT32_SIZE];
-        text_uint32(*engine->stack,text_buffer);
+        text_uint32(engine->stack[engine->stack_index],text_buffer);
         engine->print(text_buffer);
         
         //Output space
@@ -695,14 +684,23 @@ void prim_u_dot(struct ForthEngine *engine)
 //X_DOT
 void prim_x_dot(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+
+    //Print if print function defined
     if (engine->print!=NULL)
     {
         //Output number
-        char text_buffer[TEXT_HEX32_SIZE];
-        text_hex32(*engine->stack,text_buffer);
+        char text_buffer[TEXT_UINT32_SIZE];
+        text_hex32(engine->stack[engine->stack_index],text_buffer);
         engine->print(text_buffer);
         
         //Output space
@@ -716,90 +714,63 @@ void prim_x_dot(struct ForthEngine *engine)
 //SLASH
 void prim_slash(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
     if (arg2==0) arg2=1;
-    *(int32_t*)((engine->stack_base)|lower)=arg1/arg2;
+    engine->stack[engine->stack_index-1]=arg1/arg2;
 }
 
 //SLASH_MOD
 void prim_slash_mod(struct ForthEngine *engine)
 {
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg2=engine->stack[engine->stack_index-1];
+    int32_t arg1=engine->stack[engine->stack_index-2];
 
-    //Calculate
-    if (arg1==0) arg1=1;
-    
     //Write result
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2/arg1;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2%arg1;
+    if (arg2==0) arg2=1;
+    engine->stack[engine->stack_index-1]=arg1/arg2;
+    engine->stack[engine->stack_index-2]=arg1%arg2;
 }
 
 //LESS_THAN
 void prim_less_than(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1<arg2);
+    engine->stack[engine->stack_index-1]=-(arg1<arg2);
 }
 
 //EQUALS
 void prim_equals(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1==arg2);
+    engine->stack[engine->stack_index-1]=-(arg1==arg2);
 }
 
 //GREATER_THAN
 void prim_greater_than(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1>arg2);
+    engine->stack[engine->stack_index-1]=-(arg1>arg2);
 }
 
 //TO_NUMBER - Note differs from >NUMBER in standard!
@@ -810,12 +781,24 @@ void prim_greater_than(struct ForthEngine *engine)
     //u2 - number of unconverted characters
 void prim_to_number(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+    else if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    int32_t count=engine->stack[engine->stack_index-1];
+    int32_t address=engine->stack[engine->stack_index-2];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -846,6 +829,7 @@ void prim_to_number(struct ForthEngine *engine)
             else if (negative==true) result-=character-'0';
             if ((result>UINT32_MAX)||(result<INT32_MIN))
             {
+                //TODO: seems could be out of range if this size of size+1
                 //Error - number is out of range
                 for (int j=0;j<TEXT_INT32_SIZE-1;j++)
                 {
@@ -869,8 +853,7 @@ void prim_to_number(struct ForthEngine *engine)
                 engine->executing=false;
 
                 //Update stack pointer
-                lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-                engine->stack=(int32_t*)((engine->stack_base)|lower);
+                engine->stack_index-=2;
 
                 return;
             }
@@ -885,27 +868,36 @@ void prim_to_number(struct ForthEngine *engine)
     }
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=address;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=result;
-    *(uint32_t*)(engine->stack)=unconverted_count;
-    
+    engine->stack[engine->stack_index]=unconverted_count;
+    engine->stack[engine->stack_index-1]=address;
+    engine->stack[engine->stack_index-2]=result;
+
     //Update stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //TO_HEX
 //(c-addr1 u1 - s2 c-addr2 u2)
 void prim_to_hex(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+    else if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    int32_t count=engine->stack[engine->stack_index-1];
+    int32_t address=engine->stack[engine->stack_index-2];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -1003,8 +995,7 @@ void prim_to_hex(struct ForthEngine *engine)
             engine->executing=false;
 
             //Update stack pointer
-            lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-            engine->stack=(int32_t*)((engine->stack_base)|lower);
+            engine->stack_index-=2;
 
             return;
         }
@@ -1013,27 +1004,30 @@ void prim_to_hex(struct ForthEngine *engine)
     }
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=address;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=result;
-    *(uint32_t*)(engine->stack)=unconverted_count;
+    engine->stack[engine->stack_index]=unconverted_count;
+    engine->stack[engine->stack_index-1]=address;
+    engine->stack[engine->stack_index-2]=result;
 
     //Update stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //NUMBER>
 //(n c-addr - u)
 void prim_number_to(struct ForthEngine *engine)
 {
-    //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t num=*(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t address=engine->stack[engine->stack_index];
+    int32_t num=engine->stack[engine->stack_index-1];
 
     //Convert number to text
     char num_buffer[TEXT_INT32_SIZE];
@@ -1054,24 +1048,25 @@ void prim_number_to(struct ForthEngine *engine)
     }
 
     //Write character count to stack
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(uint32_t*)((engine->stack_base)|lower)=num_len;
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index-1]=num_len;
 }
 
 //HEX>
 //(u c-addr - u) 
 void prim_hex_to(struct ForthEngine *engine)
 {
-    //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t num=*(uint32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t address=engine->stack[engine->stack_index];
+    int32_t num=engine->stack[engine->stack_index-1];
 
     //Convert number to text
     char num_buffer[TEXT_HEX32_SIZE];
@@ -1092,28 +1087,35 @@ void prim_hex_to(struct ForthEngine *engine)
     }
 
     //Write character count to stack
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(uint32_t*)((engine->stack_base)|lower)=num_len;
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index-1]=num_len;
 }
 
 //QUESTION_DUPE
 void prim_question_dupe(struct ForthEngine *engine)
 {
-    //Fetch value to duplicate
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    if (*(int32_t*)((engine->stack_base)|lower)!=0)
+    if (engine->stack_index==0)
     {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
+    if (engine->stack[engine->stack_index-1]!=0)
+    {
+        if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+        {
+            //Overflow
+            engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+            engine->executing=false;
+            return;
+        }
+
         //Value is not zero - duplicate
-        *engine->stack=*(int32_t*)((engine->stack_base)|lower);
+        engine->stack[engine->stack_index]=engine->stack[engine->stack_index-1];
 
         //Advance stack pointer
-        lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-        engine->stack=(int32_t*)((engine->stack_base)|lower);
+        engine->stack_index++;
     }
 }
 
@@ -1121,9 +1123,7 @@ void prim_question_dupe(struct ForthEngine *engine)
 void prim_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    int32_t address=engine->stack[engine->stack_index-1];
 
     //Mask address
     address&=engine->data_mask_32;
@@ -1132,34 +1132,31 @@ void prim_fetch(struct ForthEngine *engine)
     int32_t value=*(int32_t*)(engine->data+address);
     
     //Write value to stack
-    *(int32_t*)((engine->stack_base)|lower)=value;
+    engine->stack[engine->stack_index-1]=value;
 }
 
 //C_FETCH
 void prim_c_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    int32_t address=engine->stack[engine->stack_index-1];
     
     //Mask address
     address&=engine->data_mask;
     
     //Read from address
+    //TODO: isnt this int8_t in some other places?
     uint8_t value=*(engine->data+address);
     
     //Write value to stack
-    *(int32_t*)((engine->stack_base)|lower)=value;
+    engine->stack[engine->stack_index-1]=value;
 }
 
 //W_FETCH
 void prim_w_fetch(struct ForthEngine *engine)
 {
     //Fetch argument
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    int32_t address=engine->stack[engine->stack_index-1];
 
     //Mask address
     address&=engine->data_mask_16;
@@ -1168,7 +1165,7 @@ void prim_w_fetch(struct ForthEngine *engine)
     uint16_t value=*(uint16_t*)(engine->data+address);
     
     //Write value to stack
-    *(int32_t*)((engine->stack_base)|lower)=value;
+    engine->stack[engine->stack_index-1]=value;
 }
 
 //QUIT
@@ -1180,33 +1177,40 @@ void prim_quit(struct ForthEngine *engine)
 //ABS
 void prim_abs(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
-    if (value<0) *(int32_t*)((engine->stack_base)|lower)=-value;
+    int32_t value=engine->stack[engine->stack_index-1];
+    if (value<0) engine->stack[engine->stack_index-1]=-value;
 }
 
 //ACCEPT
 void prim_accept(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
     //Call input routine if it exists
     if (engine->input!=NULL)
     {
         //Fetch arguments
-        lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-        uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
-        uint32_t count=*engine->stack;
+        engine->stack_index--;
+        uint32_t count=engine->stack[engine->stack_index];
+        uint32_t address=engine->stack[engine->stack_index-1];
     
         //Mask address
         address&=engine->data_mask;
         uint32_t bytes_written=engine->input(address,(char *)engine->data,count,engine->data_mask);
         
         //Write result
-        *(int32_t*)((engine->stack_base)|lower)=bytes_written;
+        engine->stack[engine->stack_index-1]=bytes_written;
+    }
+    else
+    {
+        engine->stack_index--;
+        engine->stack[engine->stack_index-1]=0;
     }
 }
 
@@ -1225,8 +1229,7 @@ void prim_align(struct ForthEngine *engine)
 void prim_aligned(struct ForthEngine *engine)
 {
     //Fetch address to align
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(int32_t*)((engine->stack_base)|lower);
+    int32_t address=engine->stack[engine->stack_index-1];
     uint32_t remainder=address%FORTH_CELL_SIZE;
     if (remainder!=0)
     {
@@ -1235,7 +1238,7 @@ void prim_aligned(struct ForthEngine *engine)
     }
 
     //Write address back even if aligned so always masked
-    *(int32_t*)((engine->stack_base)|lower)=(address&engine->data_mask_32);
+    engine->stack[engine->stack_index-1]=(address&engine->data_mask_32);
 }
 
 //ALLOT
@@ -1245,13 +1248,17 @@ void prim_allot(struct ForthEngine *engine)
     log_push(LOGGING_FORTH_ALLOT,"allot");
     log_text("data_index: %d\n",engine->data_index);
 
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
     //Fetch amount of bytes to allot
-    int32_t allot_count=*engine->stack;
+    engine->stack_index--;
+    int32_t allot_count=engine->stack[engine->stack_index];
     engine->data_index=(engine->data_index+allot_count)&(engine->data_mask);
 
     //Logging
@@ -1262,54 +1269,42 @@ void prim_allot(struct ForthEngine *engine)
 //AND
 void prim_and(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1&arg2;
+    engine->stack[engine->stack_index-1]=arg1&arg2;
 }
 
 //B_L
 void prim_b_l(struct ForthEngine *engine)
 {
     //Write value for space character
-    *engine->stack=32;
+    engine->stack[engine->stack_index]=32;
     
     //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //BOUNDS
 void prim_bounds(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    int32_t size=engine->stack[engine->stack_index-1];
+    int32_t address=engine->stack[engine->stack_index-2];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=(arg1+arg2)&engine->data_mask;
+    engine->stack[engine->stack_index-1]=address;
+    engine->stack[engine->stack_index-2]=(address+size)&engine->data_mask;
 }
 
 //CELLS
 void prim_cells(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
-    *(int32_t*)((engine->stack_base)|lower)=value*FORTH_CELL_SIZE;
+    int32_t value=engine->stack[engine->stack_index-1];
+    engine->stack[engine->stack_index-1]=value*FORTH_CELL_SIZE;
 }
 
 //C_R
@@ -1325,73 +1320,72 @@ void prim_c_r(struct ForthEngine *engine)
 //DEPTH
 void prim_depth(struct ForthEngine *engine)
 {
+    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Write stack count
-    *engine->stack=forth_stack_count(engine);
+    engine->stack[engine->stack_index]=forth_stack_count(engine);
     
     //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //DROP
 void prim_drop(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
 }
 
 //2DROP
 void prim_two_drop(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index-=2;
 }
 
 //DUPE
 void prim_dupe(struct ForthEngine *engine)
 {
-    uintptr_t lower;
     //Write duplicated value
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-1];
 
     //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //2DUPE
 void prim_two_dupe(struct ForthEngine *engine)
 {
-    uintptr_t lower;
     //Write duplicated value
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
-    
+    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-2];
+    engine->stack[engine->stack_index+1]=engine->stack[engine->stack_index-1];
+
     //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    
-    //Write duplicated value
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
-    
-    //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index+=2;
 }
 
 //EMIT
 void prim_emit(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
     if (engine->print!=NULL)
     {
         //Output character
         char text_buffer[2];
-        text_buffer[0]=*engine->stack;
+        text_buffer[0]=engine->stack[engine->stack_index];
         text_buffer[1]=0;
         engine->print(text_buffer);
 
@@ -1403,11 +1397,18 @@ void prim_emit(struct ForthEngine *engine)
 //EXECUTE
 void prim_execute(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
-    uint32_t word_ID=*engine->stack;
+    //Update stack pointer
+    engine->stack_index--;
+
+    uint32_t word_ID=engine->stack[engine->stack_index];
     if (word_ID<(uint32_t)forth_primitives_len)
     {
         //TODO: checking body is enough now but recheck after all words added
@@ -1451,9 +1452,8 @@ void prim_execute(struct ForthEngine *engine)
             int32_t num=*(int32_t *)(secondary->address+1);
             
             //Push number to stack
-            *engine->stack=num;
-            uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-            engine->stack=(int32_t*)((engine->stack_base)|lower);
+            engine->stack[engine->stack_index]=num;
+            engine->stack_index++;
         }
         else
         {
@@ -1511,14 +1511,22 @@ void prim_execute(struct ForthEngine *engine)
 //FILL
 void prim_fill(struct ForthEngine *engine)
 {
+    if (engine->stack_index<3)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t character=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    uint32_t address=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t character=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t count=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t address=engine->stack[engine->stack_index];
+
     if (count>0)
     {
         //Limit count so it loops through memory at most once
@@ -1531,10 +1539,6 @@ void prim_fill(struct ForthEngine *engine)
             address++;
         }
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //FIND
@@ -1546,39 +1550,43 @@ void prim_fill(struct ForthEngine *engine)
 void prim_here(struct ForthEngine *engine)
 {
     //Write stack count
-    *engine->stack=engine->data_index;
+    engine->stack[engine->stack_index]=engine->data_index;
 
     //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //INVERT
 void prim_invert(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
-    *(int32_t*)((engine->stack_base)|lower)=value^-1;
+    int32_t value=engine->stack[engine->stack_index-1];
+    engine->stack[engine->stack_index-1]=value^-1;
 }
 
 //KEY
 void prim_key(struct ForthEngine *engine)
 {
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch flag - true for blocking key input, false for non-blocking
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t flag=*(int32_t*)((engine->stack_base)|lower);
+    int32_t flag=engine->stack[engine->stack_index-1];
     if (engine->getkey==NULL)
     {
         //No getkey routine exists - return 0
-        *(int32_t*)((engine->stack_base)|lower)=0;
+        engine->stack[engine->stack_index-1]=0;
     }
     else
     {
         //Fetch key
         bool blocking=!(flag==0);
         int32_t key=engine->getkey(blocking);
-        *(int32_t*)((engine->stack_base)|lower)=key;
+        engine->stack[engine->stack_index-1]=key;
 
         //Update modifier output
         if (engine->update_modifiers!=NULL) engine->update_modifiers();
@@ -1588,37 +1596,28 @@ void prim_key(struct ForthEngine *engine)
 //L_SHIFT
 void prim_l_shift(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
-    uint32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1<<arg2;
+    engine->stack[engine->stack_index-1]=arg1<<arg2;
 }
 
 //MAX
 void prim_max(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
-    //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
     
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
     if (arg2>arg1)
     {
-        *(int32_t*)((engine->stack_base)|lower)=arg2;
+        engine->stack[engine->stack_index-1]=arg2;
     }
     else
     {
@@ -1629,21 +1628,16 @@ void prim_max(struct ForthEngine *engine)
 //MIN
 void prim_min(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
     if (arg2<arg1)
     {
         //Write smaller value to stack
-        *(int32_t*)((engine->stack_base)|lower)=arg2;
+        engine->stack[engine->stack_index-1]=arg2;
     }
     else
     {
@@ -1654,34 +1648,37 @@ void prim_min(struct ForthEngine *engine)
 //MOD
 void prim_mod(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
-    //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
     
+    //Fetch arguments
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Prevent divide by zero
     if (arg2==0) arg2=1;
     
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1%arg2;
+    engine->stack[engine->stack_index-1]=arg1%arg2;
 }
 
 //MOVE
 void prim_move(struct ForthEngine *engine)
 {
+    if (engine->stack_index<3)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t dest=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    uint32_t source=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t count=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t dest=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t source=engine->stack[engine->stack_index];
 
     //Limit count so copying loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -1710,70 +1707,46 @@ void prim_move(struct ForthEngine *engine)
         dest+=bytes_copied;
         source+=bytes_copied;
     }
-
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //NEGATE
 void prim_negate(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
-    *(int32_t*)((engine->stack_base)|lower)=-value;
+    int32_t value=engine->stack[engine->stack_index-1];
+    engine->stack[engine->stack_index-1]=-value;
 }
 
 //OR
 void prim_or(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1|arg2;
+    engine->stack[engine->stack_index-1]=arg1|arg2;
 }
 
 //OVER
 void prim_over(struct ForthEngine *engine)
 {
     //Write duplicated value
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *engine->stack=*(int32_t*)((engine->stack_base)|lower);
-    
+    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-2];
+
     //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //2OVER
 void prim_two_over(struct ForthEngine *engine)
 {
-    //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+4))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    //Write duplicated value
+    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-4];
+    engine->stack[engine->stack_index+1]=engine->stack[engine->stack_index-3];
 
     //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    
-    //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
+    engine->stack_index+=2;
 }
 
 //PAGE
@@ -1793,59 +1766,40 @@ void prim_page(struct ForthEngine *engine)
 void prim_rote(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg3=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg1=engine->stack[engine->stack_index-1];
+    int32_t arg2=engine->stack[engine->stack_index-2];
+    int32_t arg3=engine->stack[engine->stack_index-3];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg3;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
+    engine->stack[engine->stack_index-1]=arg3;
+    engine->stack[engine->stack_index-2]=arg1;
+    engine->stack[engine->stack_index-3]=arg2;
 }
 
 //MINUS_ROTE
 void prim_minus_rote(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg3=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg1=engine->stack[engine->stack_index-1];
+    int32_t arg2=engine->stack[engine->stack_index-2];
+    int32_t arg3=engine->stack[engine->stack_index-3];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg3;
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
+    engine->stack[engine->stack_index-1]=arg2;
+    engine->stack[engine->stack_index-2]=arg3;
+    engine->stack[engine->stack_index-3]=arg1;
 }
 
 //R_SHIFT
 void prim_r_shift(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
-    uint32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1>>arg2;
+    engine->stack[engine->stack_index-1]=arg1>>arg2;
 }
 
 //SPACE
@@ -1861,13 +1815,17 @@ void prim_space(struct ForthEngine *engine)
 //SPACES
 void prim_spaces(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
 
     //Fetch count
-    int32_t space_count=*engine->stack;
+    engine->stack_index--;
+    int32_t space_count=engine->stack[engine->stack_index];
     if ((space_count>0)&&(engine->print!=NULL))
     {
         if (space_count>engine->max_spaces) 
@@ -1889,53 +1847,46 @@ void prim_spaces(struct ForthEngine *engine)
 void prim_swap(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg1=engine->stack[engine->stack_index-1];
+    int32_t arg2=engine->stack[engine->stack_index-2];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
+    engine->stack[engine->stack_index-1]=arg2;
+    engine->stack[engine->stack_index-2]=arg1;
 }
 
 //2SWAP
 void prim_two_swap(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t arg3=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+4))&FORTH_STACK_MASK;
-    int32_t arg4=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg1=engine->stack[engine->stack_index-1];
+    int32_t arg2=engine->stack[engine->stack_index-2];
+    int32_t arg3=engine->stack[engine->stack_index-3];
+    int32_t arg4=engine->stack[engine->stack_index-4];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg3;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg4;
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
-    lower=((uintptr_t)(engine->stack+4))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
+    engine->stack[engine->stack_index-1]=arg3;
+    engine->stack[engine->stack_index-2]=arg4;
+    engine->stack[engine->stack_index-3]=arg1;
+    engine->stack[engine->stack_index-4]=arg2;
 }
 
 //TYPE
 void prim_type(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t count=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t address=engine->stack[engine->stack_index];
 
     //Print characters if print function exists
     if (engine->print!=NULL)
@@ -1959,72 +1910,60 @@ void prim_type(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //U_LESS_THAN
 void prim_u_less_than(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
-    uint32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    uint32_t arg2=engine->stack[engine->stack_index];
+    uint32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1<arg2);
+    engine->stack[engine->stack_index-1]=-(arg1<arg2);
 }
 
 //U_GREATER_THAN
 void prim_u_greater_than(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t arg1=*(uint32_t*)((engine->stack_base)|lower);
-    uint32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    uint32_t arg2=engine->stack[engine->stack_index];
+    uint32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1>arg2);
+    engine->stack[engine->stack_index-1]=-(arg1>arg2);
 }
 
 //X_OR
 void prim_x_or(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result
-    *(int32_t*)((engine->stack_base)|lower)=arg1^arg2;
+    engine->stack[engine->stack_index-1]=arg1^arg2;
 }
 
 //DOT_R
 void prim_dot_r(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t spaces=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
 
     if (engine->print!=NULL)
     {
@@ -2045,21 +1984,24 @@ void prim_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //U_DOT_R
 void prim_u_dot_r(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t value=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t spaces=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
 
     if (engine->print!=NULL)
     {
@@ -2080,21 +2022,24 @@ void prim_u_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //X_DOT_R
 void prim_x_dot_r(struct ForthEngine *engine)
 {
+    if (engine->stack_index<2)
+    {
+        //Underflow
+        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Fetch arguments
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t spaces=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t value=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t spaces=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t value=engine->stack[engine->stack_index];
 
     if (engine->print!=NULL)
     {
@@ -2115,27 +2060,18 @@ void prim_x_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //NOT_EQUALS
 void prim_not_equals(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
     //Fetch arguments
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    int32_t arg2=*engine->stack;
-    
+    engine->stack_index--;
+    int32_t arg2=engine->stack[engine->stack_index];
+    int32_t arg1=engine->stack[engine->stack_index-1];
+
     //Write result (note true is 1 in C but -1 in FORTH)
-    *(int32_t*)((engine->stack_base)|lower)=-(arg1!=arg2);
+    engine->stack[engine->stack_index-1]=-(arg1!=arg2);
 }
 
 //CASE
@@ -2146,92 +2082,71 @@ void prim_not_equals(struct ForthEngine *engine)
 //FALSE
 void prim_false(struct ForthEngine *engine)
 {
-    //Write value for space character
-    *engine->stack=FORTH_FALSE;
-    
-    //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=FORTH_FALSE;
+    engine->stack_index++;
 }
 
 //NIP
 void prim_nip(struct ForthEngine *engine)
 {
-    //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-
-    //Copy value on stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=*engine->stack;
+    
+    engine->stack_index--;
+    engine->stack[engine->stack_index-1]=engine->stack[engine->stack_index];
 }
 
 //TRUE
 void prim_true(struct ForthEngine *engine)
 {
-    //Write value for space character
-    *engine->stack=FORTH_TRUE;
-
-    //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack[engine->stack_index]=FORTH_FALSE;
+    engine->stack_index++;
 }
 
 //TUCK
 void prim_tuck(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t arg1=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t arg2=*(int32_t*)((engine->stack_base)|lower);
+    int32_t arg1=engine->stack[engine->stack_index-1];
+    int32_t arg2=engine->stack[engine->stack_index-2];
 
     //Write values to stack
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg2;
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    *(int32_t*)((engine->stack_base)|lower)=arg1;
-    *engine->stack=arg1;
+    engine->stack[engine->stack_index]=arg1;
+    engine->stack[engine->stack_index-1]=arg2;
+    engine->stack[engine->stack_index-2]=arg1;
     
     //Advance stack pointer
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //UNUSED
 void prim_unused(struct ForthEngine *engine)
 {
+    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Write memory amount left
-    *engine->stack=engine->data_size-engine->data_index;
+    engine->stack[engine->stack_index]=engine->data_size-engine->data_index;
 
     //Advance stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //WITHIN
 void prim_within(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t max=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    int32_t min=*(int32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
-
+    engine->stack_index--;
+    int32_t max=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t min=engine->stack[engine->stack_index];
+    int32_t value=engine->stack[engine->stack_index-1];
     //Write value to stack
-    lower=((uintptr_t)(engine->stack+3))&FORTH_STACK_MASK;
-    if ((value>=min)&&(value<=max)) *(int32_t*)((engine->stack_base)|lower)=FORTH_TRUE;
-    else *(int32_t*)((engine->stack_base)|lower)=FORTH_FALSE;
-    
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if ((value>=min)&&(value<=max)) engine->stack[engine->stack_index-1]=FORTH_TRUE;
+    else engine->stack[engine->stack_index-1]=FORTH_FALSE;
 }
 
 //DOT_S
@@ -2245,13 +2160,11 @@ void prim_dot_s(struct ForthEngine *engine)
         text_int32(stack_count,text_buffer);
         engine->print(text_buffer);
         engine->print("> ");
-        int32_t *stack=engine->stack+stack_count;
         for (int32_t i=0;i<stack_count;i++)
         {
-            text_int32(*stack,text_buffer);
+            text_int32(engine->stack[i],text_buffer);
             engine->print(text_buffer);
             engine->print(" ");
-            stack--;
         }
 
         //Update screen
@@ -2263,13 +2176,11 @@ void prim_dot_s(struct ForthEngine *engine)
 void prim_question(struct ForthEngine *engine)
 {
     //Update stack pointer
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
     if (engine->print!=NULL)
     {
         //Read and mask address
-        uint32_t address=(*(engine->stack))&engine->data_mask_32;
+        uint32_t address=(engine->stack[engine->stack_index])&engine->data_mask_32;
 
         //Read from address
         int32_t value=*(int32_t*)(engine->data+address);
@@ -2294,10 +2205,8 @@ void prim_dump(struct ForthEngine *engine)
     if (engine->print!=NULL)
     {
         //Fetch arguments
-        lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-        uint32_t count=*(int32_t*)((engine->stack_base)|lower);
-        lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-        uint32_t address=*(int32_t*)((engine->stack_base)|lower);
+        int32_t count=engine->stack[engine->stack_index-1];
+        int32_t address=engine->stack[engine->stack_index-2];
         
         //Fetch and print bytes
         bool newline=true;
@@ -2377,8 +2286,7 @@ void prim_dump(struct ForthEngine *engine)
     }
 
     //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index-=2;
 }
 
 //SEE
@@ -2397,7 +2305,7 @@ void prim_bye(struct ForthEngine *engine)
 void prim_reset(struct ForthEngine *engine)
 {
     //Reset Forth data stack
-    engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
+    engine->stack_index=0;
 }
 
 //WALIGN
@@ -2411,32 +2319,30 @@ void prim_walign(struct ForthEngine *engine)
 void prim_waligned(struct ForthEngine *engine)
 {
     //Fetch address to align
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    uint32_t address=engine->stack[engine->stack_index-1];
 
     //Round up to even address
     address+=address&1;
     
     //Write address back even if aligned so always masked
-    *(int32_t*)((engine->stack_base)|lower)=(address&engine->data_mask_16);
+    engine->stack[engine->stack_index-1]=(address&engine->data_mask_16);
 }
 
 //PRINTABLE
 void prim_printable(struct ForthEngine *engine)
 {
     //Fetch key to look up
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t key=*(int32_t*)((engine->stack_base)|lower);
+    int32_t key=engine->stack[engine->stack_index-1];
 
     if (engine->printable!=NULL)
     {
         //Return printable character for key
-        *(int32_t*)((engine->stack_base)|lower)=engine->printable(key);
+        engine->stack[engine->stack_index-1]=engine->printable(key);
     }
     else
     {
         //No printable function - return 0
-        *(int32_t*)((engine->stack_base)|lower)=0;
+        engine->stack[engine->stack_index-1]=0;
     }
 }
 
@@ -2445,11 +2351,10 @@ void prim_printable(struct ForthEngine *engine)
 void prim_erase(struct ForthEngine *engine)
 {
     //Fetch values from stack
-    uintptr_t lower;
-    lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    uint32_t count=*(uint32_t*)((engine->stack_base)|lower);
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    uint32_t address=*(uint32_t*)((engine->stack_base)|lower);
+    engine->stack_index--;
+    int32_t count=engine->stack[engine->stack_index];
+    engine->stack_index--;
+    int32_t address=engine->stack[engine->stack_index];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -2460,52 +2365,52 @@ void prim_erase(struct ForthEngine *engine)
         *(engine->data+address)=0;
         address++;
     }
-
-    //Update stack pointer
-    lower=((uintptr_t)(engine->stack+2))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
 }
 
 //CXT
 void prim_cxt(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    int32_t value=engine->stack[engine->stack_index-1];
     if (value&0x80) value|=0xFFFFFF00;
     else value&=0xFF;
-    *(int32_t*)((engine->stack_base)|lower)=value;
+    engine->stack[engine->stack_index-1]=value;
 }
 
 //WXT
 void prim_wxt(struct ForthEngine *engine)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    int32_t value=*(int32_t*)((engine->stack_base)|lower);
+    int32_t value=engine->stack[engine->stack_index-1];
     if (value&0x8000) value|=0xFFFF0000;
     else value&=0xFFFF;
-    *(int32_t*)((engine->stack_base)|lower)=value;
+    engine->stack[engine->stack_index-1]=value;
 }
 
 //PERF
 void prim_perf(struct ForthEngine *engine)
 {
+    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
     //Write performance counter
-    *engine->stack=engine->perf_value;
+    engine->stack[engine->stack_index]=engine->perf_value;
 
     //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //SIZE
 void prim_size(struct ForthEngine *engine)
 {
     //Write size of Forth data memory
-    *engine->stack=engine->data_size;
+    engine->stack[engine->stack_index]=engine->data_size;
 
     //Advance stack pointer
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    engine->stack_index++;
 }
 
 //Globals
@@ -2672,9 +2577,10 @@ const struct ForthPrimitive forth_primitives[]=
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_leave,      true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_loop,       true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_plus_loop,  true},
-    {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_push,       true},
+    {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_push,       false, 0, 1},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_s_quote,    true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_secondary,  true},
+    //TODO: add locals
 
 
     //Word browser showing source or disassembly of all words

@@ -18,16 +18,13 @@
 - add >= and <=
 
 - EXECUTE
-  - disabled EXEC in EXEC bc circular stack but enabled now that stack no longer circular
+  - disabled EXEC in EXEC bc circular stack but enabled now that stack no longer circular so double check works
+  - double check action_execute
 
 - insert checks after the fact for stack
   - at the top of each if block etc
   - possible to eliminate for do loop if no branch or secondary inside?
     - could keep track of whether each block or word is clean but then cant redefine
-
-- improve memory system
-  - need to add lots of different mem types so better to have list of mem segments
-    if they all work the same way. IIRC, all sections currently have custom update :(
 
 - local variables
   - store names after word for debugger and browser

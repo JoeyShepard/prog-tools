@@ -211,7 +211,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
         if (index<stack_count)
         {
             //Stack value to print
-            text_hex32_padded(*(engine->stack+index+1),text_buffer+2,8);
+            text_hex32_padded(engine->stack[engine->stack_index-index-1],text_buffer+2,8);
         }
         else
         {
@@ -1114,7 +1114,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
                     break;
                 case VKEY_INS:  //Shift+VKEY_DEL
                     //Reset Forth data stack
-                    forth->engine->stack=(int32_t*)(forth->engine->stack_base+(forth->engine->stack_count-1)*FORTH_CELL_SIZE);
+                    forth->engine->stack_index=0;
                     break;
                 default:
                     //Check for system keys like MENU, OFF, etc

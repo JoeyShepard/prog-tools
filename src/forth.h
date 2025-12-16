@@ -127,6 +127,7 @@
         FORTH_ERROR_NOT_FOUND,
         FORTH_ERROR_ON_KEY,
         FORTH_ERROR_OUT_OF_MEMORY,          //Memory is completely full. See FORTH_ERROR_INSUFFICIENT_MEMORY.
+        FORTH_ERROR_OVERFLOW,               //For immediates like TICK. See also FORTH_ENGINE_ERROR_OVERFLOW.
         FORTH_ERROR_PLUS_LOOP_WITHOUT_DO,
         FORTH_ERROR_REPEAT_WITHOUT_WHILE,
         FORTH_ERROR_RESIZE_MIN,
@@ -134,6 +135,8 @@
         FORTH_ERROR_RIGHT_BRACKET,
         FORTH_ERROR_THEN_WITHOUT_IF,
         FORTH_ERROR_TOO_LONG,
+                                            //TODO: not TICK but ... ?
+        FORTH_ERROR_UNDERFLOW,              //For immediates like TICK. See also FORTH_ENGINE_ERROR_OVERFLOW.
         FORTH_ERROR_UNTERMINATED_BEGIN,
         FORTH_ERROR_UNTERMINATED_CASE,
         FORTH_ERROR_UNTERMINATED_OF,

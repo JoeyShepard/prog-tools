@@ -34,7 +34,7 @@ void forth_init_engine(struct ForthEngine *engine,
     int16_t screen_height)
 {
     //Init Forth engine pointers (these values never change)
-    engine->stack_base=(uintptr_t)stack_base;
+    engine->stack=stack_base;
     engine->rstack_base=(struct ForthRStackElement *)rstack_base;
     engine->locals_base=locals_base;
 
@@ -97,7 +97,7 @@ void forth_reset_engine(struct ForthEngine *engine)
 void forth_reset_engine_stacks(struct ForthEngine *engine)
 {
     //Reset stack pointers
-    engine->stack=(int32_t*)(engine->stack_base+(engine->stack_count-1)*FORTH_CELL_SIZE);
+    engine->stack_index=0;
     engine->rstack=engine->rstack_base+engine->rstack_count-1;
     engine->locals_stack=engine->locals_base+engine->locals_count-1;
 }
@@ -129,21 +129,35 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
 
 int32_t forth_stack_count(struct ForthEngine *engine)
 {
-    return FORTH_STACK_ELEMENTS-((uintptr_t)(engine->stack)-(uintptr_t)(engine->stack_base))/FORTH_CELL_SIZE-1;
+    return engine->stack_index;
 }
 
-void forth_push(struct ForthEngine *engine,int32_t value)
+int forth_push(struct ForthEngine *engine,int32_t value)
 {
-    *engine->stack=value;
-    uintptr_t lower=((uintptr_t)(engine->stack-1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
+    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        return FORTH_ERROR_OVERFLOW;
+    }
+
+    engine->stack[engine->stack_index]=value;
+    engine->stack_index++;
+
+    return FORTH_ERROR_NONE;
 }
 
-int32_t forth_pop(struct ForthEngine *engine)
+int forth_pop(struct ForthEngine *engine,int32_t *value)
 {
-    uintptr_t lower=((uintptr_t)(engine->stack+1))&FORTH_STACK_MASK;
-    engine->stack=(int32_t*)((engine->stack_base)|lower);
-    return *engine->stack;
+    if (engine->stack_index==0)
+    {
+        //Underflow
+        return FORTH_ERROR_UNDERFLOW;
+    }
+
+    engine->stack_index--;
+    *value=engine->stack[engine->stack_index];
+
+    return FORTH_ERROR_NONE;
 }
 
 void forth_rstack_push(int32_t value,int32_t value_max,uint8_t type,uint32_t index,struct ForthEngine *engine)
