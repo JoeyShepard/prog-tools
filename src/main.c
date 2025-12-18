@@ -343,10 +343,6 @@ int main(void)                      //cg50 and PC
     //Initialize logging if on PC
     init_logging("log.txt");
 
-    //TODO: remove
-    const int expected_count=148;
-    log_none("Primitive count: %d of %d (%d left)\n",forth_primitives_len,expected_count,expected_count-forth_primitives_len);
-
     //Configure device specific settings - TCP on PC and timer on calculator
     setup(TICK_MS);
 

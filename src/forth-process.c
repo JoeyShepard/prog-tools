@@ -7,6 +7,7 @@
 #include "forth.h"
 #include "forth-action-list.h"
 #include "forth-actions.h"
+#include "forth-check.h"
 #include "forth-locals.h"
 #include "forth-primitives.h"
 #include "forth-process.h"
@@ -352,6 +353,9 @@ int write_definition_primitive(void (*word)(struct ForthEngine *engine),struct F
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(word);
 
+    //Update count for stack bound checks
+    compile->check_index+=sizeof(word);
+
     //Logging
     log_pop();
     
@@ -364,7 +368,7 @@ int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile)
     int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
-    //Write value to definitions - memcpy to avoid casting object pointer to function pointer
+    //Write value to definitions
     memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
 
     //Update counts in definitions memory
@@ -373,6 +377,9 @@ int write_definition_u8(uint8_t value,struct ForthCompileInfo *compile)
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(value);
+
+    //Update count for stack bound checks
+    compile->check_index+=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
@@ -383,7 +390,7 @@ int write_definition_i32(int32_t value,struct ForthCompileInfo *compile)
     int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
-    //Write value to definitions - memcpy to avoid casting object pointer to function pointer
+    //Write value to definitions
     memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
 
     //Update counts in definitions memory
@@ -392,6 +399,9 @@ int write_definition_i32(int32_t value,struct ForthCompileInfo *compile)
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(value);
+
+    //Update count for stack bound checks
+    compile->check_index+=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
@@ -402,7 +412,7 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
     int result=expand_definitions(sizeof(value),compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
-    //Write value to definitions - memcpy to avoid casting object pointer to function pointer
+    //Write value to definitions
     memcpy(compile->definitions->data+compile->definitions->index,&value,sizeof(value));
 
     //Update counts in definitions memory
@@ -411,6 +421,9 @@ int write_definition_u32(uint32_t value,struct ForthCompileInfo *compile)
 
     //Update size of definition in word header
     compile->colon_word->definition_size+=sizeof(value);
+
+    //Update count for stack bound checks
+    compile->check_index+=sizeof(value);
 
     return FORTH_ERROR_NONE;
 }
@@ -699,12 +712,60 @@ const char *local_name(uint16_t id,struct ForthCompileInfo *compile)
         return NULL;
     }
 
-    //Loop through names to find name specificed by ID
+    //Loop through names to find name specified by ID
     const char *names=compile->locals->names;
     for (int i=0;i<id;i++) names+=strlen(names)+1;
 
-    //Return pointer to word specificed by ID
+    //Return pointer to word specified by ID
     return names;
+}
+
+int compute_checks(int32_t pop_count,int32_t push_count,struct ForthCompileInfo *compile)
+{
+    if (((pop_count==0)&&(push_count==0))==false)
+    {
+        if (compile->check_index==0)
+        {
+            //Allocate space for check primitive
+            int result=write_definition_primitive(NULL,compile);
+            if (result!=FORTH_ERROR_NONE) return result;
+        }
+        int32_t new_sp=compile->check_sp-pop_count;
+        if (new_sp<compile->check_pop)
+        {
+            //TODO: check if dropped more than FORTH_CHECK_MAX
+            compile->check_pop=new_sp;
+        }
+        compile->check_sp=new_sp;
+        new_sp=compile->check_sp+push_count;
+        if (new_sp>compile->check_push)
+        {
+            //TODO: check if pushed more than FORTH_CHECK_MAX
+            compile->check_push=new_sp;
+        }
+        compile->check_sp=new_sp;
+    }
+    return FORTH_ERROR_NONE;
+}
+
+void reset_checks(struct ForthCompileInfo *compile)
+{
+    compile->check_index=0;
+    compile->check_sp=0;
+    compile->check_pop=0;
+    compile->check_push=0;
+}
+
+void finalize_checks(struct ForthCompileInfo *compile)
+{
+
+    //printf("\nfinalize: %d %d\n",compile->check_pop,compile->check_push);
+
+    if (compile->check_index!=0)
+    {
+        void (*check)(struct ForthEngine *engine)=forth_checks[-compile->check_pop][compile->check_push];
+        memcpy(compile->definitions->data+compile->definitions->index-compile->check_index,&check,sizeof(check));
+    }
 }
 
 int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile)
@@ -733,6 +794,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
             char word_buffer[FORTH_WORD_MAX+1];
             strncpy(word_buffer,source+start,compile->word_len);
             word_buffer[compile->word_len]=0;
+
+            //printf("%s ",word_buffer);
 
             //Classify word
             int32_t num=0;
@@ -806,8 +869,17 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             if (forth_primitives[compile->primitive_ID].end_block==false)
                             {
                                 //Word does not contain any stack checking - check manually
-
-                                //TODO: checks here
+                                struct ForthPrimitive primitive=forth_primitives[compile->primitive_ID];
+                                if (engine->stack_index<primitive.pop_count)
+                                {
+                                    engine->error=FORTH_ENGINE_ERROR_UNDERFLOW; 
+                                    return FORTH_ERROR_ENGINE;
+                                }
+                                else if (engine->stack_index-primitive.pop_count+primitive.push_count>FORTH_STACK_ELEMENTS)
+                                {
+                                    engine->error=FORTH_ENGINE_ERROR_OVERFLOW; 
+                                    return FORTH_ERROR_ENGINE;
+                                }
 
                             }
                             forth_engine_pre_exec(engine);
@@ -822,11 +894,10 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     else if (immediate_action==FORTH_ACTION_COMPILE_ONLY)
                     {
                         //Error - word is compile only
-                        engine->error=FORTH_ERROR_COMPILE_ONLY;
 
                         //Set pointer to word in source for error message
                         compile->error_word=source+start-compile->word_len;
-                        return FORTH_ERROR_ENGINE;
+                        return FORTH_ERROR_COMPILE_ONLY;
                     }
                     else
                     {
@@ -877,7 +948,9 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 if ((word_type==FORTH_TYPE_NUMBER)||(word_type==FORTH_TYPE_HEX))
                 {
                     //Number or hex - compile to dictionary
-                    int result=write_definition_primitive(&prim_hidden_push,compile);
+                    int result=compute_checks(0,1,compile);
+                    if (result!=FORTH_ERROR_NONE) return result;
+                    result=write_definition_primitive(&prim_hidden_push,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
                     result=write_definition_i32(num,compile);
                     if (result!=FORTH_ERROR_NONE) return result;
@@ -896,8 +969,23 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         log_text("body only\n"); 
 
                         //No special compile behavior - compile address
-                        int result=write_definition_primitive(forth_primitives[compile->primitive_ID].body,compile);
-                        if (result!=FORTH_ERROR_NONE) return result;
+                        struct ForthPrimitive primitive=forth_primitives[compile->primitive_ID];
+                        if (primitive.end_block==true)
+                        {
+                            //Primitive ends block
+                            finalize_checks(compile);
+                            int result=write_definition_primitive(forth_primitives[compile->primitive_ID].body,compile);
+                            if (result!=FORTH_ERROR_NONE) return result;
+                            reset_checks(compile);
+                        }
+                        else
+                        {
+                            //Primitive does not end block
+                            int result=compute_checks(primitive.pop_count,primitive.push_count,compile);
+                            if (result!=FORTH_ERROR_NONE) return result;
+                            result=write_definition_primitive(forth_primitives[compile->primitive_ID].body,compile);
+                            if (result!=FORTH_ERROR_NONE) return result;
+                        }
                     }
                     else if (compile_action==FORTH_ACTION_INTERPRET_ONLY)
                     {
@@ -912,10 +1000,26 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     {
                         //Process outer interpreter action requested by word if present
                         //This keeps platform specific code out of the primitives for portability
-                        int result=handle_action(compile_action,true,engine,source,&start,compile);
+                        if (forth_primitives[compile->primitive_ID].end_block==true)
+                        {
+                            //Primitive ends block - finalize stack check primitive
+                            finalize_checks(compile);
+                            int result=handle_action(compile_action,true,engine,source,&start,compile);
+                            reset_checks(compile);
 
-                        //Some actions above may set error code requiring halt to processing
-                        if (result!=FORTH_ERROR_NONE) return result;
+                            //Some actions above may set error code requiring halt to processing
+                            if (result!=FORTH_ERROR_NONE) return result;
+                        }
+                        else
+                        {
+                            int result=compute_checks(forth_primitives[compile->primitive_ID].pop_count,forth_primitives[compile->primitive_ID].push_count,compile);
+                            if (result!=FORTH_ERROR_NONE) return result;
+                            result=handle_action(compile_action,true,engine,source,&start,compile);
+
+                            //Some actions above may set error code requiring halt to processing
+                            if (result!=FORTH_ERROR_NONE) return result;
+                        }
+
                     }
 
                     //Stop logging
@@ -930,16 +1034,20 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         //Word is local
 
                         //Write primitive to push local value to stack
-                        int result=write_definition_primitive(forth_locals_fetch[id],compile);
+                        int result=compute_checks(0,1,compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
+                        result=write_definition_primitive(forth_locals_fetch[id],compile);
                         if (result!=FORTH_ERROR_NONE) return result;
                     }
                     else if (word_type==FORTH_TYPE_SECONDARY)
                     {
                         //Compile pointer to secondary
+                        finalize_checks(compile);
                         int result=write_definition_primitive(&prim_hidden_secondary,compile);
                         if (result!=FORTH_ERROR_NONE) return result;
                         result=write_definition_u32(compile->secondary->ID,compile);
                         if (result!=FORTH_ERROR_NONE) return result;
+                        reset_checks(compile);
                     }
                     else if (word_type==FORTH_TYPE_NOT_FOUND)
                     {
@@ -951,10 +1059,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         if (result!=FORTH_ERROR_NONE) return result;
 
                         //Compile pointer to secondary
+                        finalize_checks(compile);
                         result=write_definition_primitive(&prim_hidden_secondary,compile);
                         if (result!=FORTH_ERROR_NONE) return result;
                         result=write_definition_u32(new_index,compile);
                         if (result!=FORTH_ERROR_NONE) return result;
+                        reset_checks(compile);
                     }
                 }
             }

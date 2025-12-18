@@ -190,13 +190,13 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     //Gray background to left of console window
     draw_rect(x,y,FORTH_STACK_WIDTH,height,FORTH_STACK_BORDER,FORTH_STACK_BG);
 
-    //Print out Stack title and stack count
+    //Print out stack title and stack count
     struct Point pos={text_x,text_y};
     pos=draw_text("Stack[",pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
 
     //Stack count should always be less than 256 but limit anyway since only space for three characters on screen
-    uint8_t stack_count=forth_stack_count(engine);
-    text_int32(stack_count,text_buffer);
+    uint32_t stack_count=forth_stack_count(engine);
+    text_int32(stack_count%1000,text_buffer);
     pos=draw_text(text_buffer,pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
     pos=draw_text("]",pos,FORTH_STACK_FG,COL_TRANS,false,FONT_5x8);
 
@@ -206,7 +206,7 @@ static void draw_forth_stack(struct ForthEngine *engine,int x,int y,int text_x,i
     text_buffer[1]=':';
     for (int i=0;i<FORTH_STACK_SHOW_COUNT;i++)
     {
-        int index=FORTH_STACK_SHOW_COUNT-i-1;
+        uint32_t index=FORTH_STACK_SHOW_COUNT-i-1;
         text_buffer[0]=index+'0';
         if (index<stack_count)
         {
@@ -408,6 +408,9 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
         case FORTH_ERROR_OUT_OF_MEMORY:
             console_text_default("Out of memory\n",console);
             break;
+        case FORTH_ERROR_OVERFLOW:
+            console_text_default("Stack overflow\n",console);
+            break;
         case FORTH_ERROR_PLUS_LOOP_WITHOUT_DO:
             console_text_default("+LOOP without matching DO\n",console);
             break;
@@ -429,6 +432,9 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             break;
         case FORTH_ERROR_THEN_WITHOUT_IF:
             console_text_default("THEN without matching IF\n",console);
+            break;
+        case FORTH_ERROR_UNDERFLOW:
+            console_text_default("Stack underflow\n",console);
             break;
         case FORTH_ERROR_UNTERMINATED_BEGIN:
             console_text_default("BEGIN without matching AGAIN, WHILE, or UNTIL\n",console);
@@ -501,10 +507,13 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
             console_text_default("...\n",console);
             break;
         case FORTH_ENGINE_ERROR_LOCAL_STACK_FULL:
-            console_text_default("Break - out of local stack space\n",console);
+            console_text_default("Out of local stack space\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_OVERFLOW:
+            console_text_default("Stack overflow\n",console);
             break;
         case FORTH_ENGINE_ERROR_RSTACK_FULL:
-            console_text_default("Break - out of return stack space\n",console);
+            console_text_default("Out of return stack space\n",console);
             break;
         case FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET:
             console_text_default("Word is still being defined: ",console);
@@ -515,6 +524,9 @@ static void output_error_engine(struct ForthInfo *forth,struct ConsoleInfo *cons
             console_text_default("Word not defined: ",console);
             console_text_default(forth->engine->error_word,console);
             console_text_default("\n",console);
+            break;
+        case FORTH_ENGINE_ERROR_UNDERFLOW:
+            console_text_default("Stack underflow\n",console);
             break;
         default:
             //No error message for error - should never reach here unless forgot to add error message
@@ -967,7 +979,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo 5 ;\n: bar 7 { foo } foo 9 to foo foo ;\nbar\n";
     //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { a b c } b a * c - baz ;\n: baz { a } a a * ;\n1 2 3 foo\n";
     //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { b c d } c b * d - baz ;\n: baz { c } c c * ;\n1 2 3 foo\n";
-    const char *debug_keys="";
+    //const char *debug_keys="8 const r create a r 1 + allot : nqueens a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;\nnqueens";
+    const char *debug_keys="8 const rx create a rx 1 + allot : nqueens rx { r } a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;\nnqueens";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

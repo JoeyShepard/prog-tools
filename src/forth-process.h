@@ -68,6 +68,7 @@
     int add_local(const char *word_buffer,struct ForthCompileInfo *compile);
     int local_id(const char *word_buffer,struct ForthCompileInfo *compile);
     const char *local_name(uint16_t id,struct ForthCompileInfo *compile);
+    void reset_checks(struct ForthCompileInfo *compile);
     int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile);
     void update_compile_pointers(struct ForthCompileInfo *compile);
 

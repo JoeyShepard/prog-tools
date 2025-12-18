@@ -135,8 +135,7 @@
         FORTH_ERROR_RIGHT_BRACKET,
         FORTH_ERROR_THEN_WITHOUT_IF,
         FORTH_ERROR_TOO_LONG,
-                                            //TODO: not TICK but ... ?
-        FORTH_ERROR_UNDERFLOW,              //For immediates like TICK. See also FORTH_ENGINE_ERROR_OVERFLOW.
+        FORTH_ERROR_UNDERFLOW,              //For immediates like LITERAL. See also FORTH_ENGINE_ERROR_UNDERFLOW.
         FORTH_ERROR_UNTERMINATED_BEGIN,
         FORTH_ERROR_UNTERMINATED_CASE,
         FORTH_ERROR_UNTERMINATED_OF,
@@ -247,6 +246,10 @@
         uint32_t save_offset;
         uint32_t save_definition_size;
         uint8_t save_type;
+        uint32_t check_index;
+        int32_t check_sp;
+        int32_t check_pop;
+        int32_t check_push;
     };
 
 

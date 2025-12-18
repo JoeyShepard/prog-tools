@@ -1,0 +1,1300 @@
+src/forth-primitives.c:19:    if (engine->stack_index<2)
+src/forth-primitives.c:22:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:23:        engine->executing=false;
+src/forth-primitives.c:28:    int32_t loop_min=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:29:    int32_t loop_max=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:32:    engine->stack_index-=2;
+src/forth-primitives.c:35:    if (engine->rstack<engine->rstack_base)
+src/forth-primitives.c:38:        engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+src/forth-primitives.c:39:        engine->executing=false;
+src/forth-primitives.c:44:        engine->rstack->value=engine->loop_j;
+src/forth-primitives.c:45:        engine->rstack->value_max=engine->loop_j_max;
+src/forth-primitives.c:46:        engine->rstack->type=FORTH_RSTACK_DO_LOOP;
+src/forth-primitives.c:47:        engine->rstack->index=engine->word_index;;
+src/forth-primitives.c:50:        engine->rstack--;
+src/forth-primitives.c:53:        engine->loop_j=engine->loop_i;
+src/forth-primitives.c:54:        engine->loop_j_max=engine->loop_i_max;
+src/forth-primitives.c:57:        engine->loop_i=loop_min;
+src/forth-primitives.c:58:        engine->loop_i_max=loop_max;
+src/forth-primitives.c:69:        engine->rstack++;
+src/forth-primitives.c:72:        if (engine->rstack->type==FORTH_RSTACK_RETURN)
+src/forth-primitives.c:75:            engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
+src/forth-primitives.c:78:            engine->locals_stack+=engine->rstack->locals_count;
+src/forth-primitives.c:83:        else if (engine->rstack->type==FORTH_RSTACK_DONE)
+src/forth-primitives.c:86:            engine->executing=false;
+src/forth-primitives.c:102:    uint32_t quote_length=*(uint32_t *)(engine->address+1);
+src/forth-primitives.c:105:    const char *text=((char *)(engine->address+1))+sizeof(uint32_t);
+src/forth-primitives.c:109:    log_text("engine->address: %p\n",engine->address);
+src/forth-primitives.c:110:    log_text("length address: %p\n",(uint32_t *)(engine->address+1));
+src/forth-primitives.c:122:        if (engine->print!=NULL)
+src/forth-primitives.c:125:            engine->print(buffer);
+src/forth-primitives.c:136:    if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:144:    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+src/forth-primitives.c:149:    log_text("new engine->address: %p\n",engine->address);
+src/forth-primitives.c:159:    engine->stack[engine->stack_index]=engine->loop_i;
+src/forth-primitives.c:160:    engine->stack_index++;
+src/forth-primitives.c:166:    if (engine->stack_index==0)
+src/forth-primitives.c:169:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:170:        engine->executing=false;
+src/forth-primitives.c:175:    engine->stack_index--;
+src/forth-primitives.c:176:    int32_t test_value=engine->stack[engine->stack_index];
+src/forth-primitives.c:182:        int32_t offset=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:183:        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+src/forth-primitives.c:188:        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-primitives.c:196:    engine->stack[engine->stack_index]=engine->loop_j;
+src/forth-primitives.c:197:    engine->stack_index++;
+src/forth-primitives.c:204:    int32_t offset=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:205:    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+src/forth-primitives.c:211:    engine->loop_i=engine->loop_j;
+src/forth-primitives.c:212:    engine->loop_i_max=engine->loop_j_max;
+src/forth-primitives.c:215:    engine->rstack++;
+src/forth-primitives.c:216:    engine->loop_j=engine->rstack->value;
+src/forth-primitives.c:217:    engine->loop_j_max=engine->rstack->value_max;
+src/forth-primitives.c:220:    int32_t offset=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:221:    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+src/forth-primitives.c:227:    engine->loop_i++;
+src/forth-primitives.c:230:    if (engine->loop_i!=engine->loop_i_max)
+src/forth-primitives.c:233:        int32_t offset=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:234:        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+src/forth-primitives.c:239:        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-primitives.c:242:        engine->loop_i=engine->loop_j;
+src/forth-primitives.c:243:        engine->loop_i_max=engine->loop_j_max;
+src/forth-primitives.c:246:        engine->rstack++;
+src/forth-primitives.c:247:        engine->loop_j=engine->rstack->value;
+src/forth-primitives.c:248:        engine->loop_j_max=engine->rstack->value_max;
+src/forth-primitives.c:254:    if (engine->stack_index==0)
+src/forth-primitives.c:257:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:258:        engine->executing=false;
+src/forth-primitives.c:263:    engine->stack_index--;
+src/forth-primitives.c:264:    engine->loop_i+=engine->stack[engine->stack_index];
+src/forth-primitives.c:267:    if (engine->loop_i<engine->loop_i_max)
+src/forth-primitives.c:270:        int32_t offset=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:271:        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+src/forth-primitives.c:276:        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-primitives.c:279:        engine->loop_i=engine->loop_j;
+src/forth-primitives.c:280:        engine->loop_i_max=engine->loop_j_max;
+src/forth-primitives.c:283:        engine->rstack++;
+src/forth-primitives.c:284:        engine->loop_j=engine->rstack->value;
+src/forth-primitives.c:285:        engine->loop_j_max=engine->rstack->value_max;
+src/forth-primitives.c:293:    int32_t num=*(int32_t *)(engine->address+1);
+src/forth-primitives.c:296:    engine->address=(void (**)(struct ForthEngine *engine))(((int32_t *)engine->address)+1);
+src/forth-primitives.c:299:    engine->stack[engine->stack_index]=num;
+src/forth-primitives.c:300:    engine->stack_index++;
+src/forth-primitives.c:306:    if (engine->stack_index>=(FORTH_STACK_ELEMENTS-1))
+src/forth-primitives.c:309:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:310:        engine->executing=false;
+src/forth-primitives.c:315:    uint32_t quote_length=*(uint32_t *)(engine->address+1);
+src/forth-primitives.c:318:    const char *text=((char *)(engine->address+1))+sizeof(uint32_t);
+src/forth-primitives.c:321:    uint32_t address=engine->data_index;
+src/forth-primitives.c:325:    log_text("engine->address: %p\n",engine->address);
+src/forth-primitives.c:326:    log_text("length address: %p\n",(uint32_t *)(engine->address+1));
+src/forth-primitives.c:337:        *(engine->data+engine->data_index)=*text;
+src/forth-primitives.c:340:        engine->data_index=(engine->data_index+sizeof(char))&engine->data_mask;
+src/forth-primitives.c:352:    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+src/forth-primitives.c:357:    log_text("new engine->address: %p\n",engine->address);
+src/forth-primitives.c:360:    engine->stack[engine->stack_index]=address;
+src/forth-primitives.c:361:    engine->stack_index++;
+src/forth-primitives.c:362:    engine->stack[engine->stack_index]=quote_length;
+src/forth-primitives.c:363:    engine->stack_index++;
+src/forth-primitives.c:374:    uint32_t index=*(uint32_t *)(engine->address+1);
+src/forth-primitives.c:377:    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-primitives.c:380:    struct ForthWordHeader *secondary=&engine->word_headers[index];
+src/forth-primitives.c:384:        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+src/forth-primitives.c:385:        engine->error_word=secondary->name;
+src/forth-primitives.c:386:        engine->executing=false;
+src/forth-primitives.c:392:        if (engine->stack_index>=(FORTH_STACK_ELEMENTS))
+src/forth-primitives.c:395:            engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:396:            engine->executing=false;
+src/forth-primitives.c:404:        engine->stack[engine->stack_index]=num;
+src/forth-primitives.c:405:        engine->stack_index++;
+src/forth-primitives.c:410:        if (engine->rstack<engine->rstack_base)
+src/forth-primitives.c:413:            engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+src/forth-primitives.c:414:            engine->executing=false;
+src/forth-primitives.c:419:            engine->word_index++;
+src/forth-primitives.c:422:            engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
+src/forth-primitives.c:423:            engine->rstack->type=FORTH_RSTACK_RETURN;
+src/forth-primitives.c:424:            engine->rstack->index=engine->word_index;
+src/forth-primitives.c:425:            engine->rstack->locals_count=secondary->locals_count;
+src/forth-primitives.c:428:            engine->locals_stack-=secondary->locals_count;
+src/forth-primitives.c:429:            if (engine->locals_stack<engine->locals_base)
+src/forth-primitives.c:432:                engine->error=FORTH_ENGINE_ERROR_LOCAL_STACK_FULL;
+src/forth-primitives.c:433:                engine->executing=false;
+src/forth-primitives.c:437:            engine->rstack--;
+src/forth-primitives.c:440:            engine->address=secondary->address;
+src/forth-primitives.c:443:            engine->address--;
+src/forth-primitives.c:455:    engine->stack_index--;
+src/forth-primitives.c:456:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:457:    engine->stack_index--;
+src/forth-primitives.c:458:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:461:    address&=engine->data_mask_32;
+src/forth-primitives.c:464:    *(int32_t*)(engine->data+address)=value;
+src/forth-primitives.c:471:    engine->stack_index--;
+src/forth-primitives.c:472:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:475:    engine->stack_index--;
+src/forth-primitives.c:476:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:479:    address&=engine->data_mask;
+src/forth-primitives.c:482:    *(engine->data+address)=value;
+src/forth-primitives.c:489:    engine->stack_index--;
+src/forth-primitives.c:490:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:493:    engine->stack_index--;
+src/forth-primitives.c:494:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:497:    address&=engine->data_mask_16;
+src/forth-primitives.c:500:    *(int16_t*)(engine->data+address)=value;
+src/forth-primitives.c:508:    engine->stack_index--;
+src/forth-primitives.c:509:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:510:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:513:    engine->stack[engine->stack_index-1]=arg1*arg2;
+src/forth-primitives.c:520:    engine->stack_index--;
+src/forth-primitives.c:521:    int32_t divisor=engine->stack[engine->stack_index];
+src/forth-primitives.c:522:    engine->stack_index--;
+src/forth-primitives.c:523:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:524:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:532:    engine->stack[engine->stack_index-1]=quotient;
+src/forth-primitives.c:539:    engine->stack_index--;
+src/forth-primitives.c:540:    int32_t divisor=engine->stack[engine->stack_index];
+src/forth-primitives.c:541:    int32_t arg2=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:542:    int32_t arg1=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:551:    engine->stack[engine->stack_index-1]=quotient;
+src/forth-primitives.c:552:    engine->stack[engine->stack_index-2]=remainder;
+src/forth-primitives.c:559:    engine->stack_index--;
+src/forth-primitives.c:560:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:561:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:564:    engine->stack[engine->stack_index-1]=arg1+arg2;
+src/forth-primitives.c:571:    engine->data_index&=engine->data_mask_32;
+src/forth-primitives.c:574:    engine->stack_index--;
+src/forth-primitives.c:575:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:576:    *(int32_t*)(engine->data+engine->data_index)=value;
+src/forth-primitives.c:579:    engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32;
+src/forth-primitives.c:586:    engine->data_index&=engine->data_mask;
+src/forth-primitives.c:589:    engine->stack_index--;
+src/forth-primitives.c:590:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:591:    *(int8_t*)(engine->data+engine->data_index)=value;
+src/forth-primitives.c:594:    engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask;
+src/forth-primitives.c:601:    engine->data_index&=engine->data_mask_16;
+src/forth-primitives.c:604:    engine->stack_index--;
+src/forth-primitives.c:605:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:606:    *(int16_t*)(engine->data+engine->data_index)=value;
+src/forth-primitives.c:609:    engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask_16;
+src/forth-primitives.c:616:    engine->stack_index--;
+src/forth-primitives.c:617:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:618:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:621:    engine->stack[engine->stack_index-1]=arg1-arg2;
+src/forth-primitives.c:627:    if (engine->stack_index==0)
+src/forth-primitives.c:630:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:631:        engine->executing=false;
+src/forth-primitives.c:636:    engine->stack_index--;
+src/forth-primitives.c:639:    if (engine->print!=NULL)
+src/forth-primitives.c:643:        text_int32(engine->stack[engine->stack_index],text_buffer);
+src/forth-primitives.c:644:        engine->print(text_buffer);
+src/forth-primitives.c:647:        engine->print(" ");
+src/forth-primitives.c:650:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:657:    if (engine->stack_index==0)
+src/forth-primitives.c:660:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:661:        engine->executing=false;
+src/forth-primitives.c:666:    engine->stack_index--;
+src/forth-primitives.c:669:    if (engine->print!=NULL)
+src/forth-primitives.c:673:        text_uint32(engine->stack[engine->stack_index],text_buffer);
+src/forth-primitives.c:674:        engine->print(text_buffer);
+src/forth-primitives.c:677:        engine->print(" ");
+src/forth-primitives.c:680:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:687:    if (engine->stack_index==0)
+src/forth-primitives.c:690:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:691:        engine->executing=false;
+src/forth-primitives.c:696:    engine->stack_index--;
+src/forth-primitives.c:699:    if (engine->print!=NULL)
+src/forth-primitives.c:703:        text_hex32(engine->stack[engine->stack_index],text_buffer);
+src/forth-primitives.c:704:        engine->print(text_buffer);
+src/forth-primitives.c:707:        engine->print(" ");
+src/forth-primitives.c:710:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:718:    engine->stack_index--;
+src/forth-primitives.c:719:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:720:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:724:    engine->stack[engine->stack_index-1]=arg1/arg2;
+src/forth-primitives.c:731:    int32_t arg2=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:732:    int32_t arg1=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:736:    engine->stack[engine->stack_index-1]=arg1/arg2;
+src/forth-primitives.c:737:    engine->stack[engine->stack_index-2]=arg1%arg2;
+src/forth-primitives.c:744:    engine->stack_index--;
+src/forth-primitives.c:745:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:746:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:749:    engine->stack[engine->stack_index-1]=-(arg1<arg2);
+src/forth-primitives.c:756:    engine->stack_index--;
+src/forth-primitives.c:757:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:758:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:761:    engine->stack[engine->stack_index-1]=-(arg1==arg2);
+src/forth-primitives.c:768:    engine->stack_index--;
+src/forth-primitives.c:769:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:770:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:773:    engine->stack[engine->stack_index-1]=-(arg1>arg2);
+src/forth-primitives.c:784:    if (engine->stack_index<2)
+src/forth-primitives.c:787:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:788:        engine->executing=false;
+src/forth-primitives.c:791:    else if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:794:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:795:        engine->executing=false;
+src/forth-primitives.c:800:    uint32_t count=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:801:    uint32_t address=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:804:    if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:814:        address&=engine->data_mask; 
+src/forth-primitives.c:817:        char character=*(engine->data+address);
+src/forth-primitives.c:837:                    starting_address&=engine->data_mask; 
+src/forth-primitives.c:840:                    char character=*(engine->data+starting_address);
+src/forth-primitives.c:845:                        engine->error_num[j]=character;
+src/forth-primitives.c:846:                        engine->error_num[j+1]=0;
+src/forth-primitives.c:852:                engine->error=FORTH_ENGINE_ERROR_INT32_RANGE;
+src/forth-primitives.c:853:                engine->executing=false;
+src/forth-primitives.c:856:                engine->stack_index-=2;
+src/forth-primitives.c:871:    engine->stack[engine->stack_index]=unconverted_count;
+src/forth-primitives.c:872:    engine->stack[engine->stack_index-1]=address;
+src/forth-primitives.c:873:    engine->stack[engine->stack_index-2]=result;
+src/forth-primitives.c:876:    engine->stack_index++;
+src/forth-primitives.c:883:    if (engine->stack_index<2)
+src/forth-primitives.c:886:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:887:        engine->executing=false;
+src/forth-primitives.c:890:    else if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:893:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:894:        engine->executing=false;
+src/forth-primitives.c:899:    uint32_t count=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:900:    uint32_t address=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:903:    if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:913:        address&=engine->data_mask; 
+src/forth-primitives.c:914:        if  (*(engine->data+address)=='-')
+src/forth-primitives.c:929:        new_address&=engine->data_mask; 
+src/forth-primitives.c:930:        if  (*(engine->data+new_address)=='0')
+src/forth-primitives.c:933:            new_address&=engine->data_mask; 
+src/forth-primitives.c:934:            if  (*(engine->data+new_address)=='x')
+src/forth-primitives.c:949:        address&=engine->data_mask; 
+src/forth-primitives.c:952:        char character=*(engine->data+address);
+src/forth-primitives.c:976:                starting_address&=engine->data_mask; 
+src/forth-primitives.c:979:                char character=*(engine->data+starting_address);
+src/forth-primitives.c:987:                    engine->error_num[j]=character;
+src/forth-primitives.c:988:                    engine->error_num[j+1]=0;
+src/forth-primitives.c:994:            engine->error=FORTH_ENGINE_ERROR_HEX32_RANGE;
+src/forth-primitives.c:995:            engine->executing=false;
+src/forth-primitives.c:998:            engine->stack_index-=2;
+src/forth-primitives.c:1007:    engine->stack[engine->stack_index]=unconverted_count;
+src/forth-primitives.c:1008:    engine->stack[engine->stack_index-1]=address;
+src/forth-primitives.c:1009:    engine->stack[engine->stack_index-2]=result;
+src/forth-primitives.c:1012:    engine->stack_index++;
+src/forth-primitives.c:1019:    if (engine->stack_index<2)
+src/forth-primitives.c:1022:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1023:        engine->executing=false;
+src/forth-primitives.c:1028:    engine->stack_index--;
+src/forth-primitives.c:1029:    int32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:1030:    int32_t num=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1041:        address&=engine->data_mask; 
+src/forth-primitives.c:1044:        *(engine->data+address)=num_buffer[i];
+src/forth-primitives.c:1051:    engine->stack[engine->stack_index-1]=num_len;
+src/forth-primitives.c:1058:    if (engine->stack_index<2)
+src/forth-primitives.c:1061:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1062:        engine->executing=false;
+src/forth-primitives.c:1067:    engine->stack_index--;
+src/forth-primitives.c:1068:    int32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:1069:    int32_t num=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1080:        address&=engine->data_mask; 
+src/forth-primitives.c:1083:        *(engine->data+address)=num_buffer[i];
+src/forth-primitives.c:1090:    engine->stack[engine->stack_index-1]=num_len;
+src/forth-primitives.c:1096:    if (engine->stack_index==0)
+src/forth-primitives.c:1099:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1100:        engine->executing=false;
+src/forth-primitives.c:1104:    if (engine->stack[engine->stack_index-1]!=0)
+src/forth-primitives.c:1106:        if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:1109:            engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:1110:            engine->executing=false;
+src/forth-primitives.c:1115:        engine->stack[engine->stack_index]=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1118:        engine->stack_index++;
+src/forth-primitives.c:1126:    int32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1129:    address&=engine->data_mask_32;
+src/forth-primitives.c:1132:    int32_t value=*(int32_t*)(engine->data+address);
+src/forth-primitives.c:1135:    engine->stack[engine->stack_index-1]=value;
+src/forth-primitives.c:1142:    int32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1145:    address&=engine->data_mask;
+src/forth-primitives.c:1149:    uint8_t value=*(engine->data+address);
+src/forth-primitives.c:1152:    engine->stack[engine->stack_index-1]=value;
+src/forth-primitives.c:1159:    int32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1162:    address&=engine->data_mask_16;
+src/forth-primitives.c:1165:    uint16_t value=*(uint16_t*)(engine->data+address);
+src/forth-primitives.c:1168:    engine->stack[engine->stack_index-1]=value;
+src/forth-primitives.c:1174:    engine->executing=false;
+src/forth-primitives.c:1180:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1181:    if (value<0) engine->stack[engine->stack_index-1]=-value;
+src/forth-primitives.c:1187:    if (engine->stack_index<2)
+src/forth-primitives.c:1190:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1191:        engine->executing=false;
+src/forth-primitives.c:1196:    if (engine->input!=NULL)
+src/forth-primitives.c:1199:        engine->stack_index--;
+src/forth-primitives.c:1200:        uint32_t count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1201:        uint32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1204:        address&=engine->data_mask;
+src/forth-primitives.c:1205:        uint32_t bytes_written=engine->input(address,(char *)engine->data,count,engine->data_mask);
+src/forth-primitives.c:1208:        engine->stack[engine->stack_index-1]=bytes_written;
+src/forth-primitives.c:1212:        engine->stack_index--;
+src/forth-primitives.c:1213:        engine->stack[engine->stack_index-1]=0;
+src/forth-primitives.c:1220:    int32_t remainder=engine->data_index%FORTH_CELL_SIZE;
+src/forth-primitives.c:1224:        engine->data_index=(engine->data_index+FORTH_CELL_SIZE-remainder)&engine->data_mask_32;
+src/forth-primitives.c:1232:    int32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1241:    engine->stack[engine->stack_index-1]=(address&engine->data_mask_32);
+src/forth-primitives.c:1249:    log_text("data_index: %d\n",engine->data_index);
+src/forth-primitives.c:1251:    if (engine->stack_index==0)
+src/forth-primitives.c:1254:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1255:        engine->executing=false;
+src/forth-primitives.c:1260:    engine->stack_index--;
+src/forth-primitives.c:1261:    int32_t allot_count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1262:    engine->data_index=(engine->data_index+allot_count)&(engine->data_mask);
+src/forth-primitives.c:1265:    log_text("new data_index: %d\n",engine->data_index);
+src/forth-primitives.c:1273:    engine->stack_index--;
+src/forth-primitives.c:1274:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1275:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1278:    engine->stack[engine->stack_index-1]=arg1&arg2;
+src/forth-primitives.c:1285:    engine->stack[engine->stack_index]=32;
+src/forth-primitives.c:1288:    engine->stack_index++;
+src/forth-primitives.c:1295:    int32_t size=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1296:    int32_t address=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1299:    engine->stack[engine->stack_index-1]=address;
+src/forth-primitives.c:1300:    engine->stack[engine->stack_index-2]=(address+size)&engine->data_mask;
+src/forth-primitives.c:1306:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1307:    engine->stack[engine->stack_index-1]=value*FORTH_CELL_SIZE;
+src/forth-primitives.c:1313:    if (engine->print!=NULL)
+src/forth-primitives.c:1315:        engine->print("\n");
+src/forth-primitives.c:1316:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1323:    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:1326:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:1327:        engine->executing=false;
+src/forth-primitives.c:1332:    engine->stack[engine->stack_index]=forth_stack_count(engine);
+src/forth-primitives.c:1335:    engine->stack_index++;
+src/forth-primitives.c:1341:    engine->stack_index--;
+src/forth-primitives.c:1347:    engine->stack_index-=2;
+src/forth-primitives.c:1354:    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1357:    engine->stack_index++;
+src/forth-primitives.c:1364:    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1365:    engine->stack[engine->stack_index+1]=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1368:    engine->stack_index+=2;
+src/forth-primitives.c:1374:    if (engine->stack_index==0)
+src/forth-primitives.c:1377:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1378:        engine->executing=false;
+src/forth-primitives.c:1383:    engine->stack_index--;
+src/forth-primitives.c:1384:    if (engine->print!=NULL)
+src/forth-primitives.c:1388:        text_buffer[0]=engine->stack[engine->stack_index];
+src/forth-primitives.c:1390:        engine->print(text_buffer);
+src/forth-primitives.c:1393:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1400:    if (engine->stack_index==0)
+src/forth-primitives.c:1403:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1404:        engine->executing=false;
+src/forth-primitives.c:1409:    engine->stack_index--;
+src/forth-primitives.c:1411:    uint32_t word_ID=engine->stack[engine->stack_index];
+src/forth-primitives.c:1427:            engine->error=FORTH_ENGINE_ERROR_EXECUTE_NO_BODY;
+src/forth-primitives.c:1428:            engine->error_word=forth_primitives[word_ID].name;
+src/forth-primitives.c:1429:            engine->executing=false;
+src/forth-primitives.c:1432:    else if (word_ID<forth_primitives_len+engine->word_count)
+src/forth-primitives.c:1440:        struct ForthWordHeader *secondary=&engine->word_headers[secondary_id];
+src/forth-primitives.c:1444:            engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+src/forth-primitives.c:1445:            engine->error_word=secondary->name;
+src/forth-primitives.c:1446:            engine->executing=false;
+src/forth-primitives.c:1455:            engine->stack[engine->stack_index]=num;
+src/forth-primitives.c:1456:            engine->stack_index++;
+src/forth-primitives.c:1461:            if (engine->rstack<engine->rstack_base)
+src/forth-primitives.c:1464:                engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+src/forth-primitives.c:1465:                engine->executing=false;
+src/forth-primitives.c:1470:                engine->word_index++;
+src/forth-primitives.c:1473:                engine->rstack->value=(uintptr_t)(engine->address)-(uintptr_t)(engine->word_bodies);
+src/forth-primitives.c:1474:                engine->rstack->type=FORTH_RSTACK_RETURN;
+src/forth-primitives.c:1475:                engine->rstack->index=engine->word_index;
+src/forth-primitives.c:1476:                engine->rstack->locals_count=secondary->locals_count;
+src/forth-primitives.c:1479:                engine->locals_stack-=secondary->locals_count;
+src/forth-primitives.c:1480:                if (engine->locals_stack<engine->locals_base)
+src/forth-primitives.c:1483:                    engine->error=FORTH_ENGINE_ERROR_LOCAL_STACK_FULL;
+src/forth-primitives.c:1484:                    engine->executing=false;
+src/forth-primitives.c:1488:                engine->rstack--;
+src/forth-primitives.c:1491:                engine->address=secondary->address;
+src/forth-primitives.c:1494:                engine->address--;
+src/forth-primitives.c:1501:        text_uint32(word_ID,engine->error_num);
+src/forth-primitives.c:1502:        engine->error=FORTH_ENGINE_ERROR_EXECUTE_ID;
+src/forth-primitives.c:1503:        engine->executing=false;
+src/forth-primitives.c:1514:    if (engine->stack_index<3)
+src/forth-primitives.c:1517:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1518:        engine->executing=false;
+src/forth-primitives.c:1523:    engine->stack_index--;
+src/forth-primitives.c:1524:    int32_t character=engine->stack[engine->stack_index];
+src/forth-primitives.c:1525:    engine->stack_index--;
+src/forth-primitives.c:1526:    uint32_t count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1527:    engine->stack_index--;
+src/forth-primitives.c:1528:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:1533:        if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:1537:            address&=engine->data_mask;
+src/forth-primitives.c:1538:            *(engine->data+address)=character;
+src/forth-primitives.c:1553:    engine->stack[engine->stack_index]=engine->data_index;
+src/forth-primitives.c:1556:    engine->stack_index++;
+src/forth-primitives.c:1562:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1563:    engine->stack[engine->stack_index-1]=value^-1;
+src/forth-primitives.c:1569:    if (engine->stack_index==0)
+src/forth-primitives.c:1572:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1573:        engine->executing=false;
+src/forth-primitives.c:1578:    int32_t flag=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1579:    if (engine->getkey==NULL)
+src/forth-primitives.c:1582:        engine->stack[engine->stack_index-1]=0;
+src/forth-primitives.c:1588:        int32_t key=engine->getkey(blocking);
+src/forth-primitives.c:1589:        engine->stack[engine->stack_index-1]=key;
+src/forth-primitives.c:1592:        if (engine->update_modifiers!=NULL) engine->update_modifiers();
+src/forth-primitives.c:1600:    engine->stack_index--;
+src/forth-primitives.c:1601:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1602:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1605:    engine->stack[engine->stack_index-1]=arg1<<arg2;
+src/forth-primitives.c:1613:    engine->stack_index--;
+src/forth-primitives.c:1614:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1615:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1620:        engine->stack[engine->stack_index-1]=arg2;
+src/forth-primitives.c:1632:    engine->stack_index--;
+src/forth-primitives.c:1633:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1634:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1640:        engine->stack[engine->stack_index-1]=arg2;
+src/forth-primitives.c:1653:    engine->stack_index--;
+src/forth-primitives.c:1654:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1655:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1661:    engine->stack[engine->stack_index-1]=arg1%arg2;
+src/forth-primitives.c:1667:    if (engine->stack_index<3)
+src/forth-primitives.c:1670:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1671:        engine->executing=false;
+src/forth-primitives.c:1676:    engine->stack_index--;
+src/forth-primitives.c:1677:    uint32_t count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1678:    engine->stack_index--;
+src/forth-primitives.c:1679:    uint32_t dest=engine->stack[engine->stack_index];
+src/forth-primitives.c:1680:    engine->stack_index--;
+src/forth-primitives.c:1681:    uint32_t source=engine->stack[engine->stack_index];
+src/forth-primitives.c:1684:    if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:1689:        dest&=engine->data_mask;
+src/forth-primitives.c:1690:        source&=engine->data_mask;
+src/forth-primitives.c:1694:        if (dest+count>engine->data_size) dest_count=engine->data_size-dest;
+src/forth-primitives.c:1696:        if (source+count>engine->data_size) source_count=engine->data_size-source;
+src/forth-primitives.c:1703:        memmove(engine->data+dest,engine->data+source,bytes_copied);
+src/forth-primitives.c:1715:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1716:    engine->stack[engine->stack_index-1]=-value;
+src/forth-primitives.c:1723:    engine->stack_index--;
+src/forth-primitives.c:1724:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1725:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1728:    engine->stack[engine->stack_index-1]=arg1|arg2;
+src/forth-primitives.c:1735:    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1738:    engine->stack_index++;
+src/forth-primitives.c:1745:    engine->stack[engine->stack_index]=engine->stack[engine->stack_index-4];
+src/forth-primitives.c:1746:    engine->stack[engine->stack_index+1]=engine->stack[engine->stack_index-3];
+src/forth-primitives.c:1749:    engine->stack_index+=2;
+src/forth-primitives.c:1755:    if (engine->clear_console!=NULL)
+src/forth-primitives.c:1758:        engine->clear_console();
+src/forth-primitives.c:1761:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1769:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1770:    int32_t arg2=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1771:    int32_t arg3=engine->stack[engine->stack_index-3];
+src/forth-primitives.c:1774:    engine->stack[engine->stack_index-1]=arg3;
+src/forth-primitives.c:1775:    engine->stack[engine->stack_index-2]=arg1;
+src/forth-primitives.c:1776:    engine->stack[engine->stack_index-3]=arg2;
+src/forth-primitives.c:1783:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1784:    int32_t arg2=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1785:    int32_t arg3=engine->stack[engine->stack_index-3];
+src/forth-primitives.c:1788:    engine->stack[engine->stack_index-1]=arg2;
+src/forth-primitives.c:1789:    engine->stack[engine->stack_index-2]=arg3;
+src/forth-primitives.c:1790:    engine->stack[engine->stack_index-3]=arg1;
+src/forth-primitives.c:1797:    engine->stack_index--;
+src/forth-primitives.c:1798:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1799:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1802:    engine->stack[engine->stack_index-1]=arg1>>arg2;
+src/forth-primitives.c:1808:    if (engine->print!=NULL)
+src/forth-primitives.c:1810:        engine->print(" ");
+src/forth-primitives.c:1811:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1818:    if (engine->stack_index<2)
+src/forth-primitives.c:1821:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1822:        engine->executing=false;
+src/forth-primitives.c:1827:    engine->stack_index--;
+src/forth-primitives.c:1828:    int32_t space_count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1829:    if ((space_count>0)&&(engine->print!=NULL))
+src/forth-primitives.c:1831:        if (space_count>engine->max_spaces) 
+src/forth-primitives.c:1834:            space_count=engine->max_spaces;
+src/forth-primitives.c:1838:            engine->print(" ");
+src/forth-primitives.c:1842:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1850:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1851:    int32_t arg2=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1854:    engine->stack[engine->stack_index-1]=arg2;
+src/forth-primitives.c:1855:    engine->stack[engine->stack_index-2]=arg1;
+src/forth-primitives.c:1862:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1863:    int32_t arg2=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:1864:    int32_t arg3=engine->stack[engine->stack_index-3];
+src/forth-primitives.c:1865:    int32_t arg4=engine->stack[engine->stack_index-4];
+src/forth-primitives.c:1868:    engine->stack[engine->stack_index-1]=arg3;
+src/forth-primitives.c:1869:    engine->stack[engine->stack_index-2]=arg4;
+src/forth-primitives.c:1870:    engine->stack[engine->stack_index-3]=arg1;
+src/forth-primitives.c:1871:    engine->stack[engine->stack_index-4]=arg2;
+src/forth-primitives.c:1877:    if (engine->stack_index<2)
+src/forth-primitives.c:1880:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1881:        engine->executing=false;
+src/forth-primitives.c:1886:    engine->stack_index--;
+src/forth-primitives.c:1887:    uint32_t count=engine->stack[engine->stack_index];
+src/forth-primitives.c:1888:    engine->stack_index--;
+src/forth-primitives.c:1889:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:1892:    if (engine->print!=NULL)
+src/forth-primitives.c:1895:        if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:1901:            address&=engine->data_mask;
+src/forth-primitives.c:1904:            text_buffer[0]=*(engine->data+address);
+src/forth-primitives.c:1905:            engine->print(text_buffer);
+src/forth-primitives.c:1911:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1919:    engine->stack_index--;
+src/forth-primitives.c:1920:    uint32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1921:    uint32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1924:    engine->stack[engine->stack_index-1]=-(arg1<arg2);
+src/forth-primitives.c:1931:    engine->stack_index--;
+src/forth-primitives.c:1932:    uint32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1933:    uint32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1936:    engine->stack[engine->stack_index-1]=-(arg1>arg2);
+src/forth-primitives.c:1943:    engine->stack_index--;
+src/forth-primitives.c:1944:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:1945:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:1948:    engine->stack[engine->stack_index-1]=arg1^arg2;
+src/forth-primitives.c:1954:    if (engine->stack_index<2)
+src/forth-primitives.c:1957:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1958:        engine->executing=false;
+src/forth-primitives.c:1963:    engine->stack_index--;
+src/forth-primitives.c:1964:    uint32_t spaces=engine->stack[engine->stack_index];
+src/forth-primitives.c:1965:    engine->stack_index--;
+src/forth-primitives.c:1966:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:1968:    if (engine->print!=NULL)
+src/forth-primitives.c:1979:            engine->print(" ");
+src/forth-primitives.c:1982:        engine->print(text_buffer);
+src/forth-primitives.c:1985:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:1992:    if (engine->stack_index<2)
+src/forth-primitives.c:1995:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:1996:        engine->executing=false;
+src/forth-primitives.c:2001:    engine->stack_index--;
+src/forth-primitives.c:2002:    uint32_t spaces=engine->stack[engine->stack_index];
+src/forth-primitives.c:2003:    engine->stack_index--;
+src/forth-primitives.c:2004:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:2006:    if (engine->print!=NULL)
+src/forth-primitives.c:2017:            engine->print(" ");
+src/forth-primitives.c:2020:        engine->print(text_buffer);
+src/forth-primitives.c:2023:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:2030:    if (engine->stack_index<2)
+src/forth-primitives.c:2033:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-primitives.c:2034:        engine->executing=false;
+src/forth-primitives.c:2039:    engine->stack_index--;
+src/forth-primitives.c:2040:    uint32_t spaces=engine->stack[engine->stack_index];
+src/forth-primitives.c:2041:    engine->stack_index--;
+src/forth-primitives.c:2042:    int32_t value=engine->stack[engine->stack_index];
+src/forth-primitives.c:2044:    if (engine->print!=NULL)
+src/forth-primitives.c:2055:            engine->print(" ");
+src/forth-primitives.c:2058:        engine->print(text_buffer);
+src/forth-primitives.c:2061:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:2069:    engine->stack_index--;
+src/forth-primitives.c:2070:    int32_t arg2=engine->stack[engine->stack_index];
+src/forth-primitives.c:2071:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2074:    engine->stack[engine->stack_index-1]=-(arg1!=arg2);
+src/forth-primitives.c:2085:    engine->stack[engine->stack_index]=FORTH_FALSE;
+src/forth-primitives.c:2086:    engine->stack_index++;
+src/forth-primitives.c:2093:    engine->stack_index--;
+src/forth-primitives.c:2094:    engine->stack[engine->stack_index-1]=engine->stack[engine->stack_index];
+src/forth-primitives.c:2100:    engine->stack[engine->stack_index]=FORTH_FALSE;
+src/forth-primitives.c:2101:    engine->stack_index++;
+src/forth-primitives.c:2108:    int32_t arg1=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2109:    int32_t arg2=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:2112:    engine->stack[engine->stack_index]=arg1;
+src/forth-primitives.c:2113:    engine->stack[engine->stack_index-1]=arg2;
+src/forth-primitives.c:2114:    engine->stack[engine->stack_index-2]=arg1;
+src/forth-primitives.c:2117:    engine->stack_index++;
+src/forth-primitives.c:2123:    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:2126:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:2127:        engine->executing=false;
+src/forth-primitives.c:2132:    engine->stack[engine->stack_index]=engine->data_size-engine->data_index;
+src/forth-primitives.c:2135:    engine->stack_index++;
+src/forth-primitives.c:2142:    engine->stack_index--;
+src/forth-primitives.c:2143:    int32_t max=engine->stack[engine->stack_index];
+src/forth-primitives.c:2144:    engine->stack_index--;
+src/forth-primitives.c:2145:    int32_t min=engine->stack[engine->stack_index];
+src/forth-primitives.c:2146:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2148:    if ((value>=min)&&(value<=max)) engine->stack[engine->stack_index-1]=FORTH_TRUE;
+src/forth-primitives.c:2149:    else engine->stack[engine->stack_index-1]=FORTH_FALSE;
+src/forth-primitives.c:2155:    if (engine->print!=NULL)
+src/forth-primitives.c:2159:        engine->print("<");
+src/forth-primitives.c:2161:        engine->print(text_buffer);
+src/forth-primitives.c:2162:        engine->print("> ");
+src/forth-primitives.c:2165:            text_int32(engine->stack[i],text_buffer);
+src/forth-primitives.c:2166:            engine->print(text_buffer);
+src/forth-primitives.c:2167:            engine->print(" ");
+src/forth-primitives.c:2171:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:2179:    engine->stack_index--;
+src/forth-primitives.c:2180:    if (engine->print!=NULL)
+src/forth-primitives.c:2183:        uint32_t address=(engine->stack[engine->stack_index])&engine->data_mask_32;
+src/forth-primitives.c:2186:        int32_t value=*(int32_t*)(engine->data+address);
+src/forth-primitives.c:2191:        engine->print(text_buffer);
+src/forth-primitives.c:2194:        engine->print(" ");
+src/forth-primitives.c:2197:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:2204:    if (engine->print!=NULL)
+src/forth-primitives.c:2207:        uint32_t count=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2208:        uint32_t address=engine->stack[engine->stack_index-2];
+src/forth-primitives.c:2218:            address&=engine->data_mask;
+src/forth-primitives.c:2222:                engine->print("\n");
+src/forth-primitives.c:2225:                engine->print(address_buffer);
+src/forth-primitives.c:2226:                engine->print(": ");
+src/forth-primitives.c:2230:            uint8_t byte=*(engine->data+address);
+src/forth-primitives.c:2233:            engine->print(text_buffer);
+src/forth-primitives.c:2254:                    engine->print("   ");
+src/forth-primitives.c:2258:                engine->print("  ");
+src/forth-primitives.c:2259:                engine->print(byte_display);
+src/forth-primitives.c:2265:                    engine->print("\nOutput truncated");
+src/forth-primitives.c:2276:                engine->print(" ");
+src/forth-primitives.c:2284:        if (engine->update_screen!=NULL) engine->update_screen();
+src/forth-primitives.c:2288:    engine->stack_index-=2;
+src/forth-primitives.c:2299:    engine->exit_program=true;
+src/forth-primitives.c:2300:    engine->executing=false;
+src/forth-primitives.c:2307:    engine->stack_index=0;
+src/forth-primitives.c:2314:    engine->data_index=(engine->data_index+(engine->data_index&1))&engine->data_mask_16;
+src/forth-primitives.c:2321:    uint32_t address=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2327:    engine->stack[engine->stack_index-1]=(address&engine->data_mask_16);
+src/forth-primitives.c:2334:    int32_t key=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2336:    if (engine->printable!=NULL)
+src/forth-primitives.c:2339:        engine->stack[engine->stack_index-1]=engine->printable(key);
+src/forth-primitives.c:2344:        engine->stack[engine->stack_index-1]=0;
+src/forth-primitives.c:2353:    engine->stack_index--;
+src/forth-primitives.c:2354:    uint32_t count=engine->stack[engine->stack_index];
+src/forth-primitives.c:2355:    engine->stack_index--;
+src/forth-primitives.c:2356:    uint32_t address=engine->stack[engine->stack_index];
+src/forth-primitives.c:2359:    if (count>=engine->data_size) count=engine->data_size;
+src/forth-primitives.c:2363:        address&=engine->data_mask;
+src/forth-primitives.c:2364:        *(engine->data+address)=0;
+src/forth-primitives.c:2372:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2375:    engine->stack[engine->stack_index-1]=value;
+src/forth-primitives.c:2381:    int32_t value=engine->stack[engine->stack_index-1];
+src/forth-primitives.c:2384:    engine->stack[engine->stack_index-1]=value;
+src/forth-primitives.c:2390:    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-primitives.c:2393:        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-primitives.c:2394:        engine->executing=false;
+src/forth-primitives.c:2399:    engine->stack[engine->stack_index]=engine->perf_value;
+src/forth-primitives.c:2402:    engine->stack_index++;
+src/forth-primitives.c:2409:    engine->stack[engine->stack_index]=engine->data_size;
+src/forth-primitives.c:2412:    engine->stack_index++;
+src/forth-engine.c:38:    engine->stack=stack_base;
+src/forth-engine.c:39:    engine->rstack_base=(struct ForthRStackElement *)rstack_base;
+src/forth-engine.c:40:    engine->locals_base=locals_base;
+src/forth-engine.c:43:    engine->stack_count=stack_count;
+src/forth-engine.c:44:    engine->rstack_count=rstack_count;
+src/forth-engine.c:45:    engine->locals_count=locals_count;
+src/forth-engine.c:50:    engine->print=print;
+src/forth-engine.c:51:    engine->print_color=print_color;
+src/forth-engine.c:52:    engine->input=input;
+src/forth-engine.c:53:    engine->getkey=getkey;
+src/forth-engine.c:54:    engine->printable=printable;
+src/forth-engine.c:55:    engine->update_screen=update_screen;
+src/forth-engine.c:56:    engine->update_modifiers=update_modifiers;
+src/forth-engine.c:57:    engine->clear_console=clear_console;
+src/forth-engine.c:58:    engine->max_spaces=max_spaces;
+src/forth-engine.c:59:    engine->screen_width=screen_width;
+src/forth-engine.c:60:    engine->screen_height=screen_height;
+src/forth-engine.c:66:    engine->perf_value=0;
+src/forth-engine.c:71:    engine->data_size=data_size;
+src/forth-engine.c:72:    engine->data_mask=data_size-1;
+src/forth-engine.c:73:    engine->data_index&=engine->data_mask;
+src/forth-engine.c:74:    engine->data_mask_16=(engine->data_mask)&FORTH_MASK_16;
+src/forth-engine.c:75:    engine->data_mask_32=(engine->data_mask)&FORTH_MASK_32;
+src/forth-engine.c:82:    engine->data=data;
+src/forth-engine.c:89:    engine->state=false;
+src/forth-engine.c:90:    engine->in_bracket=false;
+src/forth-engine.c:91:    engine->data_index=0;
+src/forth-engine.c:101:    engine->stack_index=0;
+src/forth-engine.c:102:    engine->rstack=engine->rstack_base+engine->rstack_count-1;
+src/forth-engine.c:103:    engine->locals_stack=engine->locals_base+engine->locals_count-1;
+src/forth-engine.c:112:    engine->word_action=FORTH_ACTION_NONE;
+src/forth-engine.c:115:    engine->error=FORTH_ENGINE_ERROR_NONE;
+src/forth-engine.c:118:    engine->word_index=0;
+src/forth-engine.c:121:    engine->loop_i=0;
+src/forth-engine.c:122:    engine->loop_i_max=0;
+src/forth-engine.c:123:    engine->loop_j=0;
+src/forth-engine.c:124:    engine->loop_j_max=0;
+src/forth-engine.c:127:    engine->rstack=engine->rstack_base+engine->rstack_count-1;
+src/forth-engine.c:128:    engine->locals_stack=engine->locals_base+engine->locals_count;
+src/forth-engine.c:133:    return engine->stack_index;
+src/forth-engine.c:138:    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+src/forth-engine.c:144:    engine->stack[engine->stack_index]=value;
+src/forth-engine.c:145:    engine->stack_index++;
+src/forth-engine.c:152:    if (engine->stack_index==0)
+src/forth-engine.c:158:    engine->stack_index--;
+src/forth-engine.c:159:    *value=engine->stack[engine->stack_index];
+src/forth-engine.c:166:    if (engine->rstack<engine->rstack_base)
+src/forth-engine.c:169:        engine->error=FORTH_ENGINE_ERROR_RSTACK_FULL;
+src/forth-engine.c:170:        engine->executing=false;
+src/forth-engine.c:175:        engine->rstack->value=value;
+src/forth-engine.c:176:        engine->rstack->value_max=value_max;
+src/forth-engine.c:177:        engine->rstack->type=type;
+src/forth-engine.c:178:        engine->rstack->index=index;
+src/forth-engine.c:181:        engine->rstack--;
+src/forth-engine.c:191:        engine->error=FORTH_ENGINE_ERROR_UNDEFINED;
+src/forth-engine.c:192:        engine->error_word=secondary->name;
+src/forth-engine.c:194:    else if (((engine->state==FORTH_STATE_INTERPRET)&&(engine->in_bracket==true))&&(colon_word==secondary))
+src/forth-engine.c:197:        engine->error=FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET;
+src/forth-engine.c:198:        engine->error_word=secondary->name;
+src/forth-engine.c:204:        engine->executing=true;
+src/forth-engine.c:205:        engine->address=secondary->address;
+src/forth-engine.c:206:        engine->word_headers=word_headers;
+src/forth-engine.c:207:        engine->word_bodies=word_bodies;
+src/forth-engine.c:208:        engine->word_count=word_count;
+src/forth-engine.c:211:        engine->locals_stack-=secondary->locals_count;
+src/forth-engine.c:214:        forth_rstack_push(0,0,FORTH_RSTACK_DONE,engine->word_index,engine);
+src/forth-engine.c:216:        //Point to engine->executing flag so interrupt can set to false when ON pressed
+src/forth-engine.c:217:        on_key_executing=&engine->executing;
+src/forth-engine.c:223:        wrapper_perf_start(&engine->perf_counter); 
+src/forth-engine.c:226:        while(engine->executing)
+src/forth-engine.c:229:            log_text("address: %p [",engine->address);
+src/forth-engine.c:230:            log_bytes(engine->address,32);
+src/forth-engine.c:232:            log_primitive(engine->address,word_headers); 
+src/forth-engine.c:236:            (*engine->address)(engine);
+src/forth-engine.c:237:            engine->address++;
+src/forth-engine.c:241:        engine->perf_value=wrapper_perf_stop(&engine->perf_counter); 
+src/forth-engine.c:243:        //Clear address so interrupt doesn't set when ON pressed - address on engine->executing changes
+src/forth-engine.c:251:    return engine->error;
+src/forth.c:214:            text_hex32_padded(engine->stack[engine->stack_index-index-1],text_buffer+2,8);
+src/forth.c:381:            console_text_default(engine->error_num,console);
+src/forth.c:386:            console_text_default(engine->error_num,console);
+src/forth.c:422:            console_text_default(engine->error_num,console);
+src/forth.c:427:            console_text_default(engine->error_num,console);
+src/forth.c:483:    switch (forth->engine->error)
+src/forth.c:491:            console_text_default(forth->engine->error_num,console);
+src/forth.c:496:            console_text_default(forth->engine->error_word,console);
+src/forth.c:501:            console_text_default(forth->engine->error_num,console);
+src/forth.c:506:            console_text_default(forth->engine->error_num,console);
+src/forth.c:520:            console_text_default(forth->engine->error_word,console);
+src/forth.c:525:            console_text_default(forth->engine->error_word,console);
+src/forth.c:535:            text_int32(forth->engine->error,num_buffer);
+src/forth.c:578:    //TODO: check engine->exit_program set by BYE and exit
+src/forth.c:619:    if ((forth->engine->state==FORTH_STATE_COMPILE)||((forth->engine->state==FORTH_STATE_INTERPRET)&&(forth->engine->in_bracket==true)))
+src/forth.c:690:        forth->engine->state=FORTH_STATE_INTERPRET;
+src/forth.c:691:        forth->engine->in_bracket=false;
+src/forth.c:1130:                    forth->engine->stack_index=0;
+src/forth-actions.c:185:    if (engine->print_color!=NULL) engine->print_color(text,color);
+src/forth-actions.c:186:    else if (engine->print!=NULL) engine->print(text);
+src/forth-actions.c:268:    if (engine->in_bracket==true)
+src/forth-actions.c:344:    engine->state=FORTH_STATE_COMPILE;
+src/forth-actions.c:371:    if (engine->in_bracket==true)
+src/forth-actions.c:413:    if (engine->in_bracket==true)
+src/forth-actions.c:435:    uint32_t variable_address=align4(engine->data_index)&engine->data_mask_32;
+src/forth-actions.c:436:    engine->data_index=variable_address;
+src/forth-actions.c:505:                if (engine->print!=NULL)
+src/forth-actions.c:507:                    engine->print(buffer);
+src/forth-actions.c:515:    if ((engine->update_screen!=NULL)&&(characters_printed)) engine->update_screen();
+src/forth-actions.c:564:    engine->stack_index--;
+src/forth-actions.c:565:    uint32_t word_ID=engine->stack[engine->stack_index];
+src/forth-actions.c:582:        text_uint32(word_ID,engine->error_num);
+src/forth-actions.c:870:    if ((engine->print_color==NULL)&&(engine->print==NULL))
+src/forth-actions.c:938:            if ((engine->screen_width>0)&&(*line_characters+word_len+1>=engine->screen_width))
+src/forth-actions.c:962:    if ((engine->update_screen!=NULL)&&(redraw==true)) engine->update_screen();
+src/forth-actions.c:980:    uint32_t address=engine->data_index;
+src/forth-actions.c:1076:                    engine->stack[engine->stack_index]=address;
+src/forth-actions.c:1077:                    engine->stack_index++;
+src/forth-actions.c:1078:                    engine->stack[engine->stack_index]=bytes_written;
+src/forth-actions.c:1079:                    engine->stack_index++;
+src/forth-actions.c:1229:                log_text("writing to index %d (size: %d)\n",engine->data_index,engine->data_size);
+src/forth-actions.c:1232:                *(engine->data+engine->data_index)=character;
+src/forth-actions.c:1236:                engine->data_index=(engine->data_index+sizeof(character))&engine->data_mask;
+src/forth-actions.c:1241:                *(engine->data+engine->data_index)=character2;
+src/forth-actions.c:1245:                engine->data_index=(engine->data_index+sizeof(character))&engine->data_mask;
+src/forth-actions.c:1295:    engine->stack_index--;
+src/forth-actions.c:1298:    uint32_t data_size=engine->stack[engine->stack_index];
+src/forth-actions.c:1301:    if (data_size>(engine->data_size+heap_left()))
+src/forth-actions.c:1304:        text_uint32(data_size,engine->error_num);
+src/forth-actions.c:1312:        text_uint32(FORTH_MEM_DATA_MIN,engine->error_num);
+src/forth-actions.c:1326:                text_uint32(data_size,engine->error_num);
+src/forth-actions.c:1364:    if ((engine->print_color==NULL)&&(engine->print==NULL))
+src/forth-actions.c:1465:            if ((engine->screen_width>0)&&(*line_characters+word_len+1>=engine->screen_width))
+src/forth-actions.c:1492:    if ((engine->update_screen!=NULL)&&(redraw==true)) engine->update_screen();
+src/forth-actions.c:1555:    engine->state=FORTH_STATE_INTERPRET;
+src/forth-actions.c:1556:    engine->in_bracket=false;
+src/forth-actions.c:1713:    if (engine->in_bracket==true)
+src/forth-actions.c:1735:    uint32_t variable_address=align4(engine->data_index)&engine->data_mask_32;
+src/forth-actions.c:1736:    engine->data_index=(variable_address+sizeof(int32_t))&engine->data_mask_32; 
+src/forth-actions.c:1804:        engine->stack[engine->stack_index]=compile->secondary->definition_size;
+src/forth-actions.c:1805:        engine->stack_index++;
+src/forth-actions.c:1908:            engine->state=FORTH_STATE_INTERPRET;
+src/forth-actions.c:1909:            engine->in_bracket=true;
+src/forth-actions.c:1951:            if (engine->in_bracket==false) 
+src/forth-actions.c:1958:                engine->state=FORTH_STATE_COMPILE;
+src/main.c:163:double check all engine->print references check not NULL
+src/forth-process.c:771:    engine->exit_program=false;
+src/forth-process.c:834:            if (engine->state==FORTH_STATE_INTERPRET)
+src/forth-process.c:868:                                if (engine->stack_index<primitive.pop_count)
+src/forth-process.c:870:                                    engine->error=FORTH_ENGINE_ERROR_UNDERFLOW; 
+src/forth-process.c:873:                                else if (engine->stack_index-primitive.pop_count+primitive.push_count>FORTH_STACK_ELEMENTS)
+src/forth-process.c:875:                                    engine->error=FORTH_ENGINE_ERROR_OVERFLOW; 
+src/forth-process.c:882:                            if (engine->error!=FORTH_ENGINE_ERROR_NONE)
+src/forth-process.c:892:                        engine->error=FORTH_ERROR_COMPILE_ONLY;
+src/forth-process.c:913:                    on_key_executing=&engine->executing;
+src/forth-process.c:939:                if (engine->exit_program) return FORTH_ERROR_NONE;
+src/forth-process.c:941:            else if (engine->state==FORTH_STATE_COMPILE)
+src/forth-process.c:989:                        engine->error=FORTH_ERROR_INTERPRET_ONLY;
+src/forth-locals.c:11:    uint32_t num=*(uint32_t *)(engine->address+1);
+src/forth-locals.c:16:    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-locals.c:18:    if (engine->stack_index<count)
+src/forth-locals.c:21:        engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-locals.c:22:        engine->executing=false;
+src/forth-locals.c:27:    int32_t temp_index=engine->stack_index;
+src/forth-locals.c:28:    int32_t *temp_stack=engine->stack;
+src/forth-locals.c:35:        engine->locals_stack[offset]=temp_stack[temp_index];
+src/forth-locals.c:40:    engine->stack_index=temp_index;
+src/forth-locals.c:46:    uint32_t num=*(uint32_t *)(engine->address+1);
+src/forth-locals.c:51:    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+src/forth-locals.c:56:        engine->locals_stack[offset]=0;
+src/forth-locals.c:66:    engine->stack[engine->stack_index]=engine->locals_stack[0];
+src/forth-locals.c:69:    engine->stack_index++;
+src/forth-locals.c:75:    engine->stack[engine->stack_index]=engine->locals_stack[1];
+src/forth-locals.c:78:    engine->stack_index++;
+src/forth-locals.c:84:    engine->stack[engine->stack_index]=engine->locals_stack[2];
+src/forth-locals.c:87:    engine->stack_index++;
+src/forth-locals.c:93:    engine->stack[engine->stack_index]=engine->locals_stack[3];
+src/forth-locals.c:96:    engine->stack_index++;
+src/forth-locals.c:102:    engine->stack[engine->stack_index]=engine->locals_stack[4];
+src/forth-locals.c:105:    engine->stack_index++;
+src/forth-locals.c:111:    engine->stack[engine->stack_index]=engine->locals_stack[5];
+src/forth-locals.c:114:    engine->stack_index++;
+src/forth-locals.c:120:    engine->stack[engine->stack_index]=engine->locals_stack[6];
+src/forth-locals.c:123:    engine->stack_index++;
+src/forth-locals.c:129:    engine->stack[engine->stack_index]=engine->locals_stack[7];
+src/forth-locals.c:132:    engine->stack_index++;
+src/forth-locals.c:138:    engine->stack[engine->stack_index]=engine->locals_stack[8];
+src/forth-locals.c:141:    engine->stack_index++;
+src/forth-locals.c:147:    engine->stack[engine->stack_index]=engine->locals_stack[9];
+src/forth-locals.c:150:    engine->stack_index++;
+src/forth-locals.c:156:    engine->stack[engine->stack_index]=engine->locals_stack[10];
+src/forth-locals.c:159:    engine->stack_index++;
+src/forth-locals.c:165:    engine->stack[engine->stack_index]=engine->locals_stack[11];
+src/forth-locals.c:168:    engine->stack_index++;
+src/forth-locals.c:174:    engine->stack[engine->stack_index]=engine->locals_stack[12];
+src/forth-locals.c:177:    engine->stack_index++;
+src/forth-locals.c:183:    engine->stack[engine->stack_index]=engine->locals_stack[13];
+src/forth-locals.c:186:    engine->stack_index++;
+src/forth-locals.c:192:    engine->stack[engine->stack_index]=engine->locals_stack[14];
+src/forth-locals.c:195:    engine->stack_index++;
+src/forth-locals.c:201:    engine->stack[engine->stack_index]=engine->locals_stack[15];
+src/forth-locals.c:204:    engine->stack_index++;
+src/forth-locals.c:210:    engine->stack[engine->stack_index]=engine->locals_stack[16];
+src/forth-locals.c:213:    engine->stack_index++;
+src/forth-locals.c:219:    engine->stack[engine->stack_index]=engine->locals_stack[17];
+src/forth-locals.c:222:    engine->stack_index++;
+src/forth-locals.c:228:    engine->stack[engine->stack_index]=engine->locals_stack[18];
+src/forth-locals.c:231:    engine->stack_index++;
+src/forth-locals.c:237:    engine->stack[engine->stack_index]=engine->locals_stack[19];
+src/forth-locals.c:240:    engine->stack_index++;
+src/forth-locals.c:246:    engine->stack[engine->stack_index]=engine->locals_stack[20];
+src/forth-locals.c:249:    engine->stack_index++;
+src/forth-locals.c:255:    engine->stack[engine->stack_index]=engine->locals_stack[21];
+src/forth-locals.c:258:    engine->stack_index++;
+src/forth-locals.c:264:    engine->stack[engine->stack_index]=engine->locals_stack[22];
+src/forth-locals.c:267:    engine->stack_index++;
+src/forth-locals.c:273:    engine->stack[engine->stack_index]=engine->locals_stack[23];
+src/forth-locals.c:276:    engine->stack_index++;
+src/forth-locals.c:282:    engine->stack[engine->stack_index]=engine->locals_stack[24];
+src/forth-locals.c:285:    engine->stack_index++;
+src/forth-locals.c:291:    engine->stack[engine->stack_index]=engine->locals_stack[25];
+src/forth-locals.c:294:    engine->stack_index++;
+src/forth-locals.c:300:    engine->stack[engine->stack_index]=engine->locals_stack[26];
+src/forth-locals.c:303:    engine->stack_index++;
+src/forth-locals.c:309:    engine->stack[engine->stack_index]=engine->locals_stack[27];
+src/forth-locals.c:312:    engine->stack_index++;
+src/forth-locals.c:318:    engine->stack[engine->stack_index]=engine->locals_stack[28];
+src/forth-locals.c:321:    engine->stack_index++;
+src/forth-locals.c:327:    engine->stack[engine->stack_index]=engine->locals_stack[29];
+src/forth-locals.c:330:    engine->stack_index++;
+src/forth-locals.c:336:    engine->stack[engine->stack_index]=engine->locals_stack[30];
+src/forth-locals.c:339:    engine->stack_index++;
+src/forth-locals.c:345:    engine->stack[engine->stack_index]=engine->locals_stack[31];
+src/forth-locals.c:348:    engine->stack_index++;
+src/forth-locals.c:356:    engine->stack_index--;
+src/forth-locals.c:359:    engine->locals_stack[0]=engine->stack[engine->stack_index];
+src/forth-locals.c:365:    engine->stack_index--;
+src/forth-locals.c:368:    engine->locals_stack[1]=engine->stack[engine->stack_index];
+src/forth-locals.c:374:    engine->stack_index--;
+src/forth-locals.c:377:    engine->locals_stack[2]=engine->stack[engine->stack_index];
+src/forth-locals.c:383:    engine->stack_index--;
+src/forth-locals.c:386:    engine->locals_stack[3]=engine->stack[engine->stack_index];
+src/forth-locals.c:392:    engine->stack_index--;
+src/forth-locals.c:395:    engine->locals_stack[4]=engine->stack[engine->stack_index];
+src/forth-locals.c:401:    engine->stack_index--;
+src/forth-locals.c:404:    engine->locals_stack[5]=engine->stack[engine->stack_index];
+src/forth-locals.c:410:    engine->stack_index--;
+src/forth-locals.c:413:    engine->locals_stack[6]=engine->stack[engine->stack_index];
+src/forth-locals.c:419:    engine->stack_index--;
+src/forth-locals.c:422:    engine->locals_stack[7]=engine->stack[engine->stack_index];
+src/forth-locals.c:428:    engine->stack_index--;
+src/forth-locals.c:431:    engine->locals_stack[8]=engine->stack[engine->stack_index];
+src/forth-locals.c:437:    engine->stack_index--;
+src/forth-locals.c:440:    engine->locals_stack[9]=engine->stack[engine->stack_index];
+src/forth-locals.c:446:    engine->stack_index--;
+src/forth-locals.c:449:    engine->locals_stack[10]=engine->stack[engine->stack_index];
+src/forth-locals.c:455:    engine->stack_index--;
+src/forth-locals.c:458:    engine->locals_stack[11]=engine->stack[engine->stack_index];
+src/forth-locals.c:464:    engine->stack_index--;
+src/forth-locals.c:467:    engine->locals_stack[12]=engine->stack[engine->stack_index];
+src/forth-locals.c:473:    engine->stack_index--;
+src/forth-locals.c:476:    engine->locals_stack[13]=engine->stack[engine->stack_index];
+src/forth-locals.c:482:    engine->stack_index--;
+src/forth-locals.c:485:    engine->locals_stack[14]=engine->stack[engine->stack_index];
+src/forth-locals.c:491:    engine->stack_index--;
+src/forth-locals.c:494:    engine->locals_stack[15]=engine->stack[engine->stack_index];
+src/forth-locals.c:500:    engine->stack_index--;
+src/forth-locals.c:503:    engine->locals_stack[16]=engine->stack[engine->stack_index];
+src/forth-locals.c:509:    engine->stack_index--;
+src/forth-locals.c:512:    engine->locals_stack[17]=engine->stack[engine->stack_index];
+src/forth-locals.c:518:    engine->stack_index--;
+src/forth-locals.c:521:    engine->locals_stack[18]=engine->stack[engine->stack_index];
+src/forth-locals.c:527:    engine->stack_index--;
+src/forth-locals.c:530:    engine->locals_stack[19]=engine->stack[engine->stack_index];
+src/forth-locals.c:536:    engine->stack_index--;
+src/forth-locals.c:539:    engine->locals_stack[20]=engine->stack[engine->stack_index];
+src/forth-locals.c:545:    engine->stack_index--;
+src/forth-locals.c:548:    engine->locals_stack[21]=engine->stack[engine->stack_index];
+src/forth-locals.c:554:    engine->stack_index--;
+src/forth-locals.c:557:    engine->locals_stack[22]=engine->stack[engine->stack_index];
+src/forth-locals.c:563:    engine->stack_index--;
+src/forth-locals.c:566:    engine->locals_stack[23]=engine->stack[engine->stack_index];
+src/forth-locals.c:572:    engine->stack_index--;
+src/forth-locals.c:575:    engine->locals_stack[24]=engine->stack[engine->stack_index];
+src/forth-locals.c:581:    engine->stack_index--;
+src/forth-locals.c:584:    engine->locals_stack[25]=engine->stack[engine->stack_index];
+src/forth-locals.c:590:    engine->stack_index--;
+src/forth-locals.c:593:    engine->locals_stack[26]=engine->stack[engine->stack_index];
+src/forth-locals.c:599:    engine->stack_index--;
+src/forth-locals.c:602:    engine->locals_stack[27]=engine->stack[engine->stack_index];
+src/forth-locals.c:608:    engine->stack_index--;
+src/forth-locals.c:611:    engine->locals_stack[28]=engine->stack[engine->stack_index];
+src/forth-locals.c:617:    engine->stack_index--;
+src/forth-locals.c:620:    engine->locals_stack[29]=engine->stack[engine->stack_index];
+src/forth-locals.c:626:    engine->stack_index--;
+src/forth-locals.c:629:    engine->locals_stack[30]=engine->stack[engine->stack_index];
+src/forth-locals.c:635:    engine->stack_index--;
+src/forth-locals.c:638:    engine->locals_stack[31]=engine->stack[engine->stack_index];
+src/forth-check.c:12:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:14:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:15:		engine->executing=false;
+src/forth-check.c:21:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:23:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:24:		engine->executing=false;
+src/forth-check.c:30:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:32:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:33:		engine->executing=false;
+src/forth-check.c:39:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:41:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:42:		engine->executing=false;
+src/forth-check.c:48:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:50:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:51:		engine->executing=false;
+src/forth-check.c:57:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:59:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:60:		engine->executing=false;
+src/forth-check.c:66:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:68:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:69:		engine->executing=false;
+src/forth-check.c:75:	if (engine->stack_index<1)	
+src/forth-check.c:77:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:78:		engine->executing=false;
+src/forth-check.c:84:	if (engine->stack_index<1)	
+src/forth-check.c:86:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:87:		engine->executing=false;
+src/forth-check.c:89:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:91:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:92:		engine->executing=false;
+src/forth-check.c:98:	if (engine->stack_index<1)	
+src/forth-check.c:100:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:101:		engine->executing=false;
+src/forth-check.c:103:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:105:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:106:		engine->executing=false;
+src/forth-check.c:112:	if (engine->stack_index<1)	
+src/forth-check.c:114:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:115:		engine->executing=false;
+src/forth-check.c:117:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:119:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:120:		engine->executing=false;
+src/forth-check.c:126:	if (engine->stack_index<1)	
+src/forth-check.c:128:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:129:		engine->executing=false;
+src/forth-check.c:131:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:133:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:134:		engine->executing=false;
+src/forth-check.c:140:	if (engine->stack_index<1)	
+src/forth-check.c:142:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:143:		engine->executing=false;
+src/forth-check.c:145:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:147:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:148:		engine->executing=false;
+src/forth-check.c:154:	if (engine->stack_index<1)	
+src/forth-check.c:156:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:157:		engine->executing=false;
+src/forth-check.c:159:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:161:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:162:		engine->executing=false;
+src/forth-check.c:168:	if (engine->stack_index<1)	
+src/forth-check.c:170:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:171:		engine->executing=false;
+src/forth-check.c:173:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:175:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:176:		engine->executing=false;
+src/forth-check.c:182:	if (engine->stack_index<2)	
+src/forth-check.c:184:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:185:		engine->executing=false;
+src/forth-check.c:191:	if (engine->stack_index<2)	
+src/forth-check.c:193:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:194:		engine->executing=false;
+src/forth-check.c:196:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:198:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:199:		engine->executing=false;
+src/forth-check.c:205:	if (engine->stack_index<2)	
+src/forth-check.c:207:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:208:		engine->executing=false;
+src/forth-check.c:210:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:212:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:213:		engine->executing=false;
+src/forth-check.c:219:	if (engine->stack_index<2)	
+src/forth-check.c:221:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:222:		engine->executing=false;
+src/forth-check.c:224:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:226:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:227:		engine->executing=false;
+src/forth-check.c:233:	if (engine->stack_index<2)	
+src/forth-check.c:235:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:236:		engine->executing=false;
+src/forth-check.c:238:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:240:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:241:		engine->executing=false;
+src/forth-check.c:247:	if (engine->stack_index<2)	
+src/forth-check.c:249:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:250:		engine->executing=false;
+src/forth-check.c:252:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:254:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:255:		engine->executing=false;
+src/forth-check.c:261:	if (engine->stack_index<2)	
+src/forth-check.c:263:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:264:		engine->executing=false;
+src/forth-check.c:266:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:268:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:269:		engine->executing=false;
+src/forth-check.c:275:	if (engine->stack_index<2)	
+src/forth-check.c:277:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:278:		engine->executing=false;
+src/forth-check.c:280:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:282:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:283:		engine->executing=false;
+src/forth-check.c:289:	if (engine->stack_index<3)	
+src/forth-check.c:291:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:292:		engine->executing=false;
+src/forth-check.c:298:	if (engine->stack_index<3)	
+src/forth-check.c:300:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:301:		engine->executing=false;
+src/forth-check.c:303:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:305:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:306:		engine->executing=false;
+src/forth-check.c:312:	if (engine->stack_index<3)	
+src/forth-check.c:314:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:315:		engine->executing=false;
+src/forth-check.c:317:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:319:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:320:		engine->executing=false;
+src/forth-check.c:326:	if (engine->stack_index<3)	
+src/forth-check.c:328:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:329:		engine->executing=false;
+src/forth-check.c:331:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:333:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:334:		engine->executing=false;
+src/forth-check.c:340:	if (engine->stack_index<3)	
+src/forth-check.c:342:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:343:		engine->executing=false;
+src/forth-check.c:345:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:347:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:348:		engine->executing=false;
+src/forth-check.c:354:	if (engine->stack_index<3)	
+src/forth-check.c:356:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:357:		engine->executing=false;
+src/forth-check.c:359:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:361:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:362:		engine->executing=false;
+src/forth-check.c:368:	if (engine->stack_index<3)	
+src/forth-check.c:370:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:371:		engine->executing=false;
+src/forth-check.c:373:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:375:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:376:		engine->executing=false;
+src/forth-check.c:382:	if (engine->stack_index<3)	
+src/forth-check.c:384:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:385:		engine->executing=false;
+src/forth-check.c:387:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:389:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:390:		engine->executing=false;
+src/forth-check.c:396:	if (engine->stack_index<4)	
+src/forth-check.c:398:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:399:		engine->executing=false;
+src/forth-check.c:405:	if (engine->stack_index<4)	
+src/forth-check.c:407:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:408:		engine->executing=false;
+src/forth-check.c:410:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:412:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:413:		engine->executing=false;
+src/forth-check.c:419:	if (engine->stack_index<4)	
+src/forth-check.c:421:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:422:		engine->executing=false;
+src/forth-check.c:424:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:426:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:427:		engine->executing=false;
+src/forth-check.c:433:	if (engine->stack_index<4)	
+src/forth-check.c:435:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:436:		engine->executing=false;
+src/forth-check.c:438:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:440:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:441:		engine->executing=false;
+src/forth-check.c:447:	if (engine->stack_index<4)	
+src/forth-check.c:449:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:450:		engine->executing=false;
+src/forth-check.c:452:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:454:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:455:		engine->executing=false;
+src/forth-check.c:461:	if (engine->stack_index<4)	
+src/forth-check.c:463:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:464:		engine->executing=false;
+src/forth-check.c:466:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:468:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:469:		engine->executing=false;
+src/forth-check.c:475:	if (engine->stack_index<4)	
+src/forth-check.c:477:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:478:		engine->executing=false;
+src/forth-check.c:480:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:482:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:483:		engine->executing=false;
+src/forth-check.c:489:	if (engine->stack_index<4)	
+src/forth-check.c:491:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:492:		engine->executing=false;
+src/forth-check.c:494:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:496:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:497:		engine->executing=false;
+src/forth-check.c:503:	if (engine->stack_index<5)	
+src/forth-check.c:505:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:506:		engine->executing=false;
+src/forth-check.c:512:	if (engine->stack_index<5)	
+src/forth-check.c:514:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:515:		engine->executing=false;
+src/forth-check.c:517:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:519:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:520:		engine->executing=false;
+src/forth-check.c:526:	if (engine->stack_index<5)	
+src/forth-check.c:528:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:529:		engine->executing=false;
+src/forth-check.c:531:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:533:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:534:		engine->executing=false;
+src/forth-check.c:540:	if (engine->stack_index<5)	
+src/forth-check.c:542:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:543:		engine->executing=false;
+src/forth-check.c:545:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:547:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:548:		engine->executing=false;
+src/forth-check.c:554:	if (engine->stack_index<5)	
+src/forth-check.c:556:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:557:		engine->executing=false;
+src/forth-check.c:559:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:561:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:562:		engine->executing=false;
+src/forth-check.c:568:	if (engine->stack_index<5)	
+src/forth-check.c:570:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:571:		engine->executing=false;
+src/forth-check.c:573:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:575:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:576:		engine->executing=false;
+src/forth-check.c:582:	if (engine->stack_index<5)	
+src/forth-check.c:584:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:585:		engine->executing=false;
+src/forth-check.c:587:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:589:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:590:		engine->executing=false;
+src/forth-check.c:596:	if (engine->stack_index<5)	
+src/forth-check.c:598:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:599:		engine->executing=false;
+src/forth-check.c:601:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:603:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:604:		engine->executing=false;
+src/forth-check.c:610:	if (engine->stack_index<6)	
+src/forth-check.c:612:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:613:		engine->executing=false;
+src/forth-check.c:619:	if (engine->stack_index<6)	
+src/forth-check.c:621:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:622:		engine->executing=false;
+src/forth-check.c:624:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:626:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:627:		engine->executing=false;
+src/forth-check.c:633:	if (engine->stack_index<6)	
+src/forth-check.c:635:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:636:		engine->executing=false;
+src/forth-check.c:638:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:640:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:641:		engine->executing=false;
+src/forth-check.c:647:	if (engine->stack_index<6)	
+src/forth-check.c:649:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:650:		engine->executing=false;
+src/forth-check.c:652:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:654:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:655:		engine->executing=false;
+src/forth-check.c:661:	if (engine->stack_index<6)	
+src/forth-check.c:663:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:664:		engine->executing=false;
+src/forth-check.c:666:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:668:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:669:		engine->executing=false;
+src/forth-check.c:675:	if (engine->stack_index<6)	
+src/forth-check.c:677:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:678:		engine->executing=false;
+src/forth-check.c:680:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:682:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:683:		engine->executing=false;
+src/forth-check.c:689:	if (engine->stack_index<6)	
+src/forth-check.c:691:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:692:		engine->executing=false;
+src/forth-check.c:694:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:696:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:697:		engine->executing=false;
+src/forth-check.c:703:	if (engine->stack_index<6)	
+src/forth-check.c:705:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:706:		engine->executing=false;
+src/forth-check.c:708:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:710:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:711:		engine->executing=false;
+src/forth-check.c:717:	if (engine->stack_index<7)	
+src/forth-check.c:719:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:720:		engine->executing=false;
+src/forth-check.c:726:	if (engine->stack_index<7)	
+src/forth-check.c:728:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:729:		engine->executing=false;
+src/forth-check.c:731:	if (engine->stack_index>=FORTH_STACK_ELEMENTS)	
+src/forth-check.c:733:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:734:		engine->executing=false;
+src/forth-check.c:740:	if (engine->stack_index<7)	
+src/forth-check.c:742:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:743:		engine->executing=false;
+src/forth-check.c:745:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-1)	
+src/forth-check.c:747:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:748:		engine->executing=false;
+src/forth-check.c:754:	if (engine->stack_index<7)	
+src/forth-check.c:756:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:757:		engine->executing=false;
+src/forth-check.c:759:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-2)	
+src/forth-check.c:761:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:762:		engine->executing=false;
+src/forth-check.c:768:	if (engine->stack_index<7)	
+src/forth-check.c:770:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:771:		engine->executing=false;
+src/forth-check.c:773:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-3)	
+src/forth-check.c:775:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:776:		engine->executing=false;
+src/forth-check.c:782:	if (engine->stack_index<7)	
+src/forth-check.c:784:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:785:		engine->executing=false;
+src/forth-check.c:787:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-4)	
+src/forth-check.c:789:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:790:		engine->executing=false;
+src/forth-check.c:796:	if (engine->stack_index<7)	
+src/forth-check.c:798:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:799:		engine->executing=false;
+src/forth-check.c:801:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-5)	
+src/forth-check.c:803:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:804:		engine->executing=false;
+src/forth-check.c:810:	if (engine->stack_index<7)	
+src/forth-check.c:812:		engine->error=FORTH_ENGINE_ERROR_UNDERFLOW;
+src/forth-check.c:813:		engine->executing=false;
+src/forth-check.c:815:	if (engine->stack_index>=FORTH_STACK_ELEMENTS-6)	
+src/forth-check.c:817:		engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+src/forth-check.c:818:		engine->executing=false;

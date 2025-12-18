@@ -18,6 +18,7 @@ set(SOURCES
   src/exceptions.c
   src/forth-actions.c
   src/forth.c
+  src/forth-check.c
   src/forth-compatibility.c
   src/forth-engine.c
   src/forth-locals.c

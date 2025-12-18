@@ -152,13 +152,6 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
     log_pop();
 }
 
-//Push I counter to stack
-void prim_hidden_i(struct ForthEngine *engine)
-{
-    //Push number to stack
-    engine->stack[engine->stack_index]=engine->loop_i;
-    engine->stack_index++;
-}
 
 //Test value on stack and jump if not 0
 void prim_hidden_if(struct ForthEngine *engine)
@@ -187,14 +180,6 @@ void prim_hidden_if(struct ForthEngine *engine)
         //Jump not taken - increment thread pointer to account for offset stored after primitive
         engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
     }
-}
-
-//Push J counter to stack
-void prim_hidden_j(struct ForthEngine *engine)
-{
-    //Push number to stack
-    engine->stack[engine->stack_index]=engine->loop_j;
-    engine->stack_index++;
 }
 
 //Jump to different part of thread
@@ -797,8 +782,8 @@ void prim_to_number(struct ForthEngine *engine)
     }
 
     //Fetch values from stack
-    int32_t count=engine->stack[engine->stack_index-1];
-    int32_t address=engine->stack[engine->stack_index-2];
+    uint32_t count=engine->stack[engine->stack_index-1];
+    uint32_t address=engine->stack[engine->stack_index-2];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -896,8 +881,8 @@ void prim_to_hex(struct ForthEngine *engine)
     }
 
     //Fetch values from stack
-    int32_t count=engine->stack[engine->stack_index-1];
-    int32_t address=engine->stack[engine->stack_index-2];
+    uint32_t count=engine->stack[engine->stack_index-1];
+    uint32_t address=engine->stack[engine->stack_index-2];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -1523,9 +1508,9 @@ void prim_fill(struct ForthEngine *engine)
     engine->stack_index--;
     int32_t character=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t count=engine->stack[engine->stack_index];
+    uint32_t count=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t address=engine->stack[engine->stack_index];
+    uint32_t address=engine->stack[engine->stack_index];
 
     if (count>0)
     {
@@ -1556,11 +1541,27 @@ void prim_here(struct ForthEngine *engine)
     engine->stack_index++;
 }
 
+//I
+void prim_i(struct ForthEngine *engine)
+{
+    //Push number to stack
+    engine->stack[engine->stack_index]=engine->loop_i;
+    engine->stack_index++;
+}
+
 //INVERT
 void prim_invert(struct ForthEngine *engine)
 {
     int32_t value=engine->stack[engine->stack_index-1];
     engine->stack[engine->stack_index-1]=value^-1;
+}
+
+//J
+void prim_j(struct ForthEngine *engine)
+{
+    //Push number to stack
+    engine->stack[engine->stack_index]=engine->loop_j;
+    engine->stack_index++;
 }
 
 //KEY
@@ -1674,11 +1675,11 @@ void prim_move(struct ForthEngine *engine)
 
     //Fetch values from stack
     engine->stack_index--;
-    int32_t count=engine->stack[engine->stack_index];
+    uint32_t count=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t dest=engine->stack[engine->stack_index];
+    uint32_t dest=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t source=engine->stack[engine->stack_index];
+    uint32_t source=engine->stack[engine->stack_index];
 
     //Limit count so copying loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -1884,9 +1885,9 @@ void prim_type(struct ForthEngine *engine)
 
     //Fetch arguments
     engine->stack_index--;
-    int32_t count=engine->stack[engine->stack_index];
+    uint32_t count=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t address=engine->stack[engine->stack_index];
+    uint32_t address=engine->stack[engine->stack_index];
 
     //Print characters if print function exists
     if (engine->print!=NULL)
@@ -1961,7 +1962,7 @@ void prim_dot_r(struct ForthEngine *engine)
 
     //Fetch arguments
     engine->stack_index--;
-    int32_t spaces=engine->stack[engine->stack_index];
+    uint32_t spaces=engine->stack[engine->stack_index];
     engine->stack_index--;
     int32_t value=engine->stack[engine->stack_index];
 
@@ -1999,7 +2000,7 @@ void prim_u_dot_r(struct ForthEngine *engine)
 
     //Fetch arguments
     engine->stack_index--;
-    int32_t spaces=engine->stack[engine->stack_index];
+    uint32_t spaces=engine->stack[engine->stack_index];
     engine->stack_index--;
     int32_t value=engine->stack[engine->stack_index];
 
@@ -2037,7 +2038,7 @@ void prim_x_dot_r(struct ForthEngine *engine)
 
     //Fetch arguments
     engine->stack_index--;
-    int32_t spaces=engine->stack[engine->stack_index];
+    uint32_t spaces=engine->stack[engine->stack_index];
     engine->stack_index--;
     int32_t value=engine->stack[engine->stack_index];
 
@@ -2201,12 +2202,11 @@ void prim_question(struct ForthEngine *engine)
 //DUMP
 void prim_dump(struct ForthEngine *engine)
 {
-    uintptr_t lower;
     if (engine->print!=NULL)
     {
         //Fetch arguments
-        int32_t count=engine->stack[engine->stack_index-1];
-        int32_t address=engine->stack[engine->stack_index-2];
+        uint32_t count=engine->stack[engine->stack_index-1];
+        uint32_t address=engine->stack[engine->stack_index-2];
         
         //Fetch and print bytes
         bool newline=true;
@@ -2352,9 +2352,9 @@ void prim_erase(struct ForthEngine *engine)
 {
     //Fetch values from stack
     engine->stack_index--;
-    int32_t count=engine->stack[engine->stack_index];
+    uint32_t count=engine->stack[engine->stack_index];
     engine->stack_index--;
-    int32_t address=engine->stack[engine->stack_index];
+    uint32_t address=engine->stack[engine->stack_index];
 
     //Limit count so it loops through memory at most once
     if (count>=engine->data_size) count=engine->data_size;
@@ -2418,29 +2418,29 @@ void prim_size(struct ForthEngine *engine)
 //TODO: alphabetic order
 const struct ForthPrimitive forth_primitives[]=
 {
-    {"!",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_store,             false, 2, 1},
-    {"C!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_store,           false, 2, 1},
-    {"W!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_store,           false, 2, 1},
-    {"'",1,             FORTH_ACTION_TICK,              FORTH_ACTION_NONE,              NULL},
-    {"(",1,             FORTH_ACTION_PAREN,             FORTH_ACTION_PAREN,             NULL},
+    {"!",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_store,             false, 2, 0},
+    {"C!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_store,           false, 2, 0},
+    {"W!",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_store,           false, 2, 0},
+    {"'",1,             FORTH_ACTION_TICK,              FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"(",1,             FORTH_ACTION_PAREN,             FORTH_ACTION_PAREN,             NULL,                   true},
     {"*",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star,              false, 2, 1},
     {"*/",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star_slash,        false, 3, 1},
     {"*/MOD",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_star_slash_mod,    false, 3, 2},
     {"+",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_plus,              false, 2, 1},
-    {"+LOOP",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_PLUS_LOOP,         NULL},
+    {"+LOOP",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_PLUS_LOOP,         NULL,                   true},
     {",",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_comma,             false, 1, 0},
     {"C,",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_comma,           false, 1, 0},
     {"W,",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_w_comma,           false, 1, 0},
     {"-",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_minus,             false, 2, 1},
-    {"\\",1,            FORTH_ACTION_COMMENT,           FORTH_ACTION_COMMENT,           NULL},
+    {"\\",1,            FORTH_ACTION_COMMENT,           FORTH_ACTION_COMMENT,           NULL,                   true},
     {".",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot,               true},
     {"U.",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_dot,             true},
     {"X.",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_dot,             true},
-    {".\"",2,           FORTH_ACTION_DOT_QUOTE,         FORTH_ACTION_DOT_QUOTE,         NULL},
+    {".\"",2,           FORTH_ACTION_DOT_QUOTE,         FORTH_ACTION_DOT_QUOTE,         NULL,                   true},
     {"/",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_slash,             false, 2, 1},
     {"/MOD",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_slash_mod,         false, 2, 2},
-    {":",1,             FORTH_ACTION_COLON,             FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {";",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_SEMICOLON,         NULL},
+    {":",1,             FORTH_ACTION_COLON,             FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {";",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_SEMICOLON,         NULL,                   true},
     {"<",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_less_than,         false, 2, 1},
     {"=",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_equals,            false, 2, 1},
     {">",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_greater_than,      false, 2, 1},
@@ -2461,22 +2461,22 @@ const struct ForthPrimitive forth_primitives[]=
     {"ALIGNED",7,       FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_aligned ,          false, 1, 1},
     {"ALLOT",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_allot,             true},
     {"AND",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_and,               false, 2, 1},
-    {"BEGIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BEGIN,             NULL},
+    {"BEGIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BEGIN,             NULL,                   true},
     {"BL",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_b_l,               false, 0, 1},
     {"BOUNDS",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_bounds,            false, 2, 2},
     {"CELLS",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_cells,             false, 1, 1},
-    {"CHAR",4,          FORTH_ACTION_CHAR,              FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"CONSTANT",8,      FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"CONST",5,         FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    NULL},
+    {"CHAR",4,          FORTH_ACTION_CHAR,              FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"CONSTANT",8,      FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"CONST",5,         FORTH_ACTION_CONSTANT,          FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
     {"CR",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_c_r,               true},
-    {"CREATE",6,        FORTH_ACTION_CREATE,            FORTH_ACTION_INTERPRET_ONLY,    NULL},
+    {"CREATE",6,        FORTH_ACTION_CREATE,            FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
     {"DEPTH",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_depth,             true},
-    {"DO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_DO,                NULL},
+    {"DO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_DO,                NULL,                   true},
     {"DROP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_drop,              false, 1, 0},
     {"2DROP",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_drop,          false, 2, 0},
     {"DUP",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dupe,              false, 1, 2},
     {"2DUP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_dupe,          false, 2, 4},
-    {"ELSE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_ELSE,              NULL},
+    {"ELSE",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_ELSE,              NULL,                   true},
     {"EMIT",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_emit,              true},
     {"ERASE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_erase,             true},
     {"EXECUTE",7,       FORTH_ACTION_EXECUTE,           FORTH_ACTION_NONE,              prim_execute,           true},
@@ -2484,15 +2484,15 @@ const struct ForthPrimitive forth_primitives[]=
     {"EXIT",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_NONE,              prim_hidden_done,       true},
     {"FILL",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_fill,              true},
     {"HERE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_here,              false, 0, 1},
-    {"I",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_I,                 NULL},
-    {"IF",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_IF,                NULL},
+    {"I",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_NONE,              prim_i,                 false, 0, 1},
+    {"IF",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_IF,                NULL,                   true},
     {"INVERT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_invert,            false, 1, 1},
-    {"J",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_J,                 NULL},
+    {"J",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_NONE,              prim_j,                 false, 0, 1},
     {"KEY",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_key,               true},
-    {"LEAVE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEAVE,             NULL},
-    {"LITERAL",7,       FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           NULL},
-    {"LIT",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           NULL},
-    {"LOOP",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOOP,              NULL},
+    {"LEAVE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEAVE,             NULL,                   true},
+    {"LITERAL",7,       FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           NULL,                   true},
+    {"LIT",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LITERAL,           NULL,                   true},
+    {"LOOP",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOOP,              NULL,                   true},
     {"LSHIFT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_l_shift,           false, 2, 1},
     {"MAX",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_max,               false, 2, 1},
     {"MIN",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_min,               false, 2, 1},
@@ -2503,40 +2503,40 @@ const struct ForthPrimitive forth_primitives[]=
     {"OVER",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_over,              false, 2, 3},
     {"2OVER",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_over,          false, 4, 6},
     {"PAGE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_page,              true},
-    {"REPEAT",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_REPEAT,            NULL},
+    {"REPEAT",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_REPEAT,            NULL,                   true},
     {"ROT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_rote,              false, 3, 3},
     {"-ROT",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_minus_rote,        false, 3, 3},
     {"RSHIFT",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_r_shift,           false, 2, 1},
-    {"S\"",2,           FORTH_ACTION_S_QUOTE,           FORTH_ACTION_S_QUOTE,           NULL},
+    {"S\"",2,           FORTH_ACTION_S_QUOTE,           FORTH_ACTION_S_QUOTE,           NULL,                   true},
     {"SPACE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_space,             true},
     {"SPACES",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_spaces,            true},
     {"SWAP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_swap,              false, 2, 2},
     {"2SWAP",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_two_swap,          false, 4, 4},
-    {"THEN",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_THEN,              NULL},
+    {"THEN",4,          FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_THEN,              NULL,                   true},
     {"TYPE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_type,              true},
     {"U<",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_less_than,       false, 2, 1},
     {"U>",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_greater_than,    false, 2, 1},
-    {"UNTIL",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_UNTIL,             NULL},
-    {"VARIABLE",8,      FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"VAR",3,           FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"WHILE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_WHILE,             NULL},
+    {"UNTIL",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_UNTIL,             NULL,                   true},
+    {"VARIABLE",8,      FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"VAR",3,           FORTH_ACTION_VARIABLE,          FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"WHILE",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_WHILE,             NULL,                   true},
     {"XOR",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_or,              false, 2, 1},
-    {"[",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEFT_BRACKET,      NULL},
-    {"]",1,             FORTH_ACTION_RIGHT_BRACKET,     FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"[']",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_TICK,      NULL},
-    {"[CHAR]",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_CHAR,      NULL},
+    {"[",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LEFT_BRACKET,      NULL,                   true},
+    {"]",1,             FORTH_ACTION_RIGHT_BRACKET,     FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"[']",3,           FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_TICK,      NULL,                   true},
+    {"[CHAR]",6,        FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_BRACKET_CHAR,      NULL,                   true},
     {".R",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dot_r,             true},
     {"U.R",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_u_dot_r,           true},
     {"X.R",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_x_dot_r,           true},
     {"<>",2,            FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_not_equals,        false, 2, 1},
-    {"AGAIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_AGAIN,             NULL},
+    {"AGAIN",5,         FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_AGAIN,             NULL,                   true},
     //{"CASE",4,prim_immediate_case,prim_compile_case,prim_case},
     //{"ENDCASE",7,prim_immediate_endcase,prim_compile_endcase,prim_endcase},
     //{"OF",2,prim_immediate_of,prim_compile_of,prim_of},
     //{"ENDOF",5,prim_immediate_endof,prim_compile_endof,prim_endof},
     {"FALSE",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_false,             false, 0, 1},
     {"NIP",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_nip,               false, 2, 1},
-    {"S\\\"",3,         FORTH_ACTION_S_BACKSLASH_QUOTE, FORTH_ACTION_S_BACKSLASH_QUOTE, NULL},
+    {"S\\\"",3,         FORTH_ACTION_S_BACKSLASH_QUOTE, FORTH_ACTION_S_BACKSLASH_QUOTE, NULL,                   true},
     {"TRUE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_true,              false, 0, 1},
     {"TUCK",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_tuck,              false, 2, 3},
     {"UNUSED",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_unused,            true},
@@ -2545,23 +2545,23 @@ const struct ForthPrimitive forth_primitives[]=
     {"?",1,             FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_question,          true},
     {"DUMP",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_dump,              true},
     //{"SEE",3,prim_immediate_see,prim_compile_see,prim_body_see,prim_optimize_see},
-    {"WORDS",5,         FORTH_ACTION_WORDS,             FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"WORDSIZE",8,      FORTH_ACTION_WORDSIZE,          FORTH_ACTION_INTERPRET_ONLY,    NULL},
+    {"WORDS",5,         FORTH_ACTION_WORDS,             FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"WORDSIZE",8,      FORTH_ACTION_WORDSIZE,          FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
     {"BYE",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_bye,               true},
-    {"{",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS,            NULL},
-    {"0{",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS_0,          NULL},
-    {"TO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_TO,                NULL},
+    {"{",1,             FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS,            NULL,                   true},
+    {"0{",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_LOCALS_0,          NULL,                   true},
+    {"TO",2,            FORTH_ACTION_COMPILE_ONLY,      FORTH_ACTION_TO,                NULL,                   false, 1, 0},
     
     //Words from here are not standard forth
     {"RESET",5,         FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_reset,             true},
     {"WALIGN",6,        FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_walign,            false, 0, 0},
     {"WALIGNED",8,      FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_waligned,          false, 1, 1},
-    {"PRINTABLE",9,     FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_printable,         false, 0, 1},
+    {"PRINTABLE",9,     FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_printable,         false, 1, 1},
     {"CXT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_cxt,               false, 1, 1},
     {"WXT",3,           FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_wxt,               false, 1, 1},
-    {"PRIMITIVES",10,   FORTH_ACTION_PRIMITIVES,        FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"SECONDARIES",11,  FORTH_ACTION_SECONDARIES,       FORTH_ACTION_INTERPRET_ONLY,    NULL},
-    {"UNDEFINED",9,     FORTH_ACTION_UNDEFINED,         FORTH_ACTION_INTERPRET_ONLY,    NULL},
+    {"PRIMITIVES",10,   FORTH_ACTION_PRIMITIVES,        FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"SECONDARIES",11,  FORTH_ACTION_SECONDARIES,       FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
+    {"UNDEFINED",9,     FORTH_ACTION_UNDEFINED,         FORTH_ACTION_INTERPRET_ONLY,    NULL,                   true},
     {"PERF",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_perf,              true},
     {"SIZE",4,          FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_size,              false, 0, 1},
     {"RESIZE",6,        FORTH_ACTION_RESIZE,            FORTH_ACTION_INTERPRET_ONLY,    NULL},
@@ -2570,9 +2570,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_do,         true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_done,       true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_dot_quote,  true},
-    {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_i,          false, 0, 1},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_if,         true},
-    {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_j,          false, 0, 1},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_jump,       true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_leave,      true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_loop,       true},

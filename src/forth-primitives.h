@@ -27,9 +27,7 @@
     void prim_hidden_do(struct ForthEngine *engine);
     void prim_hidden_done(struct ForthEngine *engine);
     void prim_hidden_dot_quote(struct ForthEngine *engine);
-    void prim_hidden_i(struct ForthEngine *engine);
     void prim_hidden_if(struct ForthEngine *engine);
-    void prim_hidden_j(struct ForthEngine *engine);
     void prim_hidden_jump(struct ForthEngine *engine);
     void prim_hidden_leave(struct ForthEngine *engine);
     void prim_hidden_loop(struct ForthEngine *engine);

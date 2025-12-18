@@ -289,6 +289,9 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
     compile->locals->count=0;
     compile->locals->names[0]=0;
  
+    //Reset stack checking
+    reset_checks(compile);
+
     //Logging
     log_text("name: %s\n",word_buffer);
 
@@ -585,15 +588,6 @@ int action_execute(struct ForthEngine *engine,int *word_type,struct ForthCompile
     return FORTH_ERROR_NONE;
 }
 
-int action_i(struct ForthCompileInfo *compile)
-{
-    //Write primitive to push I counter
-    int result=write_definition_primitive(&prim_hidden_i,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
-    return FORTH_ERROR_NONE;
-}
-
 int action_if(struct ForthCompileInfo *compile)
 {
     //Write primitive that performs IF function
@@ -611,15 +605,6 @@ int action_if(struct ForthCompileInfo *compile)
     result=push_control_element(index,FORTH_CONTROL_IF,compile);
     if (result!=FORTH_ERROR_NONE) return result;
     
-    return FORTH_ERROR_NONE;
-}
-
-int action_j(struct ForthCompileInfo *compile)
-{
-    //Write primitive to push J counter
-    int result=write_definition_primitive(&prim_hidden_j,compile);
-    if (result!=FORTH_ERROR_NONE) return result;
-
     return FORTH_ERROR_NONE;
 }
 
@@ -1889,14 +1874,8 @@ int handle_action(int action,bool compile_mode,struct ForthEngine *engine,const 
         case FORTH_ACTION_ELSE:
             result=action_else(compile);
             break;
-        case FORTH_ACTION_I:
-            result=action_i(compile);
-            break;
         case FORTH_ACTION_IF:
             result=action_if(compile);
-            break;
-        case FORTH_ACTION_J:
-            result=action_j(compile);
             break;
         case FORTH_ACTION_LEAVE:
             result=action_leave(compile);
