@@ -11,6 +11,8 @@
 /*
 - tail call elimination
 
+- type for forthengine function
+
 - more abbreviations
   - << and >> for shift
   - NEG for NEGATE

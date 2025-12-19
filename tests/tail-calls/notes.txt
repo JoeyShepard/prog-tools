@@ -1,0 +1,9 @@
+1/
+- not sure what my plan was
+
+2/
+- convert test function to assembly then pass to fxsdk
+- NEED TO REMOVE .section .note.GNU-stack,"",@progbits
+  - silences warning about exec stack
+  - -z noexecstack is only for linker
+- copied to main src/ and able to call successfully from main.c

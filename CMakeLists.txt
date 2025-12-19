@@ -42,6 +42,9 @@ set(SOURCES
   src/cache.S
   src/macros.S
   src/test.S
+
+  #Test tail calls
+  src/foo.s
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS
