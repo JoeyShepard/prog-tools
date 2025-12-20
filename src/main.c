@@ -9,6 +9,9 @@
 //TODO - PRIORITY
 //===============
 /*
+- delay on PC after key input is before any key is pressed
+  - see separate thread and how keys are handled
+  - increasing key buffer size did not help
 - tail call elimination
 
 - clean up file structure
@@ -346,6 +349,8 @@ int main(void)                      //cg50 and PC
 {
     //Initialize logging if on PC
     init_logging("log.txt");
+    log_none("Begin logging\n");
+
 
     //Configure device specific settings - TCP on PC and timer on calculator
     setup(TICK_MS);

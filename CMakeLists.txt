@@ -64,7 +64,7 @@ set(ASSETS_cg
 fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
 add_executable(prog-tools ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
-target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -z noexecstack -DCG50)
+target_compile_options(prog-tools PRIVATE -Wall -Wextra -O2 -g -flto -z noexecstack -DCG50)
 target_link_libraries(prog-tools Gint::Gint LibProf::LibProf)
 #Added by user
 target_include_directories(prog-tools PRIVATE include)

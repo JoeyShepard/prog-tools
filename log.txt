@@ -2,1059 +2,774 @@
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
-action_source_pre
-- word_len: 517083564
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
-action_source_pre
-- word_len: 3
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
-action_source_pre
-- word_len: 3
-- done
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
-action_source_pre
-- word_len: 3
-- done
+Begin logging
+process_source: 8
+process_source: const
+process_source: create
+process_source: rx
+process_source: 1
+process_source: +
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
+process_source: 8
+process_source: const
+process_source: create
+process_source: rx
+process_source: 1
+process_source: +
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
+Begin logging
 
 
 LOGGING RESTARTED
 =================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 138 of 148 (10 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 139 of 148 (9 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 140 of 148 (8 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
-
-
-LOGGING RESTARTED
-=================
-Primitive count: 153 of 148 (-5 left)
+Begin logging
+Compile primitive
+- name: {
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: ERASE
+- body only
+Compile primitive
+- name: 0{
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: TO
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: >
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: ABS
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: OR
+- body only
+Compile primitive
+- name: IF
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: THEN
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: ;
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+Compile primitive
+- name: {
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: ERASE
+- body only
+Compile primitive
+- name: 0{
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: TO
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: >
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: ABS
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: OR
+- body only
+Compile primitive
+- name: IF
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: THEN
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: ;
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+Compile primitive
+- name: {
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: ERASE
+- body only
+Compile primitive
+- name: 0{
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: TO
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: >
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: ABS
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: OR
+- body only
+Compile primitive
+- name: IF
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: THEN
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: ;
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+Compile primitive
+- name: {
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: ERASE
+- body only
+Compile primitive
+- name: 0{
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: TO
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: >
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: ABS
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: OR
+- body only
+Compile primitive
+- name: IF
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: BEGIN
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: WHILE
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: TO
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: DUP
+- body only
+Compile primitive
+- name: C@
+- body only
+Compile primitive
+- name: -
+- body only
+Compile primitive
+- name: SWAP
+- body only
+Compile primitive
+- name: C!
+- body only
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: THEN
+Compile primitive
+- name: REPEAT
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: =
+- body only
+Compile primitive
+- name: UNTIL
+Compile primitive
+- name: ;
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging

@@ -148,6 +148,7 @@
         uint32_t word_count;
         prof_t perf_counter;        //Performance counter on calculator
         uint32_t perf_value;        //Result of running performance counter
+        void (*thread_buffer[2])(struct ForthEngine *engine);
 
         //Compilation
         bool state;

@@ -37,16 +37,16 @@
     void prim_hidden_secondary(struct ForthEngine *engine);
 
     //Forth NEXT - define once here in case logging needs to change
-    #define FORTH_NEXT                                  \
-        /*Logging*/                                     \
-        log_text("address: %p [",engine->address);      \
-        log_bytes(engine->address,32);                  \
-        log_text_raw("]\n");                            \
-        log_primitive(engine->address,word_headers);    \
-        log_text_raw("\n");                             \
-                                                        \
-        /*Jump to primitive function*/                  \
-        (*engine->address)(engine);                     \
-        engine->address++;                              \
+    #define FORTH_NEXT                                      \
+        /*Logging*/                                         \
+        log_text("address: %p [",engine->address);          \
+        log_bytes(engine->address,32);                      \
+        log_text_raw("]\n");                                \
+        /*log_primitive(engine->address,word_headers);*/    \
+        log_text_raw("\n");                                 \
+                                                            \
+        /*Jump to primitive function*/                      \
+        engine->address++;                                  \
+        __attribute__((musttail)) return (*engine->address)(engine);
 
 #endif

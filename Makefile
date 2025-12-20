@@ -40,8 +40,8 @@ log: $(BUILD_DIR)/$(PROJECT)
 compile: $(BUILD_DIR)/$(PROJECT)
 	#Compile only
 
-list: LIST_FLAGS = -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
-list: $(BUILD_DIR)/$(PROJECT)
+#list: LIST_FLAGS = -Wa,-aghlns=$(BUILD_DIR)/$(notdir $<).lst
+#list: $(BUILD_DIR)/$(PROJECT)
 	#Compile and generate assembly listing for each file
 
 $(BUILD_DIR)/$(PROJECT): $(OBJS) $(OBJS_ASM) $(OBJS_PRIM)

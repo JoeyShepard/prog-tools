@@ -758,9 +758,6 @@ void reset_checks(struct ForthCompileInfo *compile)
 
 void finalize_checks(struct ForthCompileInfo *compile)
 {
-
-    //printf("\nfinalize: %d %d\n",compile->check_pop,compile->check_push);
-
     if (compile->check_index!=0)
     {
         void (*check)(struct ForthEngine *engine)=forth_checks[-compile->check_pop][compile->check_push];
@@ -794,8 +791,6 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
             char word_buffer[FORTH_WORD_MAX+1];
             strncpy(word_buffer,source+start,compile->word_len);
             word_buffer[compile->word_len]=0;
-
-            //printf("%s ",word_buffer);
 
             //Classify word
             int32_t num=0;
@@ -880,10 +875,12 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                                     engine->error=FORTH_ENGINE_ERROR_OVERFLOW; 
                                     return FORTH_ERROR_ENGINE;
                                 }
-
                             }
                             forth_engine_pre_exec(engine);
-                            body_func(engine);
+                            //body_func(engine);
+                            engine->thread_buffer[0]=body_func;
+                            engine->address=engine->thread_buffer;
+                            (*engine->address)(engine);
                             if (engine->error!=FORTH_ENGINE_ERROR_NONE)
                             {
                                 //Error in word

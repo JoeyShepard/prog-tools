@@ -160,7 +160,7 @@ volatile bool *on_key_pressed;
     uint8_t *xram_base;
     uint8_t *yram_base;
     int global_delay_ms;
-    #define KEYS_SIZE 100
+    #define KEYS_SIZE 10000
     int keys[KEYS_SIZE];
     int pc_keys[KEYS_SIZE];
     int pc_scancode;

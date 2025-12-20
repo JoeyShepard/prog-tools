@@ -1,4 +1,4 @@
-//#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "compatibility.h"
@@ -57,6 +57,8 @@ void prim_hidden_do(struct ForthEngine *engine)
         engine->loop_i=loop_min;
         engine->loop_i_max=loop_max;
     }
+
+    FORTH_NEXT
 }
 
 //Done executing primitive
@@ -84,15 +86,15 @@ void prim_hidden_done(struct ForthEngine *engine)
         {
             //Returning from top-level word - stop executing
             engine->executing=false;
-
-            //Done searching
-            break;
+            return;
         }
         else
         {
             //Found loop counter or something else - keep searching
         }
     }
+
+    FORTH_NEXT
 }
 
 //Print out characters stored in thread
@@ -150,6 +152,8 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
 
     //Logging
     log_pop();
+
+    FORTH_NEXT
 }
 
 
@@ -180,6 +184,8 @@ void prim_hidden_if(struct ForthEngine *engine)
         //Jump not taken - increment thread pointer to account for offset stored after primitive
         engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
     }
+
+    FORTH_NEXT
 }
 
 //Jump to different part of thread
@@ -188,6 +194,8 @@ void prim_hidden_jump(struct ForthEngine *engine)
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
     engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+
+    FORTH_NEXT
 }
 
 void prim_hidden_leave(struct ForthEngine *engine)
@@ -204,6 +212,8 @@ void prim_hidden_leave(struct ForthEngine *engine)
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
     engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+
+    FORTH_NEXT
 }
 
 void prim_hidden_loop(struct ForthEngine *engine)
@@ -232,6 +242,8 @@ void prim_hidden_loop(struct ForthEngine *engine)
         engine->loop_j=engine->rstack->value;
         engine->loop_j_max=engine->rstack->value_max;
     }
+
+    FORTH_NEXT
 }
 
 void prim_hidden_plus_loop(struct ForthEngine *engine)
@@ -269,6 +281,8 @@ void prim_hidden_plus_loop(struct ForthEngine *engine)
         engine->loop_j=engine->rstack->value;
         engine->loop_j_max=engine->rstack->value_max;
     }
+
+    FORTH_NEXT
 }
 
 //Push next cell in dictionary to stack
@@ -283,6 +297,8 @@ void prim_hidden_push(struct ForthEngine *engine)
     //Push number to stack
     engine->stack[engine->stack_index]=num;
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //Write characters to data memory
@@ -349,6 +365,8 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
 
     //Logging
     log_pop();
+
+    FORTH_NEXT
 }
 
 //TODO: IMPORTANT - any changes here also apply to inlined copy in prim_exec!
@@ -428,6 +446,8 @@ void prim_hidden_secondary(struct ForthEngine *engine)
             engine->address--;
         }
     }
+
+    FORTH_NEXT
 }
 
 //Primitives visible to user
@@ -447,6 +467,8 @@ void prim_store(struct ForthEngine *engine)
     
     //Write value to address
     *(int32_t*)(engine->data+address)=value;
+
+    FORTH_NEXT
 }
 
 //C_STORE
@@ -465,6 +487,8 @@ void prim_c_store(struct ForthEngine *engine)
     
     //Write value to address
     *(engine->data+address)=value;
+
+    FORTH_NEXT
 }
 
 //W_STORE
@@ -483,6 +507,8 @@ void prim_w_store(struct ForthEngine *engine)
     
     //Write value to address
     *(int16_t*)(engine->data+address)=value;
+
+    FORTH_NEXT
 }
 
 //STAR
@@ -496,6 +522,8 @@ void prim_star(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1*arg2;
+
+    FORTH_NEXT
 }
 
 //STAR_SLASH
@@ -515,6 +543,8 @@ void prim_star_slash(struct ForthEngine *engine)
     
     //Write result
     engine->stack[engine->stack_index-1]=quotient;
+
+    FORTH_NEXT
 }
 
 //STAR_SLASH_MOD
@@ -535,6 +565,8 @@ void prim_star_slash_mod(struct ForthEngine *engine)
     //Write results to stack
     engine->stack[engine->stack_index-1]=quotient;
     engine->stack[engine->stack_index-2]=remainder;
+
+    FORTH_NEXT
 }
 
 //PLUS
@@ -547,6 +579,8 @@ void prim_plus(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1+arg2;
+
+    FORTH_NEXT
 }
 
 //COMMA
@@ -562,6 +596,8 @@ void prim_comma(struct ForthEngine *engine)
     
     //Advance data pointer
     engine->data_index=(engine->data_index+sizeof(int32_t))&engine->data_mask_32;
+
+    FORTH_NEXT
 }
 
 //C_COMMA
@@ -577,6 +613,8 @@ void prim_c_comma(struct ForthEngine *engine)
     
     //Advance data pointer
     engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask;
+
+    FORTH_NEXT
 }
 
 //W_COMMA
@@ -592,6 +630,8 @@ void prim_w_comma(struct ForthEngine *engine)
     
     //Advance data pointer
     engine->data_index=(engine->data_index+sizeof(int8_t))&engine->data_mask_16;
+
+    FORTH_NEXT
 }
 
 //MINUS
@@ -604,6 +644,8 @@ void prim_minus(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1-arg2;
+
+    FORTH_NEXT
 }
 
 //DOT
@@ -634,6 +676,8 @@ void prim_dot(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //U_DOT
@@ -664,6 +708,8 @@ void prim_u_dot(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //X_DOT
@@ -694,6 +740,8 @@ void prim_x_dot(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //SLASH
@@ -707,6 +755,8 @@ void prim_slash(struct ForthEngine *engine)
     //Write result
     if (arg2==0) arg2=1;
     engine->stack[engine->stack_index-1]=arg1/arg2;
+
+    FORTH_NEXT
 }
 
 //SLASH_MOD
@@ -720,6 +770,8 @@ void prim_slash_mod(struct ForthEngine *engine)
     if (arg2==0) arg2=1;
     engine->stack[engine->stack_index-1]=arg1/arg2;
     engine->stack[engine->stack_index-2]=arg1%arg2;
+
+    FORTH_NEXT
 }
 
 //LESS_THAN
@@ -732,6 +784,8 @@ void prim_less_than(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1<arg2);
+
+    FORTH_NEXT
 }
 
 //EQUALS
@@ -744,6 +798,8 @@ void prim_equals(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1==arg2);
+
+    FORTH_NEXT
 }
 
 //GREATER_THAN
@@ -756,6 +812,8 @@ void prim_greater_than(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1>arg2);
+
+    FORTH_NEXT
 }
 
 //TO_NUMBER - Note differs from >NUMBER in standard!
@@ -859,6 +917,8 @@ void prim_to_number(struct ForthEngine *engine)
 
     //Update stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //TO_HEX
@@ -995,6 +1055,8 @@ void prim_to_hex(struct ForthEngine *engine)
 
     //Update stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //NUMBER>
@@ -1034,6 +1096,8 @@ void prim_number_to(struct ForthEngine *engine)
 
     //Write character count to stack
     engine->stack[engine->stack_index-1]=num_len;
+
+    FORTH_NEXT
 }
 
 //HEX>
@@ -1073,6 +1137,8 @@ void prim_hex_to(struct ForthEngine *engine)
 
     //Write character count to stack
     engine->stack[engine->stack_index-1]=num_len;
+
+    FORTH_NEXT
 }
 
 //QUESTION_DUPE
@@ -1102,6 +1168,8 @@ void prim_question_dupe(struct ForthEngine *engine)
         //Advance stack pointer
         engine->stack_index++;
     }
+
+    FORTH_NEXT
 }
 
 //FETCH
@@ -1118,6 +1186,8 @@ void prim_fetch(struct ForthEngine *engine)
     
     //Write value to stack
     engine->stack[engine->stack_index-1]=value;
+
+    FORTH_NEXT
 }
 
 //C_FETCH
@@ -1135,6 +1205,8 @@ void prim_c_fetch(struct ForthEngine *engine)
     
     //Write value to stack
     engine->stack[engine->stack_index-1]=value;
+
+    FORTH_NEXT
 }
 
 //W_FETCH
@@ -1151,6 +1223,8 @@ void prim_w_fetch(struct ForthEngine *engine)
     
     //Write value to stack
     engine->stack[engine->stack_index-1]=value;
+
+    FORTH_NEXT
 }
 
 //QUIT
@@ -1164,6 +1238,8 @@ void prim_abs(struct ForthEngine *engine)
 {
     int32_t value=engine->stack[engine->stack_index-1];
     if (value<0) engine->stack[engine->stack_index-1]=-value;
+
+    FORTH_NEXT
 }
 
 //ACCEPT
@@ -1197,6 +1273,8 @@ void prim_accept(struct ForthEngine *engine)
         engine->stack_index--;
         engine->stack[engine->stack_index-1]=0;
     }
+
+    FORTH_NEXT
 }
 
 //ALIGN
@@ -1208,6 +1286,8 @@ void prim_align(struct ForthEngine *engine)
         //Address is not aligned - round up
         engine->data_index=(engine->data_index+FORTH_CELL_SIZE-remainder)&engine->data_mask_32;
     }
+
+    FORTH_NEXT
 }
 
 //ALIGNED
@@ -1224,6 +1304,8 @@ void prim_aligned(struct ForthEngine *engine)
 
     //Write address back even if aligned so always masked
     engine->stack[engine->stack_index-1]=(address&engine->data_mask_32);
+
+    FORTH_NEXT
 }
 
 //ALLOT
@@ -1249,6 +1331,8 @@ void prim_allot(struct ForthEngine *engine)
     //Logging
     log_text("new data_index: %d\n",engine->data_index);
     log_pop();
+
+    FORTH_NEXT
 }
 
 //AND
@@ -1261,6 +1345,8 @@ void prim_and(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1&arg2;
+
+    FORTH_NEXT
 }
 
 //B_L
@@ -1271,6 +1357,8 @@ void prim_b_l(struct ForthEngine *engine)
     
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //BOUNDS
@@ -1283,6 +1371,8 @@ void prim_bounds(struct ForthEngine *engine)
     //Write values to stack
     engine->stack[engine->stack_index-1]=address;
     engine->stack[engine->stack_index-2]=(address+size)&engine->data_mask;
+
+    FORTH_NEXT
 }
 
 //CELLS
@@ -1290,6 +1380,8 @@ void prim_cells(struct ForthEngine *engine)
 {
     int32_t value=engine->stack[engine->stack_index-1];
     engine->stack[engine->stack_index-1]=value*FORTH_CELL_SIZE;
+
+    FORTH_NEXT
 }
 
 //C_R
@@ -1300,6 +1392,8 @@ void prim_c_r(struct ForthEngine *engine)
         engine->print("\n");
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //DEPTH
@@ -1318,18 +1412,24 @@ void prim_depth(struct ForthEngine *engine)
     
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //DROP
 void prim_drop(struct ForthEngine *engine)
 {
     engine->stack_index--;
+
+    FORTH_NEXT
 }
 
 //2DROP
 void prim_two_drop(struct ForthEngine *engine)
 {
     engine->stack_index-=2;
+
+    FORTH_NEXT
 }
 
 //DUPE
@@ -1340,6 +1440,8 @@ void prim_dupe(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //2DUPE
@@ -1351,6 +1453,8 @@ void prim_two_dupe(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index+=2;
+
+    FORTH_NEXT
 }
 
 //EMIT
@@ -1377,6 +1481,8 @@ void prim_emit(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //EXECUTE
@@ -1487,6 +1593,8 @@ void prim_execute(struct ForthEngine *engine)
         engine->error=FORTH_ENGINE_ERROR_EXECUTE_ID;
         engine->executing=false;
     }
+
+    FORTH_NEXT
 }
 
 //EXIT - Reuse existing code elsewhere
@@ -1524,6 +1632,8 @@ void prim_fill(struct ForthEngine *engine)
             address++;
         }
     }
+
+    FORTH_NEXT
 }
 
 //FIND
@@ -1539,6 +1649,8 @@ void prim_here(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //I
@@ -1547,6 +1659,8 @@ void prim_i(struct ForthEngine *engine)
     //Push number to stack
     engine->stack[engine->stack_index]=engine->loop_i;
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //INVERT
@@ -1554,6 +1668,8 @@ void prim_invert(struct ForthEngine *engine)
 {
     int32_t value=engine->stack[engine->stack_index-1];
     engine->stack[engine->stack_index-1]=value^-1;
+
+    FORTH_NEXT
 }
 
 //J
@@ -1562,6 +1678,8 @@ void prim_j(struct ForthEngine *engine)
     //Push number to stack
     engine->stack[engine->stack_index]=engine->loop_j;
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //KEY
@@ -1592,6 +1710,8 @@ void prim_key(struct ForthEngine *engine)
         //Update modifier output
         if (engine->update_modifiers!=NULL) engine->update_modifiers();
     }
+
+    FORTH_NEXT
 }
 
 //L_SHIFT
@@ -1604,6 +1724,8 @@ void prim_l_shift(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1<<arg2;
+
+    FORTH_NEXT
 }
 
 //MAX
@@ -1624,6 +1746,8 @@ void prim_max(struct ForthEngine *engine)
     {
         //Larger value is already in place - nothing to do
     }
+
+    FORTH_NEXT
 }
 
 //MIN
@@ -1644,6 +1768,8 @@ void prim_min(struct ForthEngine *engine)
     {
         //Smaller value is already in place - nothing to do
     }
+
+    FORTH_NEXT
 }
 
 //MOD
@@ -1660,6 +1786,8 @@ void prim_mod(struct ForthEngine *engine)
     
     //Write result
     engine->stack[engine->stack_index-1]=arg1%arg2;
+
+    FORTH_NEXT
 }
 
 //MOVE
@@ -1708,6 +1836,8 @@ void prim_move(struct ForthEngine *engine)
         dest+=bytes_copied;
         source+=bytes_copied;
     }
+
+    FORTH_NEXT
 }
 
 //NEGATE
@@ -1715,6 +1845,8 @@ void prim_negate(struct ForthEngine *engine)
 {
     int32_t value=engine->stack[engine->stack_index-1];
     engine->stack[engine->stack_index-1]=-value;
+
+    FORTH_NEXT
 }
 
 //OR
@@ -1727,6 +1859,8 @@ void prim_or(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1|arg2;
+
+    FORTH_NEXT
 }
 
 //OVER
@@ -1737,6 +1871,8 @@ void prim_over(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //2OVER
@@ -1748,6 +1884,8 @@ void prim_two_over(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index+=2;
+
+    FORTH_NEXT
 }
 
 //PAGE
@@ -1761,6 +1899,8 @@ void prim_page(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //ROTE
@@ -1775,6 +1915,8 @@ void prim_rote(struct ForthEngine *engine)
     engine->stack[engine->stack_index-1]=arg3;
     engine->stack[engine->stack_index-2]=arg1;
     engine->stack[engine->stack_index-3]=arg2;
+
+    FORTH_NEXT
 }
 
 //MINUS_ROTE
@@ -1789,6 +1931,8 @@ void prim_minus_rote(struct ForthEngine *engine)
     engine->stack[engine->stack_index-1]=arg2;
     engine->stack[engine->stack_index-2]=arg3;
     engine->stack[engine->stack_index-3]=arg1;
+
+    FORTH_NEXT
 }
 
 //R_SHIFT
@@ -1801,6 +1945,8 @@ void prim_r_shift(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1>>arg2;
+
+    FORTH_NEXT
 }
 
 //SPACE
@@ -1811,6 +1957,8 @@ void prim_space(struct ForthEngine *engine)
         engine->print(" ");
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //SPACES
@@ -1842,6 +1990,8 @@ void prim_spaces(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //SWAP
@@ -1854,6 +2004,8 @@ void prim_swap(struct ForthEngine *engine)
     //Write values to stack
     engine->stack[engine->stack_index-1]=arg2;
     engine->stack[engine->stack_index-2]=arg1;
+
+    FORTH_NEXT
 }
 
 //2SWAP
@@ -1870,6 +2022,8 @@ void prim_two_swap(struct ForthEngine *engine)
     engine->stack[engine->stack_index-2]=arg4;
     engine->stack[engine->stack_index-3]=arg1;
     engine->stack[engine->stack_index-4]=arg2;
+
+    FORTH_NEXT
 }
 
 //TYPE
@@ -1911,6 +2065,8 @@ void prim_type(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //U_LESS_THAN
@@ -1923,6 +2079,8 @@ void prim_u_less_than(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1<arg2);
+
+    FORTH_NEXT
 }
 
 //U_GREATER_THAN
@@ -1935,6 +2093,8 @@ void prim_u_greater_than(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1>arg2);
+
+    FORTH_NEXT
 }
 
 //X_OR
@@ -1947,6 +2107,8 @@ void prim_x_or(struct ForthEngine *engine)
 
     //Write result
     engine->stack[engine->stack_index-1]=arg1^arg2;
+
+    FORTH_NEXT
 }
 
 //DOT_R
@@ -1985,6 +2147,8 @@ void prim_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //U_DOT_R
@@ -2023,6 +2187,8 @@ void prim_u_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //X_DOT_R
@@ -2061,6 +2227,8 @@ void prim_x_dot_r(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //NOT_EQUALS
@@ -2073,6 +2241,8 @@ void prim_not_equals(struct ForthEngine *engine)
 
     //Write result (note true is 1 in C but -1 in FORTH)
     engine->stack[engine->stack_index-1]=-(arg1!=arg2);
+
+    FORTH_NEXT
 }
 
 //CASE
@@ -2085,6 +2255,8 @@ void prim_false(struct ForthEngine *engine)
 {
     engine->stack[engine->stack_index]=FORTH_FALSE;
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //NIP
@@ -2093,6 +2265,8 @@ void prim_nip(struct ForthEngine *engine)
     
     engine->stack_index--;
     engine->stack[engine->stack_index-1]=engine->stack[engine->stack_index];
+
+    FORTH_NEXT
 }
 
 //TRUE
@@ -2100,6 +2274,8 @@ void prim_true(struct ForthEngine *engine)
 {
     engine->stack[engine->stack_index]=FORTH_FALSE;
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //TUCK
@@ -2116,6 +2292,8 @@ void prim_tuck(struct ForthEngine *engine)
     
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //UNUSED
@@ -2134,6 +2312,8 @@ void prim_unused(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //WITHIN
@@ -2148,6 +2328,8 @@ void prim_within(struct ForthEngine *engine)
     //Write value to stack
     if ((value>=min)&&(value<=max)) engine->stack[engine->stack_index-1]=FORTH_TRUE;
     else engine->stack[engine->stack_index-1]=FORTH_FALSE;
+
+    FORTH_NEXT
 }
 
 //DOT_S
@@ -2171,6 +2353,8 @@ void prim_dot_s(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //QUESTION
@@ -2197,6 +2381,8 @@ void prim_question(struct ForthEngine *engine)
         //Update screen
         if (engine->update_screen!=NULL) engine->update_screen();
     }
+
+    FORTH_NEXT
 }
 
 //DUMP
@@ -2287,6 +2473,8 @@ void prim_dump(struct ForthEngine *engine)
 
     //Update stack pointer
     engine->stack_index-=2;
+
+    FORTH_NEXT
 }
 
 //SEE
@@ -2299,6 +2487,8 @@ void prim_bye(struct ForthEngine *engine)
 {
     engine->exit_program=true;
     engine->executing=false;
+
+    FORTH_NEXT
 }
 
 //RESET
@@ -2306,6 +2496,8 @@ void prim_reset(struct ForthEngine *engine)
 {
     //Reset Forth data stack
     engine->stack_index=0;
+
+    FORTH_NEXT
 }
 
 //WALIGN
@@ -2313,6 +2505,8 @@ void prim_walign(struct ForthEngine *engine)
 {
     //Round up to even address
     engine->data_index=(engine->data_index+(engine->data_index&1))&engine->data_mask_16;
+
+    FORTH_NEXT
 }
 
 //WALIGNED
@@ -2326,6 +2520,8 @@ void prim_waligned(struct ForthEngine *engine)
     
     //Write address back even if aligned so always masked
     engine->stack[engine->stack_index-1]=(address&engine->data_mask_16);
+
+    FORTH_NEXT
 }
 
 //PRINTABLE
@@ -2344,6 +2540,8 @@ void prim_printable(struct ForthEngine *engine)
         //No printable function - return 0
         engine->stack[engine->stack_index-1]=0;
     }
+
+    FORTH_NEXT
 }
 
 //TODO: optimize
@@ -2365,6 +2563,8 @@ void prim_erase(struct ForthEngine *engine)
         *(engine->data+address)=0;
         address++;
     }
+
+    FORTH_NEXT
 }
 
 //CXT
@@ -2374,6 +2574,8 @@ void prim_cxt(struct ForthEngine *engine)
     if (value&0x80) value|=0xFFFFFF00;
     else value&=0xFF;
     engine->stack[engine->stack_index-1]=value;
+
+    FORTH_NEXT
 }
 
 //WXT
@@ -2383,6 +2585,8 @@ void prim_wxt(struct ForthEngine *engine)
     if (value&0x8000) value|=0xFFFF0000;
     else value&=0xFFFF;
     engine->stack[engine->stack_index-1]=value;
+
+    FORTH_NEXT
 }
 
 //PERF
@@ -2401,6 +2605,8 @@ void prim_perf(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //SIZE
@@ -2411,6 +2617,8 @@ void prim_size(struct ForthEngine *engine)
 
     //Advance stack pointer
     engine->stack_index++;
+
+    FORTH_NEXT
 }
 
 //Globals

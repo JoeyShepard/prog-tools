@@ -7,6 +7,7 @@
 #include "forth-action-list.h"
 #include "forth-engine.h"
 #include "logging.h"
+#include "macros.h"
 #include "structs.h"
 
 //Called only once when program first starts
@@ -103,6 +104,12 @@ void forth_reset_engine_stacks(struct ForthEngine *engine)
     engine->locals_stack=engine->locals_base+engine->locals_count-1;
 }
 
+//Empty primitive to end when executing primitive in immediate mode
+void thread_done(UNUSED(struct ForthEngine *engine))
+{                   
+    return;
+}
+
 //Called before executing word in outer interpreter (ie process_source in forth.c)
 //TODO: anything else to add? see how used in forth.c
 //TODO: combine with execute_secondary and/or create execute_primitive
@@ -126,6 +133,9 @@ void forth_engine_pre_exec(struct ForthEngine *engine)
     //Reset Forth return and locals stacks
     engine->rstack=engine->rstack_base+engine->rstack_count-1;
     engine->locals_stack=engine->locals_base+engine->locals_count;
+
+    //Space for single primitive to execute
+    engine->thread_buffer[1]=thread_done;
 }
 
 int32_t forth_stack_count(struct ForthEngine *engine)
@@ -133,6 +143,7 @@ int32_t forth_stack_count(struct ForthEngine *engine)
     return engine->stack_index;
 }
 
+//TODO: check again
 int forth_push(struct ForthEngine *engine,int32_t value)
 {
     if (engine->stack_index>=FORTH_STACK_ELEMENTS)
@@ -200,6 +211,7 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
     else
     {
         //Prepare engine to run secondary
+        //TODO: need to add primitive 
         forth_engine_pre_exec(engine);
         engine->executing=true;
         engine->address=secondary->address;
