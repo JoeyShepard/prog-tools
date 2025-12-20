@@ -12,6 +12,19 @@
 #fi
 #cd ../../
 
+#Instead of above, generate assembly from C files to use musttail
+    #Will not be necessary when fxsdk moves to gcc 15
+FILES=("forth-check" "forth-locals" "forth-primitives")
+for file in "${FILES[@]}"; do
+    command="sh-elf-gcc -O2 -S -Iinclude -DCG50 -DASM_ONLY -DFXCG50 -o build-asm/$file.s  src/$file.c"
+    echo "$command"
+    eval "$command"
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        exit 1
+    fi
+done
+
 #Next, start fxsdk to compile C files and .s files generated above
 fxsdk build-cg -- -s
 ret=$?

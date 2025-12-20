@@ -64,13 +64,12 @@
 
     #ifdef CG50
         //Compiling for calculator. CG50 defined in CMakeLists.txt.
-
         #include <gint/display.h>
         #include <gint/gint.h>
         #include <gint/keyboard.h>
+
         //Installed libprof manually since not included in gint 2.11.0
         #include <libprof.h>
-
     #else
         //Compiling for PC using SDL2 wrapper
 

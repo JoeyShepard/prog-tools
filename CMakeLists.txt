@@ -18,11 +18,8 @@ set(SOURCES
   src/exceptions.c
   src/forth-actions.c
   src/forth.c
-  src/forth-check.c
   src/forth-compatibility.c
   src/forth-engine.c
-  src/forth-locals.c
-  src/forth-primitives.c
   src/forth-process.c
   src/getkey.c
   src/graphics.c
@@ -39,12 +36,17 @@ set(SOURCES
   src/text.c
   src/util.c
 
+  #Hand-written assembly files
   src/cache.S
   src/macros.S
   src/test.S
 
-  #Test tail calls
-  src/foo.s
+  #Assembly files generated from C files to take advantage of musttail
+    #See compile-cg.sh for generation
+  build-asm/forth-check.s
+  build-asm/forth-locals.s
+  build-asm/forth-primitives.s
+
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS
@@ -62,8 +64,10 @@ set(ASSETS_cg
 fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
 add_executable(prog-tools ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
-target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -DCG50)
+target_compile_options(prog-tools PRIVATE -Wall -Wextra -Os -g -flto -z noexecstack -DCG50)
 target_link_libraries(prog-tools Gint::Gint LibProf::LibProf)
+#Added by user
+target_include_directories(prog-tools PRIVATE include)
 
 generate_g3a(TARGET prog-tools OUTPUT "prog-tools.g3a"
     NAME "prog-tools" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)

@@ -1,0 +1,37 @@
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/compatibility.c.lst -z noexecstack -c -o build-sh4/compatibility.o src/compatibility.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/console.c.lst -z noexecstack -c -o build-sh4/console.o src/console.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/debug.c.lst -z noexecstack -c -o build-sh4/debug.o src/debug.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/dummy.c.lst -z noexecstack -c -o build-sh4/dummy.o src/dummy.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/error.c.lst -z noexecstack -c -o build-sh4/error.o src/error.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/exceptions.c.lst -z noexecstack -c -o build-sh4/exceptions.o src/exceptions.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-actions.c.lst -z noexecstack -c -o build-sh4/forth-actions.o src/forth-actions.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth.c.lst -z noexecstack -c -o build-sh4/forth.o src/forth.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-compatibility.c.lst -z noexecstack -c -o build-sh4/forth-compatibility.o src/forth-compatibility.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-engine.c.lst -z noexecstack -c -o build-sh4/forth-engine.o src/forth-engine.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-process.c.lst -z noexecstack -c -o build-sh4/forth-process.o src/forth-process.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/getkey.c.lst -z noexecstack -c -o build-sh4/getkey.o src/getkey.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/graphics.c.lst -z noexecstack -c -o build-sh4/graphics.o src/graphics.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/key-remap.c.lst -z noexecstack -c -o build-sh4/key-remap.o src/key-remap.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/key-remap-pc.c.lst -z noexecstack -c -o build-sh4/key-remap-pc.o src/key-remap-pc.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/logging.c.lst -z noexecstack -c -o build-sh4/logging.o src/logging.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/logging-config.c.lst -z noexecstack -c -o build-sh4/logging-config.o src/logging-config.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/logging-custom.c.lst -z noexecstack -c -o build-sh4/logging-custom.o src/logging-custom.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/main.c.lst -z noexecstack -c -o build-sh4/main.o src/main.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/manager.c.lst -z noexecstack -c -o build-sh4/manager.o src/manager.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/mem.c.lst -z noexecstack -c -o build-sh4/mem.o src/mem.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/memory-manager.c.lst -z noexecstack -c -o build-sh4/memory-manager.o src/memory-manager.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/menu.c.lst -z noexecstack -c -o build-sh4/menu.o src/menu.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/shell.c.lst -z noexecstack -c -o build-sh4/shell.o src/shell.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/text.c.lst -z noexecstack -c -o build-sh4/text.o src/text.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/util.c.lst -z noexecstack -c -o build-sh4/util.o src/util.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/cache.S.lst -z noexecstack -c -o build-sh4/cache.o src/cache.S 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/macros.S.lst -z noexecstack -c -o build-sh4/macros.o src/macros.S 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/test.S.lst -z noexecstack -c -o build-sh4/test.o src/test.S 
+sh4eb-linux-musl-gcc -O2 -S -Iinclude -o src/forth-check.s src/forth-primitives/forth-check.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-check.s.lst -z noexecstack -c -o build-sh4/forth-check.o src/forth-check.s 
+sh4eb-linux-musl-gcc -O2 -S -Iinclude -o src/forth-locals.s src/forth-primitives/forth-locals.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-locals.s.lst -z noexecstack -c -o build-sh4/forth-locals.o src/forth-locals.s 
+sh4eb-linux-musl-gcc -O2 -S -Iinclude -o src/forth-primitives.s src/forth-primitives/forth-primitives.c 
+sh4eb-linux-musl-gcc -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/forth-primitives.s.lst -z noexecstack -c -o build-sh4/forth-primitives.o src/forth-primitives.s 
+sh4eb-linux-musl-gcc -o build-sh4/cg50-sdl2 build-sh4/compatibility.o build-sh4/console.o build-sh4/debug.o build-sh4/dummy.o build-sh4/error.o build-sh4/exceptions.o build-sh4/forth-actions.o build-sh4/forth.o build-sh4/forth-compatibility.o build-sh4/forth-engine.o build-sh4/forth-process.o build-sh4/getkey.o build-sh4/graphics.o build-sh4/key-remap.o build-sh4/key-remap-pc.o build-sh4/logging.o build-sh4/logging-config.o build-sh4/logging-custom.o build-sh4/main.o build-sh4/manager.o build-sh4/mem.o build-sh4/memory-manager.o build-sh4/menu.o build-sh4/shell.o build-sh4/text.o build-sh4/util.o build-sh4/cache.o build-sh4/macros.o build-sh4/test.o build-sh4/forth-check.o build-sh4/forth-locals.o build-sh4/forth-primitives.o -O2 -g -static -Iinclude -MMD -MP -Wa,-aghlns=build-sh4/compatibility.o.lst -z noexecstack
+./build-sh4/cg50-sdl2

@@ -2,6 +2,6 @@
 
 #Asked online but haven't found way to clean object files so doing manually
 
-rm -f build-cg/CMakeFiles/prog-tools.dir/src/*
-rm -f build-cg/CMakeFiles/prog-tools.dir/src/custom/generated/*
+rm -rf build-cg/CMakeFiles/prog-tools.dir/src/*
+rm build-asm/*
 

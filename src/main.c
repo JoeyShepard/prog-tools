@@ -11,6 +11,8 @@
 /*
 - tail call elimination
 
+- clean up file structure
+
 - type for forthengine function
 
 - more abbreviations

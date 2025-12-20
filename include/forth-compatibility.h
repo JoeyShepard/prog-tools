@@ -3,7 +3,6 @@
 #ifndef __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY
     #define __GUARD_PROG_TOOLS_FORTH_COMPATIBILITY
     
-    #include "compatibility.h"
     #include "console.h"
     #include "structs.h"
 

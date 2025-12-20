@@ -3,7 +3,7 @@
 
     #include "logging-custom.h"
 
-    #ifdef CG50
+    #if defined(CG50) || defined(LOGOFF)
         //Compiling for calculator - remove all log functions
         
         #define log_header()        {}

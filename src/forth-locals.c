@@ -1,5 +1,5 @@
 //TODO: remove
-#include <stdio.h>
+//#include <stdio.h>
 
 #include "forth-engine.h"
 

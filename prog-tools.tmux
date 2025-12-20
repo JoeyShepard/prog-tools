@@ -9,34 +9,34 @@ window sdl2-server/build/sdl2-server
 rename run
 vsplit
 
-window vim src/compatibility.h
+window vim include/compatibility.h
 rename sdl2
 vsplit vim src/compatibility.c
 
-window vim src/getkey.h
+window vim include/getkey.h
 rename keys
 vsplit vim src/getkey.c
 
-window vim src/structs.h
+window vim include/structs.h
 rename structs
 
-window vim src/text.h
+window vim include/text.h
 rename text
 vsplit vim src/text.c
 
-window vim src/mem.h
+window vim include/mem.h
 rename mem
 vsplit vim src/mem.c
 
-window vim src/forth-engine.h
+window vim include/forth-engine.h
 rename engine
 vsplit vim src/forth-engine.c
 
-window vim src/forth-primitives.h
+window vim include/forth-primitives.h
 rename prim
 vsplit vim src/forth-primitives.c
 
-window vim src/forth.h
+window vim include/forth.h
 rename forth
 vsplit vim src/forth.c
 

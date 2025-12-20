@@ -114,10 +114,6 @@
         int32_t loop_j;
 
         //Data stack
-        //TODO: remove
-        //uintptr_t stack_base;   //Store base as uintptr_t to do wrapping calculation on pointer
-        //int32_t *stack;         //Points to currently free stack element
-        
         uint32_t stack_count;   //Count of elements allocated for stack
 
         //Return stack
