@@ -45,7 +45,9 @@ void forth_init_engine(struct ForthEngine *engine,
     engine->rstack_count=rstack_count;
     engine->locals_count=locals_count;
     //Size must be power of 2 for mask to work correctly
+    //TODO: still need masks since changes interpreter?
     forth_gen_masks(engine,data_size);
+    engine->optimize=true;
 
     //Compatiblity parameters that can be adjusted to work on other platforms
     engine->print=print;

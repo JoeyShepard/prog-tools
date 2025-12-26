@@ -155,6 +155,9 @@
         bool in_bracket;
         int word_action;
 
+        //Ootimization
+        bool optimize;
+
         //Errors - compilation or state error
         int error;
         char error_num[ERROR_INT32_SIZE];    //Buffer to print number causing error (ie too long for >NUM)

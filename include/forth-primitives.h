@@ -4,6 +4,7 @@
     #include <stdint.h>
 
     #include "forth-engine.h"
+    #include "logging.h"
     #include "structs.h"
 
     //structs

@@ -980,7 +980,8 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { a b c } b a * c - baz ;\n: baz { a } a a * ;\n1 2 3 foo\n";
     //const char *debug_keys=": foo { a b c } c b a bar ;\n: bar { b c d } c b * d - baz ;\n: baz { c } c c * ;\n1 2 3 foo\n";
     //const char *debug_keys="8 const r create a r 1 + allot : nqueens a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;\nnqueens";
-    const char *debug_keys="8 const rx create a rx 1 + allot : nqueens rx { r } a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;";//\nnqueens";
+    //const char *debug_keys="8 const rx create a rx 1 + allot : nqueens rx { r } a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;";//\nnqueens";
+    const char *debug_keys=": f 255 0 do i loop ; f : g 1 2 3 ; g\n";
     //const char *debug_keys="";
 
     //Main loop

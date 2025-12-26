@@ -12,7 +12,10 @@
 - delay on PC after key input is before any key is pressed
   - see separate thread and how keys are handled
   - increasing key buffer size did not help
+
 - tail call elimination
+
+- no need to pass engine if engine is always at same address
 
 - clean up file structure
 
