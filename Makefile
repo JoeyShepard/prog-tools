@@ -13,8 +13,8 @@ CFLAGS += -z noexecstack
 #Convert certain C files to ASM with GCC 15.1 using musttail
 PRIM_FLAGS = -O2 -S -Iinclude
 PRIM_C_FILES = src/forth-primitives.c src/forth-locals.c src/forth-check.c
-PRIM_ASM_FILES=$(PRIM_C_FILES:$(SRC_DIR)/%.c=$(SRC_DIR)/%.s)
-OBJS_PRIM=$(PRIM_ASM_FILES:$(SRC_DIR)/%.s=$(BUILD_DIR)/%.o)
+PRIM_ASM_FILES=$(PRIM_C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.s)
+OBJS_PRIM=$(PRIM_ASM_FILES:$(BUILD_DIR)/%.s=$(BUILD_DIR)/%.o)
 
 #All other files
 C_FILES=$(filter-out $(PRIM_C_FILES), $(wildcard $(SRC_DIR)/*.c))
@@ -53,14 +53,15 @@ $(OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(OBJS_ASM): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
-$(PRIM_ASM_FILES): $(SRC_DIR)/%.s: $(SRC_DIR)/%.c
+$(PRIM_ASM_FILES): $(BUILD_DIR)/%.s: $(SRC_DIR)/%.c
 	$(CC) $(PRIM_FLAGS) -o $@ $< 
 
-$(OBJS_PRIM): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
+$(OBJS_PRIM): $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.s
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
 .PHONY: clean
 clean:
 	rm -f $(BUILD_DIR)/*
+	#rm -f $(PRIM_ASM_FILES)
 
 -include $(DEPS)

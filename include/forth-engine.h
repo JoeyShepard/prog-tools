@@ -140,6 +140,8 @@
 
         //Execution
         void (**address)(struct ForthEngine *engine);
+        //TODO: delete
+        void (**test_address)();
         volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
         bool exit_program;
         uint32_t word_index;
