@@ -212,14 +212,29 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
     }
     else
     {
+
+
         //Prepare engine to run secondary
         //TODO: need to add primitive 
         forth_engine_pre_exec(engine);
         engine->executing=true;
-        engine->address=secondary->address;
         engine->word_headers=word_headers;
         engine->word_bodies=word_bodies;
         engine->word_count=word_count;
+
+        //Optimize if enabled
+        if (engine->optimize==true)
+        {
+            START HERE
+            - how to look up fixed address of secondary? need 2nd pass :/
+
+            engine->address=
+        }
+        else
+        {
+            //Not optimizing
+            engine->address=secondary->address;
+        }
 
         //Allocate room on locals stack
         engine->locals_stack-=secondary->locals_count;
