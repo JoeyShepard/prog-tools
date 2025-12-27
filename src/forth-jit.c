@@ -4,7 +4,7 @@
 
 int forth_jit(struct ForthEngine *engine)
 {
-    //compile.word_names=(struct ForthWordNameInfo *)add_object(FORTH_MEM_WORD_NAMES,compile.heap_ptr);
+    //compile.word_names=
 
     //Logging
     log_push(LOGGING_FORTH_JIT,"forth_jit");

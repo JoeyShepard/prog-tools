@@ -154,6 +154,7 @@ unsigned char *get_split_heap()
     return heap_ptr;
 }
 
+//TODO: make sure return value is always checked
 //heap_ptr - address of split heap as returned by get_split_heap
 unsigned char *add_object(size_t size,unsigned char *heap_ptr)
 {

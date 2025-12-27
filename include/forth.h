@@ -49,18 +49,23 @@
     #define FORTH_ID_CONTROL_STACK  5
     #define FORTH_ID_LOCALS         6
 
-    //TODO: restore
-    //#define FORTH_MEM_DEFINITIONS   1024    //For these five, allocate this amount initially then add this     
+    //TODO: restore - triggering memory resize to test
+    //#define FORTH_MEM_DEFINITIONS   1024    //For these, allocate this amount initially then add this     
     //#define FORTH_MEM_WORD_HEADERS  512     //much when memory runs out. Exact amount not important - prevents
     //#define FORTH_MEM_WORD_NAMES    512     //copying whole dictionary every time new word added.
     //#define FORTH_MEM_CONTROL_STACK 512
     //#define FORTH_MEM_LOCALS        512
+    //#define FORTH_MEM_JIT_DATA      1024
+    //#define FORTH_MEM_JIT_IDS       1024
 
-    #define FORTH_MEM_DEFINITIONS   128     //For these five, allocate this amount initially then add this     
-    #define FORTH_MEM_WORD_HEADERS  128     //much when memory runs out. Exact amount not important - prevents
+    #define FORTH_MEM_DEFINITIONS   64      //For these, allocate this amount initially then add this     
+    #define FORTH_MEM_WORD_HEADERS  64      //much when memory runs out. Exact amount not important - prevents
     #define FORTH_MEM_WORD_NAMES    64      //copying whole dictionary every time new word added.
     #define FORTH_MEM_CONTROL_STACK 64
     #define FORTH_MEM_LOCALS        64
+    #define FORTH_MEM_JIT_DATA      64
+    #define FORTH_MEM_JIT_IDS       64
+    #define FORTH_MEM_JIT_CONST     64
 
     //Console
     //TODO: THIS WILL CRASH IF SCREEN SPLITS!!!

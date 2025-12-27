@@ -19,6 +19,10 @@
     - same - printf fixed but removing printf didnt bring back bug
   - tried filling all of heap, xram, and yram with test values but no change
 
+- test out of memory handling
+  - looking back at it, not sure it would work correctly
+  - mainly about whether error screen or message on console
+
 - function pointer for refilling buffer
 
 - fatal error should be press error to exit

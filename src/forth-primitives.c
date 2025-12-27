@@ -497,7 +497,7 @@ void prim_hidden_secondary(struct ForthEngine *engine)
 //Jump to JIT code
 void prim_hidden_jit(struct ForthEngine *engine)
 {
-    //__attribute__((musttail)) return *((void (**)(struct ForthEngine *))(engine->address+1))(engine);
+    __attribute__((musttail)) return ((forth_prim_t)(engine->address+1))(engine);
 }
 
 //Primitives visible to user
