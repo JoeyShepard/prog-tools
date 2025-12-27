@@ -11,6 +11,50 @@
 //TODO: remove
 #include "test.h"
 
+//TODO: remove
+#define address(x) ((uintptr_t)x)>>24, (((uintptr_t)x)>>16)&0xFF, (((uintptr_t)x)>>8)&0xFF, ((uintptr_t)x)&0xFF
+
+typedef int (*f_t)(void);
+f_t *f;
+
+int f1(){ return 12; }
+int f3(){ return 56; }
+int f_exec()
+{
+    f++;
+    __attribute__((musttail)) return ((f_t)f)();
+}
+
+void jit_test2()
+{
+    //sh4eb machine code
+    char test_code[64]={
+        address(f1),
+        address(f_exec),
+        0x00, 0x0B, //rts
+        0xE0, 0x2A, //mov #42,r0
+        address(f3),
+        address(NULL),
+        };
+
+    //Copy machine code to memory
+    memcpy(heap,test_code,sizeof(test_code));
+    
+    f=(f_t*)heap;
+    while(1)
+    {
+        if (*f==NULL) break;
+        printf("f: %p, f1: %p, f3: %p\n",f,f1,f3);
+        int result=(*f)();
+        printf("%d\n",result);
+        f++;
+    }
+}
+
+
+
+
+
 
 //Internal primitives - not visible to user
 //=========================================
@@ -450,6 +494,12 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     FORTH_NEXT
 }
 
+//Jump to JIT code
+void prim_hidden_jit(struct ForthEngine *engine)
+{
+    //__attribute__((musttail)) return *((void (**)(struct ForthEngine *))(engine->address+1))(engine);
+}
+
 //Primitives visible to user
 //==========================
 
@@ -662,6 +712,7 @@ void prim_dot(struct ForthEngine *engine)
     //Update stack pointer
     engine->stack_index--;
 
+    //TODO: printing was failing until added printf line inside if below. removed printf and bug did not reappear.
     //Print if print function defined
     if (engine->print!=NULL)
     {

@@ -189,11 +189,69 @@ unsigned char *add_object(size_t size,unsigned char *heap_ptr)
     return ((struct ObjectInfo *)heap_ptr)->data;
 }
 
+int remove_object(unsigned char *data,unsigned char *heap_ptr)
+{
+    //Logging
+    log_push(LOGGING_MEM_REMOVE_OBJECT,"remove_object");
+    log_text("heap_ptr: %p\n",heap_ptr);
+    log_text("data: %p\n",data);
+
+    //Point past header data to beginning of object list
+    unsigned char *obj_ptr=((struct HeapInfo *)heap_ptr)->objects;
+
+    //Search objects for matching data pointer
+    while(1)
+    {
+        struct ObjectInfo *object=(struct ObjectInfo *)obj_ptr;
+
+        //Logging
+        log_text("object: %p, size: %d\n",object,object->size);
+        
+        if (object->size==0)
+        {
+            //Logging
+            log_text("error - reached end of list without finding object\n");
+            log_pop();
+
+            //Error - reached end of list without finding object
+            return ERROR_BAD_OBJECT_ADDRESS;
+        }
+        else if (object->data==data)
+        {
+            //Logging
+            log_text("found\n");
+            log_text("heap size: %d\n",((struct HeapInfo *)heap_ptr)->size);
+
+            //Object found - remove
+            ((struct HeapInfo *)heap_ptr)->size-=object->size;
+            object->size=0;
+
+            //Logging
+            log_text("new heap size: %d\n",((struct HeapInfo *)heap_ptr)->size);
+            log_pop();
+
+            return ERROR_NONE;
+        }
+        else if (obj_ptr>=data)
+        {
+            //Logging
+            log_text("error - searched past object without finding it");
+            log_pop();
+
+            //Error - searched past object without finding it
+            return ERROR_BAD_OBJECT_ADDRESS;
+        }
+
+        //Skip object and point to next one
+        obj_ptr+=object->size;
+    }
+}
+
 //Base address function for object functions below
 struct ObjectInfo *object_address(int ID, unsigned char *heap_ptr)
 {
     //Logging
-    log_push(LOGGING_FORTH_OBJECT_ADDRESS,"object_address");
+    log_push(LOGGING_MEM_OBJECT_ADDRESS,"object_address");
     log_text("heap_ptr: %p\n",heap_ptr);
 
     //Point past header data to beginning of object list

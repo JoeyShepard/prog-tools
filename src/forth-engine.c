@@ -6,6 +6,7 @@
 #include "forth.h"
 #include "forth-action-list.h"
 #include "forth-engine.h"
+#include "forth-jit.h"
 #include "logging.h"
 #include "macros.h"
 #include "structs.h"
@@ -47,8 +48,7 @@ void forth_init_engine(struct ForthEngine *engine,
     //Size must be power of 2 for mask to work correctly
     //TODO: still need masks since changes interpreter?
     forth_gen_masks(engine,data_size);
-    //TODO
-    engine->optimize=false;
+    engine->optimize=true;
 
     //Compatiblity parameters that can be adjusted to work on other platforms
     engine->print=print;
@@ -213,10 +213,7 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
     }
     else
     {
-
-
         //Prepare engine to run secondary
-        //TODO: need to add primitive 
         forth_engine_pre_exec(engine);
         engine->executing=true;
         engine->word_headers=word_headers;
@@ -226,7 +223,11 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         //Optimize if enabled
         if (engine->optimize==true)
         {
-            //engine->address=
+            //Optimizing
+            int result=forth_jit(engine);
+            //TODO: check return
+            //engine->address=compile->jit_address;
+            engine->address=secondary->address;
         }
         else
         {
@@ -269,6 +270,12 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
 
         //Clear address so interrupt doesn't set when ON pressed - address on engine->executing changes
         on_key_executing=NULL;
+
+        //Free jit memory if allocated
+        if (engine->optimize==true)
+        {
+            forth_jit_free(engine);
+        }
 
         //Stop logging
         log_pop();

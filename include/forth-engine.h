@@ -159,6 +159,8 @@
 
         //Ootimization
         bool optimize;
+        unsigned char *jit_data;
+        void (**jit_IDs)(struct ForthEngine *engine);
 
         //Errors - compilation or state error
         int error;

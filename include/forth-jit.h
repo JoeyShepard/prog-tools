@@ -25,4 +25,7 @@
         unsigned char data[];
     };
 
+    int forth_jit(struct ForthEngine *engine);
+    int forth_jit_free(struct ForthEngine *engine);
+
 #endif

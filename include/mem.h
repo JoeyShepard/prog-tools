@@ -33,6 +33,7 @@
     uint32_t heap_used();
     unsigned char *get_split_heap();
     unsigned char *add_object(size_t size,unsigned char *heap_ptr);
+    int remove_object(unsigned char *object,unsigned char *heap_ptr);
     struct ObjectInfo *object_address(int ID, unsigned char *heap_ptr);
     int expand_object(size_t size,int ID,unsigned char *heap_ptr);
     int reduce_object(size_t size,int ID,unsigned char *heap_ptr);

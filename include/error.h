@@ -16,6 +16,7 @@
         ERROR_MENU_TEXT_TOO_LONG,
         ERROR_UNALIGNED_WRITE,
         ERROR_BAD_HEAP_ID,
+        ERROR_BAD_OBJECT_ADDRESS,
 
         //error_screen - not fatal, show screen then return to menu
         ERROR_OUT_OF_MEMORY

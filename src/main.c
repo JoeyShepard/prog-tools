@@ -15,6 +15,8 @@
 
 - function pointer for refilling buffer
 
+- fatal error should be press error to exit
+
 - handle EXEC in JIT
 
 - stop using uint8_t for memory - switch to unsigned char
@@ -349,7 +351,11 @@ void jit_test()
 
     //Wait for key
     getkey_wrapper(true);
+
 }
+
+//TODO: remove
+void jit_test2();
 
 //int main(int argc, char *argv[])  //PC only
 int main(void)                      //cg50 and PC
@@ -367,6 +373,7 @@ int main(void)                      //cg50 and PC
 
     //TODO: remove
     //jit_test();
+    //jit_test2();
 
     //Initialize heap memory
     init_heap();
