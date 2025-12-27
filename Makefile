@@ -62,6 +62,5 @@ $(OBJS_PRIM): $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.s
 .PHONY: clean
 clean:
 	rm -f $(BUILD_DIR)/*
-	#rm -f $(PRIM_ASM_FILES)
 
 -include $(DEPS)

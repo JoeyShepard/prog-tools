@@ -273,7 +273,7 @@ int menu_handler(int command_ID, struct WindowInfo *windows, int selected_window
 
                                 //Closing top split so need to move bottom split to full screen
                                 //(or closing left split and moving right split)
-                                uint8_t *split_ptr=heap;
+                                unsigned char *split_ptr=heap;
                                 for (int i=0;i<TAB_COUNT*SPLIT_COUNT;i++)
                                 {
                                     struct HeapInfo *heap_info=(struct HeapInfo *)split_ptr;

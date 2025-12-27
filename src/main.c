@@ -13,7 +13,11 @@
   - see separate thread and how keys are handled
   - increasing key buffer size did not help
 
-- tail call elimination
+- function pointer for refilling buffer
+
+- handle EXEC in JIT
+
+- stop using uint8_t for memory - switch to unsigned char
 
 - no need to pass engine if engine is always at same address
 

@@ -56,7 +56,7 @@ int placeholder(int command_ID, struct WindowInfo *windows, int selected_window,
 
     //Heap memory
     select_heap(window.tab_index,drawn_split);
-    uint8_t *heap_ptr=get_split_heap();
+    unsigned char *heap_ptr=get_split_heap();
 
     if (command_ID==COMMAND_START) 
         add_object((window.tab_index*2+window.selected_split)*40,heap_ptr);

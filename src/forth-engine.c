@@ -47,7 +47,8 @@ void forth_init_engine(struct ForthEngine *engine,
     //Size must be power of 2 for mask to work correctly
     //TODO: still need masks since changes interpreter?
     forth_gen_masks(engine,data_size);
-    engine->optimize=true;
+    //TODO
+    engine->optimize=false;
 
     //Compatiblity parameters that can be adjusted to work on other platforms
     engine->print=print;
@@ -80,7 +81,7 @@ void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size)
 
 //TODO: move code here or remove?
 //Called on program switch
-void forth_reload_engine(struct ForthEngine *engine,uint8_t *data)
+void forth_reload_engine(struct ForthEngine *engine,unsigned char *data)
 {
     engine->data=data;
 }
@@ -196,7 +197,7 @@ void forth_rstack_push(int32_t value,int32_t value_max,uint8_t type,uint32_t ind
 }
 
 int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
-                            struct ForthWordHeader *word_headers,uint32_t word_count,uint8_t *word_bodies)
+                            struct ForthWordHeader *word_headers,uint32_t word_count,unsigned char *word_bodies)
 {
     if (secondary->type==FORTH_SECONDARY_UNDEFINED)
     {
@@ -225,10 +226,7 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         //Optimize if enabled
         if (engine->optimize==true)
         {
-            START HERE
-            - how to look up fixed address of secondary? need 2nd pass :/
-
-            engine->address=
+            //engine->address=
         }
         else
         {

@@ -53,7 +53,7 @@ static void action_compact(uint32_t delete_offset,uint32_t delete_size,struct Fo
                 log_text("  updating address\n");
 
                 //Code address is part of memory shifted by memmove. Adjust pointer.
-                update_secondary->address=(void(**)(struct ForthEngine *))((uint8_t *)update_secondary->address-delete_size);
+                update_secondary->address=(void(**)(struct ForthEngine *))((unsigned char *)update_secondary->address-delete_size);
                 update_secondary->offset-=delete_size;
 
                 //Logging
@@ -251,7 +251,7 @@ int action_char_common(const char *source,uint32_t *start,int32_t *index,struct 
     else
     {
         //Return first character of word
-        *index=*(uint8_t *)(source+*start);
+        *index=*(unsigned char *)(source+*start);
 
         //Advance to next word
         *start+=word_len;
@@ -962,7 +962,7 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
     uint32_t address=engine->data_index;
    
     //Hex value for \x escape code
-    uint8_t hex_value;
+    char hex_value;
 
     //Skip first character which should be space but could be 0
     bool skip_first=true;
@@ -1161,8 +1161,11 @@ int action_quote_common(struct ForthEngine *engine,const char *source,uint32_t *
             }
             else
             {
+
+                //TODO: detect incorrect hex
+
                 //Processing hex value
-                uint8_t new_value;
+                char new_value;
                 if ((character>='0')&&(character<='9')) new_value=character-'0';
                 else if ((character>='A')&&(character<='F')) new_value=character-'A'+10;
                 else if ((character>='a')&&(character<='f')) new_value=character-'a'+10;

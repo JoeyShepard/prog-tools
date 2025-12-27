@@ -1,3 +1,6 @@
+//TODO: remove
+#include <stdio.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -12,43 +15,43 @@
 #include "macros.h"
 #include "mem.h"
 
-uint8_t *write_heap_i32(int32_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_i32(int32_t val,unsigned char *heap_ptr)
 {
     memcpy(heap_ptr,&val,sizeof(int32_t));
     return heap_ptr+sizeof(int32_t);
 }
 
-uint8_t *write_heap_i16(int16_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_i16(int16_t val,unsigned char *heap_ptr)
 {
     memcpy(heap_ptr,&val,sizeof(int16_t));
     return heap_ptr+sizeof(int16_t);
 }
 
-uint8_t *write_heap_i8(int8_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_i8(int8_t val,unsigned char *heap_ptr)
 {
     *(int8_t *)heap_ptr=val;
     return heap_ptr+sizeof(int8_t);
 }
 
-uint8_t *write_heap_u32(uint32_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_u32(uint32_t val,unsigned char *heap_ptr)
 {
     memcpy(heap_ptr,&val,sizeof(uint32_t));
     return heap_ptr+sizeof(uint32_t);
 }
 
-uint8_t *write_heap_u16(uint16_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_u16(uint16_t val,unsigned char *heap_ptr)
 {
     memcpy(heap_ptr,&val,sizeof(uint16_t));
     return heap_ptr+sizeof(uint16_t);
 }
 
-uint8_t *write_heap_u8(uint8_t val,uint8_t *heap_ptr)
+unsigned char *write_heap_u8(uint8_t val,unsigned char *heap_ptr)
 {
     *heap_ptr=val;
     return heap_ptr+sizeof(int8_t);
 }
 
-uint8_t *new_split_mem(uint8_t tab,uint8_t split,uint8_t *heap_ptr)
+unsigned char *new_split_mem(uint8_t tab,uint8_t split,unsigned char *heap_ptr)
 {
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
     //Size of new memory record being created - struct HeaderInfo with one object with its size member set to zero
@@ -66,7 +69,7 @@ uint8_t *new_split_mem(uint8_t tab,uint8_t split,uint8_t *heap_ptr)
 void init_heap()
 {
     //Write empty heap data for both splits of all 6 tabs
-    uint8_t *heap_ptr=heap;
+    unsigned char *heap_ptr=heap;
     for (int i=0;i<TAB_COUNT;i++)
     {
         for (int j=0;j<SPLIT_COUNT;j++)
@@ -77,7 +80,7 @@ void init_heap()
 //Move heap for selected tab/split to top so it can access free memory
 void select_heap(int tab,int split)
 {
-    uint8_t *heap_ptr=heap; 
+    unsigned char *heap_ptr=heap; 
     uint32_t *obj_start;
     uint32_t *obj_end;
     uint32_t obj_size;
@@ -132,7 +135,7 @@ void select_heap(int tab,int split)
 
 uint32_t heap_left()
 {
-    uint8_t *heap_ptr=get_split_heap();
+    unsigned char *heap_ptr=get_split_heap();
     //TODO: struct HeapInfo
     heap_ptr+=*(uint32_t *)heap_ptr;
     return (uint32_t)(heap+HEAP_SIZE-heap_ptr);
@@ -143,16 +146,16 @@ uint32_t heap_used()
     return HEAP_SIZE-heap_left();
 }
 
-uint8_t *get_split_heap()
+unsigned char *get_split_heap()
 {
-    uint8_t *heap_ptr=heap;
+    unsigned char *heap_ptr=heap;
     for (int i=0;i<TAB_COUNT*SPLIT_COUNT-1;i++)
         heap_ptr+=((struct HeapInfo *)heap_ptr)->size;
     return heap_ptr;
 }
 
 //heap_ptr - address of split heap as returned by get_split_heap
-uint8_t *add_object(size_t size,uint8_t *heap_ptr)
+unsigned char *add_object(size_t size,unsigned char *heap_ptr)
 {
     if (size%ALIGNMENT)
     {
@@ -187,7 +190,7 @@ uint8_t *add_object(size_t size,uint8_t *heap_ptr)
 }
 
 //Base address function for object functions below
-struct ObjectInfo *object_address(int ID, uint8_t *heap_ptr)
+struct ObjectInfo *object_address(int ID, unsigned char *heap_ptr)
 {
     //Logging
     log_push(LOGGING_FORTH_OBJECT_ADDRESS,"object_address");
@@ -231,7 +234,7 @@ struct ObjectInfo *object_address(int ID, uint8_t *heap_ptr)
     return (struct ObjectInfo *)heap_ptr;
 }
 
-int expand_object(size_t size,int ID,uint8_t *heap_ptr)
+int expand_object(size_t size,int ID,unsigned char *heap_ptr)
 {
     //Logging
     log_push(LOGGING_MEM_EXPAND_OBJECT,"expand_object");
@@ -251,9 +254,9 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
     struct ObjectInfo *object_info=object_address(ID,heap_ptr);
-    uint8_t *object=(uint8_t *)object_info;
-    uint8_t *src=object+object_info->size;
-    uint8_t *dest=src+size;
+    unsigned char *object=(unsigned char *)object_info;
+    unsigned char *src=object+object_info->size;
+    unsigned char *dest=src+size;
     uint32_t copy_size=heap_info->size-(object-heap_ptr);
     //Memory range overlaps - memmove instead of memcpy
     memmove(dest,src,copy_size);
@@ -268,7 +271,7 @@ int expand_object(size_t size,int ID,uint8_t *heap_ptr)
     return ERROR_NONE;
 }
 
-int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
+int reduce_object(size_t size,int ID,unsigned char *heap_ptr)
 {
     if (size%ALIGNMENT)
     {
@@ -278,8 +281,8 @@ int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
 
     struct HeapInfo *heap_info=(struct HeapInfo *)heap_ptr;
     struct ObjectInfo *object_info=object_address(ID,heap_ptr);
-    uint8_t *object=(uint8_t *)object_info;
-    uint8_t *src=object+object_info->size;
+    unsigned char *object=(unsigned char *)object_info;
+    unsigned char *src=object+object_info->size;
     //Memory range overlaps - memmove instead of memcpy
     memmove(src-size,src,size);
 
@@ -291,7 +294,7 @@ int reduce_object(size_t size,int ID,uint8_t *heap_ptr)
 }
 
 //Call expand_object or reduce_object as necessary
-int resize_object(size_t new_size,int ID,uint8_t *heap_ptr)
+int resize_object(size_t new_size,int ID,unsigned char *heap_ptr)
 {
     if (new_size%ALIGNMENT)
     {

@@ -26,9 +26,9 @@ volatile bool *on_key_pressed;
 
 
     //2MB of unused space in RAM for heap
-    uint8_t *heap=(uint8_t *)0x8c200000;
-    uint8_t *xram=(uint8_t *)0xe5007000;
-    uint8_t *yram=(uint8_t *)0xe5017000;
+    unsigned char *heap=(unsigned char *)0x8c200000;
+    unsigned char *xram=(unsigned char *)0xe5007000;
+    unsigned char *yram=(unsigned char *)0xe5017000;
 
     volatile int tick_flag;
 
@@ -154,11 +154,11 @@ volatile bool *on_key_pressed;
     //=======
     //Calculator
     uint16_t screen[DHEIGHT*DWIDTH];
-    uint8_t *heap;
-    uint8_t *xram;
-    uint8_t *yram;
-    uint8_t *xram_base;
-    uint8_t *yram_base;
+    unsigned char *heap;
+    unsigned char *xram;
+    unsigned char *yram;
+    unsigned char *xram_base;
+    unsigned char *yram_base;
     int global_delay_ms;
     #define KEYS_SIZE 10000
     int keys[KEYS_SIZE];

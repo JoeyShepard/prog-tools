@@ -43,7 +43,7 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
 
     //Calculate space used by each tab/split for use below
     uint32_t split_mem[TAB_COUNT][SPLIT_COUNT]={0};
-    uint8_t *split_ptr=heap;
+    unsigned char *split_ptr=heap;
     for (int tab=0;tab<TAB_COUNT;tab++)
     {
         for (int split=0;split<SPLIT_COUNT;split++)
@@ -106,7 +106,7 @@ int memory_manager(int command_ID, struct WindowInfo *windows, int selected_wind
     //Start or Resume so enter input loop
     //Heap must be at top even if not used since will be freed on exit
     select_heap(window.tab_index,window.selected_split);
-    //uint8_t *heap_ptr=get_split_heap();
+    //unsigned char *heap_ptr=get_split_heap();
     int modifier=MODIFIER_NONE;
     bool redraw=true;
     while (1)

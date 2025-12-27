@@ -131,7 +131,7 @@
         int32_t loop_j_max;
 
         //Data area - like dictionary but no definitions stored there
-        uint8_t *data;          //Pointer to memory occupied by data area
+        unsigned char *data;    //Pointer to memory occupied by data area
         uint32_t data_size;
         uint32_t data_index;    //Index into memory pointed to by *data
         uint32_t data_mask;
@@ -146,7 +146,7 @@
         bool exit_program;
         uint32_t word_index;
         struct ForthWordHeader *word_headers;
-        uint8_t *word_bodies;
+        unsigned char *word_bodies;
         uint32_t word_count;
         prof_t perf_counter;        //Performance counter on calculator
         uint32_t perf_value;        //Result of running performance counter
@@ -223,7 +223,7 @@
         int16_t screen_width,
         int16_t screen_height);
     void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size);
-    void forth_reload_engine(struct ForthEngine *engine,uint8_t *data);
+    void forth_reload_engine(struct ForthEngine *engine,unsigned char *data);
     void forth_reset_engine(struct ForthEngine *engine);
     void forth_reset_engine_stacks(struct ForthEngine *engine);
     void forth_engine_pre_exec(struct ForthEngine *engine);
@@ -232,6 +232,6 @@
     int forth_pop(struct ForthEngine *engine,int32_t *value);
     void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
     int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
-                                struct ForthWordHeader *word_headers,uint32_t word_count,uint8_t *word_bodies);
+                                struct ForthWordHeader *word_headers,uint32_t word_count,unsigned char *word_bodies);
 
 #endif

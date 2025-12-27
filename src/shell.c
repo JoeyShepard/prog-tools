@@ -617,7 +617,7 @@ static int process_input(void *struct_args)
                 }
 
                 //Manually copy bytes from source to destination
-                uint8_t copy_buffer[SHELL_CP_SIZE];
+                unsigned char copy_buffer[SHELL_CP_SIZE];
                 size_t bytes_read;
                 size_t bytes_written;
                 do
@@ -1169,7 +1169,7 @@ int calc_shell(int command_ID, struct WindowInfo *windows, int selected_window)
 
     //Heap memory
     select_heap(window.tab_index,drawn_split);
-    uint8_t *heap_ptr=get_split_heap();
+    unsigned char *heap_ptr=get_split_heap();
 
     //Pointers to data on heap
     struct ShellInfo *shell;

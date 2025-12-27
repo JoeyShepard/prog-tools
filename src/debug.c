@@ -107,7 +107,7 @@ void debug_global(const char *msg,void *data,bool count)
     {
         //TODO: rewrite with struct HeapInfo
         /*
-        uint8_t *ptr=heap;
+        unsigned char *ptr=heap;
       
         printf("Debugging heap:\n");
         for (int i=0;i<48;i++)
