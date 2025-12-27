@@ -581,22 +581,29 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
     console_text_default("\n",console);
     console->input.visible=true;
 
-    //Restore control flow stack size if it was expanded
-    int result=resize_object(FORTH_MEM_CONTROL_STACK,FORTH_ID_CONTROL_STACK,compile->heap_ptr);
-    if (result!=ERROR_NONE)
+    //Shrink memory only used during processing
+    struct ResizeInfo
     {
-        //Should never happen since only error would be ERROR_UNALIGNED_WRITE which isn't possible here.
-        //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
-        process_result=FORTH_ERROR_MEMORY_OTHER;
-    }
+        int size, id;
+    } resize_list[]={
+        {FORTH_MEM_CONTROL_STACK,   FORTH_ID_CONTROL_STACK},
+        {FORTH_MEM_LOCALS,          FORTH_ID_LOCALS},
+        {FORTH_MEM_JIT_DATA,        FORTH_ID_JIT_DATA},
+        {FORTH_MEM_JIT_IDS,         FORTH_ID_JIT_IDS},
+        {FORTH_MEM_JIT_CONST,       FORTH_ID_JIT_CONST},
+        };
 
-    //Restore locals size if it was expanded
-    result=resize_object(FORTH_MEM_LOCALS,FORTH_ID_LOCALS,compile->heap_ptr);
-    if (result!=ERROR_NONE)
+
+    for (int i=0;i<ARRAY_LEN(resize_list);i++)
     {
-        //Should never happen since only error would be ERROR_UNALIGNED_WRITE which isn't possible here.
-        //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
-        process_result=FORTH_ERROR_MEMORY_OTHER;
+        int result=resize_object(resize_list[i].size,resize_list[i].id,compile->heap_ptr);
+        if (result!=ERROR_NONE)
+        {
+            //Should never happen since only error would be ERROR_UNALIGNED_WRITE which isn't possible here.
+            //(Object size is always greater than or equal to FORTH_MEM_CONTROL_STACK so no ERROR_OUT_OF_MEMORY).
+            process_result=FORTH_ERROR_MEMORY_OTHER;
+            break;
+        }
     }
 
     //Process any errors from processing source or resizing control stack or locals
@@ -818,9 +825,47 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //No need to initialize locals - reinitialized every time source begins to be processed
 
-        START HERE:
-        - need memory for JIT data, IDs, and constant list
+        START HERE
+        - add pointers below to compile object
+        - figure out how to handle since pointers should be in engine not compile
+        - add new pointers to code that reassigns when memory changes
 
+
+        //Allocate space for JIT data 
+        compile.jit_data=(struct ForthJitData *)add_object(FORTH_MEM_JIT_DATA,compile.heap_ptr);
+
+        //Make sure allocation succeeded
+        if (compile.jit_data==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+        //No need to initialize JIT data - reinitialized every time source begins to be processed
+
+        //Allocate space for JIT IDs
+        compile.jit_IDs=(struct ForthJitIDs *)add_object(FORTH_MEM_JIT_IDS,compile.heap_ptr);
+
+        //Make sure allocation succeeded
+        if (compile.jit_IDs==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+        //No need to initialize JIT IDs - reinitialized every time source begins to be processed
+
+        //Allocate space for JIT constants
+        compile.jit_constants=(struct ForthJitConstants *)add_object(FORTH_MEM_JIT_CONST,compile.heap_ptr);
+
+        //Make sure allocation succeeded
+        if (compile.jit_constants==NULL)
+        {
+            error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
+            return COMMAND_EXIT;
+        }
+
+        //No need to initialize JIT contants - reinitialized every time source begins to be processed
 
         //Init console
         console=&forth->console;

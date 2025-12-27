@@ -190,6 +190,8 @@ unsigned char *add_object(size_t size,unsigned char *heap_ptr)
     return ((struct ObjectInfo *)heap_ptr)->data;
 }
 
+//UNTESTED
+/*
 int remove_object(unsigned char *data,unsigned char *heap_ptr)
 {
     //Logging
@@ -247,6 +249,7 @@ int remove_object(unsigned char *data,unsigned char *heap_ptr)
         obj_ptr+=object->size;
     }
 }
+*/
 
 //Base address function for object functions below
 struct ObjectInfo *object_address(int ID, unsigned char *heap_ptr)

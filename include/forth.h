@@ -48,6 +48,9 @@
     #define FORTH_ID_WORD_NAMES     4
     #define FORTH_ID_CONTROL_STACK  5
     #define FORTH_ID_LOCALS         6
+    #define FORTH_ID_JIT_DATA       7
+    #define FORTH_ID_JIT_IDS        8
+    #define FORTH_ID_JIT_CONST      9
 
     //TODO: restore - triggering memory resize to test
     //#define FORTH_MEM_DEFINITIONS   1024    //For these, allocate this amount initially then add this     
@@ -55,8 +58,9 @@
     //#define FORTH_MEM_WORD_NAMES    512     //copying whole dictionary every time new word added.
     //#define FORTH_MEM_CONTROL_STACK 512
     //#define FORTH_MEM_LOCALS        512
-    //#define FORTH_MEM_JIT_DATA      1024
-    //#define FORTH_MEM_JIT_IDS       1024
+    //#define FORTH_MEM_JIT_DATA      512
+    //#define FORTH_MEM_JIT_IDS       512
+    //#define FORTH_MEM_JIT_CONST     512
 
     #define FORTH_MEM_DEFINITIONS   64      //For these, allocate this amount initially then add this     
     #define FORTH_MEM_WORD_HEADERS  64      //much when memory runs out. Exact amount not important - prevents

@@ -18,6 +18,8 @@
   - now underflow checks failing. related?
     - same - printf fixed but removing printf didnt bring back bug
   - tried filling all of heap, xram, and yram with test values but no change
+  - printf fixed because triggered make on file it was added to?
+    - save files next time bug appears
 
 - test out of memory handling
   - looking back at it, not sure it would work correctly
@@ -49,8 +51,6 @@
 - local variables
   - store names after word for debugger and browser
 
-- typedef for function pointers
-
 - need opt on and off for testing
 
 - color code )
@@ -66,10 +66,6 @@
 - paren comments not working in word definition
   - now can't reproduce
   - got it more than once to include ) as undefined word
-
-- tail call improvements
-  - get compiler to generate tail call
-  - have stack underflow generate exception
 
 - shift should stay on if held down
 
