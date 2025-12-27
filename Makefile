@@ -1,4 +1,4 @@
-PROJECT = cg50-sdl2
+PROJECT = prog-tools
 
 BUILD_DIR=build-sh4
 SRC_DIR=src

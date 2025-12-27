@@ -963,11 +963,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         //Execute secondary
                         result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,
                             compile->words->header,compile->words->index,compile->definitions->data,
-                            NULL);
-
-                            //START HERE:
-
-                            //(forth_prim_t *)compile->jit_data);
+                            (forth_prim_t *)compile->jit_data->data);
 
                         //Clean up JIT code
                         forth_jit_free(compile);

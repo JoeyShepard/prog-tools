@@ -1233,3 +1233,117 @@ LOGGING RESTARTED
 Begin logging
 forth_jit
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x4121b0
+- 0x40c218
+- 0x40c3f4
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x4121d0
+- 0x40c238
+- 0x40c414
+- 
+- 0x40bf20
+- 0
+- 0
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x4121f8
+- 0x2b2c9cb8: 0x40c260
+- 0x2b2c9cbc: 0x40c43c
+- 
+- writing 0x40bf48 to 0x2b2c9e40
+- writing 42 to 0x2b2c9e50
+- writing 0x40bca0 to 0x2b2c9e60
+- 0x2b2c9e40: 0x40bf48
+- 0x2b2c9e44: 0
+- 0x2b2c9e48: 0
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x412200
+- 0x2b2c9cb8: 0x40c268
+- 0x2b2c9cbc: 0x40c444
+- 
+- writing 0x40bf50 to 0x2b2c9e44
+- writing 42 to 0x2b2c9e48
+- writing 0x40bca8 to 0x2b2c9e60
+- 0x2b2c9e44: 0x40bf50
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0x40bca8
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x412200
+- 0x2b2c9cb8: 0x40c268
+- 0x2b2c9cbc: 0x40c444
+- 
+- writing 0x40bf50 to 0x2b2c9e44
+- writing 42 to 0x2b2c9e48
+- writing 0x40bca8 to 0x2b2c9e4c
+- 0x2b2c9e44: 0x40bf50
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0x40bca8
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x412200
+- 0x2b2c9cb8: 0x40c268
+- 0x2b2c9cbc: 0x40c444
+- 
+- writing 0x40bf50 to 0x2b2c9e44
+- writing 42 to 0x2b2c9e48
+- writing 0x40bca8 to 0x2b2c9e4c
+- 0x2b2c9e44: 0x40bf50
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0x40bca8
+- 
+forth_jit_free
