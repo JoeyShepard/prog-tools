@@ -469,6 +469,15 @@ volatile bool *on_key_pressed;
         uintptr_t yram_diff=YRAM_SIZE-((uintptr_t)(yram_base))%YRAM_SIZE;
         yram=yram_base+yram_diff;
 
+        //TODO: remove
+        /*
+        //Set memory contents to help track down bugs
+        int pattern=0xFF;
+        memset(xram,XRAM_SIZE,pattern);
+        memset(yram,YRAM_SIZE,pattern);
+        memset(heap,HEAP_SIZE,pattern);
+        */
+
         //Save ms to delay between frames
         global_delay_ms=delay_ms;
 

@@ -668,7 +668,6 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         if (compile->colon_word_exists==true)
         {
             if (compile->save_type!=FORTH_SECONDARY_UNDEFINED) 
-                //compile->colon_word->address=(void (**)(struct ForthEngine *))(compile->definitions->data+compile->save_offset);
                 compile->colon_word->address=(forth_prim_t *)(compile->definitions->data+compile->save_offset);
             else compile->colon_word->address=NULL;
             compile->colon_word->offset=compile->save_offset;
@@ -901,8 +900,6 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         while (secondary->last==false)
         {
             //Recalculate execution pointer
-            //TODO: remove
-            //secondary->address=(void (**)(struct ForthEngine *engine))(compile.definitions->data+secondary->offset);
             secondary->address=(forth_prim_t *)(compile.definitions->data+secondary->offset);
 
             //Recalculate word name pointer

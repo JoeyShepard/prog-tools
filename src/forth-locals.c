@@ -11,8 +11,6 @@ void prim_locals_copy(struct ForthEngine *engine)
     int offset=num&0xFFFF;
 
     //Increment thread pointer to account for number
-    //TODO: remove
-    //engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
     engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
     
     if (engine->stack_index<count)
@@ -50,7 +48,7 @@ void prim_locals_zero(struct ForthEngine *engine)
     int offset=num&0xFFFF;
 
     //Increment thread pointer to account for number
-    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+    engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
     
     //Initialize locals to 0
     for (int i=0;i<count;i++)

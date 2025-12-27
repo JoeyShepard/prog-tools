@@ -611,7 +611,6 @@ int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct For
     }
     else
     {
-        //secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
         secondary->address=(forth_prim_t *)(compile->definitions->data+compile->definitions->index);
         secondary->offset=compile->definitions->index;
     }
@@ -1128,7 +1127,6 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
         while(secondary->last==false)
         {
             //Recalculate execution pointer
-            //secondary->address=(void (**)(struct ForthEngine *engine))(compile->definitions->data+secondary->offset);
             secondary->address=(forth_prim_t *)(compile->definitions->data+secondary->offset);
 
             //Advance to next word header

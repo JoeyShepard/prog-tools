@@ -118,7 +118,7 @@ void prim_hidden_done(struct ForthEngine *engine)
         if (engine->rstack->type==FORTH_RSTACK_RETURN)
         {
             //Return to calling word
-            engine->address=(void (**)(struct ForthEngine *engine))(engine->word_bodies+engine->rstack->value);
+            engine->address=(forth_prim_t *)(engine->word_bodies+engine->rstack->value);
 
             //Restore any locals memory used
             engine->locals_stack+=engine->rstack->locals_count;
@@ -187,7 +187,7 @@ void prim_hidden_dot_quote(struct ForthEngine *engine)
     //Align address pointer
     uint32_t ptr_size=sizeof(void(*)(struct ForthEngine *engine));
     text+=(ptr_size-(quote_length%ptr_size))%ptr_size;
-    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+    engine->address=((forth_prim_t *)text)-1;
 
     //Logging
     log_text("ptr_size: %u\n",ptr_size);
@@ -221,12 +221,12 @@ void prim_hidden_if(struct ForthEngine *engine)
     {
         //Jump taken - fetch offset which is stored after pointer to current word
         int32_t offset=*(int32_t *)(engine->address+1);
-        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+        engine->address=(forth_prim_t *)((char *)engine->address+offset);
     }
     else
     {
         //Jump not taken - increment thread pointer to account for offset stored after primitive
-        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+        engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
     }
 
     FORTH_NEXT
@@ -237,7 +237,7 @@ void prim_hidden_jump(struct ForthEngine *engine)
 {
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
-    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+    engine->address=(forth_prim_t *)((char *)engine->address+offset);
 
     FORTH_NEXT
 }
@@ -255,7 +255,7 @@ void prim_hidden_leave(struct ForthEngine *engine)
 
     //Fetch offset which is stored after pointer to current word and jump
     int32_t offset=*(int32_t *)(engine->address+1);
-    engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+    engine->address=(forth_prim_t *)((char *)engine->address+offset);
 
     FORTH_NEXT
 }
@@ -270,12 +270,12 @@ void prim_hidden_loop(struct ForthEngine *engine)
     {
         //Jump taken - fetch offset which is stored after pointer to current word
         int32_t offset=*(int32_t *)(engine->address+1);
-        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+        engine->address=(forth_prim_t *)((char *)engine->address+offset);
     }
     else
     {
         //Jump not taken - increment thread pointer to account for offset stored after primitive
-        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+        engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
 
         //Copy J counter to I counter
         engine->loop_i=engine->loop_j;
@@ -309,12 +309,12 @@ void prim_hidden_plus_loop(struct ForthEngine *engine)
     {
         //Jump taken - fetch offset which is stored after pointer to current word
         int32_t offset=*(int32_t *)(engine->address+1);
-        engine->address=(void (**)(struct ForthEngine *))((char *)engine->address+offset);
+        engine->address=(forth_prim_t *)((char *)engine->address+offset);
     }
     else
     {
         //Jump not taken - increment thread pointer to account for offset stored after primitive
-        engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+        engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
 
         //Copy J counter to I counter
         engine->loop_i=engine->loop_j;
@@ -336,7 +336,7 @@ void prim_hidden_push(struct ForthEngine *engine)
     int32_t num=*(int32_t *)(engine->address+1);
 
     //Increment thread pointer to account for number
-    engine->address=(void (**)(struct ForthEngine *engine))(((int32_t *)engine->address)+1);
+    engine->address=(forth_prim_t *)(((int32_t *)engine->address)+1);
 
     //Push number to stack
     engine->stack[engine->stack_index]=num;
@@ -392,9 +392,9 @@ void prim_hidden_s_quote(struct ForthEngine *engine)
     log_text("text: %p\n",text);
 
     //Align address pointer
-    uint32_t ptr_size=sizeof(void(*)(struct ForthEngine *engine));
+    uint32_t ptr_size=sizeof(forth_prim_t);
     text+=(ptr_size-(quote_length%ptr_size))%ptr_size;
-    engine->address=((void (**)(struct ForthEngine *engine))text)-1;
+    engine->address=((forth_prim_t *)text)-1;
 
     //Logging
     log_text("ptr_size: %u\n",ptr_size);
@@ -421,7 +421,7 @@ void prim_hidden_secondary(struct ForthEngine *engine)
     uint32_t index=*(uint32_t *)(engine->address+1);
 
     //Increment thread pointer to account for fetched offset
-    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+    engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
 
     //Figure out if secondary is user-defined word or variable - slower but necessary to support redefining words
     struct ForthWordHeader *secondary=&engine->word_headers[index];

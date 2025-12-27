@@ -14,8 +14,10 @@
   - increasing key buffer size did not help
 
 - dot was failing
+  - added printf then went away and didn't come back when removing printf
   - now underflow checks failing. related?
-  - went away when adding printf then came back after adding printf and removing
+    - same - printf fixed but removing printf didnt bring back bug
+  - tried filling all of heap, xram, and yram with test values but no change
 
 - function pointer for refilling buffer
 
@@ -23,13 +25,7 @@
 
 - handle EXEC in JIT
 
-- stop using uint8_t for memory - switch to unsigned char
-
-- no need to pass engine if engine is always at same address
-
 - clean up file structure
-
-- type for forthengine function
 
 - more abbreviations
   - << and >> for shift
