@@ -8,6 +8,7 @@
 #include "forth-action-list.h"
 #include "forth-actions.h"
 #include "forth-check.h"
+#include "forth-jit.h"
 #include "forth-locals.h"
 #include "forth-primitives.h"
 #include "forth-process.h"
@@ -944,14 +945,38 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                 }
                 else if (word_type==FORTH_TYPE_SECONDARY)
                 {
+
                     //Break on ON key - set up pointers
                     bool on_key_halted=false;
                     on_key_pressed=&on_key_halted;
                     on_key_executing=&engine->executing;
 
                     //Execute secondary
-                    int result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,compile->words->header,
-                                                        compile->words->index,compile->definitions->data);
+                    int result;
+                    if (compile->optimize==true)
+                    {
+                        //TODO: don't regenerate JIT if nothing has changed
+
+                        //Generate JIT code
+                        forth_jit(compile);
+
+                        //Execute secondary
+                        result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,
+                            compile->words->header,compile->words->index,compile->definitions->data,
+                            NULL);
+
+                            //START HERE:
+
+                            //(forth_prim_t *)compile->jit_data);
+
+                        //Clean up JIT code
+                        forth_jit_free(compile);
+                    }
+                    else
+                    {
+                        result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,
+                            compile->words->header,compile->words->index,compile->definitions->data,NULL);
+                    }
 
                     //Abort if error occured while running secondary
                     if (result!=FORTH_ENGINE_ERROR_NONE) return FORTH_ERROR_ENGINE;
@@ -1164,6 +1189,11 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
 
     //Update pointer to locals
     compile->locals=(struct ForthLocalsInfo *)(object_address(FORTH_ID_LOCALS,compile->heap_ptr)->data);
+
+    //Update JIT pointers
+    compile->jit_data=(struct ForthJitData *)(object_address(FORTH_ID_JIT_DATA,compile->heap_ptr)->data);
+    compile->jit_IDs=(struct ForthJitIDs *)(object_address(FORTH_ID_JIT_IDS,compile->heap_ptr)->data);
+    compile->jit_constants=(struct ForthJitConstants *)(object_address(FORTH_ID_JIT_CONST,compile->heap_ptr)->data);
 
     //Logging
     log_text("done\n");

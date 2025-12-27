@@ -30,6 +30,7 @@
     void prim_hidden_dot_quote(struct ForthEngine *engine);
     void prim_hidden_if(struct ForthEngine *engine);
     void prim_hidden_jump(struct ForthEngine *engine);
+    void prim_hidden_jit(struct ForthEngine *engine);
     void prim_hidden_leave(struct ForthEngine *engine);
     void prim_hidden_loop(struct ForthEngine *engine);
     void prim_hidden_plus_loop(struct ForthEngine *engine);

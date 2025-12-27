@@ -1094,3 +1094,142 @@ Compile primitive
   reset_checks
 forth_jit
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+address: 0x2b4afc78 [00 40 EE 80 00 40 5B F4 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free

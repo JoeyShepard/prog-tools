@@ -1,5 +1,10 @@
 PENDING
 =======
+primitves and secondaries stop working sometimes
+- saved generated files to folder here
+- make clean fixed which matches other observed behavior where adding printf fixed but removing printf
+  did not reintroduce bug
+- problem is no .d file generated for the 3 .c files converted to .s?
 
 
 
