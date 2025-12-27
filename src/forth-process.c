@@ -611,7 +611,8 @@ int new_secondary(const char *word_buffer,uint8_t word_type,bool done,struct For
     }
     else
     {
-        secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        //secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        secondary->address=(forth_prim_t *)(compile->definitions->data+compile->definitions->index);
         secondary->offset=compile->definitions->index;
     }
     secondary->definition_size=0;
@@ -722,6 +723,10 @@ const char *local_name(uint16_t id,struct ForthCompileInfo *compile)
 
 int compute_checks(int32_t pop_count,int32_t push_count,struct ForthCompileInfo *compile)
 {
+    log_push(LOGGING_FORTH_CHECKS,"compute_checks");
+    log_text("pop: %d, push: %d\n",pop_count,push_count);
+    log_text("check_sp: %d\n",compile->check_sp);
+
     if (((pop_count==0)&&(push_count==0))==false)
     {
         if (compile->check_index==0)
@@ -745,30 +750,62 @@ int compute_checks(int32_t pop_count,int32_t push_count,struct ForthCompileInfo 
         }
         compile->check_sp=new_sp;
     }
+
+    log_text("new check_sp: %d\n",compile->check_sp);
+    log_pop();
+
     return FORTH_ERROR_NONE;
 }
 
 void reset_checks(struct ForthCompileInfo *compile)
 {
+    log_push(LOGGING_FORTH_CHECKS,"reset_checks");
+
     compile->check_index=0;
     compile->check_sp=0;
     compile->check_pop=0;
     compile->check_push=0;
+
+    log_pop();
 }
 
 void finalize_checks(struct ForthCompileInfo *compile)
 {
+    //Logging
+    log_push(LOGGING_FORTH_CHECKS,"finalize_checks");
+    log_text("check_index: %d\n",compile->check_index);
+    log_text("pop: %d, push:%d\n",-compile->check_pop,compile->check_push);
+
     if (compile->check_index!=0)
     {
         void (*check)(struct ForthEngine *engine)=forth_checks[-compile->check_pop][compile->check_push];
+        
+        //Logging
+        log_text("check: %p\n",check);
+        for (int pop=0;pop<FORTH_CHECK_MAX;pop++)
+        {
+            log_text("%d: ",pop);
+            for (int push=0;push<FORTH_CHECK_MAX;push++)
+            {
+                log_text("(%d) %p, ",push,forth_checks[pop][push]);
+            }
+            log_text("\n");
+        }
+        
+        //Write check primitive
         memcpy(compile->definitions->data+compile->definitions->index-compile->check_index,&check,sizeof(check));
     }
+
+    log_pop();
 }
 
 int process_source(struct ForthEngine *engine,const char *source,struct ForthCompileInfo *compile)
 {
     //Primitive like BYE may set flag to request that caller close program
     engine->exit_program=false;
+
+    //Initialize stack check primitives
+    reset_checks(compile);
 
     //Loop through words in source
     compile->word_len=0;
@@ -959,14 +996,13 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     log_text("name: %s\n",forth_primitives[compile->primitive_ID].name);
                     
                     //Primitive - compile
-                    int compile_action=forth_primitives[compile->primitive_ID].compile_action;
-                    if (compile_action==FORTH_ACTION_NONE)
+                    struct ForthPrimitive primitive=forth_primitives[compile->primitive_ID];
+                    if (primitive.compile_action==FORTH_ACTION_NONE)
                     {
                         //Logging
                         log_text("body only\n"); 
 
                         //No special compile behavior - compile address
-                        struct ForthPrimitive primitive=forth_primitives[compile->primitive_ID];
                         if (primitive.end_block==true)
                         {
                             //Primitive ends block
@@ -984,7 +1020,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                             if (result!=FORTH_ERROR_NONE) return result;
                         }
                     }
-                    else if (compile_action==FORTH_ACTION_INTERPRET_ONLY)
+                    else if (primitive.compile_action==FORTH_ACTION_INTERPRET_ONLY)
                     {
                         //Error - word is compile only
                         engine->error=FORTH_ERROR_INTERPRET_ONLY;
@@ -1001,7 +1037,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         {
                             //Primitive ends block - finalize stack check primitive
                             finalize_checks(compile);
-                            int result=handle_action(compile_action,true,engine,source,&start,compile);
+                            int result=handle_action(primitive.compile_action,true,engine,source,&start,compile);
                             reset_checks(compile);
 
                             //Some actions above may set error code requiring halt to processing
@@ -1011,7 +1047,7 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         {
                             int result=compute_checks(forth_primitives[compile->primitive_ID].pop_count,forth_primitives[compile->primitive_ID].push_count,compile);
                             if (result!=FORTH_ERROR_NONE) return result;
-                            result=handle_action(compile_action,true,engine,source,&start,compile);
+                            result=handle_action(primitive.compile_action,true,engine,source,&start,compile);
 
                             //Some actions above may set error code requiring halt to processing
                             if (result!=FORTH_ERROR_NONE) return result;
@@ -1092,7 +1128,8 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
         while(secondary->last==false)
         {
             //Recalculate execution pointer
-            secondary->address=(void (**)(struct ForthEngine *engine))(compile->definitions->data+secondary->offset);
+            //secondary->address=(void (**)(struct ForthEngine *engine))(compile->definitions->data+secondary->offset);
+            secondary->address=(forth_prim_t *)(compile->definitions->data+secondary->offset);
 
             //Advance to next word header
             secondary++;

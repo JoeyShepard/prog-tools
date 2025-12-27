@@ -13,6 +13,10 @@
   - see separate thread and how keys are handled
   - increasing key buffer size did not help
 
+- dot was failing
+  - now underflow checks failing. related?
+  - went away when adding printf then came back after adding printf and removing
+
 - function pointer for refilling buffer
 
 - fatal error should be press error to exit

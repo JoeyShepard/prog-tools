@@ -46,3 +46,631 @@ Begin logging
 LOGGING RESTARTED
 =================
 Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+Compile primitive
+- name: +
+- body only
+Compile primitive
+- name: ;
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 0
+  reset_checks
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check_2_1: 0x412090, check: 0x41206c
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check_2_1: 0x1000
+  - 0:   - (4267296) 0x472040,   - (4267480) 0x472040,   - (4267520) 0x472040,   - (4267560) 0x472040,   - (4267600) 0x472040,   - (4267640) 0x472040,   - (4267680) 0x472040,   - (4267720) 0x472040,   - 
+  - 1:   - (4267760) 0x472040,   - (4267796) 0x472040,   - (4267856) 0x472040,   - (4267916) 0x472040,   - (4267976) 0x472040,   - (4268036) 0x472040,   - (4268096) 0x472040,   - (4268156) 0x472040,   - 
+  - 2:   - (4268216) 0x472040,   - (4268252) 0x472040,   - (4268316) 0x472040,   - (4268380) 0x472040,   - (4268444) 0x472040,   - (4268508) 0x472040,   - (4268572) 0x472040,   - (4268636) 0x472040,   - 
+  - 3:   - (4268700) 0x472040,   - (4268736) 0x472040,   - (4268800) 0x472040,   - (4268864) 0x472040,   - (4268928) 0x472040,   - (4268992) 0x472040,   - (4269056) 0x472040,   - (4269120) 0x472040,   - 
+  - 4:   - (4269184) 0x472040,   - (4269220) 0x472040,   - (4269284) 0x472040,   - (4269348) 0x472040,   - (4269412) 0x472040,   - (4269476) 0x472040,   - (4269540) 0x472040,   - (4269604) 0x472040,   - 
+  - 5:   - (4269668) 0x472040,   - (4269704) 0x472040,   - (4269768) 0x472040,   - (4269832) 0x472040,   - (4269896) 0x472040,   - (4269960) 0x472040,   - (4270024) 0x472040,   - (4270088) 0x472040,   - 
+  - 6:   - (4270152) 0x472040,   - (4270188) 0x472040,   - (4270252) 0x472040,   - (4270316) 0x472040,   - (4270380) 0x472040,   - (4270444) 0x472040,   - (4270508) 0x472040,   - (4270572) 0x472040,   - 
+  - 7:   - (4270636) 0x472040,   - (4270672) 0x472040,   - (4270732) 0x472040,   - (4270792) 0x472040,   - (4270852) 0x472040,   - (4270912) 0x472040,   - (4270972) 0x472040,   - (4271032) 0x472040,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x411d80
+  - 0:   - (0) 0x411d24,   - (1) 0x411e74,   - (2) 0x411e9c,   - (3) 0x411ec4,   - (4) 0x411eec,   - (5) 0x411f14,   - (6) 0x411f3c,   - (7) 0x411f64,   - 
+  - 1:   - (0) 0x411f8c,   - (1) 0x411fb0,   - (2) 0x411fec,   - (3) 0x412028,   - (4) 0x412064,   - (5) 0x4120a0,   - (6) 0x4120dc,   - (7) 0x412118,   - 
+  - 2:   - (0) 0x411d80,   - (1) 0x412154,   - (2) 0x412194,   - (3) 0x4121d4,   - (4) 0x412214,   - (5) 0x412254,   - (6) 0x412294,   - (7) 0x4122d4,   - 
+  - 3:   - (0) 0x412314,   - (1) 0x412338,   - (2) 0x412378,   - (3) 0x4123b8,   - (4) 0x4123f8,   - (5) 0x412438,   - (6) 0x412478,   - (7) 0x4124b8,   - 
+  - 4:   - (0) 0x4124f8,   - (1) 0x41251c,   - (2) 0x41255c,   - (3) 0x41259c,   - (4) 0x4125dc,   - (5) 0x41261c,   - (6) 0x41265c,   - (7) 0x41269c,   - 
+  - 5:   - (0) 0x4126dc,   - (1) 0x412700,   - (2) 0x412740,   - (3) 0x412780,   - (4) 0x4127c0,   - (5) 0x412800,   - (6) 0x412840,   - (7) 0x412880,   - 
+  - 6:   - (0) 0x4128c0,   - (1) 0x4128e4,   - (2) 0x412924,   - (3) 0x412964,   - (4) 0x4129a4,   - (5) 0x4129e4,   - (6) 0x412a24,   - (7) 0x412a64,   - 
+  - 7:   - (0) 0x412aa4,   - (1) 0x412ac8,   - (2) 0x412b04,   - (3) 0x412b40,   - (4) 0x412b7c,   - (5) 0x412bb8,   - (6) 0x412bf4,   - (7) 0x412c30,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x412bd4
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x412bd4,   - (1) 0x4120bc,   - (2) 0x4120fc,   - (3) 0x41213c,   - (4) 0x41217c,   - (5) 0x4121bc,   - (6) 0x4121fc,   - (7) 0x41223c,   - 
+  - 3:   - (0) 0x41227c,   - (1) 0x4122a0,   - (2) 0x4122e0,   - (3) 0x412320,   - (4) 0x412360,   - (5) 0x4123a0,   - (6) 0x4123e0,   - (7) 0x412420,   - 
+  - 4:   - (0) 0x412460,   - (1) 0x412484,   - (2) 0x4124c4,   - (3) 0x412504,   - (4) 0x412544,   - (5) 0x412584,   - (6) 0x4125c4,   - (7) 0x412604,   - 
+  - 5:   - (0) 0x412644,   - (1) 0x412668,   - (2) 0x4126a8,   - (3) 0x4126e8,   - (4) 0x412728,   - (5) 0x412768,   - (6) 0x4127a8,   - (7) 0x4127e8,   - 
+  - 6:   - (0) 0x412828,   - (1) 0x41284c,   - (2) 0x41288c,   - (3) 0x4128cc,   - (4) 0x41290c,   - (5) 0x41294c,   - (6) 0x41298c,   - (7) 0x4129cc,   - 
+  - 7:   - (0) 0x412a0c,   - (1) 0x412a30,   - (2) 0x412a6c,   - (3) 0x412aa8,   - (4) 0x412ae4,   - (5) 0x412b20,   - (6) 0x412b5c,   - (7) 0x412b98,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x412bd4
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x412bd4,   - (1) 0x4120bc,   - (2) 0x4120fc,   - (3) 0x41213c,   - (4) 0x41217c,   - (5) 0x4121bc,   - (6) 0x4121fc,   - (7) 0x41223c,   - 
+  - 3:   - (0) 0x41227c,   - (1) 0x4122a0,   - (2) 0x4122e0,   - (3) 0x412320,   - (4) 0x412360,   - (5) 0x4123a0,   - (6) 0x4123e0,   - (7) 0x412420,   - 
+  - 4:   - (0) 0x412460,   - (1) 0x412484,   - (2) 0x4124c4,   - (3) 0x412504,   - (4) 0x412544,   - (5) 0x412584,   - (6) 0x4125c4,   - (7) 0x412604,   - 
+  - 5:   - (0) 0x412644,   - (1) 0x412668,   - (2) 0x4126a8,   - (3) 0x4126e8,   - (4) 0x412728,   - (5) 0x412768,   - (6) 0x4127a8,   - (7) 0x4127e8,   - 
+  - 6:   - (0) 0x412828,   - (1) 0x41284c,   - (2) 0x41288c,   - (3) 0x4128cc,   - (4) 0x41290c,   - (5) 0x41294c,   - (6) 0x41298c,   - (7) 0x4129cc,   - 
+  - 7:   - (0) 0x412a0c,   - (1) 0x412a30,   - (2) 0x412a6c,   - (3) 0x412aa8,   - (4) 0x412ae4,   - (5) 0x412b20,   - (6) 0x412b5c,   - (7) 0x412b98,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+address: 0x2b4afc78 [00 40 EE C0 00 40 5B 48 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+reset_checks
+compute_checks
+- pop: 0, push: 1
+- check_sp: 0
+- new check_sp: 1
+compute_checks
+- pop: 0, push: 1
+- check_sp: 1
+- new check_sp: 2
+compute_checks
+- pop: 0, push: 1
+- check_sp: 2
+- new check_sp: 3
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 28
+  - pop: 0, push:3
+  - check: 0x411e2c
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+reset_checks
+Compile primitive
+- name: *
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: -1
+  - new check_sp: -2
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 12
+  - pop: 3, push:0
+  - check: 0x4122a0
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+reset_checks
+compute_checks
+- pop: 0, push: 1
+- check_sp: 0
+- new check_sp: 1
+compute_checks
+- pop: 0, push: 1
+- check_sp: 1
+- new check_sp: 2
+compute_checks
+- pop: 0, push: 1
+- check_sp: 2
+- new check_sp: 3
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 28
+  - pop: 0, push:3
+  - check: 0x411e2c
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+reset_checks
+reset_checks
+Compile primitive
+- name: *
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: -1
+  - new check_sp: -2
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 12
+  - pop: 3, push:0
+  - check: 0x4122a0
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+reset_checks
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+reset_checks
+reset_checks
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 8
+  - pop: 2, push:0
+  - check: 0x4120bc
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+reset_checks
+address: 0x2b4afc78 [00 40 C1 B4 00 40 5B 48 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+address: 0x2b4afc78 [00 40 C3 90 00 40 5B 48 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+reset_checks
+reset_checks
+Compile primitive
+- name: *
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: 0
+  - new check_sp: -1
+Compile primitive
+- name: +
+- body only
+  compute_checks
+  - pop: 2, push: 1
+  - check_sp: -1
+  - new check_sp: -2
+Compile primitive
+- name: ;
+  finalize_checks
+  - check_index: 12
+  - pop: 3, push:0
+  - check: 0x4122a0
+  - 0:   - (0) 0x411d24,   - (1) 0x411ddc,   - (2) 0x411e04,   - (3) 0x411e2c,   - (4) 0x411e54,   - (5) 0x411e7c,   - (6) 0x411ea4,   - (7) 0x411ecc,   - 
+  - 1:   - (0) 0x411ef4,   - (1) 0x411f18,   - (2) 0x411f54,   - (3) 0x411f90,   - (4) 0x411fcc,   - (5) 0x412008,   - (6) 0x412044,   - (7) 0x412080,   - 
+  - 2:   - (0) 0x4120bc,   - (1) 0x4120e0,   - (2) 0x412120,   - (3) 0x412160,   - (4) 0x4121a0,   - (5) 0x4121e0,   - (6) 0x412220,   - (7) 0x412260,   - 
+  - 3:   - (0) 0x4122a0,   - (1) 0x4122c4,   - (2) 0x412304,   - (3) 0x412344,   - (4) 0x412384,   - (5) 0x4123c4,   - (6) 0x412404,   - (7) 0x412444,   - 
+  - 4:   - (0) 0x412484,   - (1) 0x4124a8,   - (2) 0x4124e8,   - (3) 0x412528,   - (4) 0x412568,   - (5) 0x4125a8,   - (6) 0x4125e8,   - (7) 0x412628,   - 
+  - 5:   - (0) 0x412668,   - (1) 0x41268c,   - (2) 0x4126cc,   - (3) 0x41270c,   - (4) 0x41274c,   - (5) 0x41278c,   - (6) 0x4127cc,   - (7) 0x41280c,   - 
+  - 6:   - (0) 0x41284c,   - (1) 0x412870,   - (2) 0x4128b0,   - (3) 0x4128f0,   - (4) 0x412930,   - (5) 0x412970,   - (6) 0x4129b0,   - (7) 0x4129f0,   - 
+  - 7:   - (0) 0x412a30,   - (1) 0x412a54,   - (2) 0x412a90,   - (3) 0x412acc,   - (4) 0x412b08,   - (5) 0x412b44,   - (6) 0x412b80,   - (7) 0x412bbc,   - 
+  reset_checks
+reset_checks
+reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+forth_jit
+forth_jit_free
+reset_checks
+address: 0x2b4afc78 [00 40 EE C0 00 40 5B 48 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+reset_checks
+address: 0x2b4afc78 [00 40 EE C0 00 40 5B 48 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+

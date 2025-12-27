@@ -47,13 +47,15 @@ static void action_compact(uint32_t delete_offset,uint32_t delete_size,struct Fo
             log_text("  address: %p\n",update_secondary->address);
             log_text("  dest: %p\n",dest);
             log_text("  offset: %p\n",update_secondary->offset);
-            if (update_secondary->address>(void(**)(struct ForthEngine *))dest)
+            //if (update_secondary->address>(void(**)(struct ForthEngine *))dest)
+            if (update_secondary->address>(forth_prim_t *)dest)
             {
                 //Logging
                 log_text("  updating address\n");
 
                 //Code address is part of memory shifted by memmove. Adjust pointer.
-                update_secondary->address=(void(**)(struct ForthEngine *))((unsigned char *)update_secondary->address-delete_size);
+                //update_secondary->address=(void(**)(struct ForthEngine *))((unsigned char *)update_secondary->address-delete_size);
+                update_secondary->address=(forth_prim_t *)((unsigned char *)update_secondary->address-delete_size);
                 update_secondary->offset-=delete_size;
 
                 //Logging
@@ -99,7 +101,8 @@ static int action_prepare_word(const char *word_buffer,int word_type,uint8_t sec
         compile->colon_word_index=compile->secondary->ID;
 
         //Update existing word header with new details
-        compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        //compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        compile->secondary->address=(forth_prim_t *)(compile->definitions->data+compile->definitions->index);
         compile->secondary->offset=compile->definitions->index;
         compile->secondary->definition_size=0;
         compile->secondary->type=secondary_type;
@@ -318,7 +321,8 @@ int action_colon(struct ForthEngine *engine,const char *source,uint32_t *start,s
         compile->save_type=compile->secondary->type;
 
         //Update existing word header with new details
-        compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        //compile->secondary->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->definitions->index);
+        compile->secondary->address=(forth_prim_t *)(compile->definitions->data+compile->definitions->index);
         compile->secondary->offset=compile->definitions->index;
         compile->secondary->definition_size=0;
         compile->secondary->type=FORTH_SECONDARY_WORD;

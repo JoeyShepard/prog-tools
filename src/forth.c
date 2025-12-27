@@ -668,7 +668,8 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         if (compile->colon_word_exists==true)
         {
             if (compile->save_type!=FORTH_SECONDARY_UNDEFINED) 
-                compile->colon_word->address=(void(**)(struct ForthEngine *))(compile->definitions->data+compile->save_offset);
+                //compile->colon_word->address=(void (**)(struct ForthEngine *))(compile->definitions->data+compile->save_offset);
+                compile->colon_word->address=(forth_prim_t *)(compile->definitions->data+compile->save_offset);
             else compile->colon_word->address=NULL;
             compile->colon_word->offset=compile->save_offset;
             compile->colon_word->definition_size=compile->save_definition_size;
@@ -900,7 +901,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         while (secondary->last==false)
         {
             //Recalculate execution pointer
-            secondary->address=(void (**)(struct ForthEngine *engine))(compile.definitions->data+secondary->offset);
+            //TODO: remove
+            //secondary->address=(void (**)(struct ForthEngine *engine))(compile.definitions->data+secondary->offset);
+            secondary->address=(forth_prim_t *)(compile.definitions->data+secondary->offset);
 
             //Recalculate word name pointer
             secondary->name=compile.word_names->names+secondary->name_offset;
@@ -983,7 +986,9 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys="8 const r create a r 1 + allot : nqueens a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;\nnqueens";
     //const char *debug_keys="8 const rx create a rx 1 + allot : nqueens rx { r } a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;";//\nnqueens";
     //const char *debug_keys=": f 255 0 do i loop ; f : g 1 2 3 ; g\n";
-    const char *debug_keys="";
+    //const char *debug_keys="1 2 3 : foo * + ; foo";
+    const char *debug_keys=": foo + ; foo";
+    //const char *debug_keys="";
 
     //Main loop
     bool redraw_screen=true;

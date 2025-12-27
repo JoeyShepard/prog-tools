@@ -92,6 +92,9 @@
         FORTH_RSTACK_DO_LOOP
     };
 
+    struct ForthEngine; //Forward declaration for typedef
+    typedef void (*forth_prim_t)(struct ForthEngine *engine);
+
     struct ForthRStackElement
     {
         uint32_t value;
@@ -139,9 +142,7 @@
         uint32_t data_mask_32;
 
         //Execution
-        void (**address)(struct ForthEngine *engine);
-        //TODO: delete
-        void (**test_address)();
+        forth_prim_t *address;
         volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
         bool exit_program;
         uint32_t word_index;
@@ -150,7 +151,7 @@
         uint32_t word_count;
         prof_t perf_counter;        //Performance counter on calculator
         uint32_t perf_value;        //Result of running performance counter
-        void (*thread_buffer[2])(struct ForthEngine *engine);
+        forth_prim_t thread_buffer[2];
 
         //Compilation
         bool state;
@@ -160,7 +161,7 @@
         //Ootimization
         bool optimize;
         unsigned char *jit_data;
-        void (**jit_IDs)(struct ForthEngine *engine);
+        forth_prim_t *jit_IDs;
 
         //Errors - compilation or state error
         int error;
@@ -185,7 +186,7 @@
 
     struct ForthWordHeader
     {
-        void (**address)(struct ForthEngine *engine);   //Target address within definitions memory
+        forth_prim_t *address;
         uint32_t offset;                                //Offset into definitions of target address
         uint32_t definition_size;
         uint32_t name_offset;
@@ -197,7 +198,6 @@
         bool last;                          //Whether this header is empty header marking end of list
         bool done;                          //Whether word is done being processed. Used to rewind if error in word.
     };
-
 
     //Functions
     //=========

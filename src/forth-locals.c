@@ -1,6 +1,3 @@
-//TODO: remove
-//#include <stdio.h>
-
 #include "forth-engine.h"
 #include "forth-primitives.h"
 
@@ -14,7 +11,9 @@ void prim_locals_copy(struct ForthEngine *engine)
     int offset=num&0xFFFF;
 
     //Increment thread pointer to account for number
-    engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+    //TODO: remove
+    //engine->address=(void (**)(struct ForthEngine *engine))(((uint32_t *)engine->address)+1);
+    engine->address=(forth_prim_t *)(((uint32_t *)engine->address)+1);
     
     if (engine->stack_index<count)
     {
