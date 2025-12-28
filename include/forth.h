@@ -268,7 +268,6 @@
         bool optimize;
     };
 
-
     //Functions
     //=========
     int forth(int command_ID, struct WindowInfo *windows, int selected_window);

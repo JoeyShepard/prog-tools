@@ -2313,3 +2313,18 @@ forth_jit_free
 LOGGING RESTARTED
 =================
 Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+forth_jit_free
+forth_jit
+forth_jit_free

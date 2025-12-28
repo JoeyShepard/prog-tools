@@ -223,7 +223,8 @@ int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *s
         if (alt_address!=NULL)
         {
             //Use alternate thread address such as JIT code
-            engine->address=alt_address;
+            //engine->address=alt_address;
+            engine->address=secondary->address;
         }
         else
         {
