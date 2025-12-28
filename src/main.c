@@ -55,6 +55,9 @@
 
 - color code )
 
+- size and resize need to use same numbering
+  - SIZE 2 * RESIZE
+
 - try blue for primitives
   - color by primitive type too?
   - best may be to rotate through colors on button press

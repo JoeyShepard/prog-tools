@@ -51,6 +51,8 @@
         uint32_t *index;
     };
 
+    //Functions
+    //=========
     int forth_jit(struct ForthCompileInfo *compile);
     int forth_jit_free(struct ForthCompileInfo *compile);
 

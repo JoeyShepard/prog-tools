@@ -2308,3 +2308,8 @@ execute_secondary
 - address(primitive): 0x2b2c9e60 [00 40 D6 08 00 40 BD 1C 00 00 00 00 00 00 00 00 ]
 - address(primitive): 0x2b2c9e64 [00 40 BD 1C 00 00 00 00 00 00 00 00 00 00 00 00 ]
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging

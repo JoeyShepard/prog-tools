@@ -15,14 +15,31 @@ void set_jit_data(struct ForthJitGeneric *settings,struct ForthCompileInfo *comp
     settings->bytes_left=&compile->jit_data->bytes_left;
 }
 
-int expand_jit_data(uint32_t size,struct ForthCompileInfo *compile)
+int write_jit_primitive(forth_prim_t value,struct ForthCompileInfo *compile)
 {
     struct ForthJitGeneric settings;
     set_jit_data(&settings,compile);
-    return expand_generic(size,settings.mem_size,settings.ID,settings.bytes_left,compile);
+    return write_generic((generic_t)value,sizeof(value),settings.data,settings.index,settings.mem_size,
+                            settings.ID,settings.bytes_left,compile);
 }
 
-int write_jit_primitive(forth_prim_t value,struct ForthCompileInfo *compile)
+int write_jit_u32(uint32_t value,struct ForthCompileInfo *compile)
+{
+    struct ForthJitGeneric settings;
+    set_jit_data(&settings,compile);
+    return write_generic((generic_t)value,sizeof(value),settings.data,settings.index,settings.mem_size,
+                            settings.ID,settings.bytes_left,compile);
+}
+
+int write_jit_i32(int32_t value,struct ForthCompileInfo *compile)
+{
+    struct ForthJitGeneric settings;
+    set_jit_data(&settings,compile);
+    return write_generic((generic_t)value,sizeof(value),settings.data,settings.index,settings.mem_size,
+                            settings.ID,settings.bytes_left,compile);
+}
+
+int write_jit_u16(uint16_t value,struct ForthCompileInfo *compile)
 {
     struct ForthJitGeneric settings;
     set_jit_data(&settings,compile);
