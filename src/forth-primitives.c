@@ -188,10 +188,6 @@ void prim_hidden_if(struct ForthEngine *engine)
 void prim_hidden_jit(struct ForthEngine *engine)
 {
     forth_prim_t target=(forth_prim_t)(engine->address+1);
-    log_text("prim_hidden_jit: %p\n",target);
-
-    //__attribute__((musttail)) return ((forth_prim_t)(engine->address+1))(engine);
-    //__attribute__((musttail)) return (*(forth_prim_t)(engine->address+1))(engine);
     __attribute__((musttail)) return target(engine);
 }
 

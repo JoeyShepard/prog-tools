@@ -2249,3 +2249,62 @@ execute_secondary
 - address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
 - address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
 - prim_hidden_jit: 0x2b2c9e50 0xe1691412
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411868
+- 0x2b2c9cb8: 0x40c22c
+- 0x2b2c9cbc: 0x40c3dc
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf68
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040f8f0
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x5144710c
+- 0x2b2c9e58: 0x000b1414
+- 0x2b2c9e5c: 0x0040d394
+- 0x2b2c9e60: 0x0040d608
+- 0x2b2c9e64: 0x0040bd1c
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 68 00 00 00 2A 00 40 F8 F0 E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 F8 F0 E1 69 14 12 51 44 71 0C 00 0B 14 14 ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e5c [00 40 D3 94 00 40 D6 08 00 40 BD 1C 00 00 00 00 ]
+- address(primitive): 0x2b2c9e60 [00 40 D6 08 00 40 BD 1C 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e64 [00 40 BD 1C 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free

@@ -115,6 +115,7 @@
         int32_t *stack;
         int32_t loop_i;
         int32_t loop_j;
+        forth_prim_t *address;
 
         //Data stack
         uint32_t stack_count;   //Count of elements allocated for stack
@@ -142,7 +143,6 @@
         uint32_t data_mask_32;
 
         //Execution
-        forth_prim_t *address;
         volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
         bool exit_program;
         uint32_t word_index;

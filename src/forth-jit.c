@@ -44,8 +44,15 @@ int forth_jit(struct ForthCompileInfo *compile)
         {DEBUG_PRIM,    &prim_hidden_jit},
         {DEBUG_U16,     .data.u16=0xe169},  //mov #69,r1
         {DEBUG_U16,     .data.u16=0x1412},  //mov.l r1,@(8,r4)
+
+        {DEBUG_U16,     .data.u16=0x5144},  //mov.l @(16,r4),r1
+        {DEBUG_U16,     .data.u16=0x710c},  //add #12,r1
+        
         {DEBUG_U16,     .data.u16=0x000b},  //rts
-        {DEBUG_U16,     .data.u16=0x0009},  //nop
+        {DEBUG_U16,     .data.u16=0x1414},  //mov.l r1,@(16,r4)
+
+        //{DEBUG_U16,     .data.u16=0x0009},  //nop
+        
         {DEBUG_PRIM,    &prim_dupe},
         {DEBUG_PRIM,    &prim_i},
         {DEBUG_PRIM,    &prim_hidden_done},
