@@ -16,6 +16,7 @@
 
     struct ForthJitData
     {
+        uint32_t index;
         uint32_t bytes_left;
         unsigned char data[];
     };
@@ -30,12 +31,24 @@
     struct ForthJitConstants
     {
         uint32_t bytes_left;
-        uint32_t element_count;
+        uint32_t index;
         struct ForthJitElement
         {
-            uint8_t type;
+            enum
+            {
+                FORTH_JIT_CONST,
+            } type;
             uint8_t id;
         } elements[];
+    };
+
+    struct ForthJitGeneric
+    {
+        size_t mem_size;
+        int ID;
+        uint32_t *bytes_left;
+        unsigned char *data;
+        uint32_t *index;
     };
 
     int forth_jit(struct ForthCompileInfo *compile);

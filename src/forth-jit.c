@@ -1,88 +1,52 @@
 #include <string.h>
 
 #include "forth-jit.h"
+#include "forth-mem.h"
 #include "logging.h"
 #include "macros.h"
+#include "mem.h"
 
-//TODO: remove
-void prim_dupe(struct ForthEngine *engine);
-void prim_i(struct ForthEngine *engine);
-void prim_hidden_jit(struct ForthEngine *engine);
-
-void jit_print()
+void set_jit_data(struct ForthJitGeneric *settings,struct ForthCompileInfo *compile)
 {
-    log_text("JIT print test\n");
+    settings->data=compile->jit_data->data;
+    settings->index=&compile->jit_data->index;
+    settings->mem_size=FORTH_MEM_JIT_DATA;
+    settings->ID=FORTH_ID_JIT_DATA;
+    settings->bytes_left=&compile->jit_data->bytes_left;
+}
+
+int expand_jit_data(uint32_t size,struct ForthCompileInfo *compile)
+{
+    struct ForthJitGeneric settings;
+    set_jit_data(&settings,compile);
+    return expand_generic(size,settings.mem_size,settings.ID,settings.bytes_left,compile);
+}
+
+int write_jit_primitive(forth_prim_t value,struct ForthCompileInfo *compile)
+{
+    struct ForthJitGeneric settings;
+    set_jit_data(&settings,compile);
+    return write_generic((generic_t)value,sizeof(value),settings.data,settings.index,settings.mem_size,
+                            settings.ID,settings.bytes_left,compile);
 }
 
 int forth_jit(struct ForthCompileInfo *compile)
 {
     //Logging
     log_push(LOGGING_FORTH_JIT,"forth_jit");
-    log_text("secondary:\n");
-    for (int i=0;i<3;i++)
-        log_text("%p: %p\n",(compile->secondary->address+i),*(compile->secondary->address+i));
-    log_text("\n");
 
-    enum
-    {
-        DEBUG_PRIM,
-        DEBUG_U16,
-        DEBUG_U32
-    };
-    struct DebugInfo
-    {
-        int type;
-        union DebugUnion
-        {
-            forth_prim_t prim;
-            uint16_t u16;
-            uint32_t u32;
-        } data;
-    } debug[]={
-        {DEBUG_PRIM,    &prim_hidden_push},
-        {DEBUG_U32,     .data.u32=42},
-        {DEBUG_PRIM,    &prim_hidden_jit},
-        {DEBUG_U16,     .data.u16=0xe169},  //mov #69,r1
-        {DEBUG_U16,     .data.u16=0x1412},  //mov.l r1,@(8,r4)
+    /*
+    START HERE
+    - figure out how to handle IF (ie WHILE/AGAIN)
+      - no matching primitive, just target so hard to adjust
+      - in the case of IF, can't adjust until done with code gen following
+      - store adjusted jump distances with constants?
+      - prob need to scan whole secondary recording jump targets
+        - yes since need to end optmizing at BEGIN
+    */
 
-        {DEBUG_U16,     .data.u16=0x5144},  //mov.l @(16,r4),r1
-        {DEBUG_U16,     .data.u16=0x710c},  //add #12,r1
-        
-        {DEBUG_U16,     .data.u16=0x000b},  //rts
-        {DEBUG_U16,     .data.u16=0x1414},  //mov.l r1,@(16,r4)
+    
 
-        //{DEBUG_U16,     .data.u16=0x0009},  //nop
-        
-        {DEBUG_PRIM,    &prim_dupe},
-        {DEBUG_PRIM,    &prim_i},
-        {DEBUG_PRIM,    &prim_hidden_done},
-        };
-
-    int offset=0;
-    for (int i=0;i<ARRAY_LEN(debug);i++)
-    {
-        switch (debug[i].type)
-        {
-            case DEBUG_PRIM:
-                memcpy(compile->jit_data->data+offset,&debug[i].data.prim,sizeof(forth_prim_t));
-                offset+=sizeof(forth_prim_t);
-                break;
-            case DEBUG_U16:
-                memcpy(compile->jit_data->data+offset,&debug[i].data.u16,sizeof(uint16_t));
-                offset+=sizeof(uint16_t);
-                break;
-            case DEBUG_U32:
-                memcpy(compile->jit_data->data+offset,&debug[i].data.u32,sizeof(uint32_t));
-                offset+=sizeof(uint32_t);
-                break;
-        }
-    }
-
-    log_text("check:\n");
-    forth_prim_t *debug_prim=(forth_prim_t *)compile->jit_data->data;
-    for (int i=0;i<10;i++)
-        log_text("%p: %010p\n",debug_prim+i,*(debug_prim+i));
-    log_text("\n");
 
     //Logging
     log_pop();
