@@ -5,6 +5,7 @@ primitves and secondaries stop working sometimes
 - make clean fixed which matches other observed behavior where adding printf fixed but removing printf
   did not reintroduce bug
 - problem is no .d file generated for the 3 .c files converted to .s?
+- need to diff binaries
 
 
 

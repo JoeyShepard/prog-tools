@@ -1347,3 +1347,905 @@ forth_jit
 - 0x2b2c9e4c: 0x40bca8
 - 
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x412254
+- 0x2b2c9cb8: 0x40c2bc
+- 0x2b2c9cbc: 0x40c498
+- 
+- writing 0x40bfa4 to 0x2b2c9e44
+- writing 42 to 0x2b2c9e48
+- 0x2b2c9e44: 0x40bfa4
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0xe1691412
+- 0x2b2c9e50: 0xb0009
+- 0x2b2c9e54: 0x40d90c
+- 0x2b2c9e58: 0x40bcfc
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- 0x2b2c9cb4: 0x412254
+- 0x2b2c9cb8: 0x40c2bc
+- 0x2b2c9cbc: 0x40c498
+- 
+- writing 0x40bfa4 to 0x2b2c9e44
+- writing 42 to 0x2b2c9e48
+- 0x2b2c9e44: 0x40bfa4
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0xe1691412
+- 0x2b2c9e50: 0xb0009
+- 0x2b2c9e54: 0x40d90c
+- 0x2b2c9e58: 0x40bcfc
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x41224c
+- 0x2b2c9cb8: 0x40c2b4
+- 0x2b2c9cbc: 0x40c490
+- 
+- check:
+- 0x2b2c9e44: 0x40bf9c
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0xe1691412
+- 0x2b2c9e50: 0xb0009
+- 0x2b2c9e54: 0x40d904
+- 0x2b2c9e58: 0x40bcf4
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412280
+- 0x2b2c9cb8: 0x40c2c8
+- 0x2b2c9cbc: 0x40c4a4
+- 
+- check:
+- 0x2b2c9e44: 0x40bfb0
+- 0x2b2c9e48: 0x2a
+- 0x2b2c9e4c: 0x40ffe4
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0xb0009
+- 0x2b2c9e58: 0x40d918
+- 0x2b2c9e5c: 0x40bd08
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412284
+- 0x2b2c9cb8: 0x40c2cc
+- 0x2b2c9cbc: 0x40c4a8
+- 
+- check:
+- 0x2b2c9e44: 0x40bfb4
+- 0x2b2c9e48: 0x00002a
+- 0x2b2c9e4c: 0x40ffe8
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x0b0009
+- 0x2b2c9e58: 0x40d91c
+- 0x2b2c9e5c: 0x40bd0c
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412284
+- 0x2b2c9cb8: 0x40c2cc
+- 0x2b2c9cbc: 0x40c4a8
+- 
+- check:
+- 0x2b2c9e44: 0x0040bfb4
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040ffe8
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d91c
+- 0x2b2c9e5c: 0x0040bd0c
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412284
+- 0x2b2c9cb8: 0x40c2cc
+- 0x2b2c9cbc: 0x40c4a8
+- 
+- check:
+- 0x2b2c9e44: 0x0040bfb4
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040ffe8
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d91c
+- 0x2b2c9e5c: 0x0040bd0c
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412284
+- 0x2b2c9cb8: 0x40c2cc
+- 0x2b2c9cbc: 0x40c4a8
+- 
+- check:
+- 0x2b2c9e44: 0x0040bfb4
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d648
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d91c
+- 0x2b2c9e5c: 0x0040bd0c
+- 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x41224c
+- 0x2b2c9cb8: 0x40c294
+- 0x2b2c9cbc: 0x40c470
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf7c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d610
+- 0x2b2c9e50: 0x0040d610
+- 0x2b2c9e54: 0x0040d610
+- 0x2b2c9e58: 0x0040d8e4
+- 0x2b2c9e5c: 0x0040bcd4
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412290
+- 0x2b2c9cb8: 0x40c29c
+- 0x2b2c9cbc: 0x40c478
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf84
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d618
+- 0x2b2c9e50: 0x0040d618
+- 0x2b2c9e54: 0x0040ffb8
+- 0x2b2c9e58: 0x0040d8ec
+- 0x2b2c9e5c: 0x0040bcdc
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x41229c
+- 0x2b2c9cb8: 0x40c29c
+- 0x2b2c9cbc: 0x40c478
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf84
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d618
+- 0x2b2c9e50: 0x0040d618
+- 0x2b2c9e54: 0x0040ffb8
+- 0x2b2c9e58: 0x0040d8ec
+- 0x2b2c9e5c: 0x0040bcdc
+- 
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x41229c
+- 0x2b2c9cb8: 0x40c29c
+- 0x2b2c9cbc: 0x40c478
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf84
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d618
+- 0x2b2c9e50: 0x0040d618
+- 0x2b2c9e54: 0x0040ffb8
+- 0x2b2c9e58: 0x0040d8ec
+- 0x2b2c9e5c: 0x0040bcdc
+- 
+execute_secondary
+- address: 0x2b2c9e44 [00 40 BF 84 00 00 00 2A 00 40 D6 18 00 40 D6 18 00 40 FF B8 00 40 D8 EC 00 40 BC DC 00 00 00 00 ]
+-  (0x40bf84)
+
+- address: 0x2b2c9e48 [00 00 00 2A 00 40 D6 18 00 40 D6 18 00 40 FF B8 00 40 D8 EC 00 40 BC DC 00 00 00 00 00 00 00 00 ]
+
+- address: 0x2b2c9e4c [00 40 D6 18 00 40 D6 18 00 40 FF B8 00 40 D8 EC 00 40 BC DC 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- address: 0x2b2c9e50 [00 40 D6 18 00 40 FF B8 00 40 D8 EC 00 40 BC DC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- prim_hidden_jit: 0x2b2c9e58
+- address: 0x2b2c9e54 [00 40 FF B8 00 40 D8 EC 00 40 BC DC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- address: 0x2b2c9e58 [00 40 D8 EC 00 40 BC DC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411cdc
+- 0x2b2c9cb8: 0x40c200
+- 0x2b2c9cbc: 0x40c3b4
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf30
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d3dc
+- 0x2b2c9e50: 0x0040d3dc
+- 0x2b2c9e54: 0x0040fa10
+- 0x2b2c9e58: 0x0040d668
+- 0x2b2c9e5c: 0x0040bccc
+- 
+execute_secondary
+- address: 0x2b2c9e44 [00 40 BF 30 00 00 00 2A 00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 ]
+-  (0x40bf30)
+
+- address: 0x2b2c9e48 [00 00 00 2A 00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e4c [00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e50 [00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address: 0x2b2c9e54 [00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e58 [00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411cdc
+- 0x2b2c9cb8: 0x40c200
+- 0x2b2c9cbc: 0x40c3b4
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf30
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d3dc
+- 0x2b2c9e50: 0x0040d3dc
+- 0x2b2c9e54: 0x0040fa10
+- 0x2b2c9e58: 0x0040d668
+- 0x2b2c9e5c: 0x0040bccc
+- 
+execute_secondary
+- address: 0x2b2c9e44 [00 40 BF 30 00 00 00 2A 00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 ]
+-  (0x40bf30)
+
+- address: 0x2b2c9e48 [00 00 00 2A 00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e4c [00 40 D3 DC 00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e50 [00 40 D3 DC 00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address: 0x2b2c9e54 [00 40 FA 10 00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address: 0x2b2c9e58 [00 40 D6 68 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x40f0c0
+- 0x2b2c9cb8: 0x40bf68
+- 0x2b2c9cbc: 0x40c088
+- 
+- check:
+- 0x2b2c9e44: 0x0040bdcc
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040cad0
+- 0x2b2c9e50: 0x0040cad0
+- 0x2b2c9e54: 0x0040e498
+- 0x2b2c9e58: 0x0040cc50
+- 0x2b2c9e5c: 0x0040bc90
+- 
+execute_secondary
+- address: 0x2b2c9e44 [00 40 BD CC 00 00 00 2A 00 40 CA D0 00 40 CA D0 00 40 E4 98 00 40 CC 50 00 40 BC 90 00 00 00 00 ]
+-  (0x40bdcc)
+
+- prim_hidden_jit: 0x2b2c9e58
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x412280
+- 0x2b2c9cb8: 0x40c28c
+- 0x2b2c9cbc: 0x40c468
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf74
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d608
+- 0x2b2c9e50: 0x0040d608
+- 0x2b2c9e54: 0x0040ffa8
+- 0x2b2c9e58: 0x0040d8dc
+- 0x2b2c9e5c: 0x0040bccc
+- 
+execute_secondary
+- address (engine)   : 0x2b2c9e44 [00 40 BF 74 00 00 00 2A 00 40 D6 08 00 40 D6 08 00 40 FF A8 00 40 D8 DC 00 40 BC CC 00 00 00 00 ]
+
+- address(primitive): 0x2b2c9e48 [00 00 00 2A 00 40 D6 08 00 40 D6 08 00 40 FF A8 00 40 D8 DC 00 40 BC CC 00 00 00 00 00 00 00 00 ]
+
+- address(primitive): 0x2b2c9e4c [00 40 D6 08 00 40 D6 08 00 40 FF A8 00 40 D8 DC 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- address(primitive): 0x2b2c9e50 [00 40 D6 08 00 40 FF A8 00 40 D8 DC 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- prim_hidden_jit: 0x2b2c9e58
+- address(primitive): 0x2b2c9e54 [00 40 FF A8 00 40 D8 DC 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+- address(primitive): 0x2b2c9e58 [00 40 D8 DC 00 40 BC CC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411844
+- 0x2b2c9cb8: 0x40c1e4
+- 0x2b2c9cbc: 0x40c398
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf14
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d3c0
+- 0x2b2c9e50: 0x0040d3c0
+- 0x2b2c9e54: 0x0040f9f4
+- 0x2b2c9e58: 0x0040d64c
+- 0x2b2c9e5c: 0x0040bcb0
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 14 00 00 00 2A 00 40 D3 C0 00 40 D3 C0 00 40 F9 F4 00 40 D6 4C 00 40 BC B0 00 00 00 00 ]
+- address(primitive): 0x2b2c9e48 [00 00 00 2A 00 40 D3 C0 00 40 D3 C0 00 40 F9 F4 00 40 D6 4C 00 40 BC B0 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e4c [00 40 D3 C0 00 40 D3 C0 00 40 F9 F4 00 40 D6 4C 00 40 BC B0 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e50 [00 40 D3 C0 00 40 F9 F4 00 40 D6 4C 00 40 BC B0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address(primitive): 0x2b2c9e54 [00 40 F9 F4 00 40 D6 4C 00 40 BC B0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e58 [00 40 D6 4C 00 40 BC B0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x41197c
+- 0x2b2c9cb8: 0x40c1e8
+- 0x2b2c9cbc: 0x40c3a0
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf1c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d3d0
+- 0x2b2c9e50: 0x0040d3d0
+- 0x2b2c9e54: 0x0040fa54
+- 0x2b2c9e58: 0x0040d660
+- 0x2b2c9e5c: 0x0040bcb8
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e48 [00 40 BF 1C 00 00 00 2A 00 40 D3 D0 00 40 D3 D0 00 40 FA 54 00 40 D6 60 00 40 BC B8 00 00 00 00 ]
+- address(primitive): 0x2b2c9e4c [00 00 00 2A 00 40 D3 D0 00 40 D3 D0 00 40 FA 54 00 40 D6 60 00 40 BC B8 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e50 [00 40 D3 D0 00 40 D3 D0 00 40 FA 54 00 40 D6 60 00 40 BC B8 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e54 [00 40 D3 D0 00 40 FA 54 00 40 D6 60 00 40 BC B8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address(primitive): 0x2b2c9e58 [00 40 FA 54 00 40 D6 60 00 40 BC B8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e5c [00 40 D6 60 00 40 BC B8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411ae4
+- 0x2b2c9cb8: 0x40c208
+- 0x2b2c9cbc: 0x40c3c8
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf28
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d438
+- 0x2b2c9e50: 0x0040d438
+- 0x2b2c9e54: 0x0040fb38
+- 0x2b2c9e58: 0x0040d6d0
+- 0x2b2c9e5c: 0x0040bcb8
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e48 [00 00 00 2A 00 40 D4 38 00 40 D4 38 00 40 FB 38 ]
+- address(primitive): 0x2b2c9e4c [00 40 D4 38 00 40 D4 38 00 40 FB 38 00 40 D6 D0 ]
+- address(primitive): 0x2b2c9e50 [00 40 D4 38 00 40 FB 38 00 40 D6 D0 00 40 BC B8 ]
+- address(primitive): 0x2b2c9e54 [00 40 FB 38 00 40 D6 D0 00 40 BC B8 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address(primitive): 0x2b2c9e58 [00 40 D6 D0 00 40 BC B8 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e5c [00 40 BC B8 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411ae0
+- 0x2b2c9cb8: 0x40c204
+- 0x2b2c9cbc: 0x40c3c4
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf24
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d434
+- 0x2b2c9e50: 0x0040d434
+- 0x2b2c9e54: 0x0040fb34
+- 0x2b2c9e58: 0x0040d6cc
+- 0x2b2c9e5c: 0x0040bcb4
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 24 00 00 00 2A 00 40 D4 34 00 40 D4 34 ]
+- address(primitive): 0x2b2c9e4c [00 40 D4 34 00 40 D4 34 00 40 FB 34 00 40 D6 CC ]
+- address(primitive): 0x2b2c9e50 [00 40 D4 34 00 40 FB 34 00 40 D6 CC 00 40 BC B4 ]
+- address(primitive): 0x2b2c9e54 [00 40 FB 34 00 40 D6 CC 00 40 BC B4 00 00 00 00 ]
+- prim_hidden_jit: 0x2b2c9e58
+- address(primitive): 0x2b2c9e58 [00 40 D6 CC 00 40 BC B4 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e5c [00 40 BC B4 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411b00
+- 0x2b2c9cb8: 0x40c224
+- 0x2b2c9cbc: 0x40c3e4
+- 
+- check:
+- 0x2b2c9e44: 0x0000002a
+- 0x2b2c9e48: 0000000000
+- 0x2b2c9e4c: 0x0040d454
+- 0x2b2c9e50: 0x0040d6ec
+- 0x2b2c9e54: 0x0040bcd4
+- 0x2b2c9e58: 0000000000
+- 0x2b2c9e5c: 0000000000
+- 0x2b2c9e60: 0000000000
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 00 00 2A 00 00 00 00 00 40 D4 54 00 40 D6 EC ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af0
+- 0x2b2c9cb8: 0x40c214
+- 0x2b2c9cbc: 0x40c3d4
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf34
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040d444
+- 0x2b2c9e50: 0x0040d6dc
+- 0x2b2c9e54: 0x0040bcc4
+- 0x2b2c9e58: 0000000000
+- 0x2b2c9e5c: 0000000000
+- 0x2b2c9e60: 0000000000
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 34 00 00 00 2A 00 40 D4 44 00 40 D6 DC ]
+- address(primitive): 0x2b2c9e4c [00 40 D4 44 00 40 D6 DC 00 40 BC C4 00 00 00 00 ]
+- address(primitive): 0x2b2c9e50 [00 40 D6 DC 00 40 BC C4 00 00 00 00 00 00 00 00 ]
+- address(primitive): 0x2b2c9e54 [00 40 BC C4 00 00 00 00 00 00 00 00 00 00 00 00 ]
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411b20
+- 0x2b2c9cb8: 0x40c244
+- 0x2b2c9cbc: 0x40c404
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf64
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0xe1691412
+- 0x2b2c9e50: 0x000b0009
+- 0x2b2c9e54: 0x0040d474
+- 0x2b2c9e58: 0x0040d70c
+- 0x2b2c9e5c: 0x0040bcf4
+- 0x2b2c9e60: 0000000000
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 64 00 00 00 2A E1 69 14 12 00 0B 00 09 ]
+- address(primitive): 0x2b2c9e4c [E1 69 14 12 00 0B 00 09 00 40 D4 74 00 40 D7 0C ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411b28
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(primitive): 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af4
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af4
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af4
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af4
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50, 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50, 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50, 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50 0x2b2c9e50
+- address(engine)   : 0x2b2c9e50 [E1 69 14 12 00 0B 00 09 00 40 D4 7C 00 40 D7 14 ]
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- secondary:
+- 0x2b2c9cb4: 0x411af8
+- 0x2b2c9cb8: 0x40c24c
+- 0x2b2c9cbc: 0x40c40c
+- 
+- check:
+- 0x2b2c9e44: 0x0040bf6c
+- 0x2b2c9e48: 0x0000002a
+- 0x2b2c9e4c: 0x0040fb7c
+- 0x2b2c9e50: 0xe1691412
+- 0x2b2c9e54: 0x000b0009
+- 0x2b2c9e58: 0x0040d47c
+- 0x2b2c9e5c: 0x0040d714
+- 0x2b2c9e60: 0x0040bcfc
+- 0x2b2c9e64: 0000000000
+- 0x2b2c9e68: 0000000000
+- 
+execute_secondary
+- address(engine)   : 0x2b2c9e44 [00 40 BF 6C 00 00 00 2A 00 40 FB 7C E1 69 14 12 ]
+- address(primitive): 0x2b2c9e4c [00 40 FB 7C E1 69 14 12 00 0B 00 09 00 40 D4 7C ]
+- prim_hidden_jit: 0x2b2c9e50 0xe1691412

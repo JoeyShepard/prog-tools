@@ -2,33 +2,79 @@
 
 #include "forth-jit.h"
 #include "logging.h"
+#include "macros.h"
+
+//TODO: remove
+void prim_dupe(struct ForthEngine *engine);
+void prim_i(struct ForthEngine *engine);
+void prim_hidden_jit(struct ForthEngine *engine);
+
+void jit_print()
+{
+    log_text("JIT print test\n");
+}
 
 int forth_jit(struct ForthCompileInfo *compile)
 {
     //Logging
     log_push(LOGGING_FORTH_JIT,"forth_jit");
+    log_text("secondary:\n");
     for (int i=0;i<3;i++)
         log_text("%p: %p\n",(compile->secondary->address+i),*(compile->secondary->address+i));
     log_text("\n");
 
-    forth_prim_t prim=&prim_hidden_push;
-    memcpy(compile->jit_data->data,&prim,sizeof(prim));
-    log_text("writing %p to %p\n",prim,compile->jit_data->data);
+    enum
+    {
+        DEBUG_PRIM,
+        DEBUG_U16,
+        DEBUG_U32
+    };
+    struct DebugInfo
+    {
+        int type;
+        union DebugUnion
+        {
+            forth_prim_t prim;
+            uint16_t u16;
+            uint32_t u32;
+        } data;
+    } debug[]={
+        {DEBUG_PRIM,    &prim_hidden_push},
+        {DEBUG_U32,     .data.u32=42},
+        {DEBUG_PRIM,    &prim_hidden_jit},
+        {DEBUG_U16,     .data.u16=0xe169},  //mov #69,r1
+        {DEBUG_U16,     .data.u16=0x1412},  //mov.l r1,@(8,r4)
+        {DEBUG_U16,     .data.u16=0x000b},  //rts
+        {DEBUG_U16,     .data.u16=0x0009},  //nop
+        {DEBUG_PRIM,    &prim_dupe},
+        {DEBUG_PRIM,    &prim_i},
+        {DEBUG_PRIM,    &prim_hidden_done},
+        };
 
-    int32_t value=42;
-    memcpy(compile->jit_data->data+4,&value,sizeof(value));
-    log_text("writing %d to %p\n",value,compile->jit_data->data+4);
-    
-    //Machine code
-    uint16_t code=0xe169;
+    int offset=0;
+    for (int i=0;i<ARRAY_LEN(debug);i++)
+    {
+        switch (debug[i].type)
+        {
+            case DEBUG_PRIM:
+                memcpy(compile->jit_data->data+offset,&debug[i].data.prim,sizeof(forth_prim_t));
+                offset+=sizeof(forth_prim_t);
+                break;
+            case DEBUG_U16:
+                memcpy(compile->jit_data->data+offset,&debug[i].data.u16,sizeof(uint16_t));
+                offset+=sizeof(uint16_t);
+                break;
+            case DEBUG_U32:
+                memcpy(compile->jit_data->data+offset,&debug[i].data.u32,sizeof(uint32_t));
+                offset+=sizeof(uint32_t);
+                break;
+        }
+    }
 
-    prim=&prim_hidden_done;
-    memcpy(compile->jit_data->data+8,&prim,sizeof(prim));
-    log_text("writing %p to %p\n",prim,compile->jit_data->data+8);
-
-    forth_prim_t *debug=(forth_prim_t *)compile->jit_data->data;
-    for (int i=0;i<3;i++)
-        log_text("%p: %p\n",debug+i,*(debug+i));
+    log_text("check:\n");
+    forth_prim_t *debug_prim=(forth_prim_t *)compile->jit_data->data;
+    for (int i=0;i<10;i++)
+        log_text("%p: %010p\n",debug_prim+i,*(debug_prim+i));
     log_text("\n");
 
     //Logging

@@ -28,9 +28,12 @@ DEPS=$(OBJS:.o=.d)
 run: $(BUILD_DIR)/$(PROJECT)
 	./$(BUILD_DIR)/$(PROJECT)
 
-debug: $(BUILD_DIR)/$(PROJECT)
+debug_old: $(BUILD_DIR)/$(PROJECT)
 	qemu-sh4eb-static -g 2345 ./$(BUILD_DIR)/$(PROJECT) &
 	gdb-multiarch --quiet -x gdb-options.txt ./$(BUILD_DIR)/$(PROJECT)
+
+debug: $(BUILD_DIR)/$(PROJECT)
+	qemu-sh4eb-static -g 2345 ./$(BUILD_DIR)/$(PROJECT)
 
 log: $(BUILD_DIR)/$(PROJECT)
 	-./$(BUILD_DIR)/$(PROJECT)

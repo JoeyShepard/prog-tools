@@ -730,6 +730,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //struct to hold arguments to compile functions. No need to preserve on heap.
     struct ForthCompileInfo compile;
     compile.optimize=true;
+    //compile.optimize=false;
 
     //Heap memory
     select_heap(window.tab_index,drawn_split);
