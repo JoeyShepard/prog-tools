@@ -47,6 +47,41 @@ int write_jit_u16(uint16_t value,struct ForthCompileInfo *compile)
                             settings.ID,settings.bytes_left,compile);
 }
 
+int jit_stack_init(struct ForthJitStack *stack)
+{
+    stack->sp=FORTH_JIT_STACK_SIZE/2;
+    stack->sp_min=stack->sp;
+    stack->sp_max=stack->sp;
+    for (int i=0;i<FORTH_JIT_STACK_SIZE;i++)
+    {
+        stack->elements[i].type=STACK_INITIAL;
+        stack->elements[i].id=i-FORTH_JIT_STACK_SIZE/2;
+    }
+}
+
+struct ForthJitStackElement jit_stack_pop(struct ForthJitStack *stack,int *error)
+{
+    if (*error!=FORTH_JIT_ERROR_NONE) return (struct ForthJitStackElement){STACK_NONE,0};
+    if (stack->sp==0)
+    {
+        *error=FORTH_JIT_ERROR_UNDERFLOW;
+        return (struct ForthJitStackElement){STACK_NONE,0};
+    }
+    else
+    {
+        stack->sp--;
+        //TODO: min and max
+        return stack->elements[stack->sp];
+    }
+}
+
+/*
+void jit_stack_push(int32_t value,struct ForthJitStack *stack,int *error)
+{
+    if (*error!=FORTH_JIT_ERROR_NONE) return 0;
+}
+*/
+
 int forth_jit(struct ForthCompileInfo *compile)
 {
     //Logging

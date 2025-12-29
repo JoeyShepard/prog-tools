@@ -5,6 +5,15 @@
 
     #include "forth.h"
 
+    #define FORTH_JIT_STACK_SIZE    32
+
+    enum
+    {
+        FORTH_JIT_ERROR_NONE,
+        FORTH_JIT_ERROR_OVERFLOW,
+        FORTH_JIT_ERROR_UNDERFLOW,
+    };
+
     enum
     {
         FORTH_JIT_EMPTY,    //Reclaimed after being used previously
@@ -241,6 +250,31 @@
         uint8_t pop;
         uint8_t push;
         void (*model)();
+    };
+
+    struct ForthJitStackElement
+    {
+        enum 
+        {
+            STACK_NONE,
+            STACK_CONST,
+            STACK_INITIAL,
+            STACK_LOCAL,
+            STACK_SSA,
+        } type;
+        union
+        {
+            int32_t const_value;
+            int32_t id;
+        };
+    };
+
+    struct ForthJitStack
+    {
+        int sp;
+        int sp_min;
+        int sp_max;
+        struct ForthJitStackElement elements[FORTH_JIT_STACK_SIZE];
     };
 
     //Functions
