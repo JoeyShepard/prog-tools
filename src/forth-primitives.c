@@ -304,6 +304,28 @@ void prim_hidden_push(struct ForthEngine *engine)
     FORTH_NEXT
 }
 
+//Push next cell in dictionary to stack and check for overflow - used for CONST, VAR, and CREATE
+void prim_hidden_push_check(struct ForthEngine *engine)
+{
+    if (engine->stack_index>=FORTH_STACK_ELEMENTS)
+    {
+        //Overflow
+        engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+        engine->executing=false;
+        return;
+    }
+
+    //Fetch number which is stored after pointer to current word
+    int32_t num=*(int32_t *)(engine->address+1);
+
+    //Increment thread pointer to account for number
+    engine->address=(forth_prim_t *)(((int32_t *)engine->address)+1);
+
+    //Push number to stack
+    engine->stack[engine->stack_index]=num;
+    engine->stack_index++;
+}
+
 //Write characters to data memory
 void prim_hidden_s_quote(struct ForthEngine *engine)
 {
@@ -1508,9 +1530,10 @@ void prim_execute(struct ForthEngine *engine)
     if (word_ID<(uint32_t)forth_primitives_len)
     {
         //TODO: checking body is enough now but recheck after all words added
+        //TODO: COULD EXECUTE HIDDEN HERE!
 
         //ID on stack is primitive
-        void (*body_func)(struct ForthEngine *engine)=forth_primitives[word_ID].body;
+        forth_prim_t body_func=forth_primitives[word_ID].body;
         if (body_func!=NULL)
         {
             //TODO: EXEC chain will take stack space! TCO?
@@ -1545,6 +1568,15 @@ void prim_execute(struct ForthEngine *engine)
                 (secondary->type==FORTH_SECONDARY_VARIABLE))
         {
             //These are actually words that can be executed but faster to extract value and push here manually instead
+            if (engine->stack_index>=(FORTH_STACK_ELEMENTS))
+            {
+                //Overflow
+                engine->error=FORTH_ENGINE_ERROR_OVERFLOW;
+                engine->executing=false;
+                return;
+            }
+
+            //Extract number
             int32_t num=*(int32_t *)(secondary->address+1);
             
             //Push number to stack
@@ -2789,6 +2821,7 @@ const struct ForthPrimitive forth_primitives[]=
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_loop,       true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_plus_loop,  true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_push,       false, 0, 1},
+    {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_push_check, false, 0, 1},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_s_quote,    true},
     {"",0,              FORTH_ACTION_NONE,              FORTH_ACTION_NONE,              prim_hidden_secondary,  true},
     //TODO: add locals

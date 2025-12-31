@@ -143,6 +143,7 @@
     void prim_hidden_loop(struct ForthEngine *engine);
     void prim_hidden_plus_loop(struct ForthEngine *engine);
     void prim_hidden_push(struct ForthEngine *engine);
+    void prim_hidden_push_check(struct ForthEngine *engine);
     void prim_hidden_s_quote(struct ForthEngine *engine);
     void prim_hidden_secondary(struct ForthEngine *engine);
 

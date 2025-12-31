@@ -1043,11 +1043,10 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                     else if (primitive.compile_action==FORTH_ACTION_INTERPRET_ONLY)
                     {
                         //Error - word is compile only
-                        engine->error=FORTH_ERROR_INTERPRET_ONLY;
 
                         //Set pointer to word in source for error message
                         compile->error_word=source+start-compile->word_len;
-                        return FORTH_ERROR_ENGINE;
+                        return FORTH_ERROR_INTERPRET_ONLY;
                     }
                     else
                     {
@@ -1189,7 +1188,7 @@ void update_compile_pointers(struct ForthCompileInfo *compile)
     //Update JIT pointers
     compile->jit_data=(struct ForthJitData *)(object_address(FORTH_ID_JIT_DATA,compile->heap_ptr)->data);
     compile->jit_IDs=(struct ForthJitIDs *)(object_address(FORTH_ID_JIT_IDS,compile->heap_ptr)->data);
-    compile->jit_constants=(struct ForthJitConstants *)(object_address(FORTH_ID_JIT_CONST,compile->heap_ptr)->data);
+    compile->jit_elements=(struct ForthJitElements *)(object_address(FORTH_ID_JIT_ELEMENTS,compile->heap_ptr)->data);
 
     //Logging
     log_text("done\n");

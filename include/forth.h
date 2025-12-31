@@ -50,7 +50,7 @@
     #define FORTH_ID_LOCALS         6
     #define FORTH_ID_JIT_DATA       7
     #define FORTH_ID_JIT_IDS        8
-    #define FORTH_ID_JIT_CONST      9
+    #define FORTH_ID_JIT_ELEMENTS   9
 
     //TODO: restore - triggering memory resize to test
     //#define FORTH_MEM_DEFINITIONS   1024    //For these, allocate this amount initially then add this     
@@ -60,7 +60,7 @@
     //#define FORTH_MEM_LOCALS        512
     //#define FORTH_MEM_JIT_DATA      512
     //#define FORTH_MEM_JIT_IDS       512
-    //#define FORTH_MEM_JIT_CONST     512
+    //#define FORTH_MEM_JIT_ELEMENTS  512
 
     #define FORTH_MEM_DEFINITIONS   64      //For these, allocate this amount initially then add this     
     #define FORTH_MEM_WORD_HEADERS  64      //much when memory runs out. Exact amount not important - prevents
@@ -69,7 +69,7 @@
     #define FORTH_MEM_LOCALS        64
     #define FORTH_MEM_JIT_DATA      64
     #define FORTH_MEM_JIT_IDS       64
-    #define FORTH_MEM_JIT_CONST     64
+    #define FORTH_MEM_JIT_ELEMENTS  64
 
     //Console
     //TODO: THIS WILL CRASH IF SCREEN SPLITS!!!
@@ -247,7 +247,7 @@
         struct ForthLocalsInfo *locals;
         struct ForthJitData *jit_data;
         struct ForthJitIDs *jit_IDs;
-        struct ForthJitConstants *jit_constants;
+        struct ForthJitElements *jit_elements;
         uint8_t *heap_ptr;
         int primitive_ID;
         struct ForthWordHeader *secondary;

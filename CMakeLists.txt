@@ -24,9 +24,6 @@ set(SOURCES
   src/getkey.c
   src/graphics.c
   src/key-remap.c
-  src/logging.c
-  src/logging-config.c
-  src/logging-custom.c
   src/main.c
   src/manager.c
   src/mem.c

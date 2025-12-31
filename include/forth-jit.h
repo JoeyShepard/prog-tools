@@ -5,7 +5,10 @@
 
     #include "forth.h"
 
-    #define FORTH_JIT_STACK_SIZE    32
+    #define FORTH_JIT_STACK_SIZE    32      //Must be even number
+    #define FORTH_JIT_STACK_MIN     0
+    #define FORTH_JIT_STACK_MAX     FORTH_JIT_STACK_SIZE
+    #define FORTH_JIT_STACK_START   (FORTH_JIT_STACK_SIZE/2)
 
     enum
     {
@@ -126,6 +129,7 @@
         ID_PRIM_HIDDEN_LOOP,
         ID_PRIM_HIDDEN_PLUS_LOOP,
         ID_PRIM_HIDDEN_PUSH,
+        ID_PRIM_HIDDEN_PUSH_CHECK,
         ID_PRIM_HIDDEN_S_QUOTE,
         ID_PRIM_HIDDEN_SECONDARY,
         ID_PRIM_LOCALS_COPY,
@@ -194,13 +198,80 @@
         ID_PRIM_LOCAL_STORE29,
         ID_PRIM_LOCAL_STORE30,
         ID_PRIM_LOCAL_STORE31,
+        ID_PRIM_CHECK_0_0,
+        ID_PRIM_CHECK_0_1,
+        ID_PRIM_CHECK_0_2,
+        ID_PRIM_CHECK_0_3,
+        ID_PRIM_CHECK_0_4,
+        ID_PRIM_CHECK_0_5,
+        ID_PRIM_CHECK_0_6,
+        ID_PRIM_CHECK_0_7,
+        ID_PRIM_CHECK_1_0,
+        ID_PRIM_CHECK_1_1,
+        ID_PRIM_CHECK_1_2,
+        ID_PRIM_CHECK_1_3,
+        ID_PRIM_CHECK_1_4,
+        ID_PRIM_CHECK_1_5,
+        ID_PRIM_CHECK_1_6,
+        ID_PRIM_CHECK_1_7,
+        ID_PRIM_CHECK_2_0,
+        ID_PRIM_CHECK_2_1,
+        ID_PRIM_CHECK_2_2,
+        ID_PRIM_CHECK_2_3,
+        ID_PRIM_CHECK_2_4,
+        ID_PRIM_CHECK_2_5,
+        ID_PRIM_CHECK_2_6,
+        ID_PRIM_CHECK_2_7,
+        ID_PRIM_CHECK_3_0,
+        ID_PRIM_CHECK_3_1,
+        ID_PRIM_CHECK_3_2,
+        ID_PRIM_CHECK_3_3,
+        ID_PRIM_CHECK_3_4,
+        ID_PRIM_CHECK_3_5,
+        ID_PRIM_CHECK_3_6,
+        ID_PRIM_CHECK_3_7,
+        ID_PRIM_CHECK_4_0,
+        ID_PRIM_CHECK_4_1,
+        ID_PRIM_CHECK_4_2,
+        ID_PRIM_CHECK_4_3,
+        ID_PRIM_CHECK_4_4,
+        ID_PRIM_CHECK_4_5,
+        ID_PRIM_CHECK_4_6,
+        ID_PRIM_CHECK_4_7,
+        ID_PRIM_CHECK_5_0,
+        ID_PRIM_CHECK_5_1,
+        ID_PRIM_CHECK_5_2,
+        ID_PRIM_CHECK_5_3,
+        ID_PRIM_CHECK_5_4,
+        ID_PRIM_CHECK_5_5,
+        ID_PRIM_CHECK_5_6,
+        ID_PRIM_CHECK_5_7,
+        ID_PRIM_CHECK_6_0,
+        ID_PRIM_CHECK_6_1,
+        ID_PRIM_CHECK_6_2,
+        ID_PRIM_CHECK_6_3,
+        ID_PRIM_CHECK_6_4,
+        ID_PRIM_CHECK_6_5,
+        ID_PRIM_CHECK_6_6,
+        ID_PRIM_CHECK_6_7,
+        ID_PRIM_CHECK_7_0,
+        ID_PRIM_CHECK_7_1,
+        ID_PRIM_CHECK_7_2,
+        ID_PRIM_CHECK_7_3,
+        ID_PRIM_CHECK_7_4,
+        ID_PRIM_CHECK_7_5,
+        ID_PRIM_CHECK_7_6,
+        ID_PRIM_CHECK_7_7,
     };
 
     enum
     {
-        LOCAL_NONE,
-        LOCAL_FETCH,
-        LOCAL_STORE
+        PRIM_NONE,
+        PRIM_ARG,
+        PRIM_MULT,
+        PRIM_FETCH,
+        PRIM_STORE,
+        PRIM_IGNORE,
     };
 
     struct ForthJitData
@@ -212,15 +283,16 @@
 
     struct ForthJitIDs
     {
+        uint32_t index;
         uint32_t bytes_left;
         uint32_t element_count;
         forth_prim_t address[];
     };
     
-    struct ForthJitConstants
+    struct ForthJitElements
     {
-        uint32_t bytes_left;
         uint32_t index;
+        uint32_t bytes_left;
         struct ForthJitElement
         {
             enum
@@ -244,7 +316,7 @@
     {
         forth_prim_t prim;
         uint8_t prim_ID;
-        uint8_t local;
+        uint8_t property;
         uint8_t local_ID;
         bool optimizable;
         uint8_t pop;

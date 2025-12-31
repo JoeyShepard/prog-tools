@@ -390,7 +390,7 @@ int action_constant(struct ForthEngine *engine,const char *source,uint32_t *star
     if (result!=FORTH_ERROR_NONE) return result;
 
     //Add code to push constant value
-    result=write_definition_primitive(&prim_hidden_push,compile);
+    result=write_definition_primitive(&prim_hidden_push_check,compile);
     if (result!=FORTH_ERROR_NONE) return result;
     int32_t value;
     result=forth_pop(engine,&value);
@@ -436,7 +436,7 @@ int action_create(struct ForthEngine *engine,const char *source,uint32_t *start,
     engine->data_index=variable_address;
 
     //Add code to push create address
-    result=write_definition_primitive(&prim_hidden_push,compile);
+    result=write_definition_primitive(&prim_hidden_push_check,compile);
     if (result!=FORTH_ERROR_NONE) return result;
     result=write_definition_u32(variable_address,compile);
     if (result!=FORTH_ERROR_NONE) return result;
@@ -1721,7 +1721,7 @@ int action_variable(struct ForthEngine *engine,const char *source,uint32_t *star
     engine->data_index=(variable_address+sizeof(int32_t))&engine->data_mask_32; 
 
     //Add code to push variable address
-    result=write_definition_primitive(&prim_hidden_push,compile);
+    result=write_definition_primitive(&prim_hidden_push_check,compile);
     if (result!=FORTH_ERROR_NONE) return result;
     result=write_definition_u32(variable_address,compile);
     if (result!=FORTH_ERROR_NONE) return result;

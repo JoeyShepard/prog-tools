@@ -591,7 +591,7 @@ static int handle_VKEY_EXE(struct ForthInfo *forth,struct ConsoleInfo *console,s
         {FORTH_MEM_LOCALS,          FORTH_ID_LOCALS},
         {FORTH_MEM_JIT_DATA,        FORTH_ID_JIT_DATA},
         {FORTH_MEM_JIT_IDS,         FORTH_ID_JIT_IDS},
-        {FORTH_MEM_JIT_CONST,       FORTH_ID_JIT_CONST},
+        {FORTH_MEM_JIT_ELEMENTS,    FORTH_ID_JIT_ELEMENTS},
         };
 
 
@@ -851,17 +851,17 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
 
         //No need to initialize JIT IDs - reinitialized every time source begins to be processed
 
-        //Allocate space for JIT constants
-        compile.jit_constants=(struct ForthJitConstants *)add_object(FORTH_MEM_JIT_CONST,compile.heap_ptr);
+        //Allocate space for JIT elements
+        compile.jit_elements=(struct ForthJitElements *)add_object(FORTH_MEM_JIT_ELEMENTS,compile.heap_ptr);
 
         //Make sure allocation succeeded
-        if (compile.jit_constants==NULL)
+        if (compile.jit_elements==NULL)
         {
             error_screen(ERROR_OUT_OF_MEMORY,pos,width,height);
             return COMMAND_EXIT;
         }
 
-        //No need to initialize JIT contants - reinitialized every time source begins to be processed
+        //No need to initialize JIT elements - reinitialized every time source begins to be processed
 
         //Init console
         console=&forth->console;
@@ -943,7 +943,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
         compile.locals=(struct ForthLocalsInfo *)(object_address(FORTH_ID_LOCALS,compile.heap_ptr)->data);
         compile.jit_data=(struct ForthJitData *)(object_address(FORTH_ID_JIT_DATA,compile.heap_ptr)->data);
         compile.jit_IDs=(struct ForthJitIDs *)(object_address(FORTH_ID_JIT_IDS,compile.heap_ptr)->data);
-        compile.jit_constants=(struct ForthJitConstants *)(object_address(FORTH_ID_JIT_CONST,compile.heap_ptr)->data);
+        compile.jit_elements=(struct ForthJitElements *)(object_address(FORTH_ID_JIT_ELEMENTS,compile.heap_ptr)->data);
 
         //Recalculate pointers in word header
         struct ForthWordHeader *secondary=compile.words->header;
@@ -1034,8 +1034,10 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys="8 const r create a r 1 + allot : nqueens a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;\nnqueens";
     //const char *debug_keys="8 const rx create a rx 1 + allot : nqueens rx { r } a r 1 + erase 0{ s x y t } begin x 1 + to x r a x + c! begin s 1 + to s x to y begin y 1 > while y 1 - to y x a + c@ y a + c@ - to t t 0 = x y - t abs = or if 0 to y a x + dup c@ 1 - swap c! begin a x + c@ 0 = while x 1 - to x a x + dup c@ 1 - swap c! repeat then repeat y 1 = until x r = until s ;";//\nnqueens";
     //const char *debug_keys=": f 255 0 do i loop ; f : g 1 2 3 ; g\n";
-    const char *debug_keys="1 2 3 : foo * + ; foo";
+    //const char *debug_keys="1 2 3 : foo * + ; foo";
     //const char *debug_keys=": foo + ; foo";
+    const char *debug_keys=": foo 42 + bar ; : bar 7 * ; 5 const a create b var c : d e ; 5 foo\n";
+    //const char *debug_keys=": foo 256 0 do i loop ; 5 const a foo\n";
     //const char *debug_keys="";
 
     //Main loop
