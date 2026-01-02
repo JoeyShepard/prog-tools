@@ -3793,3 +3793,1267 @@ forth_jit
 - 
 - finished processing secondaries
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412410: prim_check_1_1
+- 0x40d0bc: prim_hidden_push
+- 0x2a: not found!
+- + (0x40d530)
+- 0x40d11c: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- 0x1: not found!
+- EXIT (0x40ce70)
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412410: prim_check_1_1
+- 0x40d0bc: prim_hidden_push
+- 0x7: not found!
+- * (0x40d380)
+- EXIT (0x40ce70)
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d11c: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- 0x6: not found!
+- EXIT (0x40ce70)
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412464: prim_check_1_1
+- jit ID: 182
+- 0x40d110: prim_hidden_push
+- jit ID: 103
+- 0x2a: not found!
+- jit ID: 0
+- + (0x40d584)
+- jit ID: 6
+- 0x40d170: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106
+- 0x1: not found!
+- jit ID: 0
+- EXIT (0x40cec4)
+- jit ID: 46
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412464: prim_check_1_1
+- jit ID: 182
+- 0x40d110: prim_hidden_push
+- jit ID: 103
+- 0x7: not found!
+- jit ID: 0
+- * (0x40d3d4)
+- jit ID: 3
+- EXIT (0x40cec4)
+- jit ID: 46
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d170: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106
+- 0x6: not found!
+- jit ID: 0
+- EXIT (0x40cec4)
+- jit ID: 46
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x4124a4: prim_check_1_1
+- jit ID: 0
+- 0x40d150: prim_hidden_push
+- jit ID: 0
+- 0x2a: not found!
+- jit ID: 0
+- + (0x40d5c4)
+- jit ID: 0
+- 0x40d1b0: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 0
+- 0x1: not found!
+- jit ID: 0
+- EXIT (0x40cf04)
+- jit ID: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x4124a4: prim_check_1_1
+- jit ID: 0
+- 0x40d150: prim_hidden_push
+- jit ID: 0
+- 0x7: not found!
+- jit ID: 0
+- * (0x40d414)
+- jit ID: 0
+- EXIT (0x40cf04)
+- jit ID: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d1b0: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 0
+- 0x6: not found!
+- jit ID: 0
+- EXIT (0x40cf04)
+- jit ID: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x4124f0: prim_check_1_1
+- jit ID: 182
+- 0x40d19c: prim_hidden_push
+- jit ID: 103
+- 0x2a: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x4124f8: prim_check_1_1
+- jit ID: 182
+- 0x40d1a4: prim_hidden_push
+- jit ID: 103
+- 0x2a: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412514: prim_check_1_1
+- jit ID: 182
+- 0x40d1c0: prim_hidden_push
+- jit ID: 103
+- 0x2a: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412520: prim_check_1_1
+- jit ID: 182
+- 0x40d1cc: prim_hidden_push
+- jit ID: 103
+- 0x2a: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41252c: prim_check_1_1
+- jit ID: 182, property: 0
+- 0x40d1d8: prim_hidden_push
+- jit ID: 103, property: 65536
+- + (0x40d64c)
+- jit ID: 6, property: 33619968
+- 0x40d238: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 0
+- EXIT (0x40cf8c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41252c: prim_check_1_1
+- jit ID: 182, property: 0
+- 0x40d1d8: prim_hidden_push
+- jit ID: 103, property: 65536
+- * (0x40d49c)
+- jit ID: 3, property: 33619968
+- EXIT (0x40cf8c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d238: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 0
+- EXIT (0x40cf8c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d644)
+- jit ID: 6, property: 0
+- 0x40d230: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d494)
+- jit ID: 3, property: 0
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d230: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d644)
+- jit ID: 6, property: 0
+- 0x40d230: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d494)
+- jit ID: 3, property: 0
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d230: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412534: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d654)
+- jit ID: 6, property: 0
+- 0x40d240: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf94)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412534: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4a4)
+- jit ID: 3, property: 0
+- EXIT (0x40cf94)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d240: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf94)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412558: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d204: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d678)
+- jit ID: 6, property: 0
+- 0x40d264: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cfb8)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412558: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d204: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4c8)
+- jit ID: 3, property: 0
+- EXIT (0x40cfb8)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d264: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cfb8)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412564: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d210: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d684)
+- jit ID: 6, property: 0
+- 0x40d270: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412564: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d210: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4d4)
+- jit ID: 3, property: 0
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d270: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412564: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d210: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d684)
+- jit ID: 6, property: 0
+- 0x40d270: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412564: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d210: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4d4)
+- jit ID: 3, property: 0
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d270: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cfc4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d644)
+- jit ID: 6, property: 0
+- 0x40d230: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 20 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d494)
+- jit ID: 3, property: 0
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d230: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d644)
+- jit ID: 6, property: 0
+- 0x40d230: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 36 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d494)
+- jit ID: 3, property: 0
+- 0x40fa20rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- 0x5: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d644)
+- jit ID: 6, property: 0
+- 0x40d230: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf84)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412524: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1d0: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d494)
+- jit ID: 3, property: 0
+- 0x40fa20rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- 0x5: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412530: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1dc: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d650)
+- jit ID: 6, property: 0
+- 0x40d23c: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf90)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412530: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1dc: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4a0)
+- jit ID: 3, property: 0
+- 0x40fa2crim_hidden_dot_quote
+- jit ID: 97, property: 2
+- 0x5: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d65c)
+- jit ID: 6, property: 0
+- 0x40d248: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4ac)
+- jit ID: 3, property: 0
+- 0x40fa38rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- rounded up by 1090140160 bytes
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d248: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d65c)
+- jit ID: 6, property: 0
+- 0x40d248: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4ac)
+- jit ID: 3, property: 0
+- 0x40fa38rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- rounded up by 1090140160 bytes
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d248: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412540: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1ec: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d660)
+- jit ID: 6, property: 0
+- 0x40d24c: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cfa0)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412540: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1ec: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4b0)
+- jit ID: 3, property: 0
+- 0x40fa3crim_hidden_dot_quote
+- jit ID: 97, property: 2
+- rounded up by 1090141184 bytes (length: 1090141184, ptr_size: 4)
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d24c: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- jit ID: 106, property: 1
+- EXIT (0x40cfa0)
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d65c)
+- jit ID: 6, property: 0
+- 0x40d248: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4ac)
+- jit ID: 3, property: 0
+- 0x40fa38rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- 0x6f000000: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d65c)
+- jit ID: 6, property: 0
+- 0x40d248: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cf9c)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41253c: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d1e8: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4ac)
+- jit ID: 3, property: 0
+- 0x40fa38rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- 0x6f000000: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412554: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d200: prim_hidden_push
+- jit ID: 103, property: 1
+- + (0x40d674)
+- jit ID: 6, property: 0
+- 0x40d260: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- jit ID: 106, property: 1
+- EXIT (0x40cfb4)
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412554: prim_check_1_1
+- jit ID: 182, property: 5
+- 0x40d200: prim_hidden_push
+- jit ID: 103, property: 1
+- * (0x40d4c4)
+- jit ID: 3, property: 0
+- 0x40fa50rim_hidden_dot_quote
+- jit ID: 97, property: 2
+- address before rounding: 0x2b2c9ce0
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- address after rounding: 0x2b2c9ce8
+- 0x6f000000: not found!
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412560: prim_check_1_1
+00 41 25 60 00 40 D2 0C 00 00 00 2A 00 40 D6 80 - jit ID: 182, property: 5
+- 0x40d20c: prim_hidden_push
+00 40 D2 0C 00 00 00 2A 00 40 D6 80 00 40 D2 6C - jit ID: 103, property: 1
+- + (0x40d680)
+00 40 D6 80 00 40 D2 6C 00 00 00 01 00 40 CF C0 - jit ID: 6, property: 0
+- 0x40d26c: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+00 40 D2 6C 00 00 00 01 00 40 CF C0 00 41 25 60 - jit ID: 106, property: 1
+- EXIT (0x40cfc0)
+00 40 CF C0 00 41 25 60 00 40 D2 0C 00 00 00 07 - jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412560: prim_check_1_1
+00 41 25 60 00 40 D2 0C 00 00 00 07 00 40 D4 D0 - jit ID: 182, property: 5
+- 0x40d20c: prim_hidden_push
+00 40 D2 0C 00 00 00 07 00 40 D4 D0 00 40 FA 5C - jit ID: 103, property: 1
+- * (0x40d4d0)
+00 40 D4 D0 00 40 FA 5C 00 00 00 05 68 65 6C 6C - jit ID: 3, property: 0
+- 0x40fa5c: prim_hidden_dot_quote
+00 40 FA 5C 00 00 00 05 68 65 6C 6C 6F 00 00 00 - jit ID: 97, property: 2
+- address before rounding: 0x2b2c9ce0
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- address after rounding: 0x2b2c9ce8
+- 0x6f000000: not found!
+6F 00 00 00 00 41 24 24 00 40 E8 50 00 40 CF C0 
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412578: prim_check_1_1
+- 00 41 25 78 00 40 D2 24 00 00 00 2A 00 40 D6 98 
+- jit ID: 182, property: 5
+- 0x40d224: prim_hidden_push
+- 00 40 D2 24 00 00 00 2A 00 40 D6 98 00 40 D2 84 
+- jit ID: 103, property: 1
+- + (0x40d698)
+- 00 40 D6 98 00 40 D2 84 00 00 00 01 00 40 CF D8 
+- jit ID: 6, property: 0
+- 0x40d284: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- 00 40 D2 84 00 00 00 01 00 40 CF D8 00 41 25 78 
+- jit ID: 106, property: 1
+- EXIT (0x40cfd8)
+- 00 40 CF D8 00 41 25 78 00 40 D2 24 00 00 00 07 
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x412578: prim_check_1_1
+- 00 41 25 78 00 40 D2 24 00 00 00 07 00 40 D4 E8 
+- jit ID: 182, property: 5
+- 0x40d224: prim_hidden_push
+- 00 40 D2 24 00 00 00 07 00 40 D4 E8 00 40 FA 74 
+- jit ID: 103, property: 1
+- * (0x40d4e8)
+- 00 40 D4 E8 00 40 FA 74 00 00 00 05 68 65 6C 6C 
+- jit ID: 3, property: 0
+- 0x40fa74: prim_hidden_dot_quote
+- 00 40 FA 74 00 00 00 05 68 65 6C 6C 6F 00 00 00 
+- jit ID: 97, property: 2
+- address before rounding: 0x2b2c9ce0
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- address after rounding: 0x2b2c9ce8
+- 0x6f000000: not found!
+- 6F 00 00 00 00 41 24 3C 00 40 E8 68 00 40 CF D8 
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+forth_jit
+- scanning secondary foo (ID 0, 28 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41257c: prim_check_1_1
+- 00 41 25 7C 00 40 D2 28 00 00 00 2A 00 40 D6 9C 
+- jit ID: 182, property: 5
+- 0x40d228: prim_hidden_push
+- 00 40 D2 28 00 00 00 2A 00 40 D6 9C 00 40 D2 88 
+- jit ID: 103, property: 1
+- + (0x40d69c)
+- 00 40 D6 9C 00 40 D2 88 00 00 00 01 00 40 CF DC 
+- jit ID: 6, property: 0
+- 0x40d288: prim_hidden_secondary
+-   index: 1
+-   name: bar
+-   offset: 28
+-   address: 0x2b2c9cd0
+- 00 40 D2 88 00 00 00 01 00 40 CF DC 00 41 25 7C 
+- jit ID: 106, property: 1
+- EXIT (0x40cfdc)
+- 00 40 CF DC 00 41 25 7C 00 40 D2 28 00 00 00 07 
+- jit ID: 46, property: 0
+- 
+- scanning secondary bar (ID 1, 44 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x41257c: prim_check_1_1
+- 00 41 25 7C 00 40 D2 28 00 00 00 07 00 40 D4 EC 
+- jit ID: 182, property: 5
+- 0x40d228: prim_hidden_push
+- 00 40 D2 28 00 00 00 07 00 40 D4 EC 00 40 FA 78 
+- jit ID: 103, property: 1
+- * (0x40d4ec)
+- 00 40 D4 EC 00 40 FA 78 00 00 00 05 68 65 6C 6C 
+- jit ID: 3, property: 0
+- 0x40fa78: prim_hidden_dot_quote
+- 00 40 FA 78 00 00 00 05 68 65 6C 6C 6F 00 00 00 
+- jit ID: 97, property: 2
+- address before rounding: 0x2b2c9ce0
+- rounded up by 8 bytes (length: 5, ptr_size: 4)
+- address after rounding: 0x2b2c9cec
+- 0x412440: prim_check_0_1
+- 00 41 24 40 00 40 E8 6C 00 40 CF DC 00 40 CE DC 
+- jit ID: 174, property: 5
+- HERE (0x40e86c)
+- 00 40 E8 6C 00 40 CF DC 00 40 CE DC 00 00 00 05 
+- jit ID: 48, property: 0
+- EXIT (0x40cfdc)
+- 00 40 CF DC 00 40 CE DC 00 00 00 05 00 40 CF DC 
+- jit ID: 46, property: 0
+- 
+- scanning secondary a (ID 2, 12 bytes)
+- type: FORTH_SECONDARY_CONSTANT
+- 
+- scanning secondary b (ID 3, 12 bytes)
+- type: FORTH_SECONDARY_CREATE
+- 
+- scanning secondary c (ID 4, 12 bytes)
+- type: FORTH_SECONDARY_VARIABLE
+- 
+- scanning secondary d (ID 5, 12 bytes)
+- type: FORTH_SECONDARY_WORD
+- 0x40d288: prim_hidden_secondary
+-   index: 6
+-   name: e
+-   offset: 0
+-   address: 0
+- 00 40 D2 88 00 00 00 06 00 40 CF DC 00 00 01 44 
+- jit ID: 106, property: 1
+- EXIT (0x40cfdc)
+- 00 40 CF DC 00 00 01 44 00 00 00 07 00 00 00 58 
+- jit ID: 46, property: 0
+- 
+- scanning secondary e (ID 6, 0 bytes)
+- type: FORTH_SECONDARY_UNDEFINED
+- 
+- finished processing secondaries
+forth_jit_free

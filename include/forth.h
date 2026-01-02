@@ -103,6 +103,10 @@
     //Forth primitives
     #define FORTH_PRIM_NOT_FOUND            -1
 
+    //Max digits for JIT error message
+    #define FORTH_JIT_ERROR_SIZE            9   //max 8 digits, 1 for terminator
+
+
     //enums
     //=====
 
@@ -125,6 +129,7 @@
         FORTH_ERROR_INTERNAL,
         FORTH_ERROR_INTERPRET_ONLY,
         FORTH_ERROR_INVALID_NAME,
+        FORTH_ERROR_JIT_NOT_FOUND,
         FORTH_ERROR_LEAVE_WITHOUT_DO,
         FORTH_ERROR_LOCAL_EXISTS,
         FORTH_ERROR_LOOP_WITHOUT_DO,
@@ -266,6 +271,7 @@
         int32_t check_pop;
         int32_t check_push;
         bool optimize;
+        char jit_error_num[FORTH_JIT_ERROR_SIZE];
     };
 
     //Functions

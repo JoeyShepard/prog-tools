@@ -25,6 +25,7 @@
 
     enum
     {
+        ID_NOT_FOUND,
         ID_PRIM_STORE,
         ID_PRIM_C_STORE,
         ID_PRIM_W_STORE,
@@ -267,7 +268,7 @@
     enum
     {
         PRIM_NONE,
-        PRIM_ARG,
+        PRIM_32,
         PRIM_MULT,
         PRIM_FETCH,
         PRIM_STORE,
@@ -314,7 +315,7 @@
 
     struct ForthJitFuncInfo
     {
-        forth_prim_t prim;
+        forth_prim_t address;
         uint8_t prim_ID;
         uint8_t property;
         uint8_t local_ID;

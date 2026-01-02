@@ -35,7 +35,7 @@
 
         if (*func==prim_hidden_do) log_text("%p: prim_hidden_do\n",*func);
         else if (*func==prim_hidden_done) log_text("%p: prim_hidden_done\n",*func);
-        else if (*func==prim_hidden_dot_quote) log_text("%prim_hidden_dot_quote\n",*func);
+        else if (*func==prim_hidden_dot_quote) log_text("%p: prim_hidden_dot_quote\n",*func);
         else if (*func==prim_hidden_if) log_text("%p: prim_hidden_if\n",*func);
         else if (*func==prim_hidden_jit) log_text("%p: prim_hidden_jit\n",*func);
         else if (*func==prim_hidden_jump) log_text("%p: prim_hidden_jump\n",*func);

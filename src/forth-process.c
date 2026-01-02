@@ -958,7 +958,8 @@ int process_source(struct ForthEngine *engine,const char *source,struct ForthCom
                         //TODO: don't regenerate JIT if nothing has changed
 
                         //Generate JIT code
-                        forth_jit(compile);
+                        result=forth_jit(compile);
+                        if (result!=FORTH_ERROR_NONE) return result;
 
                         //Execute secondary
                         result=forth_execute_secondary(engine,compile->secondary,compile->colon_word,

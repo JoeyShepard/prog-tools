@@ -11,6 +11,7 @@
 #include "logging-custom.h"
 #include "macros.h"
 #include "mem.h"
+#include "text.h"
 
 void set_jit_data(struct ForthJitGeneric *settings,struct ForthCompileInfo *compile)
 {
@@ -106,6 +107,22 @@ void jit_stack_push(struct ForthJitStackElement element,struct ForthJitStack *st
     }
 }
 
+int jit_word_info(forth_prim_t word)
+{
+    //Loop through all primitives looking for match
+    for (int i=0;i<forth_jit_functions_len;i++)
+    {
+        if (word==forth_jit_functions[i].address)
+        {
+            //Match found - done searching
+            return i;
+        }
+    }
+
+    //No matching primitive address found in loop above
+    return ID_NOT_FOUND;
+}
+
 int forth_jit(struct ForthCompileInfo *compile)
 {
     //Logging
@@ -163,9 +180,42 @@ int forth_jit(struct ForthCompileInfo *compile)
             {
                 //Logging
                 log_primitive((forth_prim_t *)(address+i),compile->words->header);
+                log_text("");
+                log_bytes((forth_prim_t *)(address+i),16);
+                log_text_raw("\n");
 
-                //Skip constants embedded in thread
-                START HERE
+                //TODO: cache lookups if too slow
+                //Look up optimization information on primitive in thread
+                forth_prim_t primitive=*(forth_prim_t *)(address+i);
+                int jit_ID=jit_word_info(primitive);
+                if (jit_ID==ID_NOT_FOUND)
+                {
+                    //Unknown primitive - should never happen but just in case
+                    text_hex32_padded((uint32_t)primitive,compile->jit_error_num,8);
+                    return FORTH_ERROR_JIT_NOT_FOUND;
+                }
+
+                //Logging
+                log_text("jit ID: %d, property: %d\n",jit_ID,forth_jit_functions[jit_ID].property);
+                
+                //Skip over data in thread after primitive if exists
+                if (forth_jit_functions[jit_ID].property==PRIM_32)
+                {
+                    i+=sizeof(int32_t);
+                }
+                else if (forth_jit_functions[jit_ID].property==PRIM_MULT)
+                {
+                    //Logging
+                    log_text("address before rounding: %p\n",address+i);
+
+                    uint32_t quote_length=*(uint32_t *)(address+i+sizeof(forth_prim_t));
+                    uint32_t ptr_size=sizeof(forth_prim_t);
+                    i+=sizeof(int32_t)+quote_length+(ptr_size-(quote_length%ptr_size))%ptr_size;
+
+                    //Logging
+                    log_text("rounded up by %d bytes (length: %d, ptr_size: %d)\n",quote_length+(ptr_size-(quote_length%ptr_size))%ptr_size,quote_length,ptr_size);
+                    log_text("address after rounding: %p\n",address+i);
+                }
             }
         }
         else
@@ -183,7 +233,7 @@ int forth_jit(struct ForthCompileInfo *compile)
     //Logging
     log_pop();
 
-    int FORTH_ERROR_NONE;
+    return FORTH_ERROR_NONE;
 }
 
 int forth_jit_free(struct ForthCompileInfo *compile)
@@ -309,17 +359,17 @@ const struct ForthJitFuncInfo forth_jit_functions[]={
     {prim_size,             ID_PRIM_SIZE,               PRIM_NONE, 0,       true,  0, 1, NULL},
     {prim_hidden_do,        ID_PRIM_HIDDEN_DO,          PRIM_NONE, 0,       false, 0, 0, NULL},
     {prim_hidden_dot_quote, ID_PRIM_HIDDEN_DOT_QUOTE,   PRIM_MULT, 0,       false, 0, 0, NULL},
-    {prim_hidden_if,        ID_PRIM_HIDDEN_IF,          PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_hidden_jump,      ID_PRIM_HIDDEN_JUMP,        PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_hidden_leave,     ID_PRIM_HIDDEN_LEAVE,       PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_hidden_loop,      ID_PRIM_HIDDEN_LOOP,        PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_hidden_plus_loop, ID_PRIM_HIDDEN_PLUS_LOOP,   PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_hidden_push,      ID_PRIM_HIDDEN_PUSH,        PRIM_ARG, 0,        true,  0, 1, NULL},
-    {prim_hidden_push_check,ID_PRIM_HIDDEN_PUSH_CHECK,  PRIM_ARG, 0,        true,  0, 1, NULL},
+    {prim_hidden_if,        ID_PRIM_HIDDEN_IF,          PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_hidden_jump,      ID_PRIM_HIDDEN_JUMP,        PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_hidden_leave,     ID_PRIM_HIDDEN_LEAVE,       PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_hidden_loop,      ID_PRIM_HIDDEN_LOOP,        PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_hidden_plus_loop, ID_PRIM_HIDDEN_PLUS_LOOP,   PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_hidden_push,      ID_PRIM_HIDDEN_PUSH,        PRIM_32, 0,         true,  0, 1, NULL},
+    {prim_hidden_push_check,ID_PRIM_HIDDEN_PUSH_CHECK,  PRIM_32, 0,         true,  0, 1, NULL},
     {prim_hidden_s_quote,   ID_PRIM_HIDDEN_S_QUOTE,     PRIM_MULT, 0,       false, 0, 0, NULL},
-    {prim_hidden_secondary, ID_PRIM_HIDDEN_SECONDARY,   PRIM_ARG, 0,        false, 0, 0, NULL},
-    {prim_locals_copy,      ID_PRIM_LOCALS_COPY,        PRIM_ARG, 0,        true,  0, 0, NULL},
-    {prim_locals_zero,      ID_PRIM_LOCALS_ZERO,        PRIM_ARG, 0,        true,  0, 0, NULL},
+    {prim_hidden_secondary, ID_PRIM_HIDDEN_SECONDARY,   PRIM_32, 0,         false, 0, 0, NULL},
+    {prim_locals_copy,      ID_PRIM_LOCALS_COPY,        PRIM_32, 0,         true,  0, 0, NULL},
+    {prim_locals_zero,      ID_PRIM_LOCALS_ZERO,        PRIM_32, 0,         true,  0, 0, NULL},
     {prim_local_fetch0,     ID_PRIM_LOCAL_FETCH0,       PRIM_FETCH, 0,      true,  0, 1, NULL},
     {prim_local_fetch1,     ID_PRIM_LOCAL_FETCH1,       PRIM_FETCH, 1,      true,  0, 1, NULL},
     {prim_local_fetch2,     ID_PRIM_LOCAL_FETCH2,       PRIM_FETCH, 2,      true,  0, 1, NULL},
@@ -450,5 +500,4 @@ const struct ForthJitFuncInfo forth_jit_functions[]={
     {prim_check_7_7,        ID_PRIM_CHECK_7_7,          PRIM_IGNORE, 0,     true,  0, 0, NULL},
     };
 
-const int forth_jit_functions_len=ARRAY_LEN(forth_jit_functions);
-
+    const int forth_jit_functions_len=ARRAY_LEN(forth_jit_functions);

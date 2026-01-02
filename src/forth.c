@@ -386,6 +386,11 @@ static void output_error_source(int process_result,struct ForthEngine *engine,st
             console_text_default(engine->error_num,console);
             console_text_default(" bytes\n",console);
             break;
+        case FORTH_ERROR_JIT_NOT_FOUND:
+            console_text_default("JIT address not found: ",console);
+            console_text_default(compile->jit_error_num,console);
+            console_text_default("\n",console);
+            break;
         case FORTH_ERROR_LOOP_WITHOUT_DO:
             console_text_default("LOOP without matching DO\n",console);
             break;
@@ -1036,7 +1041,7 @@ int forth(int command_ID, struct WindowInfo *windows, int selected_window)
     //const char *debug_keys=": f 255 0 do i loop ; f : g 1 2 3 ; g\n";
     //const char *debug_keys="1 2 3 : foo * + ; foo";
     //const char *debug_keys=": foo + ; foo";
-    const char *debug_keys=": foo 42 + bar ; : bar 7 * ; 5 const a create b var c : d e ; 5 foo\n";
+    const char *debug_keys=": foo 42 + bar ; : bar 7 * .\" hello\" here  ; 5 const a create b var c : d e ; 5 foo\n";
     //const char *debug_keys=": foo 256 0 do i loop ; 5 const a foo\n";
     //const char *debug_keys="";
 
