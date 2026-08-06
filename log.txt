@@ -5144,3 +5144,13 @@ forth_jit
 - 
 - finished processing secondaries
 forth_jit_free
+
+
+LOGGING RESTARTED
+=================
+Begin logging
+
+
+LOGGING RESTARTED
+=================
+Begin logging
