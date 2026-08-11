@@ -1,13 +1,11 @@
-#ifndef __GUARD_PROG_TOOLS_EXCEPTIONS
-    #define __GUARD_PROG_TOOLS_EXCEPTIONS
-    
-    #include <stdbool.h>
+#pragma once
 
-    #define EXCEPTION_WADDERR       0x100
-    #define EXCEPTION_RADDERR       0x0E0
+#include <stdbool.h>
 
-    extern volatile bool address_exception;
+#define EXCEPTION_WADDERR       0x100
+#define EXCEPTION_RADDERR       0x0E0
 
-    void setup_exception_handling();
+extern volatile bool address_exception;
 
-#endif
+void setup_exception_handling();
+

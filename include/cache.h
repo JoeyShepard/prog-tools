@@ -1,6 +1,4 @@
-#ifndef __GUARD_PROG_TOOLS_CACHE
-    #define __GUARD_PROG_TOOLS_CACHE
+#pragma once
 
-    void sync_icache(void *ptr, int size)
+void sync_icache(void *ptr, int size)
 
-#endif

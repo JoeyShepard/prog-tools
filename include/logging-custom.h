@@ -1,19 +1,18 @@
-#ifndef __GUARD_PROG_TOOLS_LOGGING_CUSTOM
-    #define __GUARD_PROG_TOOLS_LOGGING_CUSTOM
-   
-    #ifdef CG50
-    //Compiling for calculator - header should remove all log functions on calculator
+#pragma once 
 
-        #define log_bytes(...)      {}
-        #define log_primitive(...) {}
+#ifdef CG50
+//Compiling for calculator - header should remove all log functions on calculator
 
-    #else
+    #define log_bytes(...)      {}
+    #define log_primitive(...) {}
 
-        #include "forth.h"
-        #include "forth-engine.h" 
+#else
 
-        void log_bytes(void *ptr,int bytes);
-        void log_primitive(forth_prim_t *func,struct ForthWordHeader *word_headers);
-    
-    #endif
+    #include "forth.h"
+    #include "forth-engine.h" 
+
+    void log_bytes(void *ptr,int bytes);
+    void log_primitive(forth_prim_t *func,struct ForthWordHeader *word_headers);
+
 #endif
+

@@ -1,235 +1,233 @@
-#ifndef __GUARD_PROG_TOOLS_FORTH_ENGINE
-    #define __GUARD_PROG_TOOLS_FORTH_ENGINE
+#pragma once
 
-    #include <stdint.h>
+#include <stdint.h>
 
-    #include "forth-compatibility.h"
+#include "forth-compatibility.h"
 
-    #define FORTH_FALSE             0
-    #define FORTH_TRUE              -1
+#define FORTH_FALSE             0
+#define FORTH_TRUE              -1
 
-    #define FORTH_CELL_SIZE         ((int)sizeof(int32_t))
-    struct ForthRStackElement;          //Forward declaration for struct for return stack element
-    #define FORTH_RSTACK_ELEMENT_SIZE   sizeof(struct ForthRStackElement)
+#define FORTH_CELL_SIZE         ((int)sizeof(int32_t))
+struct ForthRStackElement;          //Forward declaration for struct for return stack element
+#define FORTH_RSTACK_ELEMENT_SIZE   sizeof(struct ForthRStackElement)
 
-    //Primitves assume stacks are aligned to their sizes, so calculated size here must be power of two
-    #define FORTH_STACK_SIZE        (FORTH_CELL_SIZE*FORTH_STACK_ELEMENTS)
-    #define FORTH_RSTACK_SIZE       (FORTH_RSTACK_ELEMENT_SIZE*FORTH_RSTACK_ELEMENTS)
-    #define FORTH_LOCALS_SIZE       (FORTH_CELL_SIZE*FORTH_LOCALS_ELEMENTS)
+//Primitves assume stacks are aligned to their sizes, so calculated size here must be power of two
+#define FORTH_STACK_SIZE        (FORTH_CELL_SIZE*FORTH_STACK_ELEMENTS)
+#define FORTH_RSTACK_SIZE       (FORTH_RSTACK_ELEMENT_SIZE*FORTH_RSTACK_ELEMENTS)
+#define FORTH_LOCALS_SIZE       (FORTH_CELL_SIZE*FORTH_LOCALS_ELEMENTS)
 
-    //Offset past FORTH_COMPAT_STACKS where stacks start
-    #define FORTH_STACK_OFFSET      0
-    //Forth data stack
-    #define FORTH_STACK_ADDRESS     (FORTH_COMPAT_STACKS+FORTH_STACK_OFFSET)
-    #define FORTH_STACK_END         (FORTH_STACK_ADDRESS+FORTH_STACK_SIZE)
-    //Forth return stack
-    #define FORTH_RSTACK_ADDRESS    FORTH_STACK_END
-    #define FORTH_RSTACK_END        (FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE)
-    //Forth locals stack
-    #define FORTH_LOCALS_ADDRESS    FORTH_RSTACK_END
-    #define FORTH_LOCALS_END        (FORTH_LOCALS_ADDRESS+FORTH_LOCALS_SIZE)
-    //Forth engine memory - should be in fastest memory with stacks
-    struct ForthEngine; //Forward declaration
-    #define FORTH_ENGINE_ADDRESS    FORTH_LOCALS_END
-    #define FORTH_ENGINE_END        (FORTH_ENGINE_ADDRESS+sizeof(struct ForthEngine))
-    //MEMORY MAY BE UNALIGNED HERE! struct ForthEngine size divisible by largest member so probably fine but just in case
+//Offset past FORTH_COMPAT_STACKS where stacks start
+#define FORTH_STACK_OFFSET      0
+//Forth data stack
+#define FORTH_STACK_ADDRESS     (FORTH_COMPAT_STACKS+FORTH_STACK_OFFSET)
+#define FORTH_STACK_END         (FORTH_STACK_ADDRESS+FORTH_STACK_SIZE)
+//Forth return stack
+#define FORTH_RSTACK_ADDRESS    FORTH_STACK_END
+#define FORTH_RSTACK_END        (FORTH_RSTACK_ADDRESS+FORTH_RSTACK_SIZE)
+//Forth locals stack
+#define FORTH_LOCALS_ADDRESS    FORTH_RSTACK_END
+#define FORTH_LOCALS_END        (FORTH_LOCALS_ADDRESS+FORTH_LOCALS_SIZE)
+//Forth engine memory - should be in fastest memory with stacks
+struct ForthEngine; //Forward declaration
+#define FORTH_ENGINE_ADDRESS    FORTH_LOCALS_END
+#define FORTH_ENGINE_END        (FORTH_ENGINE_ADDRESS+sizeof(struct ForthEngine))
+//MEMORY MAY BE UNALIGNED HERE! struct ForthEngine size divisible by largest member so probably fine but just in case
 
-    //Masks for wrapping stack addresses
-    #define FORTH_STACK_MASK        (FORTH_STACK_SIZE-1)
+//Masks for wrapping stack addresses
+#define FORTH_STACK_MASK        (FORTH_STACK_SIZE-1)
 
-    //Masks for aligning data access
-    #define FORTH_MASK_16           (~1)
-    #define FORTH_MASK_32           (~3)
+//Masks for aligning data access
+#define FORTH_MASK_16           (~1)
+#define FORTH_MASK_32           (~3)
 
-    //Max number of digits to include in error message about number out of range
-    #define ERROR_INT32_SIZE        12  //max 10 digits, 1 for - sign, 1 for terminator 
-    
-    enum ForthEngineErrors
-    {
-        FORTH_ENGINE_ERROR_NONE,
-        FORTH_ENGINE_ERROR_EXECUTE_ID,
-        FORTH_ENGINE_ERROR_EXECUTE_NO_BODY,
-        FORTH_ENGINE_ERROR_INT32_RANGE,
-        FORTH_ENGINE_ERROR_HEX32_RANGE,
-        FORTH_ENGINE_ERROR_LOCAL_STACK_FULL,
-        FORTH_ENGINE_ERROR_OVERFLOW,
-        FORTH_ENGINE_ERROR_RSTACK_FULL,
-        FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
-        FORTH_ENGINE_ERROR_UNDEFINED,
-        FORTH_ENGINE_ERROR_UNDERFLOW,
-    };
+//Max number of digits to include in error message about number out of range
+#define ERROR_INT32_SIZE        12  //max 10 digits, 1 for - sign, 1 for terminator 
 
-    enum ForthState
-    {
-        FORTH_STATE_INTERPRET,  //0 is interpret per Forth standard
-        FORTH_STATE_COMPILE
-    };
+enum ForthEngineErrors
+{
+    FORTH_ENGINE_ERROR_NONE,
+    FORTH_ENGINE_ERROR_EXECUTE_ID,
+    FORTH_ENGINE_ERROR_EXECUTE_NO_BODY,
+    FORTH_ENGINE_ERROR_INT32_RANGE,
+    FORTH_ENGINE_ERROR_HEX32_RANGE,
+    FORTH_ENGINE_ERROR_LOCAL_STACK_FULL,
+    FORTH_ENGINE_ERROR_OVERFLOW,
+    FORTH_ENGINE_ERROR_RSTACK_FULL,
+    FORTH_ENGINE_ERROR_SECONDARY_IN_BRACKET,
+    FORTH_ENGINE_ERROR_UNDEFINED,
+    FORTH_ENGINE_ERROR_UNDERFLOW,
+};
 
-    enum ForthObjectType
-    {
-        FORTH_TYPE_NUMBER,
-        FORTH_TYPE_HEX,
-        FORTH_TYPE_OTHER,
-        FORTH_TYPE_PRIMITIVE,
-        FORTH_TYPE_SECONDARY,
-        FORTH_TYPE_NOT_FOUND,
-        FORTH_TYPE_NONE
-    };
+enum ForthState
+{
+    FORTH_STATE_INTERPRET,  //0 is interpret per Forth standard
+    FORTH_STATE_COMPILE
+};
 
-    enum ForthSecondaryType
-    {
-        FORTH_SECONDARY_WORD,
-        FORTH_SECONDARY_CONSTANT,
-        FORTH_SECONDARY_CREATE,
-        FORTH_SECONDARY_VARIABLE,
-        FORTH_SECONDARY_UNDEFINED
-    };
+enum ForthObjectType
+{
+    FORTH_TYPE_NUMBER,
+    FORTH_TYPE_HEX,
+    FORTH_TYPE_OTHER,
+    FORTH_TYPE_PRIMITIVE,
+    FORTH_TYPE_SECONDARY,
+    FORTH_TYPE_NOT_FOUND,
+    FORTH_TYPE_NONE
+};
 
-    enum ForthRStackType
-    {
-        FORTH_RSTACK_DONE,      //Pushed by top-level secondary. Stop executing when returning from this. 
-        FORTH_RSTACK_RETURN,    //Return address to return to calling secondary.
-        FORTH_RSTACK_DO_LOOP
-    };
+enum ForthSecondaryType
+{
+    FORTH_SECONDARY_WORD,
+    FORTH_SECONDARY_CONSTANT,
+    FORTH_SECONDARY_CREATE,
+    FORTH_SECONDARY_VARIABLE,
+    FORTH_SECONDARY_UNDEFINED
+};
 
-    struct ForthEngine; //Forward declaration for typedef
-    typedef void (*forth_prim_t)(struct ForthEngine *engine);
+enum ForthRStackType
+{
+    FORTH_RSTACK_DONE,      //Pushed by top-level secondary. Stop executing when returning from this. 
+    FORTH_RSTACK_RETURN,    //Return address to return to calling secondary.
+    FORTH_RSTACK_DO_LOOP
+};
 
-    struct ForthRStackElement
-    {
-        uint32_t value;
-        uint32_t value_max;
-        uint32_t index;         //TODO: need? can probably delete
-        uint16_t locals_count;
-        uint8_t type;
-    };
+struct ForthEngine; //Forward declaration for typedef
+typedef void (*forth_prim_t)(struct ForthEngine *engine);
 
-    //Declared here for struct ForthEngine and defined below
-    struct ForthWordHeader;
+struct ForthRStackElement
+{
+    uint32_t value;
+    uint32_t value_max;
+    uint32_t index;         //TODO: need? can probably delete
+    uint16_t locals_count;
+    uint8_t type;
+};
 
-    struct ForthEngine //No improvement with __attribute__ ((aligned(4)))
-    {
-        //Members accessible to optimizer
-        //***DO NOT MOVE!!!***
-        int32_t stack_index; 
-        int32_t *stack;
-        int32_t loop_i;
-        int32_t loop_j;
-        forth_prim_t *address;
+//Declared here for struct ForthEngine and defined below
+struct ForthWordHeader;
 
-        //Data stack
-        uint32_t stack_count;   //Count of elements allocated for stack
+struct ForthEngine //No improvement with __attribute__ ((aligned(4)))
+{
+    //Members accessible to optimizer
+    //***DO NOT MOVE!!!***
+    int32_t stack_index; 
+    int32_t *stack;
+    int32_t loop_i;
+    int32_t loop_j;
+    forth_prim_t *address;
 
-        //Return stack
-        struct ForthRStackElement *rstack_base;
-        struct ForthRStackElement *rstack;      //Points to currently free stack element
-        uint32_t rstack_count;                  //Count of elements allocated for stack
+    //Data stack
+    uint32_t stack_count;   //Count of elements allocated for stack
 
-        //Locals stack
-        int32_t *locals_base;
-        int32_t *locals_stack;
-        uint32_t locals_count;
+    //Return stack
+    struct ForthRStackElement *rstack_base;
+    struct ForthRStackElement *rstack;      //Points to currently free stack element
+    uint32_t rstack_count;                  //Count of elements allocated for stack
 
-        //Loop counters
-        int32_t loop_i_max;
-        int32_t loop_j_max;
+    //Locals stack
+    int32_t *locals_base;
+    int32_t *locals_stack;
+    uint32_t locals_count;
 
-        //Data area - like dictionary but no definitions stored there
-        unsigned char *data;    //Pointer to memory occupied by data area
-        uint32_t data_size;
-        uint32_t data_index;    //Index into memory pointed to by *data
-        uint32_t data_mask;
-        uint32_t data_mask_16;
-        uint32_t data_mask_32;
+    //Loop counters
+    int32_t loop_i_max;
+    int32_t loop_j_max;
 
-        //Execution
-        volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
-        bool exit_program;
-        uint32_t word_index;
-        struct ForthWordHeader *word_headers;
-        unsigned char *word_bodies;
-        uint32_t word_count;
-        prof_t perf_counter;        //Performance counter on calculator
-        uint32_t perf_value;        //Result of running performance counter
-        forth_prim_t thread_buffer[2];
+    //Data area - like dictionary but no definitions stored there
+    unsigned char *data;    //Pointer to memory occupied by data area
+    uint32_t data_size;
+    uint32_t data_index;    //Index into memory pointed to by *data
+    uint32_t data_mask;
+    uint32_t data_mask_16;
+    uint32_t data_mask_32;
 
-        //Compilation
-        bool state;
-        bool in_bracket;
-        int word_action;
+    //Execution
+    volatile bool executing;    //Set to false by ON in key filter - see compatibility.c
+    bool exit_program;
+    uint32_t word_index;
+    struct ForthWordHeader *word_headers;
+    unsigned char *word_bodies;
+    uint32_t word_count;
+    prof_t perf_counter;        //Performance counter on calculator
+    uint32_t perf_value;        //Result of running performance counter
+    forth_prim_t thread_buffer[2];
 
-        //Errors - compilation or state error
-        int error;
-        char error_num[ERROR_INT32_SIZE];    //Buffer to print number causing error (ie too long for >NUM)
-        const char *error_word;
+    //Compilation
+    bool state;
+    bool in_bracket;
+    int word_action;
 
-        //Compatibility functions - set at initialization so engine can adapt to different platforms
-        void (*print)(const char *text);
-        void (*print_color)(const char *text,color_t color);
-        int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask);
-        int32_t (*getkey)(bool blocking);
-        int32_t (*printable)(int32_t key);
-        void (*update_screen)();
-        void (*update_modifiers)();
-        void (*clear_console)();
+    //Errors - compilation or state error
+    int error;
+    char error_num[ERROR_INT32_SIZE];    //Buffer to print number causing error (ie too long for >NUM)
+    const char *error_word;
 
-        //Compatibility parameters - adjused in forth-compatibility.h for each platform
-        int32_t max_spaces;
-        int32_t screen_width;
-        int32_t screen_height;
-    };
+    //Compatibility functions - set at initialization so engine can adapt to different platforms
+    void (*print)(const char *text);
+    void (*print_color)(const char *text,color_t color);
+    int32_t (*input)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask);
+    int32_t (*getkey)(bool blocking);
+    int32_t (*printable)(int32_t key);
+    void (*update_screen)();
+    void (*update_modifiers)();
+    void (*clear_console)();
 
-    struct ForthWordHeader
-    {
-        forth_prim_t *address;
-        uint32_t offset;                                //Offset into definitions of target address
-        uint32_t definition_size;
-        uint32_t name_offset;
-        uint32_t name_len;
-        char *name;
-        uint16_t ID;                        //ID assigned to each user-defined word
-        uint16_t locals_count;              //Count of local variables used
-        uint8_t type;                       //User-defined word, variable, constant, etc
-        bool last;                          //Whether this header is empty header marking end of list
-        bool done;                          //Whether word is done being processed. Used to rewind if error in word.
-    };
+    //Compatibility parameters - adjused in forth-compatibility.h for each platform
+    int32_t max_spaces;
+    int32_t screen_width;
+    int32_t screen_height;
+};
 
-    //Functions
-    //=========
-    void forth_init_engine(struct ForthEngine *engine,
-        //Stacks
-        void *stack_base,
-        void *rstack_base,
-        void *locals_stack_base,
-        uint32_t stack_count,
-        uint32_t rstack_count,
-        uint32_t locals_stack_count,
-        //Data area
-        uint32_t data_size,
-        //Function pointers
-        void (*print)(const char *text),
-        void (*print_color)(const char *text,color_t color),
-        int32_t (*forth_accept)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
-        int32_t (*getkey)(bool blocking),
-        int32_t (*printable)(int32_t key),
-        void (*update_screen)(),
-        void (*update_modifiers)(),
-        void (*clear_console)(),
-        //Console
-        int32_t max_spaces,
-        int16_t screen_width,
-        int16_t screen_height);
-    void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size);
-    void forth_reload_engine(struct ForthEngine *engine,unsigned char *data);
-    void forth_reset_engine(struct ForthEngine *engine);
-    void forth_reset_engine_stacks(struct ForthEngine *engine);
-    void forth_engine_pre_exec(struct ForthEngine *engine);
-    int32_t forth_stack_count(struct ForthEngine *engine);
-    int forth_push(struct ForthEngine *engine,int32_t value);
-    int forth_pop(struct ForthEngine *engine,int32_t *value);
-    void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
-    int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
-                                struct ForthWordHeader *word_headers,uint32_t word_count,unsigned char *word_bodies,
-                                forth_prim_t *alt_address);
+struct ForthWordHeader
+{
+    forth_prim_t *address;
+    uint32_t offset;                                //Offset into definitions of target address
+    uint32_t definition_size;
+    uint32_t name_offset;
+    uint32_t name_len;
+    char *name;
+    uint16_t ID;                        //ID assigned to each user-defined word
+    uint16_t locals_count;              //Count of local variables used
+    uint8_t type;                       //User-defined word, variable, constant, etc
+    bool last;                          //Whether this header is empty header marking end of list
+    bool done;                          //Whether word is done being processed. Used to rewind if error in word.
+};
 
-#endif
+//Functions
+//=========
+void forth_init_engine(struct ForthEngine *engine,
+    //Stacks
+    void *stack_base,
+    void *rstack_base,
+    void *locals_stack_base,
+    uint32_t stack_count,
+    uint32_t rstack_count,
+    uint32_t locals_stack_count,
+    //Data area
+    uint32_t data_size,
+    //Function pointers
+    void (*print)(const char *text),
+    void (*print_color)(const char *text,color_t color),
+    int32_t (*forth_accept)(int32_t text_address,char *text_base,int32_t max_chars,uint32_t mask),
+    int32_t (*getkey)(bool blocking),
+    int32_t (*printable)(int32_t key),
+    void (*update_screen)(),
+    void (*update_modifiers)(),
+    void (*clear_console)(),
+    //Console
+    int32_t max_spaces,
+    int16_t screen_width,
+    int16_t screen_height);
+void forth_gen_masks(struct ForthEngine *engine,uint32_t data_size);
+void forth_reload_engine(struct ForthEngine *engine,unsigned char *data);
+void forth_reset_engine(struct ForthEngine *engine);
+void forth_reset_engine_stacks(struct ForthEngine *engine);
+void forth_engine_pre_exec(struct ForthEngine *engine);
+int32_t forth_stack_count(struct ForthEngine *engine);
+int forth_push(struct ForthEngine *engine,int32_t value);
+int forth_pop(struct ForthEngine *engine,int32_t *value);
+void forth_rstack_push(int32_t value,int32_t value_ma,uint8_t type,uint32_t index,struct ForthEngine *engine);
+int forth_execute_secondary(struct ForthEngine *engine,struct ForthWordHeader *secondary,struct ForthWordHeader *colon_word,
+                            struct ForthWordHeader *word_headers,uint32_t word_count,unsigned char *word_bodies,
+                            forth_prim_t *alt_address);
+

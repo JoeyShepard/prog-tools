@@ -1,6 +1,4 @@
-#ifndef __GUARD_PROG_TOOLS_LOGGING_CONFIG
-    #define __GUARD_PROG_TOOLS_LOGGING_CONFIG
+#pragma once
 
-    void log_config();
+void log_config();
 
-#endif

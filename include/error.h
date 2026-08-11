@@ -1,28 +1,35 @@
-#ifndef __GUARD_PROG_TOOLS_ERROR
-    #define __GUARD_PROG_TOOLS_ERROR
+#pragma once
 
-    #include "structs.h"
+#include <stdint.h>
 
-    #define ERROR_COL_BG    COL_RED
-    #define ERROR_COL_FG    COL_WHITE
+#include "structs.h"
 
-    #define ERROR_SPACING_Y 12
+#define ERROR_COL_BG    COL_RED
+#define ERROR_COL_FG    COL_WHITE
 
-    enum ErrorNumbers
-    {
-        //error_exit - fatal, stop executing
-        ERROR_NONE,
-        ERROR_FONT_NOT_FOUND,
-        ERROR_MENU_TEXT_TOO_LONG,
-        ERROR_UNALIGNED_WRITE,
-        ERROR_BAD_HEAP_ID,
-        ERROR_BAD_OBJECT_ADDRESS,
+#define ERROR_SPACING_Y 12
 
-        //error_screen - not fatal, show screen then return to menu
-        ERROR_OUT_OF_MEMORY
-    };
+enum ErrorNumber
+{
+    //error_exit - fatal, stop executing
+    ERROR_NONE,
+    ERROR_FONT_NOT_FOUND,
+    ERROR_MENU_TEXT_TOO_LONG,
+    ERROR_UNALIGNED_WRITE,
+    ERROR_BAD_HEAP_ID,
+    ERROR_BAD_OBJECT_ADDRESS,
 
-    void error_exit(int error);
-    void error_screen(int error,struct Point pos,int width,int height);
+    //error_screen - not fatal, show screen then return to menu
+    ERROR_OUT_OF_MEMORY
+};
 
-#endif
+struct ErrorType
+{
+    //Error code - set as needed by programs
+    uint32_t code;
+};
+
+void error_reset(struct ErrorType *e);
+void error_exit(int error);
+void error_screen(int error,struct Point pos,int width,int height);
+

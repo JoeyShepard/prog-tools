@@ -14,7 +14,7 @@ CFLAGS += -MMD -MP
 CFLAGS += -z noexecstack
 
 #Convert certain C files to ASM with GCC 15.1 using musttail
-PRIM_FLAGS = -O2 -S -I$(INCLUDE)
+PRIM_FLAGS = -O2 -S -I$(INCLUDE_DIR)
 PRIM_C_FILES = src/forth-primitives.c src/forth-locals.c src/forth-check.c
 PRIM_ASM_FILES=$(PRIM_C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.s)
 OBJS_PRIM=$(PRIM_ASM_FILES:$(BUILD_DIR)/%.s=$(BUILD_DIR)/%.o)

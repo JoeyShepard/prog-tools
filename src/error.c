@@ -5,6 +5,11 @@
 #include "structs.h"
 #include "text.h"
 
+void error_reset(struct ErrorType *e)
+{
+    e->code=ERROR_NONE;
+}
+
 #ifdef CG50
     //Calculator version
     void error_exit(int error)
