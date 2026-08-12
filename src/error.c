@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "compatibility.h"
 #include "error.h"          
 #include "getkey.h"
@@ -8,6 +10,7 @@
 void error_reset(struct ErrorType *e)
 {
     e->code=ERROR_NONE;
+    e->messages=NULL;
 }
 
 #ifdef CG50

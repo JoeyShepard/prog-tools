@@ -25,8 +25,9 @@ enum ErrorNumber
 
 struct ErrorType
 {
-    //Error code - set as needed by programs
-    uint32_t code;
+    uint32_t code;              //Set as needed by programs
+    uint32_t subcode;           //Optional. Set as needed by programs.
+    const char **messages;      //Optional error message list
 };
 
 void error_reset(struct ErrorType *e);

@@ -79,6 +79,9 @@
 - rework word KEY
   - two words rather than word w arg
   - sys_key word
+
+- see this option for soft lock after restart
+  - https://git.planet-casio.com/Lephenixnoir/gint/issues/55
 */
 
 
