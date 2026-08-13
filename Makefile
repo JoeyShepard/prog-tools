@@ -37,6 +37,9 @@ DEPS=$(OBJS:.o=.d)
 run: $(BUILD_DIR)/$(PROJECT)
 	./$(BUILD_DIR)/$(PROJECT)
 
+compile-tests: $(PROGS_TEST)
+	#Compile only
+
 tests: $(PROGS_TEST)
 	@#@$(foreach test,$^,./$(test);)
 	./test-runner.py $^

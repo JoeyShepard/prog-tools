@@ -8,17 +8,65 @@
 #include "error.h"
 #include "gc.h"
 
-//Constants
-#define GC_TABLE_ELEMENTS   128     //Initial size of table
-#define GC_TABLE_ID         0       //First table entry is pointer to table
-
 //Global variables private to file
 static struct GC_Internals gc;
 
-//Advance to next header
-struct GC_Header *gc_next_header(struct GC_Header *header)
+//Get header from ID
+struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
 {
-    return (struct GC_Header *)(((uintptr_t)header)+header->size);
+    //Exit early if prior function set error
+    if (e->code!=ERROR_NONE) return NULL;
+
+    //Make sure ID is in range
+    if (id>=gc.table_elements)
+    {
+        e->code=GC_ERROR_ID_RANGE;
+        return NULL;
+    }
+
+    //Make sure ID is in use
+    if (gc.id_table[id]==NULL)
+    {
+        //ID is not assigned
+        e->code=GC_ERROR_ID_UNASSIGNED;
+        return NULL;
+    }
+
+    return gc.id_table[id];
+}
+
+//Advance to next header
+struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    if (e->code!=ERROR_NONE) return NULL;
+
+    //Make sure header size is not 0 which would stall traversing list
+        //Would only happen if heap is corrupt
+    if (header->size==0)
+    {
+        e->code=GC_ERROR_EMPTY_HEADER;
+        return NULL;
+    }
+
+    //Make sure next header is at higher address
+        //Would only happen if heap is corrupt
+    struct GC_Header *new_header=(struct GC_Header *)(((uintptr_t)header)+header->size);
+    if (new_header<=header)
+    {
+        e->code=GC_ERROR_HEADER_SIZE;
+        return NULL;
+    }
+
+    //Make sure new header address is not beyond end of heap
+        //Would only happen if heap is corrupt
+    if (((uintptr_t)new_header)>((uintptr_t)gc.heap_base+gc.heap_size-sizeof(struct GC_Header)))
+    {
+        e->code=GC_ERROR_HEADER_OVERFLOW;
+        return NULL;
+    }
+
+    return new_header;
 }
 
 //Initialize garbage collector
@@ -49,7 +97,7 @@ void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
 
     //Free memory ready for allocation
     uint32_t bytes_left=gc.heap_size-header->size;
-    header=gc_next_header(header);
+    header=gc_next_header(header,e);
     header->size=bytes_left-sizeof(struct GC_Header);   //Account for end marker below
     header->free=true;
     //Don't need pid or lock_count if memory is free
@@ -61,8 +109,16 @@ void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
     header->pid=GC_ROOT_PID;
     header->lock_count=1;
 
-    //Assume root access to until set otherwise
+    //Assume root access to objects until set otherwise
     gc.current_pid=GC_ROOT_PID;
+}
+
+void gc_set_pid(uint8_t pid,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    if (e->code!=ERROR_NONE) return;
+    
+    gc.current_pid=pid;
 }
 
 uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
@@ -126,7 +182,7 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
                     //Split block into two
                     uint32_t old_size=header->size;
                     header->size=size;
-                    header=gc_next_header(header);
+                    header=gc_next_header(header,e);
                     header->size=old_size-size;
                     header->free=true;
                 }
@@ -141,7 +197,7 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
             }
 
             //Advance to next header
-            header=gc_next_header(header);
+            header=gc_next_header(header,e);
         }
 
         //Search finished without finding free memory slot
@@ -166,18 +222,10 @@ void gc_free(int id,struct ErrorType *e)
     //Exit early if prior function set error
     if (e->code!=ERROR_NONE) return;
 
-    //Check memory before freeing including ID range
-    struct GC_Header *header=get_header(id,e);
+    //Check memory before freeing, including ID range
+        //Also errors if memory here is free catching double free
+    struct GC_Header *header=gc_get_header(id,e);
     if (e->code!=ERROR_NONE) return;
-
-    //Make sure memory is not already free
-        //Must happen first since PID and lock_count only valid if free is false
-    if (header->free==true)
-    {
-        //Memory is already free
-        e->code=GC_ERROR_DOUBLE_FREE;
-        return;
-    }
 
     //Make sure memory does not belong to another program
     if (gc.current_pid!=GC_ROOT_PID)
@@ -185,9 +233,14 @@ void gc_free(int id,struct ErrorType *e)
         //PID is not root
         if (header->pid!=gc.current_pid)
         {
+            //PID of object does not belong to current process
             e->code=GC_ERROR_WRONG_PID;
             return;
         }
+    }
+    else
+    {
+        //PID is root - ok to modify memory of any other process
     }
 
     //Make sure memory is not locked
@@ -200,16 +253,17 @@ void gc_free(int id,struct ErrorType *e)
 
     //Free memory
     header->free=true;
+    gc.id_table[id]=NULL;
 }
 
 void *gc_lock(int id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    if (e->code!=ERROR_NONE) return NULL;
 
-    //Check memory before freeing including ID range
-    struct GC_Header *header=get_header(id,e);
-    if (e->code!=ERROR_NONE) return;
+    //Check memory before locking including ID range
+    struct GC_Header *header=gc_get_header(id,e);
+    if (e->code!=ERROR_NONE) return NULL;
 
     //Make sure memory does not belong to another program
     if (gc.current_pid!=GC_ROOT_PID)
@@ -217,9 +271,14 @@ void *gc_lock(int id,struct ErrorType *e)
         //PID is not root
         if (header->pid!=gc.current_pid)
         {
+            //PID of object does not belong to current process
             e->code=GC_ERROR_WRONG_PID;
-            return;
+            return NULL;
         }
+    }
+    else
+    {
+        //PID is root - ok to modify memory of any other process
     }
 
     //Don't exceed max number of locks
@@ -227,11 +286,14 @@ void *gc_lock(int id,struct ErrorType *e)
     {
         //Exceeded max lock count
         e->code=GC_ERROR_LOCK_COUNT;
-        return;
+        return NULL;
     }
 
     //Increase lock count
     header->lock_count++;
+
+    //Return pointer to data portion of object, not header
+    return header->data;
 }
 
 void gc_unlock(int id,struct ErrorType *e)
@@ -240,7 +302,7 @@ void gc_unlock(int id,struct ErrorType *e)
     if (e->code!=ERROR_NONE) return;
 
     //Check memory before freeing including ID range
-    struct GC_Header *header=get_header(id,e);
+    struct GC_Header *header=gc_get_header(id,e);
     if (e->code!=ERROR_NONE) return;
 
     //Make sure memory does not belong to another program
@@ -249,37 +311,29 @@ void gc_unlock(int id,struct ErrorType *e)
         //PID is not root
         if (header->pid!=gc.current_pid)
         {
+            //PID of object does not belong to current process
             e->code=GC_ERROR_WRONG_PID;
             return;
         }
+    }
+    else
+    {
+        //PID is root - ok to modify memory of any other process
     }
 
     //Don't unlock if already unlocked
     if (header->lock_count==0)
     {
-        //Exceeded max lock count
+        //Already unlocked
         e->code=GC_ERROR_UNLOCK;
         return;
     }
 
-    //Increase lock count
+    //Decrease lock count
     header->lock_count--;
 }
 
-struct GC_Header *gc_header(uint32_t id,struct ErrorType *e)
-{
-    //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return NULL;
 
-    //Make sure ID is in range
-    if (id>=gc.table_elements)
-    {
-        e->code=GC_ERROR_ID_RANGE;
-        return NULL;
-    }
-
-    return gc.id_table[id];
-}
 uint32_t gc_free_bytes(struct ErrorType *e);
 uint32_t gc_locked_bytes(struct ErrorType *e);
 uint32_t gc_object_count(struct ErrorType *e);

@@ -8,18 +8,22 @@
 #define GC_ALIGN            4       //Alignment requirement on SH4
 #define GC_TABLE_ELEMENTS   128     //Elements in table of memory IDs
 #define GC_ROOT_PID         0       //Root can access memory belonging to any PID
+#define GC_TABLE_ID         0       //First table entry is pointer to table
 
 enum GC_ERRORS
 {
-    GC_ERROR_NONE=ERROR_NONE,
-    GC_ERROR_OBJ_SIZE,
-    GC_ERROR_OUT_OF_MEM,
-    GC_ERROR_ID_RANGE,
-    GC_ERROR_DOUBLE_FREE,
-    GC_ERROR_FREE_LOCKED,
-    GC_ERROR_WRONG_PID,
-    GC_ERROR_LOCK_COUNT,
-    GE_ERROR_UNLOCK,
+    GC_ERROR_NONE=ERROR_NONE,   //0
+    GC_ERROR_OBJ_SIZE,          //1
+    GC_ERROR_OUT_OF_MEM,        //2
+    GC_ERROR_ID_RANGE,          //3
+    GC_ERROR_FREE_LOCKED,       //4
+    GC_ERROR_WRONG_PID,         //5
+    GC_ERROR_LOCK_COUNT,        //6
+    GC_ERROR_UNLOCK,            //7
+    GC_ERROR_ID_UNASSIGNED,     //8
+    GC_ERROR_EMPTY_HEADER,      //9
+    GC_ERROR_HEADER_SIZE,       //10
+    GC_ERROR_HEADER_OVERFLOW    //11
 };
 
 struct GC_Header
@@ -40,10 +44,10 @@ struct GC_Internals
     uint32_t ids_left;
     struct GC_Header **id_table;
     uint8_t current_pid;
-
 };
 
-struct GC_Header *gc_next_header(struct GC_Header *header);
+struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e);
+struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e);
 void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e);
 void gc_set_pid(uint8_t pid,struct ErrorType *e);
 uint32_t gc_alloc(uint32_t size,struct ErrorType *e);
@@ -51,7 +55,6 @@ void gc_realloc(int id,uint32_t size,struct ErrorType *e);
 void gc_free(int id,struct ErrorType *e);
 void *gc_lock(int id,struct ErrorType *e);
 void gc_unlock(int id,struct ErrorType *e);
-struct GC_Header *gc_header(uint32_t id,struct ErrorType *e);
 uint32_t gc_free_bytes(struct ErrorType *e);
 uint32_t gc_locked_bytes(struct ErrorType *e);
 uint32_t gc_overhead_bytes(struct ErrorType *e);
