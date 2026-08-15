@@ -38,6 +38,6 @@ for arg in args:
                 if "FAIL" in line:
                     printc(f"   {line}\n","red")
 if total_fails==0:
-    printc(f"All tests passed ({total_tests} tests in {len(argv)} files)\n","green")
+    printc(f"All tests passed ({total_tests} tests in {len(args)} files)\n","green")
 else:
-    printc(f"Failed {total_fails} of {total_tests} tests in {len(argv)} files\n","red")
+    printc(f"Failed {total_fails} of {total_tests} tests in {len(args)} files\n","red")
