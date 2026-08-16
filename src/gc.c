@@ -12,6 +12,8 @@
 //Global variables private to file
 static struct GC_Internals gc;
 
+//Static functions
+//================
 static uint32_t gc_round_up(uint32_t number,uint32_t alignment)
 {
     return number+(alignment-number%alignment)%alignment;
@@ -21,6 +23,32 @@ uint32_t gc_obj_size(uint32_t size)
 {
     return gc_round_up(size+sizeof(struct GC_Header),GC_OBJ_ALIGN);
 }
+
+struct GC_Header *gc_find_free(uint32_t size,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    if (e->code!=ERROR_NONE) return NULL;
+
+    struct GC_Header *header=(struct GC_Header *)gc.heap_base;
+    while(header->end==false)
+    {
+        if ((header->free==true)&&(header->size>=size))
+        {
+            //Free slot found - done searching
+            return header;
+        }
+
+        //Advance to next header
+        header=gc_next_header(header,e);
+        if (e->code!=ERROR_NONE) return NULL;
+    }
+
+    //Finished searching without finding match
+    return NULL;
+}
+
+//Functions
+//=========
 
 //Get header from ID
 struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
@@ -156,11 +184,8 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
         return 0;
     }
 
-    //Add size of header to requested size
-    size+=sizeof(struct GC_Header);
-
-    //Round up object size to object alignment
-    size=gc_round_up(size,GC_OBJ_ALIGN);
+    //Account for header and round up to alignment
+    size=gc_obj_size(size);
 
     //Expand ID table if necessary
     if (gc.ids_left==0)
@@ -182,44 +207,39 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
     }
 
     //Try to find free memory slot then compact and try again if necessary
-    for (int i=0;i<3;i++)
+    const int try_count=3;
+    for (int i=0;i<try_count;i++)
     {
         //Search heap for free memory slot
-        struct GC_Header *header=(struct GC_Header *)gc.heap_base;
-        while(header->end==false)
+        struct GC_Header *header=gc_find_free(size,e);
+        if (e->code!=ERROR_NONE) return 0;
+        if (header!=NULL)
         {
-            if ((header->free==true)&&(header->size>=size))
+            //Memory slot found - claim
+            header->end=false;
+            header->free=false;
+            header->pid=gc.current_pid;
+            header->lock_count=0;
+            uint32_t old_size=header->size;
+            header->size=size;
+            
+            //Assign ID in table
+            gc.id_table[assigned_id]=header;
+            header->id=assigned_id;
+
+            //Create new free block if memory left over
+            if (old_size>size)
             {
-                //Memory slot found - claim
-                header->end=false;
-                header->free=false;
-                header->pid=gc.current_pid;
-                header->lock_count=0;
-                uint32_t old_size=header->size;
-                header->size=size;
-                
-                //Assign ID in table
-                gc.id_table[assigned_id]=header;
-                header->id=assigned_id;
-
-                //Create new free block if memory left over
-                if (old_size>size)
-                {
-                    struct GC_Header *new_header=gc_next_header(header,e);
-                    if (e->code!=ERROR_NONE) return 0;
-                    new_header->size=old_size-size;
-                    new_header->end=false;
-                    new_header->free=true;
-                }
-
-                //Done
-                gc.ids_left--;
-                return assigned_id;
+                struct GC_Header *new_header=gc_next_header(header,e);
+                if (e->code!=ERROR_NONE) return 0;
+                new_header->size=old_size-size;
+                new_header->end=false;
+                new_header->free=true;
             }
 
-            //Advance to next header
-            header=gc_next_header(header,e);
-            if (e->code!=ERROR_NONE) return 0;
+            //Done
+            gc.ids_left--;
+            return assigned_id;
         }
 
         //Search finished without finding free memory slot
@@ -256,19 +276,19 @@ void gc_realloc(int id,uint32_t size,struct ErrorType *e)
         return;
     }
 
-    //TODO: check if locked
-
-    //TODO: gc_alloc changed after pasting below
-
-    //Round up object size to alignment
-    size+=(GC_OBJ_ALIGN-size%GC_OBJ_ALIGN)%GC_OBJ_ALIGN;
-
-    //Add size of header to requested size
-    size+=sizeof(struct GC_Header);
-
-    //Shrink or expand based on size difference
+    //Object cannot be locked
     struct GC_Header *original_header=gc_get_header(id,e);
     if (e->code!=ERROR_NONE) return;
+    if (original_header->lock_count!=0)
+    {
+        e->code=GC_ERROR_REALLOC_LOCKED;
+        return;
+    }
+
+    //Account for header and round up to alignment
+    size=gc_obj_size(size);
+
+    //Shrink or expand based on size difference
     if (original_header->size==size)
     {
         //No change in size - nothing to do
@@ -277,96 +297,94 @@ void gc_realloc(int id,uint32_t size,struct ErrorType *e)
     else if (original_header->size>size)
     {
         //Requested size is smaller than original object - shrink
-        uint32_t original_size=original_header->size;
-        uint32_t free_size=original_size-size;
-        
-        //Create free object in extra space if possible
-        if (free_size>=sizeof(struct GC_Header)+GC_MIN_SIZE)
-        {
-            //Create free object
-            struct GC_Header *free_header=gc_next_header(original_header,e);
-            if (e->code!=ERROR_NONE) return;
-            original_header->size=size;
-            free_header->size=free_size;
-            free_header->free=true;
-        }
-        else
-        {
-            //Cannot split - new block would not be big enough for header and min data size
-            //Leave size as is even if slightly larger than requested
-        }
+        uint32_t old_size=original_header->size;
+        original_header->size=size;
+        struct GC_Header *new_header=gc_next_header(original_header,e);
+        if (e->code!=ERROR_NONE) return;
+        new_header->size=old_size-size;
+        new_header->end=false;
+        new_header->free=true;
     }
     else
     {
         //Requested size is larger than original object - expand
-    }
 
-    /*
-    //Try to find free memory slot then compact and try again if necessary
-    for (int i=0;i<3;i++)
-    {
-        //Search heap for free memory slot
-        struct GC_Header *header=(struct GC_Header *)gc.heap_base;
-        while(header->size-sizeof(struct GC_Header)!=0)
+        //Actually, below is wrong
+            //Better to copy first and if copy fails, then resort to acrobatics
+            //Failed copy will mean mem is garbage collected so easy to copy all 
+            //neighboring unlocked mem to free space at end
+            //If not, search for equivalent range :(
+        //First, try to expand in place since may not be enough room for copy
+            //seems better to do before compacting since only makes it worse
+            //scan whole range keeping track of beginning and end and all
+            //in between. rearrange all unlocked in range if enough free.
+            //if not, try to find home for objects in range
+            //if not, find equivalent range
+        
+        /*
+        //Try to find free memory slot then compact and try again if necessary
+        for (int i=0;i<3;i++)
         {
-            if ((header->free==true)&&(header->size>=size))
+            //Search heap for free memory slot
+            struct GC_Header *header=(struct GC_Header *)gc.heap_base;
+            while(header->end==false)
             {
-                //Memory slot found - claim
-                header->free=false;
-                header->pid=gc.current_pid;
-                header->lock_count=0;
-                
-                //Assign ID in table
-                gc.id_table[assigned_id]=header;
-                header->id=assigned_id;
-
-                //Split block if possible
-                if (header->size>=size+sizeof(struct GC_Header)+GC_MIN_SIZE)
+                if ((header->free==true)&&(header->size>=size))
                 {
-                    //Split block into two
+                    //Memory slot found - claim
+                    header->end=false;
+                    header->free=false;
+                    header->pid=gc.current_pid;
+                    header->lock_count=0;
                     uint32_t old_size=header->size;
                     header->size=size;
-                    header=gc_next_header(header,e);
-                    header->size=old_size-size;
-                    header->free=true;
-                }
-                else
-                {
-                    //Cannot split - new block would not be big enough for header and min data size
-                    //Leave size as is even if slightly larger than requested
+                    
+                    //Assign ID in table
+                    gc.id_table[assigned_id]=header;
+                    header->id=assigned_id;
+
+                    //Create new free block if memory left over
+                    if (old_size>size)
+                    {
+                        struct GC_Header *new_header=gc_next_header(header,e);
+                        if (e->code!=ERROR_NONE) return 0;
+                        new_header->size=old_size-size;
+                        new_header->end=false;
+                        new_header->free=true;
+                    }
+
+                    //Done
+                    gc.ids_left--;
+                    return assigned_id;
                 }
 
-                //Done
-                gc.ids_left--;
-                return assigned_id;
+                //Advance to next header
+                header=gc_next_header(header,e);
+                if (e->code!=ERROR_NONE) return 0;
             }
 
-            //Advance to next header
-            header=gc_next_header(header,e);
-            if (e->code!=ERROR_NONE) return;
+            //Search finished without finding free memory slot
+            if (i==0)
+            {
+                //Try 1 - compact heap quickly and try allocating again
+                gc_compact_fast(e);
+                if (e->code!=ERROR_NONE) return 0;
+            }
+            else if (i==1)
+            {
+                //Try 2 - compact heap completely and try allocating again
+                gc_compact_full(e);
+                if (e->code!=ERROR_NONE) return 0;
+            }
+            else
+            {
+                //Try 3 - heap fully compacted and no free memory slot - out of memory
+                e->code=GC_ERROR_OUT_OF_MEM;
+                return 0;
+            }
         }
-
-        //Search finished without finding free memory slot
-        if (i==0)
-        {
-            //Try 1 - compact heap quickly and try allocating again
-            gc_compact_fast(e);
-            if (e->code!=ERROR_NONE) return;
-        }
-        else if (i==1)
-        {
-            //Try 2 - compact heap completely and try allocating again
-            gc_compact_full(e);
-            if (e->code!=ERROR_NONE) return;
-        }
-        else
-        {
-            //Try 3 - heap fully compacted and no free memory slot - out of memory
-            e->code=GC_ERROR_OUT_OF_MEM;
-            return 0;
-        }
-    }
     */
+    }
 }
 
 void gc_free(int id,struct ErrorType *e)

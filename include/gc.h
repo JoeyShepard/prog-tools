@@ -11,8 +11,6 @@
 #define GC_ROOT_PID         0           //Root can access memory belonging to any PID
 #define GC_TABLE_ID         0           //First table entry is pointer to table
 #define GC_MAX_LOCKS        UINT8_MAX   //Max times same object can be locked
-//TODO: remove
-#define GC_MIN_SIZE         GC_ALIGN    //Min size of requested memory excluding header
 
 enum GC_ERRORS
 {
@@ -30,6 +28,7 @@ enum GC_ERRORS
     GC_ERROR_HEADER_OVERFLOW,   //11
     GC_ERROR_HEAP_SIZE,         //12
     GC_ERROR_OBJ_ALIGNMENT,     //13
+    GC_ERROR_REALLOC_LOCKED,    //14
 };
 
 struct GC_Header
