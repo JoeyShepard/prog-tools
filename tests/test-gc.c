@@ -65,7 +65,7 @@ void test_gc_get_header()   //1
     for (int i=1;i<test_count;i++)
     {
         //Allocate test object
-        int id=gc_alloc(i*GC_MIN_SIZE,&e);
+        int id=gc_alloc(i*GC_OBJ_ALIGN,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
         //Assert all IDs in test range correct
@@ -79,7 +79,7 @@ void test_gc_get_header()   //1
                 struct GC_Header *test_header=gc_get_header(j,&e);
                 TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
                 TEST_ASSERT_EQUAL_PTR(header,test_header);
-                header=(struct GC_Header *)((uintptr_t)header+sizeof(struct GC_Header)+j*GC_MIN_SIZE);
+                header=(struct GC_Header *)((uintptr_t)header+(j+1)*GC_OBJ_ALIGN);
             }
             else
             {
@@ -100,14 +100,15 @@ void test_gc_next_header()  //2
 
     //Alocate test objects
     const int test_objs=5;
+    const int test_multiple=4;
     for (int i=1;i<=test_objs;i++)
     {
-        int id=gc_alloc(i*GC_MIN_SIZE,&e);
+        int id=gc_alloc(i*test_multiple,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
     }
 
     //Test various types of heap corruption
-    const int test_count=3;
+    const int test_count=4;
     for (int test=0;test<test_count;test++)
     {
         for (int i=1;i<=test_objs;i++)
@@ -117,7 +118,6 @@ void test_gc_next_header()  //2
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             for (int j=1;j<=test_objs;j++)
             {
-                uint32_t expected_size=j*GC_MIN_SIZE+sizeof(struct GC_Header);
                 header=gc_next_header(header,&e);
             }
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -126,19 +126,20 @@ void test_gc_next_header()  //2
             struct GC_Header *test_header=gc_get_header(i,&e);
             uint32_t old_size=test_header->size;
             if (test==0) test_header->size=0;
-            else if (test==1) test_header->size=-GC_ALIGN;
+            else if (test==1) test_header->size=-GC_OBJ_ALIGN;
             else if (test==2) test_header->size=HEAP_SIZE;
+            else if (test==3) test_header->size++;
 
             //Assert error caught after purposely corrupting heap
             header=gc_get_header(1,&e);
             for (int j=1;j<=test_objs;j++)
             {
-                uint32_t expected_size=j*GC_MIN_SIZE+sizeof(struct GC_Header);
                 header=gc_next_header(header,&e);
             }
             if (test==0) TEST_ASSERT_EQUAL(GC_ERROR_EMPTY_HEADER,e.code);
             else if (test==1) TEST_ASSERT_EQUAL(GC_ERROR_HEADER_SIZE,e.code);
             else if (test==2) TEST_ASSERT_EQUAL(GC_ERROR_HEADER_OVERFLOW,e.code);
+            else if (test==2) TEST_ASSERT_EQUAL(GC_ERROR_OBJ_ALIGNMENT,e.code);
             error_reset(&e);
 
             //Undo heap corruption for next check
@@ -149,12 +150,15 @@ void test_gc_next_header()  //2
 
 void test_gc_init()     //3
 {
+    //Assert heap size is multiple of alignment
+    TEST_ASSERT_EQUAL(0,HEAP_SIZE%GC_OBJ_ALIGN);
+
     //Initialize GC
     gc_init(test_mem_aligned,HEAP_SIZE,&e);
     TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
     //Assert header for GC table of IDs is correct
-    uint32_t table_size=sizeof(struct GC_Header)+sizeof(struct GC_Header *)*GC_TABLE_ELEMENTS;
+    uint32_t table_size=gc_obj_size(sizeof(struct GC_Header *)*GC_TABLE_ELEMENTS);
     struct GC_Header *header=(struct GC_Header *)test_mem_aligned;
     TEST_ASSERT_EQUAL(table_size,header->size);
     TEST_ASSERT_FALSE(header->free);
@@ -164,8 +168,8 @@ void test_gc_init()     //3
     TEST_ASSERT_EACH_EQUAL_PTR(NULL,&((struct GC_Header **)header->data)[1],GC_TABLE_ELEMENTS-1);
 
     //Assert empty object marking end of heap is correct
-    uint32_t marker_size=sizeof(struct GC_Header);
-    header=(struct GC_Header *)((uintptr_t)test_mem_aligned+HEAP_SIZE-sizeof(struct GC_Header));
+    uint32_t marker_size=GC_OBJ_ALIGN;
+    header=(struct GC_Header *)((uintptr_t)test_mem_aligned+HEAP_SIZE-marker_size);
     TEST_ASSERT_EQUAL(marker_size,header->size);
     TEST_ASSERT_FALSE(header->free);
     TEST_ASSERT_EQUAL(0,header->pid);
@@ -204,8 +208,8 @@ void test_gc_alloc()    //4
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
         //Assert rounded up correctly
-        if (i<=GC_ALIGN) TEST_ASSERT_EQUAL(GC_ALIGN+sizeof(struct GC_Header),header->size);
-        else TEST_ASSERT_EQUAL(GC_ALIGN*2+sizeof(struct GC_Header),header->size);
+        if (i<=GC_OBJ_ALIGN-sizeof(struct GC_Header)) TEST_ASSERT_EQUAL(GC_OBJ_ALIGN,header->size);
+        else TEST_ASSERT_EQUAL(2*GC_OBJ_ALIGN,header->size);
 
         //Assert ID assigned correctly
         TEST_ASSERT_EQUAL(i,id);
@@ -480,7 +484,7 @@ void test_gc_free_bytes()       //9
     TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
     
     //Assert expected size of empty heap
-    uint32_t expected_size=HEAP_SIZE-sizeof(struct GC_Header)*2-GC_TABLE_ELEMENTS*sizeof(struct GC_Header *);
+    uint32_t expected_size=HEAP_SIZE-GC_OBJ_ALIGN-gc_obj_size(GC_TABLE_ELEMENTS*sizeof(struct GC_Header *));
     uint32_t size=gc_free_bytes(&e);
     TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
     TEST_ASSERT_EQUAL(expected_size,size);
@@ -490,10 +494,10 @@ void test_gc_free_bytes()       //9
     uint32_t test_ids[test_count];
     for (int i=0;i<test_count;i++)
     {
-        uint32_t obj_size=(i+1)*GC_MIN_SIZE;
+        uint32_t obj_size=i+1;
         test_ids[i]=gc_alloc(obj_size,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
-        expected_size-=obj_size+sizeof(struct GC_Header);
+        expected_size-=gc_obj_size(obj_size);
         size=gc_free_bytes(&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         TEST_ASSERT_EQUAL(expected_size,size);
@@ -502,7 +506,6 @@ void test_gc_free_bytes()       //9
     //Assert size after locking
     for (int i=0;i<test_count;i++)
     {
-        uint32_t obj_size=(i+1)*GC_MIN_SIZE;
         gc_lock(test_ids[i],&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         size=gc_free_bytes(&e);
@@ -513,7 +516,6 @@ void test_gc_free_bytes()       //9
     //Assert size after unlocking
     for (int i=0;i<test_count;i++)
     {
-        uint32_t obj_size=(i+1)*GC_MIN_SIZE;
         gc_unlock(test_ids[i],&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         size=gc_free_bytes(&e);
@@ -524,10 +526,10 @@ void test_gc_free_bytes()       //9
     //Assert size after freeing
     for (int i=0;i<test_count;i++)
     {
-        uint32_t obj_size=(i+1)*GC_MIN_SIZE;
+        uint32_t obj_size=i+1;
         gc_free(test_ids[i],&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
-        expected_size+=obj_size+sizeof(struct GC_Header);
+        expected_size+=gc_obj_size(obj_size);
         size=gc_free_bytes(&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         TEST_ASSERT_EQUAL(expected_size,size);
@@ -554,15 +556,16 @@ void test_gc_allocated_bytes()  //10
     int test_sizes[ARRAY_LEN(tests)];
     uint32_t test_ids[9];
     uint32_t test_ids_index=0;
+    const int test_multiple=4;
     for (int i=0;i<ARRAY_LEN(tests);i++)
     {
         int test=tests[i];
-        test_sizes[i]=test*((test*GC_MIN_SIZE)+sizeof(struct GC_Header));
+        test_sizes[i]=test*gc_obj_size(test*test_multiple);
         gc_set_pid(test,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         for (int j=0;j<test;j++)
         {
-            test_ids[test_ids_index]=gc_alloc(test*GC_MIN_SIZE,&e);
+            test_ids[test_ids_index]=gc_alloc(test*test_multiple,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             test_ids_index++;
         }
@@ -615,8 +618,8 @@ void test_gc_allocated_bytes()  //10
             gc_free(test_ids[test_ids_index],&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             test_ids_index++;
-            expected_size-=test*GC_MIN_SIZE+sizeof(struct GC_Header);
-            total_size-=test*GC_MIN_SIZE+sizeof(struct GC_Header);
+            expected_size-=gc_obj_size(test*test_multiple);
+            total_size-=gc_obj_size(test*test_multiple);
 
             size=gc_allocated_bytes(true,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -648,15 +651,16 @@ void test_gc_locked_bytes()  //11
     int test_sizes[ARRAY_LEN(tests)];
     uint32_t test_ids[9];
     uint32_t test_ids_index=0;
+    const int test_multiple=4;
     for (int i=0;i<ARRAY_LEN(tests);i++)
     {
         int test=tests[i];
-        test_sizes[i]=test*((test*GC_MIN_SIZE)+sizeof(struct GC_Header));
+        test_sizes[i]=test*gc_obj_size(test*test_multiple);
         gc_set_pid(test,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         for (int j=0;j<test;j++)
         {
-            test_ids[test_ids_index]=gc_alloc(test*GC_MIN_SIZE,&e);
+            test_ids[test_ids_index]=gc_alloc(test*test_multiple,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             test_ids_index++;
         }
@@ -697,8 +701,8 @@ void test_gc_locked_bytes()  //11
             gc_lock(test_ids[test_ids_index],&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             test_ids_index++;
-            expected_size+=test*GC_MIN_SIZE+sizeof(struct GC_Header);
-            total_size+=test*GC_MIN_SIZE+sizeof(struct GC_Header);
+            expected_size+=gc_obj_size(test*test_multiple);
+            total_size+=gc_obj_size(test*test_multiple);
 
             size=gc_locked_bytes(true,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -732,8 +736,8 @@ void test_gc_locked_bytes()  //11
             gc_unlock(test_ids[test_ids_index],&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             test_ids_index++;
-            expected_size-=test*GC_MIN_SIZE+sizeof(struct GC_Header);
-            total_size-=test*GC_MIN_SIZE+sizeof(struct GC_Header);
+            expected_size-=gc_obj_size(test*test_multiple);
+            total_size-=gc_obj_size(test*test_multiple);
 
             size=gc_locked_bytes(true,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -753,6 +757,7 @@ void test_gc_lost_bytes()  //12
 
     //Assert no bytes lost before allocating
     const int test_count=10;
+    const int test_multiple=4;
     uint32_t test_ids[test_count];
     uint32_t size=gc_lost_bytes(&e);
     TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -761,7 +766,7 @@ void test_gc_lost_bytes()  //12
     //Assert no bytes lost while allocating
     for (int i=0;i<test_count;i++)
     {
-        int obj_size=(i+1)*GC_MIN_SIZE;
+        int obj_size=(i+1)*test_multiple;
         test_ids[i]=gc_alloc(obj_size,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         uint32_t size=gc_lost_bytes(&e);
@@ -774,7 +779,7 @@ void test_gc_lost_bytes()  //12
     int expected_size=0;
     for (int i=0;i<test_count-1;i++)
     {
-        expected_size+=(i+1)*GC_MIN_SIZE+sizeof(struct GC_Header);
+        expected_size+=gc_obj_size((i+1)*test_multiple);
         gc_free(test_ids[i],&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         uint32_t size=gc_lost_bytes(&e);
@@ -807,7 +812,7 @@ void test_gc_lost_bytes()  //12
     for (int i=0;i<test_count-1;i++)
     {
         int index=pattern[i];
-        expected_size+=(index+1)*GC_MIN_SIZE+sizeof(struct GC_Header);
+        expected_size+=gc_obj_size((index+1)*test_multiple);
         gc_free(test_ids[index],&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         uint32_t size=gc_lost_bytes(&e);
@@ -856,6 +861,7 @@ void test_gc_obj_count()  //13
     struct StateType state_counts[pid_count];
     uint32_t test_ids[pid_count*states_per_pid];
     uint32_t test_ids_index=0;
+    const int test_multiple=4;
     for (int j=0;j<pid_count;j++)
     {
         state_counts[j].free=0;
@@ -870,7 +876,7 @@ void test_gc_obj_count()  //13
         {
             //Make each object slightly larger to prevent memory reuse
                 //so that number of free objects is predictable in test
-            int obj_size=(i*4+j+1)*GC_MIN_SIZE;
+            int obj_size=(i*5+j+1)*GC_OBJ_ALIGN;
             int id=gc_alloc(obj_size,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
             int state=states[state_index];
@@ -1034,7 +1040,8 @@ void test_gc_compact_fast()     //14
     {
         const int slot_size=100;
         const int locked_size=100;
-        for (int i=72;i<=100;i+=GC_ALIGN)
+        const int test_multiple=4;
+        for (int i=72;i<=100;i+=test_multiple)
         {
             int slot_id=gc_alloc(slot_size,&e);
             int locked_id=gc_alloc(slot_size,&e);
@@ -1046,12 +1053,12 @@ void test_gc_compact_fast()     //14
             int count=gc_obj_count(false,true,true,true,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
-            if (slot_size-i>=sizeof(struct GC_Header)+GC_MIN_SIZE)
+            if (gc_obj_size(slot_size)>gc_obj_size(i))
             {
                 //Small free object created in slot
                 TEST_ASSERT_EQUAL(4,count);
                 int size=gc_lost_bytes(&e);
-                TEST_ASSERT_EQUAL(size,slot_size-i);
+                TEST_ASSERT_EQUAL(size,GC_OBJ_ALIGN);
             }
             else
             {
@@ -1069,18 +1076,18 @@ void test_gc_compact_fast()     //14
 
     //Assert correct compaction of complicated pattern
     /*
-        Before                  After
-        ======                  =====
-        0 free        400       unlocked    100
-        1 unlocked    100       unlocked    1000
-        2 free        600       locked      200
-        3 locked      200       unlocked    1200
-        4 free        400       unlocked    1000
-        5 free        300       unlocked    700
-        6 unlocked    1200      locked      900
-        7 unlocked    1000      free        600
-        8 locked      900       locked      500
-        9 free        600       unlocked    700
+        Before
+        ======
+        0 free        400
+        1 unlocked    100
+        2 free        600
+        3 locked      200
+        4 free        400
+        5 free        300
+        6 unlocked    1200
+        7 unlocked    1000
+        8 locked      900
+        9 free        600
         10 locked     500
         11 unlocked   700
     */
@@ -1114,36 +1121,40 @@ void test_gc_compact_fast()     //14
         gc_compact_fast(&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
+        enum
+        {
+            CHECK_FREE,
+            CHECK_LOCKED,
+            CHECK_UNLOCKED
+        };
         struct CheckType
         {
             int size;
-            int combined;
-            bool free;
-            bool locked;
+            int state;
         }checks[]={
-            {100,   1,  false,false},
-            {1000,  2,  false,false},
-            {200,   1,  false,true},
-            {1200,  1,  false,false},
-            {700,   1,  false,false},
-            {1000,  2,  true,false},
-            {900,   1,  false,true},
-            {600,   1,  true,false},
-            {500,   1,  false,true},
+            {112,   CHECK_UNLOCKED}, 
+            {1024,  CHECK_UNLOCKED},
+            {16,    CHECK_FREE},
+            {224,   CHECK_LOCKED},
+            {1216,  CHECK_UNLOCKED},
+            {720,   CHECK_UNLOCKED},
+            {1040,  CHECK_FREE},
+            {912,   CHECK_LOCKED},
+            {624,   CHECK_FREE},
+            {512,   CHECK_LOCKED},
             };
 
         struct GC_Header *header=gc_next_header((struct GC_Header *)test_mem_aligned,&e);
         for (int i=0;i<ARRAY_LEN(checks);i++)
         {
             //Assert object matches expected
-            TEST_ASSERT_EQUAL(checks[i].size+sizeof(struct GC_Header)*checks[i].combined,header->size);
-            TEST_ASSERT_EQUAL(checks[i].free,header->free);
-            if (checks[i].free==false)
-            {
-                if (checks[i].locked==true)
-                    TEST_ASSERT_EQUAL(1,header->lock_count);
-                else TEST_ASSERT_EQUAL(0,header->lock_count);
-            }
+            TEST_ASSERT_EQUAL(checks[i].size,header->size);
+            bool free=(checks[i].state==CHECK_FREE);
+            TEST_ASSERT_EQUAL(free,header->free);
+            if (checks[i].state==CHECK_LOCKED)
+                TEST_ASSERT_EQUAL(1,header->lock_count);
+            else if (checks[i].state==CHECK_UNLOCKED)
+                TEST_ASSERT_EQUAL(0,header->lock_count);
             
             header=gc_next_header(header,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
@@ -1151,18 +1162,15 @@ void test_gc_compact_fast()     //14
 
         //Assert object data correct
         const int test_ids[]={2,4,7,8,9,11,12};
+        const int test_lens[]={100,200,1200,1000,900,500,700};
         for (int i=0;i<ARRAY_LEN(test_ids);i++)
         {
             int test=test_ids[i];
             uint8_t *data=gc_lock(test,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
 
-            int count=gc_get_data_size(test,&e);
             TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
-            //Correction for slight increase in object size when free space to
-                //next object is not enough to create free object
-            count-=count%100;
-            for (int j=0;j<count;j++)
+            for (int j=0;j<test_lens[i];j++)
             {
                 uint8_t expected=j*test;
                 TEST_ASSERT_EQUAL(expected,data[j]);

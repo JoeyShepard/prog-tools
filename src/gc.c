@@ -9,11 +9,18 @@
 #include "error.h"
 #include "gc.h"
 
-//TODO: switch from adding extra bytes to objects to aligning to 16 or so
-
-
 //Global variables private to file
 static struct GC_Internals gc;
+
+static uint32_t gc_round_up(uint32_t number,uint32_t alignment)
+{
+    return number+(alignment-number%alignment)%alignment;
+}
+
+uint32_t gc_obj_size(uint32_t size)
+{
+    return gc_round_up(size+sizeof(struct GC_Header),GC_OBJ_ALIGN);
+}
 
 //Get header from ID
 struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
@@ -53,6 +60,14 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
         return NULL;
     }
 
+    //Make sure object is not misaligned
+        //Would only happen if heap is corrupt
+    if (header->size%GC_OBJ_ALIGN!=0)
+    {
+        e->code=GC_ERROR_OBJ_ALIGNMENT;
+        return NULL;
+    }
+
     //Make sure next header is at higher address
         //Would only happen if heap is corrupt
     struct GC_Header *new_header=(struct GC_Header *)(((uintptr_t)header)+header->size);
@@ -85,7 +100,8 @@ void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
 
     //First object is for table of GC IDs
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
-    header->size=sizeof(struct GC_Header)+sizeof(struct GC_Header *)*GC_TABLE_ELEMENTS;
+    header->size=gc_round_up(sizeof(struct GC_Header)+sizeof(struct GC_Header *)*GC_TABLE_ELEMENTS,GC_OBJ_ALIGN);
+    header->end=false;
     header->free=false;     
     header->pid=GC_ROOT_PID;
     header->lock_count=0;
@@ -103,13 +119,15 @@ void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
     //Free memory ready for allocation
     uint32_t bytes_left=gc.heap_size-header->size;
     header=gc_next_header(header,e);
-    header->size=bytes_left-sizeof(struct GC_Header);   //Account for end marker below
+    header->size=bytes_left-GC_OBJ_ALIGN;   //Account for end marker below
+    header->end=false;
     header->free=true;
     //Don't need pid or lock_count if memory is free
 
     //Empty object to mark end of heap
-    header=(struct GC_Header *)((uintptr_t)gc.heap_base+gc.heap_size-sizeof(struct GC_Header));
-    header->size=sizeof(struct GC_Header);  //Header only marks end of heap
+    header=(struct GC_Header *)((uintptr_t)gc.heap_base+gc.heap_size-GC_OBJ_ALIGN);
+    header->size=GC_OBJ_ALIGN;
+    header->end=true;
     header->free=false;
     header->pid=GC_ROOT_PID;
     header->lock_count=1;
@@ -138,11 +156,11 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
         return 0;
     }
 
-    //Round up object size to alignment
-    size+=(GC_ALIGN-size%GC_ALIGN)%GC_ALIGN;
-
     //Add size of header to requested size
     size+=sizeof(struct GC_Header);
+
+    //Round up object size to object alignment
+    size=gc_round_up(size,GC_OBJ_ALIGN);
 
     //Expand ID table if necessary
     if (gc.ids_left==0)
@@ -168,34 +186,30 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
     {
         //Search heap for free memory slot
         struct GC_Header *header=(struct GC_Header *)gc.heap_base;
-        while(header->size-sizeof(struct GC_Header)!=0)
+        while(header->end==false)
         {
             if ((header->free==true)&&(header->size>=size))
             {
                 //Memory slot found - claim
+                header->end=false;
                 header->free=false;
                 header->pid=gc.current_pid;
                 header->lock_count=0;
+                uint32_t old_size=header->size;
+                header->size=size;
                 
                 //Assign ID in table
                 gc.id_table[assigned_id]=header;
                 header->id=assigned_id;
 
-                //Split block if possible
-                if (header->size>=size+sizeof(struct GC_Header)+GC_MIN_SIZE)
+                //Create new free block if memory left over
+                if (old_size>size)
                 {
-                    //Split block into two
-                    uint32_t old_size=header->size;
-                    header->size=size;
                     struct GC_Header *new_header=gc_next_header(header,e);
                     if (e->code!=ERROR_NONE) return 0;
                     new_header->size=old_size-size;
+                    new_header->end=false;
                     new_header->free=true;
-                }
-                else
-                {
-                    //Cannot split - new block would not be big enough for header and min data size
-                    //Leave size as is even if slightly larger than requested
                 }
 
                 //Done
@@ -244,8 +258,10 @@ void gc_realloc(int id,uint32_t size,struct ErrorType *e)
 
     //TODO: check if locked
 
+    //TODO: gc_alloc changed after pasting below
+
     //Round up object size to alignment
-    size+=(GC_ALIGN-size%GC_ALIGN)%GC_ALIGN;
+    size+=(GC_OBJ_ALIGN-size%GC_OBJ_ALIGN)%GC_OBJ_ALIGN;
 
     //Add size of header to requested size
     size+=sizeof(struct GC_Header);
@@ -483,7 +499,7 @@ uint32_t gc_free_bytes(struct ErrorType *e)
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return size;
+        if (header->end==true) return size;
 
         //Add up size of all free objects
         if (header->free==true)
@@ -508,7 +524,7 @@ uint32_t gc_allocated_bytes(bool pid_only,struct ErrorType *e)
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return size;
+        if (header->end==true) return size;
 
         //Add up size of all allocated objects belonging to PID or all PIDs
             //Skip table of object IDs used internally for housekeeping
@@ -542,7 +558,7 @@ uint32_t gc_locked_bytes(bool pid_only,struct ErrorType *e)
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return size;
+        if (header->end==true) return size;
 
         //Add up size of all locked objects belonging to PID or all PIDs
             //Skip table of object IDs used internally for housekeeping
@@ -582,7 +598,7 @@ uint32_t gc_lost_bytes(struct ErrorType *e)
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return total_size;
+        if (header->end==true) return total_size;
 
         //Add up size of all free objects
         if (header->free==true)
@@ -614,7 +630,7 @@ uint32_t gc_obj_count(bool pid_only,bool locked,bool unlocked,bool free,struct E
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return count;
+        if (header->end==true) return count;
 
         //Count objects
         if (header!=gc.id_table_header)
@@ -657,7 +673,7 @@ void gc_compact_fast(struct ErrorType *e)
     while(1)
     {
         //End of heap found?
-        if (header->size==sizeof(struct GC_Header)) return;
+        if (header->end==true) return;
 
         //Free space found - combine with contiguous free space then fill
         if (header->free==true)
@@ -670,7 +686,7 @@ void gc_compact_fast(struct ErrorType *e)
                 if (e->code!=ERROR_NONE) return;
 
                 //End of heap found?
-                if (combine_header->size==sizeof(struct GC_Header)) break;
+                if (combine_header->end==true) break;
 
                 if (combine_header->free==true)
                 {
@@ -696,11 +712,19 @@ void gc_compact_fast(struct ErrorType *e)
                     uint32_t free_size=header->size;
                     gc.id_table[fill_header->id]=header;
                     memmove(header,fill_header,fill_header->size);
-                    fill_header=gc_next_header(header,e);
+
+                    //Mark next object as free
+                    struct GC_Header *free_header=gc_next_header(header,e);
                     if (e->code!=ERROR_NONE) return;
-                    fill_header->size=free_size;
-                    fill_header->free=true;
+                    free_header->size=free_size;
+                    free_header->free=true;
+                    free_header->end=false;
                     found=true;
+                }
+                else
+                {
+                    //Empty object marking end of heap is locked, so no need
+                        //to check for it explicitly
                 }
             }
 
@@ -715,7 +739,7 @@ void gc_compact_fast(struct ErrorType *e)
                     if (e->code!=ERROR_NONE) return;
 
                     //End of heap found?
-                    if (fill_header->size==sizeof(struct GC_Header)) break;
+                    if (fill_header->end==true) break;
 
                     //Can object fill empty space?
                     if (fill_header->free==false)
@@ -726,26 +750,20 @@ void gc_compact_fast(struct ErrorType *e)
                             {
                                 //Object found - move into free space
                                 uint32_t old_size=header->size;
-                                if (header->size>=fill_header->size+sizeof(struct GC_Header)+GC_MIN_SIZE)
+                                gc.id_table[fill_header->id]=header;
+                                memmove(header,fill_header,fill_header->size);
+
+                                //Mark moved object as free
+                                fill_header->free=true;
+
+                                //Create new free object for any excess space
+                                if (old_size>header->size)
                                 {
-                                    //Excess room - create free object at end after copying
-                                    header->size=fill_header->size;
-                                    struct GC_Header *free_header=gc_next_header(header,e);
+                                    struct GC_Header *new_header=gc_next_header(header,e);
                                     if (e->code!=ERROR_NONE) return;
-                                    free_header->size=old_size-header->size;
-                                    free_header->free=true;
-                                    gc.id_table[fill_header->id]=header;
-                                    memcpy(header,fill_header,fill_header->size);
-                                    fill_header->free=true;
-                                }
-                                else
-                                {
-                                    //Not enough room after object is copied - add excess to
-                                        //object copied even if not needed
-                                    gc.id_table[fill_header->id]=header;
-                                    memcpy(header,fill_header,fill_header->size);
-                                    header->size=old_size;
-                                    fill_header->free=true;
+                                    new_header->size=old_size-header->size;
+                                    new_header->end=false;
+                                    new_header->free=true;
                                 }
 
                                 //Update pointer to ID table if it changed
@@ -757,6 +775,7 @@ void gc_compact_fast(struct ErrorType *e)
 
                                 //Combine newly freed memory with next block if free
                                 struct GC_Header *next_header=gc_next_header(fill_header,e);
+                                if (e->code!=ERROR_NONE) return;
                                 if (next_header->free==true)
                                     fill_header->size+=next_header->size;
 
@@ -817,7 +836,7 @@ void gc_check(struct ErrorType *e)
         //Track combined size of all objects
         size+=header->size;
 
-        if (header->size==sizeof(struct GC_Header))
+        if (header->end==true)
         {
             //End of heap found
             if (size!=gc.heap_size)
@@ -848,7 +867,7 @@ void gc_debug(struct ErrorType *e)
     uint32_t size=0;
     while(1)
     {
-        if (header->size==sizeof(struct GC_Header)) return;
+        if (header->end==true) return;
 
         printf("%X: size: %d, free: %d",header,header->size,header->free);
         if (header->free==false)

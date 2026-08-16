@@ -6,10 +6,12 @@
 #include "error.h"
 
 #define GC_ALIGN            4           //Alignment requirement on SH4
+#define GC_OBJ_ALIGN        16          //Must be large enough for header and GC_MIN_SIZE
 #define GC_TABLE_ELEMENTS   128         //Elements in table of memory IDs
 #define GC_ROOT_PID         0           //Root can access memory belonging to any PID
 #define GC_TABLE_ID         0           //First table entry is pointer to table
 #define GC_MAX_LOCKS        UINT8_MAX   //Max times same object can be locked
+//TODO: remove
 #define GC_MIN_SIZE         GC_ALIGN    //Min size of requested memory excluding header
 
 enum GC_ERRORS
@@ -27,15 +29,17 @@ enum GC_ERRORS
     GC_ERROR_HEADER_SIZE,       //10
     GC_ERROR_HEADER_OVERFLOW,   //11
     GC_ERROR_HEAP_SIZE,         //12
+    GC_ERROR_OBJ_ALIGNMENT,     //13
 };
 
 struct GC_Header
 {
     uint32_t size;                  //Including header
     uint32_t id;                    //ID assigned in ID table
-    bool free;
-    uint8_t pid;
-    uint8_t lock_count;
+    bool end;                       //Whether empty object marking end of heap
+    bool free;                      //Whether free to be assigned
+    uint8_t pid;                    //PID from requesting process
+    uint8_t lock_count; 
     //Flexible array member
     alignas(GC_ALIGN) char data[];
 };
@@ -50,6 +54,9 @@ struct GC_Internals
     struct GC_Header **id_table;
     uint8_t current_pid;
 };
+
+//Round number up for heap object size calculation
+uint32_t gc_obj_size(uint32_t size);
 
 //Get pointer to header of heap object from its ID
 struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e);
