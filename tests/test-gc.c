@@ -1531,7 +1531,7 @@ void test_gc_compact_fast()     //14
     }
 }
 
-void test_gc_check()
+void test_gc_check()        //15
 {
     //Initialize GC
     gc_init(test_mem_aligned,HEAP_SIZE,&e);
@@ -1581,6 +1581,333 @@ void test_gc_check()
     }
 }
 
+void test_gc_swap_next()     //16
+{
+    //Initialize GC
+    gc_init(test_mem_aligned,HEAP_SIZE,&e);
+    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    
+    //Assert error on swapping last and next to last objects
+    {
+        struct GC_Header *header=(struct GC_Header *)test_mem_aligned;
+        //Free object
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_TRUE(header->free);
+        //Swap
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SWAP_END,e.code);
+        error_reset(&e);
+        //End object
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_TRUE(header->end);
+        //Swap
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SWAP_END,e.code);
+        error_reset(&e);
+    }
+    
+    //Assert error on one or both objects locked
+    {
+        const int test_size=1000;
+        uint32_t id1=gc_alloc(test_size,&e);
+        uint32_t id2=gc_alloc(test_size,&e);
+        
+        //id1 locked
+        gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        struct GC_Header *header=gc_get_header(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SWAP_LOCKED,e.code);
+        error_reset(&e);
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //id2 locked
+        gc_lock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        header=gc_get_header(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SWAP_LOCKED,e.code);
+        error_reset(&e);
+        gc_unlock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Both locked
+        gc_lock(id1,&e);
+        gc_lock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        header=gc_get_header(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SWAP_LOCKED,e.code);
+        error_reset(&e);
+        gc_unlock(id1,&e);
+        gc_unlock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Both unlocked
+        header=gc_get_header(id1,&e);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    }
+
+    //Assert unlocked objects swapped correctly
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        const int test_size=1000;
+        uint32_t id1=gc_alloc(test_size,&e);
+        uint32_t id2=gc_alloc(2*test_size,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Write data to objects
+        uint8_t *data1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) data1[i]=i*2;
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        uint8_t *data2=gc_lock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size*2;i++) data2[i]=i*3;
+        gc_unlock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Swap
+        struct GC_Header *header=gc_get_header(id1,&e);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id2)
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id2,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+
+        //Check second object (id1)
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id1,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),header->size);
+
+        //Check data
+        uint8_t *check1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*2,check1[i]);
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        uint8_t *check2=gc_lock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*3,check2[i]);
+        gc_unlock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Reswap
+        header=gc_get_header(id2,&e);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id1)
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id1,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),header->size);
+
+        //Check second object (id2)
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id2,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+
+        //Check data
+        check1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*2,check1[i]);
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        check2=gc_lock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*3,check2[i]);
+        gc_unlock(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    }
+
+    //Assert one unlocked and one free object swapped correctly
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        const int test_size=1000;
+        uint32_t id1=gc_alloc(test_size,&e);
+        uint32_t id2=gc_alloc(2*test_size,&e);
+        uint32_t id3=gc_alloc(test_size,&e);
+        gc_free(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Write data to object
+        uint8_t *data1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) data1[i]=i*2;
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Swap
+        struct GC_Header *header=gc_get_header(id1,&e);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id2)
+        TEST_ASSERT_TRUE(header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+
+        //Check second object (id1)
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id1,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),header->size);
+
+        //Check data
+        uint8_t *check1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*2,check1[i]);
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Reswap
+        header=gc_get_header(id2,&e);
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id1)
+        TEST_ASSERT_FALSE(header->free);
+        TEST_ASSERT_EQUAL(id1,header->id);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),header->size);
+
+        //Check second object (id2)
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_TRUE(header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+
+        //Check data
+        check1=gc_lock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++) 
+            TEST_ASSERT_EQUAL_UINT8(i*2,check1[i]);
+        gc_unlock(id1,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    }
+
+    //Assert free objects swapped correctly
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        const int test_size=1000;
+        uint32_t id1=gc_alloc(test_size,&e);
+        uint32_t id2=gc_alloc(2*test_size,&e);
+        struct GC_Header *header=gc_get_header(id1,&e);
+        gc_free(id1,&e);
+        gc_free(id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Swap
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id2)
+        TEST_ASSERT_TRUE(header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+
+        //Check second object (id1)
+        struct GC_Header *next_header=gc_next_header(header,&e);
+        TEST_ASSERT_TRUE(next_header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),next_header->size);
+
+        //Reswap
+        gc_swap_next(header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        
+        //Check first object (id1)
+        TEST_ASSERT_TRUE(header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),header->size);
+
+        //Check second object (id2)
+        header=gc_next_header(header,&e);
+        TEST_ASSERT_TRUE(header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
+    }
+
+    //Assert memory range sorted correctly
+    /*
+    Before
+    ======
+    1. free     1K
+    2. unlocked 2K
+    3. free     2K
+    4. unlocked 4K
+    5. unlocked 5K
+    6. test     500K
+    7. unlocked 3K
+    8. free     1K
+    9. unlocked 2K
+    10. locked 5.4M
+    */
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        uint32_t id1=gc_alloc(1000,&e);
+        uint32_t id2=gc_alloc(2000,&e);
+        uint32_t id3=gc_alloc(2000,&e);
+        uint32_t id4=gc_alloc(4000,&e);
+        uint32_t id5=gc_alloc(5000,&e);
+        uint32_t id6=gc_alloc(500000,&e);
+        uint32_t id7=gc_alloc(3000,&e);
+        uint32_t id8=gc_alloc(1000,&e);
+        uint32_t id9=gc_alloc(2000,&e);
+        uint32_t id10=gc_alloc(5400000,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_free(id1,&e);
+        gc_free(id3,&e);
+        gc_free(id8,&e);
+        gc_lock(id10,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        gc_debug(&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        printf("\n");
+
+        //Reallocate
+        gc_realloc(id6,501000,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        gc_debug(&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        printf("\n");
+
+    }
+
+}
+
+
 int main()
 {
     UNITY_BEGIN();
@@ -1598,9 +1925,8 @@ int main()
     RUN_TEST(test_gc_lost_bytes);       //12
     RUN_TEST(test_gc_obj_count);        //13
     RUN_TEST(test_gc_compact_fast);     //14
-
-
-    RUN_TEST(test_gc_check);
+    RUN_TEST(test_gc_check);            //15
+    RUN_TEST(test_gc_swap_next);        //16
     return UNITY_END();
 }
 

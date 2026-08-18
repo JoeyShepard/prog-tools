@@ -19,6 +19,19 @@ static uint32_t gc_round_up(uint32_t number,uint32_t alignment)
     return number+(alignment-number%alignment)%alignment;
 }
 
+static void gc_update_id_table(struct GC_Header *old_header,struct GC_Header *new_header,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    if (e->code!=ERROR_NONE) return;
+
+    if (old_header==gc.id_table_header)
+    {
+        gc.id_table_header=new_header;
+        gc.id_table=(struct GC_Header **)new_header->data;
+    }
+}
+
+
 //Functions
 //=========
 uint32_t gc_obj_size(uint32_t size)
@@ -313,39 +326,41 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
         //Requested size is larger than original object - expand
 
         //First, try to allocate new object and copy
-        uint32_t new_id=gc_alloc(requested_size,e);
-        if (e->code==GC_ERROR_NONE)
         {
-            //Allocation succeeded
-            struct GC_Header *dest_header=gc_get_header(new_id,e);
-            if (e->code!=ERROR_NONE) return;
-            gc.id_table[new_id]=NULL;
-            memcpy(dest_header,original_header,original_header->size);
-            dest_header->size=obj_size;
-            if (original_header==gc.id_table_header)
+            uint32_t new_id=gc_alloc(requested_size,e);
+            if (e->code==GC_ERROR_NONE)
             {
-                gc.id_table_header=dest_header;
-                gc.id_table=(struct GC_Header **)dest_header->data;
-            }
-            gc.id_table[dest_header->id]=dest_header;
-            original_header->free=true;
+                //Allocation succeeded
+                struct GC_Header *dest_header=gc_get_header(new_id,e);
+                if (e->code!=ERROR_NONE) return;
+                gc.id_table[new_id]=NULL;
+                original_header=gc_get_header(id,e);
+                if (e->code!=ERROR_NONE) return;
+                memcpy(dest_header,original_header,original_header->size);
+                dest_header->size=obj_size;
+                gc_update_id_table(original_header,dest_header,e);
+                if (e->code!=ERROR_NONE) return;
+                gc.id_table[dest_header->id]=dest_header;
+                original_header->free=true;
 
-            //Done
-            return;
-        }
-        else if (e->code==GC_ERROR_OUT_OF_MEM)
-        {
-            //Allocation failed - try alternate strategy below
-            error_reset(e);
-        }
-        else
-        {
-            //Other error than out of memory - exit
-            return;
+                //Done
+                return;
+            }
+            else if (e->code==GC_ERROR_OUT_OF_MEM)
+            {
+                //Allocation failed - try alternate strategy below
+                error_reset(e);
+            }
+            else
+            {
+                //Other error than out of memory - exit
+                return;
+            }
         }
 
         //Second, try to shift neighboring blocks to make room
         {
+            original_header=gc_get_header(id,e);
             uint32_t unlocked_size=0;
             uint32_t free_size=0;
             bool obj_found=false;
@@ -353,6 +368,11 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             struct GC_Header *range_begin=NULL;
             while(search_header->end==false)
             {
+                
+                printf("header: free %d, size %d, lock %d, id %d. free_size %d, unlocked_size %d\n",
+                    search_header->free,search_header->size,
+                    search_header->lock_count,search_header->id,free_size,unlocked_size);
+
                 if (search_header->free==true)
                 {
                     //Found free object - add to total
@@ -366,7 +386,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                     if (search_header->lock_count==0)
                     {
                         //Found unlocked object - add to total
-                        unlocked_size+=search_header->size
+                        unlocked_size+=search_header->size;
 
                         //Record beginning of range if first object
                         if (range_begin==NULL) range_begin=search_header;
@@ -377,7 +397,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                     else
                     {
                         //Found locked object - check if done searching
-                        if (found==true)
+                        if (obj_found==true)
                         {
                             //Found range containing reallocated object - done searching 
                             break;
@@ -393,17 +413,111 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                 }
 
                //Advance to next object
-               search_header=gc_next_header(search_header);
+               search_header=gc_next_header(search_header,e);
                 if (e->code!=ERROR_NONE) return;
             }
 
             //If enough free space exists in the range, use it to expand the object
-            uint32_t added_space=obj_size-original_header->size;
-            if (added_space<=free_space)
+            uint32_t additional_space=obj_size-original_header->size;
+            if (additional_space<=free_size)
             {
-                //Use free space to expand object
+                //Free space in range is enough - rearrange unlocked objects
+                struct GC_Header *end_header=(struct GC_Header *)((uintptr_t)range_begin+free_size+unlocked_size);
+                bool changed;
+                do
+                {
+                    //Rearrange objects until no changes left
+                    changed=false;
+                    obj_found=false;
+                    search_header=range_begin;
+                    while(search_header!=end_header)
+                    {
+                        //No changes to make if at last header in range since can't swap
+                        struct GC_Header *next_header=gc_next_header(search_header,e);
+                        if (e->code!=ERROR_NONE) return;
+                        if (next_header!=end_header)
+                        {
+                            if (search_header->free==true)
+                            {
+                                //First object is free
+                                if (next_header->free==true)
+                                {
+                                    //Both objects free - combine
+                                    search_header->size+=next_header->size;
+                                    changed=true;
+                                }
+                                else
+                                {
+                                    //Second object is unlocked
+                                    if (obj_found==false)
+                                    {
+                                        //Below reallocated object - push free object up
+                                        if (next_header->id==id)
+                                        {
+                                            //Mark reallocated object as found
+                                            obj_found=true;
+                                        }
+                                        gc_swap_next(search_header,e);
+                                        if (e->code!=ERROR_NONE) return;
+                                        changed=true;
+                                    }
+                                    else
+                                    {
+                                        //Above reallocated object - no change
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //First object is unlocked
+                                if (next_header->free==true)
+                                {
+                                    //Second object is free
+                                    if (obj_found==false)
+                                    {
+                                        //Below reallocated object - no change
+                                        if (search_header->id==id)
+                                        {
+                                            //Mark reallocated object as found
+                                            obj_found=true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //Above reallocated object - move free object down
+                                        gc_swap_next(search_header,e);
+                                        if (e->code!=ERROR_NONE) return;
+                                        changed=true;
+                                    }
+                                }
+                                else
+                                {
+                                    //Second object is unlocked
+                                    if (next_header->id==id)
+                                    {
+                                        gc_swap_next(search_header,e);
+                                        if (e->code!=ERROR_NONE) return;
+                                        changed=true;
+                                        obj_found=true;
+                                    }
+                                    else if (search_header->id==id)
+                                    {
+                                        //Mark reallocated object as found
+                                        obj_found=true;
+                                    }
+                                }
+                            }
+                        }
+
+                        //Advance to next header
+                        search_header=gc_next_header(search_header,e);
+                        if (e->code!=ERROR_NONE) return;
+                    }
+                } while(changed==true);
             }
         }
+
+        //Third, subset sum
     }
 }
 
@@ -805,11 +919,8 @@ void gc_compact_fast(struct ErrorType *e)
                                 }
 
                                 //Update pointer to ID table if it changed
-                                if (fill_header==gc.id_table_header)
-                                {
-                                    gc.id_table_header=header;
-                                    gc.id_table=(struct GC_Header **)header->data;
-                                }
+                                gc_update_id_table(fill_header,header,e);
+                                if (e->code!=ERROR_NONE) return;
 
                                 //Combine newly freed memory with next block if free
                                 struct GC_Header *next_header=gc_next_header(fill_header,e);
@@ -929,7 +1040,7 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
         e->code=GC_ERROR_SWAP_END;
         return;
     }
-    struct GC_header *obj2=gc_next_header(header);
+    struct GC_Header *obj2=gc_next_header(header,e);
     if (e->code!=ERROR_NONE) return;
     if (obj2->end==true)
     {
@@ -948,8 +1059,91 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     //Triple reverse algorithm
     uint32_t obj1_size=obj1->size;
     uint32_t obj2_size=obj2->size;
+    uint32_t obj1_id=obj1->id;
+    uint32_t obj2_id=obj2->id;
     
+    //Access bytes of objects as uint32_t for speed
+    union CopyAccess
+    {
+        struct GC_Header *header;
+        uint32_t *u32;
+    } copy_begin,copy_end;
+
+    //Reverse first object
+    copy_begin.header=obj1;
+    copy_end.header=(struct GC_Header *)((uintptr_t)obj1+obj1_size)-1;
+    if (obj1->free==true)
+    {
+        //Free object - only reverse header
+        while(((uintptr_t)copy_begin.header-(uintptr_t)obj1)<sizeof(struct GC_Header))
+        {
+            *copy_end.u32=*copy_begin.u32;
+            copy_end.u32--;
+            copy_begin.u32++;
+        }
+    }
+    else
+    {
+        //Reverse whole object
+        while (copy_end.u32>copy_begin.u32)
+        {
+            uint32_t temp=*copy_end.u32;
+            *copy_end.u32=*copy_begin.u32;
+            *copy_begin.u32=temp;
+            copy_end.u32--;
+            copy_begin.u32++;
+        }
+    }
+
+    //Reverse second object
+    copy_begin.header=obj2;
+    copy_end.header=(struct GC_Header *)((uintptr_t)obj2+obj2_size)-1;
+    if (obj2->free==true)
+    {
+        //Free object - only reverse header
+        while(((uintptr_t)copy_begin.header-(uintptr_t)obj2)<sizeof(struct GC_Header))
+        {
+            *copy_end.u32=*copy_begin.u32;
+            copy_end.u32--;
+            copy_begin.u32++;
+        }
+    }
+    else
+    {
+        //Reverse whole object
+        while (copy_end.u32>copy_begin.u32)
+        {
+            uint32_t temp=*copy_end.u32;
+            *copy_end.u32=*copy_begin.u32;
+            *copy_begin.u32=temp;
+            copy_end.u32--;
+            copy_begin.u32++;
+        }
+    }
+
+    //Reverse combined object
+    //TODO: Optimization if one or both objects is free
+    copy_begin.header=obj1;
+    copy_end.header=(struct GC_Header *)((uintptr_t)obj1+obj1_size+obj2_size)-1;
+    while (copy_end.u32>copy_begin.u32)
+    {
+        uint32_t temp=*copy_end.u32;
+        *copy_end.u32=*copy_begin.u32;
+        *copy_begin.u32=temp;
+        copy_end.u32--;
+        copy_begin.u32++;
+    }
+
+    //Assign IDs
+    struct GC_Header *new_obj1=gc_next_header(obj1,e);
+    struct GC_Header *new_obj2=obj1;
+    gc_update_id_table(obj1,new_obj1,e);
+    gc_update_id_table(obj2,new_obj2,e);
+    gc.id_table[new_obj1->id]=new_obj1;
+    gc.id_table[new_obj2->id]=new_obj2;
+
 }
+
 
 
 

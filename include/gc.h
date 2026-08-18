@@ -143,3 +143,5 @@ void gc_check(struct ErrorType *e);
 
 //TODO: remove
 void gc_debug(struct ErrorType *e);
+
+void gc_swap_next(struct GC_Header *header,struct ErrorType *e);
