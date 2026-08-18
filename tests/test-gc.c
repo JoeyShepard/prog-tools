@@ -224,6 +224,210 @@ void test_gc_alloc()    //4
 
 void test_gc_realloc()  //5
 {
+    //Initialize GC
+    gc_init(test_mem_aligned,HEAP_SIZE,&e);
+    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+    //Assert error on object size 0
+    {
+        const uint32_t test_size=1000;
+        uint32_t id=gc_alloc(test_size,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_realloc(id,0,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_OBJ_SIZE,e.code);
+        error_reset(&e);
+    }
+
+    //Assert error if object locked
+    {
+        const uint32_t test_size=1000;
+        uint32_t id=gc_alloc(test_size,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_lock(id,&e);
+        gc_realloc(id,2*test_size,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_REALLOC_LOCKED,e.code);
+        error_reset(&e);
+    }
+
+    //Assert no change in address if object size same
+    {
+        const uint32_t test_size=1000;
+        uint32_t id=gc_alloc(test_size,&e);
+        struct GC_Header *test1=gc_lock(id,&e);
+        gc_unlock(id,&e);
+        gc_realloc(id,test_size,&e);
+        struct GC_Header *test2=gc_lock(id,&e);
+        gc_unlock(id,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_EQUAL(test2,test1);
+    }
+
+    //Assert object split if new size is smaller
+    {
+        const int test_count=16;
+        const int test_multiple=4;
+        const int test_size=100;
+
+        for (int i=1;i<=test_count;i++)
+        {
+            //Reinitialize GC
+            gc_init(test_mem_aligned,HEAP_SIZE,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            
+            //Create objects
+            uint32_t test_id=gc_alloc(test_size,&e);
+            uint32_t locked_id=gc_alloc(test_size,&e);
+            gc_lock(locked_id,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+            //Realloc
+            uint32_t new_size=test_size-(i+1)*test_multiple;
+            uint32_t new_obj_size=gc_obj_size(new_size);
+            uint32_t old_obj_size=gc_obj_size(test_size);
+            uint32_t free_size=old_obj_size-new_obj_size;
+            if (free_size!=0)
+            {
+                gc_realloc(test_id,new_size,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+                //Check test object
+                struct GC_Header *check_header=gc_get_header(test_id,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                TEST_ASSERT_FALSE(check_header->free);
+                TEST_ASSERT_EQUAL(new_obj_size,check_header->size);
+                //Free object
+                check_header=gc_next_header(check_header,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                TEST_ASSERT_TRUE(check_header->free);
+                TEST_ASSERT_EQUAL(free_size,check_header->size);
+                //Locked object
+                check_header=gc_next_header(check_header,&e);
+                TEST_ASSERT_FALSE(check_header->free);
+                TEST_ASSERT_EQUAL(1,check_header->lock_count);
+                TEST_ASSERT_EQUAL(gc_obj_size(test_size),check_header->size);
+            }
+        }
+    }
+
+    //Assert expected addresses for reallocating with memory copying
+    {
+        //Reinitialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        const uint32_t test_size=0x100000;
+        const uint32_t other_size=1000;
+        uint32_t test_id=gc_alloc(test_size,&e);
+        uint32_t locked_id1=gc_alloc(other_size,&e);
+        uint32_t free_id=gc_alloc(other_size,&e);
+        uint32_t locked_id2=gc_alloc(other_size,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_lock(locked_id1,&e);
+        gc_free(free_id,&e);
+        gc_lock(locked_id2,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        uint32_t new_size=test_size;
+
+        //Check heap objects
+        struct GC_Header *check_header=gc_next_header((struct GC_Header *)test_mem_aligned,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        //Unlocked object
+        TEST_ASSERT_FALSE(check_header->free);
+        TEST_ASSERT_EQUAL(0,check_header->lock_count);
+        TEST_ASSERT_EQUAL(gc_obj_size(test_size),check_header->size);
+        //Locked object
+        check_header=gc_next_header(check_header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_FALSE(check_header->free);
+        TEST_ASSERT_EQUAL(1,check_header->lock_count);
+        TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+        //Free object
+        check_header=gc_next_header(check_header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_TRUE(check_header->free);
+        TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+        //Locked object
+        check_header=gc_next_header(check_header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_FALSE(check_header->free);
+        TEST_ASSERT_EQUAL(1,check_header->lock_count);
+        TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+        //Free object
+        check_header=gc_next_header(check_header,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        TEST_ASSERT_TRUE(check_header->free);
+
+        //Check for heap corruption
+        gc_check(&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Write test data
+        uint8_t c=1,step=0;
+        uint32_t count=0;
+        uint8_t *data=gc_lock(test_id,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        for (int i=0;i<test_size;i++)
+        {
+            data[i]=(c+step);
+            c++;
+            if (c==0) step++;
+        }
+        gc_unlock(test_id,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Realloc and check heap
+        const int size_diff=100;
+        const int test_count=4;
+        for (int i=0;i<test_count;i++)
+        {
+            //Reallocate
+            new_size+=size_diff;
+            gc_realloc(test_id,new_size,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+            //Check heap objects
+            check_header=gc_next_header((struct GC_Header *)test_mem_aligned,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+            //Free object
+            TEST_ASSERT_TRUE(check_header->free);
+            TEST_ASSERT_EQUAL(0,check_header->lock_count);
+            TEST_ASSERT_EQUAL(gc_obj_size(test_size),check_header->size);
+            //Locked object
+            check_header=gc_next_header(check_header,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            TEST_ASSERT_FALSE(check_header->free);
+            TEST_ASSERT_EQUAL(1,check_header->lock_count);
+            TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+            //Free object
+            check_header=gc_next_header(check_header,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            TEST_ASSERT_TRUE(check_header->free);
+            TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+            //Locked object
+            check_header=gc_next_header(check_header,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            TEST_ASSERT_FALSE(check_header->free);
+            TEST_ASSERT_EQUAL(1,check_header->lock_count);
+            TEST_ASSERT_EQUAL(gc_obj_size(other_size),check_header->size);
+
+            //Check free space left by realloced objects
+            for (int j=0;j<i;j++)
+            {
+                check_header=gc_next_header(check_header,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                TEST_ASSERT_TRUE(check_header->free);
+                TEST_ASSERT_EQUAL(gc_obj_size(test_size+(j+1)*size_diff),check_header->size);
+            }
+
+            //Check test object
+            check_header=gc_next_header(check_header,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            TEST_ASSERT_FALSE(check_header->free);
+            TEST_ASSERT_EQUAL(0,check_header->lock_count);
+            TEST_ASSERT_EQUAL(gc_obj_size(test_size+(i+1)*size_diff),check_header->size);
+        }
+    }
 }
 
 void test_gc_free()     //6
@@ -797,7 +1001,7 @@ void test_gc_lost_bytes()  //12
     //Assert no bytes lost while reallocating
     for (int i=0;i<test_count;i++)
     {
-        int obj_size=(i+1)*GC_MIN_SIZE;
+        int obj_size=(i+1)*test_multiple;
         test_ids[i]=gc_alloc(obj_size,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         uint32_t size=gc_lost_bytes(&e);
@@ -1339,10 +1543,11 @@ void test_gc_check()
 
     //Assert no error while allocating
     const int test_count=100;
+    const int test_multiple=4;
     uint32_t test_ids[test_count];
     for (int i=0;i<test_count;i++)
     {
-        test_ids[i]=gc_alloc((i+1)*GC_MIN_SIZE,&e);
+        test_ids[i]=gc_alloc((i+1)*test_multiple,&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
         gc_check(&e);
         TEST_ASSERT_EQUAL(ERROR_NONE,e.code);

@@ -29,6 +29,8 @@ enum GC_ERRORS
     GC_ERROR_HEAP_SIZE,         //12
     GC_ERROR_OBJ_ALIGNMENT,     //13
     GC_ERROR_REALLOC_LOCKED,    //14
+    GC_ERROR_SWAP_END,          //15
+    GC_ERROR_SWAP_LOCKED,       //16
 };
 
 struct GC_Header
@@ -75,20 +77,20 @@ void gc_set_pid(uint8_t pid,struct ErrorType *e);
 uint32_t gc_alloc(uint32_t size,struct ErrorType *e);
 
 //Reallocate heap object and change its size
-void gc_realloc(int id,uint32_t size,struct ErrorType *e);
+void gc_realloc(uint32_t id,uint32_t size,struct ErrorType *e);
 
 //Free heap object which must be unlocked first
-void gc_free(int id,struct ErrorType *e);
+void gc_free(uint32_t id,struct ErrorType *e);
 
 //Lock heap object and return temporary pointer to its data section
     //Objects can be locked multiple times and must be unlocked the
     //same number of times before they can be compacted or freed
-void *gc_lock(int id,struct ErrorType *e);
+void *gc_lock(uint32_t id,struct ErrorType *e);
 
 //Unlock heap object. Objects can be locked multiple times and must
     //be unlocked the same number of times before they can be
     //compacted ot freed.
-void gc_unlock(int id,struct ErrorType *e);
+void gc_unlock(uint32_t id,struct ErrorType *e);
 
 //Get total number of free bytes on heap including header bytes
 uint32_t gc_free_bytes(struct ErrorType *e);
@@ -130,11 +132,11 @@ void gc_compact_full(struct ErrorType *e);
 
 //Get size of object as stored in header which may be slightly larger
     //than the size requested
-uint32_t gc_get_header_size(int id,struct ErrorType *e);
+uint32_t gc_get_header_size(uint32_t id,struct ErrorType *e);
 
 //Get size of object as stored in header which may be slightly larger
     //than the size requested less size of header
-uint32_t gc_get_data_size(int id,struct ErrorType *e);
+uint32_t gc_get_data_size(uint32_t id,struct ErrorType *e);
 
 //TODO: describe
 void gc_check(struct ErrorType *e);
