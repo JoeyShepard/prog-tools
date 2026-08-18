@@ -31,6 +31,103 @@ static void gc_update_id_table(struct GC_Header *old_header,struct GC_Header *ne
     }
 }
 
+//Rearrange objects near reallocated object to prepare for expansion
+static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint32_t free_size,uint32_t unlocked_size,struct ErrorType *e)
+{
+    //Free space in range is enough - rearrange unlocked objects
+    struct GC_Header *end_header=(struct GC_Header *)((uintptr_t)range_begin+free_size+unlocked_size);
+    bool changed;
+    do
+    {
+        //Rearrange objects until no changes left
+        changed=false;
+        bool obj_found=false;
+        struct GC_Header *search_header=range_begin;
+        while(search_header!=end_header)
+        {
+            //No changes to make if at last header in range since can't swap
+            struct GC_Header *next_header=gc_next_header(search_header,e);
+            if (e->code!=ERROR_NONE) return;
+            if (next_header!=end_header)
+            {
+                if (search_header->free==true)
+                {
+                    //First object is free
+                    if (next_header->free==true)
+                    {
+                        //Both objects free - combine
+                        search_header->size+=next_header->size;
+                        changed=true;
+                    }
+                    else
+                    {
+                        //Second object is unlocked
+                        if (obj_found==false)
+                        {
+                            //Below reallocated object - push free object up
+                            if (next_header->id==id)
+                            {
+                                //Mark reallocated object as found
+                                obj_found=true;
+                            }
+                            gc_swap_next(search_header,e);
+                            if (e->code!=ERROR_NONE) return;
+                            changed=true;
+                        }
+                        else
+                        {
+                            //Above reallocated object - no change
+                        }
+                    }
+                }
+                else
+                {
+                    //First object is unlocked
+                    if (next_header->free==true)
+                    {
+                        //Second object is free
+                        if (obj_found==false)
+                        {
+                            //Below reallocated object - no change
+                            if (search_header->id==id)
+                            {
+                                //Mark reallocated object as found
+                                obj_found=true;
+                            }
+                        }
+                        else
+                        {
+                            //Above reallocated object - move free object down
+                            gc_swap_next(search_header,e);
+                            if (e->code!=ERROR_NONE) return;
+                            changed=true;
+                        }
+                    }
+                    else
+                    {
+                        //Second object is unlocked
+                        if (next_header->id==id)
+                        {
+                            gc_swap_next(search_header,e);
+                            if (e->code!=ERROR_NONE) return;
+                            changed=true;
+                            obj_found=true;
+                        }
+                        else if (search_header->id==id)
+                        {
+                            //Mark reallocated object as found
+                            obj_found=true;
+                        }
+                    }
+                }
+            }
+
+            //Advance to next header
+            search_header=gc_next_header(search_header,e);
+            if (e->code!=ERROR_NONE) return;
+        }
+    } while(changed==true);
+}
 
 //Functions
 //=========
@@ -421,99 +518,8 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             uint32_t additional_space=obj_size-original_header->size;
             if (additional_space<=free_size)
             {
-                //Free space in range is enough - rearrange unlocked objects
-                struct GC_Header *end_header=(struct GC_Header *)((uintptr_t)range_begin+free_size+unlocked_size);
-                bool changed;
-                do
-                {
-                    //Rearrange objects until no changes left
-                    changed=false;
-                    obj_found=false;
-                    search_header=range_begin;
-                    while(search_header!=end_header)
-                    {
-                        //No changes to make if at last header in range since can't swap
-                        struct GC_Header *next_header=gc_next_header(search_header,e);
-                        if (e->code!=ERROR_NONE) return;
-                        if (next_header!=end_header)
-                        {
-                            if (search_header->free==true)
-                            {
-                                //First object is free
-                                if (next_header->free==true)
-                                {
-                                    //Both objects free - combine
-                                    search_header->size+=next_header->size;
-                                    changed=true;
-                                }
-                                else
-                                {
-                                    //Second object is unlocked
-                                    if (obj_found==false)
-                                    {
-                                        //Below reallocated object - push free object up
-                                        if (next_header->id==id)
-                                        {
-                                            //Mark reallocated object as found
-                                            obj_found=true;
-                                        }
-                                        gc_swap_next(search_header,e);
-                                        if (e->code!=ERROR_NONE) return;
-                                        changed=true;
-                                    }
-                                    else
-                                    {
-                                        //Above reallocated object - no change
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                //First object is unlocked
-                                if (next_header->free==true)
-                                {
-                                    //Second object is free
-                                    if (obj_found==false)
-                                    {
-                                        //Below reallocated object - no change
-                                        if (search_header->id==id)
-                                        {
-                                            //Mark reallocated object as found
-                                            obj_found=true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        //Above reallocated object - move free object down
-                                        gc_swap_next(search_header,e);
-                                        if (e->code!=ERROR_NONE) return;
-                                        changed=true;
-                                    }
-                                }
-                                else
-                                {
-                                    //Second object is unlocked
-                                    if (next_header->id==id)
-                                    {
-                                        gc_swap_next(search_header,e);
-                                        if (e->code!=ERROR_NONE) return;
-                                        changed=true;
-                                        obj_found=true;
-                                    }
-                                    else if (search_header->id==id)
-                                    {
-                                        //Mark reallocated object as found
-                                        obj_found=true;
-                                    }
-                                }
-                            }
-                        }
-
-                        //Advance to next header
-                        search_header=gc_next_header(search_header,e);
-                        if (e->code!=ERROR_NONE) return;
-                    }
-                } while(changed==true);
+                gc_rearrange_realloc(id,range_begin,free_size,unlocked_size,e);
+                if (e->code!=ERROR_NONE) return;
             }
         }
 
