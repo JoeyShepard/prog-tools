@@ -31,6 +31,7 @@ enum GC_ERRORS
     GC_ERROR_REALLOC_LOCKED,    //14
     GC_ERROR_SWAP_END,          //15
     GC_ERROR_SWAP_LOCKED,       //16
+    GC_ERROR_BAD_HEADER_ID,     //17
 };
 
 struct GC_Header

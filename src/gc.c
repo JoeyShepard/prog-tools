@@ -28,14 +28,16 @@ static void gc_update_id_table(struct GC_Header *old_header,struct GC_Header *ne
     {
         gc.id_table_header=new_header;
         gc.id_table=(struct GC_Header **)new_header->data;
+        gc.id_table[GC_TABLE_ID]=new_header;
     }
 }
 
-//Rearrange objects near reallocated object to prepare for expansion
+//Rearrange objects near reallocated object to prepare for expansion where reallocated
+    //object is first followed by free space then unlocked objects
 static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint32_t free_size,uint32_t unlocked_size,struct ErrorType *e)
 {
     //Free space in range is enough - rearrange unlocked objects
-    struct GC_Header *end_header=(struct GC_Header *)((uintptr_t)range_begin+free_size+unlocked_size);
+    struct GC_Header *end_header=(struct GC_Header *)(((uintptr_t)range_begin)+free_size+unlocked_size);
     bool changed;
     do
     {
@@ -43,11 +45,19 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
         changed=false;
         bool obj_found=false;
         struct GC_Header *search_header=range_begin;
+
+        printf("rearrange - restart\n");
+
         while(search_header!=end_header)
         {
             //No changes to make if at last header in range since can't swap
             struct GC_Header *next_header=gc_next_header(search_header,e);
             if (e->code!=ERROR_NONE) return;
+            
+            printf("before\n");
+            printf("rearrange - free %d, size %d, lock_count %d, id %d\n",search_header->free,search_header->size,search_header->lock_count,search_header->id);
+            printf("rearrange - free %d, size %d, lock_count %d, id %d\n",next_header->free,next_header->size,next_header->lock_count,next_header->id);
+
             if (next_header!=end_header)
             {
                 if (search_header->free==true)
@@ -122,6 +132,17 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
                 }
             }
 
+            printf("after\n");
+            printf("rearrange - free %d, size %d, lock_count %d, id %d\n",search_header->free,search_header->size,search_header->lock_count,search_header->id);
+            next_header=gc_next_header(search_header,e);
+            if (e->code!=ERROR_NONE) return;
+            printf("rearrange - free %d, size %d, lock_count %d, id %d\n",next_header->free,next_header->size,next_header->lock_count,next_header->id);
+            /*
+            char *b=NULL;
+            int n=0;
+            getline(&b,&n,stdin);
+            */
+
             //Advance to next header
             search_header=gc_next_header(search_header,e);
             if (e->code!=ERROR_NONE) return;
@@ -186,6 +207,7 @@ struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
     return gc.id_table[id];
 }
 
+//TODO: add check that id corresponds to address
 //Advance to next header
 struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
 {
@@ -228,6 +250,7 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
     return new_header;
 }
 
+//TODO: check if multiple of GC_OBJ_SIZE
 //Initialize garbage collector
 void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
 {
@@ -455,7 +478,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             }
         }
 
-        //Second, try to shift neighboring blocks to make room
+        //Second, try to shift neighboring blocks in the same range to make room
         {
             original_header=gc_get_header(id,e);
             uint32_t unlocked_size=0;
@@ -518,8 +541,36 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             uint32_t additional_space=obj_size-original_header->size;
             if (additional_space<=free_size)
             {
+                printf("start rearranging\n");
+
+                //Rearrange blocks so that reallocated object is first followed by free space
+                    //followed by unlocked objects
                 gc_rearrange_realloc(id,range_begin,free_size,unlocked_size,e);
                 if (e->code!=ERROR_NONE) return;
+
+                printf("done rearranging\n");
+
+                gc_debug(e);
+                if (e->code!=ERROR_NONE) return;
+                printf("\n");
+
+                //Expand reallocated object
+                original_header=gc_get_header(id,e);
+                struct GC_Header *free_header=gc_next_header(original_header,e);
+                if (e->code!=ERROR_NONE) return;
+                uint32_t new_free_size=original_header->size+free_header->size-obj_size;
+                original_header->size=obj_size;
+                if (new_free_size>0)
+                {
+                    //Create new free object for any excess space
+                    free_header=gc_next_header(original_header,e);
+                    free_header->free=true;
+                    free_header->end=false;
+                    free_header->size=new_free_size;
+                }
+
+                //Done
+                return;
             }
         }
 
@@ -1023,12 +1074,25 @@ void gc_debug(struct ErrorType *e)
     while(1)
     {
         if (header->end==true) return;
-
+        
+        //Object information
         printf("%X: size: %d, free: %d",header,header->size,header->free);
         if (header->free==false)
             printf(", ID: %d, pid %d, locked %d",header->id,header->pid,header->lock_count);
         printf("\n");
 
+        //Error if address in ID table incorrect
+        if (header->free==false)
+        {
+            if (gc.id_table[header->id]!=header)
+            {
+                printf("ERROR: expected %X in id_table[%d] but found %X\n",header,header->id,gc.id_table[header->id]);
+                e->code=GC_ERROR_BAD_HEADER_ID;
+                return;
+            }
+        }
+
+        //Advance to next object
         header=gc_next_header(header,e);
         if (e->code!=ERROR_NONE) return;
     }
@@ -1065,6 +1129,8 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     //Triple reverse algorithm
     uint32_t obj1_size=obj1->size;
     uint32_t obj2_size=obj2->size;
+    bool obj1_free=obj1->free;
+    bool obj2_free=obj2->free;
     uint32_t obj1_id=obj1->id;
     uint32_t obj2_id=obj2->id;
     
@@ -1077,12 +1143,21 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
 
     //Reverse first object
     copy_begin.header=obj1;
-    copy_end.header=(struct GC_Header *)((uintptr_t)obj1+obj1_size)-1;
+    copy_end.header=(struct GC_Header *)(((uintptr_t)obj1)+obj1_size-sizeof(uint32_t));
+
+    printf("swap 1st obj %X, size %d, end %X\n",obj1,obj1_size,copy_end.header);
+
     if (obj1->free==true)
     {
+        printf("swap 1st obj - free object header only\n"); 
+        int debug_counter=0;
+
         //Free object - only reverse header
         while(((uintptr_t)copy_begin.header-(uintptr_t)obj1)<sizeof(struct GC_Header))
         {
+            printf("- %d, %X (%X)\n",debug_counter,copy_begin.u32,*copy_begin.u32);
+            debug_counter++;
+
             *copy_end.u32=*copy_begin.u32;
             copy_end.u32--;
             copy_begin.u32++;
@@ -1090,25 +1165,42 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     }
     else
     {
+        printf("swap 1st obj - reverse whole object\n"); 
+        printf("- swapping ");
+
         //Reverse whole object
         while (copy_end.u32>copy_begin.u32)
         {
+            printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
+
             uint32_t temp=*copy_end.u32;
             *copy_end.u32=*copy_begin.u32;
             *copy_begin.u32=temp;
             copy_end.u32--;
             copy_begin.u32++;
         }
+
+        printf("\n");
     }
 
     //Reverse second object
     copy_begin.header=obj2;
-    copy_end.header=(struct GC_Header *)((uintptr_t)obj2+obj2_size)-1;
+    copy_end.header=(struct GC_Header *)(((uintptr_t)obj2)+obj2_size-sizeof(uint32_t));
+
+    printf("swap 2nd obj %X, size %d, end %X\n",obj2,obj2_size,copy_end.header);
+
     if (obj2->free==true)
     {
+        printf("swap 2nd obj - free object header only\n"); 
+        int debug_counter=0;
+        printf("- end %d\n",copy_begin.header->end);
+
         //Free object - only reverse header
         while(((uintptr_t)copy_begin.header-(uintptr_t)obj2)<sizeof(struct GC_Header))
         {
+            printf("- %d, %X (%X)\n",debug_counter,copy_begin.u32,*copy_begin.u32);
+            debug_counter++;
+
             *copy_end.u32=*copy_begin.u32;
             copy_end.u32--;
             copy_begin.u32++;
@@ -1116,23 +1208,37 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     }
     else
     {
+        printf("swap 2nd obj - reverse whole object\n"); 
+        printf("- swapping ");
+
         //Reverse whole object
         while (copy_end.u32>copy_begin.u32)
         {
+            printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
+
             uint32_t temp=*copy_end.u32;
             *copy_end.u32=*copy_begin.u32;
             *copy_begin.u32=temp;
             copy_end.u32--;
             copy_begin.u32++;
         }
+
+        printf("\n");
     }
+
 
     //Reverse combined object
     //TODO: Optimization if one or both objects is free
     copy_begin.header=obj1;
-    copy_end.header=(struct GC_Header *)((uintptr_t)obj1+obj1_size+obj2_size)-1;
+    copy_end.header=(struct GC_Header *)(((uintptr_t)obj1)+obj1_size+obj2_size-sizeof(uint32_t));
+
+    printf("swap combined obj %X, size %d, end %X\n",obj1,obj1_size+obj2_size,copy_end.header);
+    printf("- swapping ");
+    
     while (copy_end.u32>copy_begin.u32)
     {
+        printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
+
         uint32_t temp=*copy_end.u32;
         *copy_end.u32=*copy_begin.u32;
         *copy_begin.u32=temp;
@@ -1140,20 +1246,29 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
         copy_begin.u32++;
     }
 
+    printf("\n");
+    
+    printf("Done swapping\n");
+
     //Assign IDs
     struct GC_Header *new_obj1=gc_next_header(obj1,e);
     struct GC_Header *new_obj2=obj1;
+    printf("1\n");
+    if (e->code!=ERROR_NONE) return;
     gc_update_id_table(obj1,new_obj1,e);
+    printf("2\n");
     gc_update_id_table(obj2,new_obj2,e);
-    gc.id_table[new_obj1->id]=new_obj1;
-    gc.id_table[new_obj2->id]=new_obj2;
+    printf("3\n");
+    if (e->code!=ERROR_NONE) return;
 
+    if (obj1_free==false) gc.id_table[obj1_id]=new_obj1;
+    if (obj2_free==false) gc.id_table[obj2_id]=new_obj2;
+    
+    printf("4\n");
+
+    printf("Done assigning IDs\n");
+
+    gc_debug(e);
 }
-
-
-
-
-
-
 
 
