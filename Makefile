@@ -12,6 +12,7 @@ CFLAGS = -O2 -g -static -I$(INCLUDE_DIR) -I$(UNITY_DIR)
 CFLAGS += -MMD -MP
 #Silence warning for assembly files re non-executable stack
 CFLAGS += -z noexecstack
+CFLAGS += -Wno-strict-aliasing
 
 #Convert certain C files to ASM with GCC 15.1 using musttail
 PRIM_FLAGS = -O2 -S -I$(INCLUDE_DIR)

@@ -1973,8 +1973,235 @@ void test_gc_swap_next()     //16
         TEST_ASSERT_TRUE(header->free);
         TEST_ASSERT_EQUAL(gc_obj_size(2*test_size),header->size);
     }
+
 }
 
+void test_gc_sort_id_list()             //17
+{
+    //Assert no errors creating and sorting various types of lists
+    {
+        enum
+        {
+            TEST_UNLOCKED,
+            TEST_LOCKED,
+        };
+        const int test_len=5;
+        const uint32_t tests[][5]={
+            {100,200,300,400,500},
+            {500,400,300,200,100},
+            {200,200,200,200,200},
+            {500,200,200,200,200},
+            {200,200,200,200,500},
+            {100,300,500,200,400},
+            {200,400,100,300,500}
+            };
+        const uint32_t test_checks[][5]={
+            {100,200,300,400,500},
+            {100,200,300,400,500},
+            {200,200,200,200,200},
+            {200,200,200,200,500},
+            {200,200,200,200,500},
+            {100,200,300,400,500},
+            {100,200,300,400,500},
+            };
+        const int test_status[][5]={
+            {TEST_UNLOCKED,TEST_UNLOCKED,TEST_UNLOCKED,TEST_UNLOCKED,TEST_UNLOCKED},    //All unlocked
+            {TEST_LOCKED,TEST_LOCKED,TEST_LOCKED,TEST_LOCKED,TEST_LOCKED},              //All locked
+            {TEST_LOCKED,TEST_UNLOCKED,TEST_LOCKED,TEST_UNLOCKED,TEST_LOCKED},          //Locked and unlocked
+            {TEST_UNLOCKED,TEST_LOCKED,TEST_UNLOCKED,TEST_LOCKED,TEST_UNLOCKED},        //Locked and unlocked
+            };
+        uint32_t obj_ids[test_len];
+        for (int i=0;i<ARRAY_LEN(tests);i++)
+        {
+            for (int test=0;test<ARRAY_LEN(test_status);test++)
+            {
+                //Initialize GC
+                gc_init(test_mem_aligned,HEAP_SIZE,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+                //Assert heap is empty
+                TEST_ASSERT_EQUAL(0,gc_obj_count(false,true,true,false,&e));     //No unlocked or locked objects
+                TEST_ASSERT_EQUAL(1,gc_obj_count(false,true,true,true,&e));     //Only one free object
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+                //Create objects
+                for (int j=0;j<ARRAY_LEN(tests[i]);j++)
+                {
+                    uint32_t size=tests[i][j];
+                    obj_ids[j]=gc_alloc(size,&e);
+                    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                }
+
+                //Assert heap contains correct object counts
+                TEST_ASSERT_EQUAL(0,gc_obj_count(false,true,false,false,&e));   //No locked objects
+                TEST_ASSERT_EQUAL(test_len,gc_obj_count(false,false,true,false,&e));   //Five unlocked objects
+                TEST_ASSERT_EQUAL(1,gc_obj_count(false,false,false,true,&e));   //One free object
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+                //Assert objects are correct size
+                struct GC_Header *header;
+                for (int j=0;j<ARRAY_LEN(tests[i]);j++)
+                {
+                    uint32_t size=tests[i][j];
+                    uint32_t predicted_size=gc_obj_size(size);
+                    header=gc_get_header(obj_ids[j],&e);
+                    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                    uint32_t actual_size=header->size;
+                    TEST_ASSERT_EQUAL(predicted_size,actual_size);
+                }
+
+                //Apply lock according to pattern
+                for (int j=0;j<ARRAY_LEN(tests[i]);j++)
+                {
+                    int test_action=test_status[test][j];
+                    if (test_action==TEST_UNLOCKED)
+                    {
+                        //Nothing to do
+                    }
+                    else if (test_action==TEST_LOCKED)
+                    {
+                        //Lock
+                        gc_lock(obj_ids[j],&e);
+                    }
+                    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                }
+
+                //Sort list
+                gc_sort_id_list(obj_ids,test_len,&e);
+                TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+                //Assert list sorted correctly
+                for (int j=0;j<ARRAY_LEN(test_checks[i]);j++)
+                {
+                    uint32_t obj_id=obj_ids[j];
+                    header=gc_get_header(obj_id,&e);
+                    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+                    uint32_t expected_size=test_checks[i][j];
+                    TEST_ASSERT_EQUAL(gc_obj_size(expected_size),header->size);
+                }
+            }
+        }
+    }
+
+    //Assert error on empty list
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        gc_sort_id_list(NULL,0,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SORT_EMPTY,e.code);
+        error_reset(&e);
+    }
+
+    //Assert free objects in list caught as ID_UNASSIGNED
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        const int test_count=5;
+        const int test_size=1000;
+        uint32_t test_ids[test_count];
+        for (int i=0;i<test_count;i++)
+        {
+            test_ids[i]=gc_alloc(test_count,&e); 
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        }
+
+        //Sort list
+        gc_sort_id_list(test_ids,test_count,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Free one object
+        gc_free(test_ids[2],&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Sort list
+        gc_sort_id_list(test_ids,test_count,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_ID_UNASSIGNED,e.code);
+    }
+}
+
+void test_gc_find_subset()
+{
+    //Assert error on empty list
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    
+        gc_find_subset(NULL,0,42,&e);
+        TEST_ASSERT_EQUAL(GC_ERROR_SUBSET_EMPTY,e.code);
+        error_reset(&e);
+    }
+
+    //Assert error on free items in list
+    {
+        //Initialize GC
+        gc_init(test_mem_aligned,HEAP_SIZE,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        //Create objects
+        const int test_multiple=1000;
+        const int test_count=5;
+        uint32_t test_ids[test_count];
+        struct GC_Header *test_headers[test_count];
+        for (int i=1;i<=test_count;i++)
+        {
+            test_ids[i-1]=gc_alloc(i*test_multiple,&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+            test_headers[i-1]=gc_get_header(test_ids[i-1],&e);
+            TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        }
+
+        gc_debug(&e);
+        printf("\n");
+
+        //Assert no errors if no objects free
+        gc_find_subset(test_headers[0],test_count,3032,&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+        gc_debug(&e);
+        printf("\n");
+
+        //Assert error if object free
+        gc_free(test_ids[2],&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+        gc_find_subset(test_headers[0],test_count,3032,&e);
+
+        gc_debug(&e);
+        printf("\n");
+
+        TEST_ASSERT_EQUAL(GC_ERROR_SUBSET_FREE,e.code);
+    }
+
+
+        //out of mem for temp lists
+        //free items in list
+
+    //Assert correct subsets for various combinations
+    //const int test_sizes[]={2000,1000,1000,3000};
+    //include perfect matches
+    //subset not found
+    //test clean up
+    const int test_sizes[]={1000,1000,2000,3000};
+    uint32_t test_ids[ARRAY_LEN(test_sizes)];
+    for (int i=0;i<ARRAY_LEN(test_sizes);i++)
+    {
+        test_ids[i]=gc_alloc(test_sizes[i],&e);
+        TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    }
+    struct GC_Header *header=gc_get_header(test_ids[0],&e);
+    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+    gc_find_subset(header,ARRAY_LEN(test_sizes),3032,&e);
+    TEST_ASSERT_EQUAL(ERROR_NONE,e.code);
+
+    //out of mem errors
+
+    //
+}
 
 int main()
 {
@@ -1995,6 +2222,8 @@ int main()
     RUN_TEST(test_gc_compact_fast);     //14
     RUN_TEST(test_gc_check);            //15
     RUN_TEST(test_gc_swap_next);        //16
+    RUN_TEST(test_gc_sort_id_list);     //17
+    RUN_TEST(test_gc_find_subset);      //18
     return UNITY_END();
 }
 

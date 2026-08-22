@@ -11,8 +11,9 @@
 #define GC_ROOT_PID         0           //Root can access memory belonging to any PID
 #define GC_TABLE_ID         0           //First table entry is pointer to table
 #define GC_MAX_LOCKS        UINT8_MAX   //Max times same object can be locked
+#define GC_ID_NONE          UINT32_MAX  //ID used temporarily to indicate no ID
 
-enum GC_ERRORS
+enum
 {
     GC_ERROR_NONE=ERROR_NONE,   //0
     GC_ERROR_OBJ_SIZE,          //1
@@ -32,6 +33,18 @@ enum GC_ERRORS
     GC_ERROR_SWAP_END,          //15
     GC_ERROR_SWAP_LOCKED,       //16
     GC_ERROR_BAD_HEADER_ID,     //17
+    GC_ERROR_SUBSET_EMPTY,      //18
+    GC_ERROR_SUBSET_NOT_FOUND,  //19
+    GC_ERROR_SUBSET_FREE,       //20
+    GC_ERROR_SORT_EMPTY,        //21
+    GC_ERROR_SORT_FREE,         //22
+};
+
+enum
+{
+    GC_SUBSET_WITH,
+    GC_SUBSET_WITHOUT,
+    GC_SUBSET_DONE
 };
 
 struct GC_Header
@@ -146,3 +159,16 @@ void gc_check(struct ErrorType *e);
 void gc_debug(struct ErrorType *e);
 
 void gc_swap_next(struct GC_Header *header,struct ErrorType *e);
+
+void gc_sort_id_list(uint32_t *obj_list,uint32_t obj_count,struct ErrorType *e);
+
+//Returns ID of newly allocated memory with IDs to include
+    //MAY CAUSE GARBAGE COLLECTION!
+uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t target,struct ErrorType *e);
+
+//Returns ID of newly allocated memory with IDs to include
+    //MAY CAUSE GARBAGE COLLECTION!
+uint32_t gc_rearrange_subset(struct GC_Header *header,uint32_t obj_count,uint32_t *result_id);
+
+//Free memory even if locked preserving original error if any
+void gc_cleanup(uint32_t id,struct ErrorType *e);

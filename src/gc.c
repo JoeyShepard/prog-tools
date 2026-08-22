@@ -21,8 +21,8 @@ static uint32_t gc_round_up(uint32_t number,uint32_t alignment)
 
 static void gc_update_id_table(struct GC_Header *old_header,struct GC_Header *new_header,struct ErrorType *e)
 {
-    //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    //Exit function early if prior function set error
+    IF_ERROR_RETURN();
 
     if (old_header==gc.id_table_header)
     {
@@ -52,7 +52,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
         {
             //No changes to make if at last header in range since can't swap
             struct GC_Header *next_header=gc_next_header(search_header,e);
-            if (e->code!=ERROR_NONE) return;
+            IF_ERROR_RETURN();
             
             printf("before\n");
             printf("rearrange - free %d, size %d, lock_count %d, id %d\n",search_header->free,search_header->size,search_header->lock_count,search_header->id);
@@ -81,7 +81,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
                                 obj_found=true;
                             }
                             gc_swap_next(search_header,e);
-                            if (e->code!=ERROR_NONE) return;
+                            IF_ERROR_RETURN();
                             changed=true;
                         }
                         else
@@ -109,7 +109,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
                         {
                             //Above reallocated object - move free object down
                             gc_swap_next(search_header,e);
-                            if (e->code!=ERROR_NONE) return;
+                            IF_ERROR_RETURN();
                             changed=true;
                         }
                     }
@@ -119,7 +119,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
                         if (next_header->id==id)
                         {
                             gc_swap_next(search_header,e);
-                            if (e->code!=ERROR_NONE) return;
+                            IF_ERROR_RETURN();
                             changed=true;
                             obj_found=true;
                         }
@@ -135,7 +135,8 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
             printf("after\n");
             printf("rearrange - free %d, size %d, lock_count %d, id %d\n",search_header->free,search_header->size,search_header->lock_count,search_header->id);
             next_header=gc_next_header(search_header,e);
-            if (e->code!=ERROR_NONE) return;
+            IF_ERROR_RETURN();
+
             printf("rearrange - free %d, size %d, lock_count %d, id %d\n",next_header->free,next_header->size,next_header->lock_count,next_header->id);
             /*
             char *b=NULL;
@@ -145,7 +146,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
 
             //Advance to next header
             search_header=gc_next_header(search_header,e);
-            if (e->code!=ERROR_NONE) return;
+            IF_ERROR_RETURN();
         }
     } while(changed==true);
 }
@@ -159,8 +160,9 @@ uint32_t gc_obj_size(uint32_t size)
 
 struct GC_Header *gc_find_free(uint32_t size,struct ErrorType *e)
 {
+    //TODO: change to Exit function
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return NULL;
+    IF_ERROR_RETURN(NULL);
 
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
     while(header->end==false)
@@ -173,7 +175,7 @@ struct GC_Header *gc_find_free(uint32_t size,struct ErrorType *e)
 
         //Advance to next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return NULL;
+        IF_ERROR_RETURN(NULL);
     }
 
     //Finished searching without finding match
@@ -187,12 +189,12 @@ struct GC_Header *gc_find_free(uint32_t size,struct ErrorType *e)
 struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return NULL;
+    IF_ERROR_RETURN(NULL);
 
     //Make sure ID is in range
     if (id>=gc.table_elements)
     {
-        e->code=GC_ERROR_ID_RANGE;
+        ERROR_SET(GC_ERROR_ID_RANGE);
         return NULL;
     }
 
@@ -200,7 +202,8 @@ struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
     if (gc.id_table[id]==NULL)
     {
         //ID is not assigned
-        e->code=GC_ERROR_ID_UNASSIGNED;
+        ERROR_SET(GC_ERROR_ID_UNASSIGNED);
+
         return NULL;
     }
 
@@ -212,13 +215,13 @@ struct GC_Header *gc_get_header(uint32_t id,struct ErrorType *e)
 struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return NULL;
+    IF_ERROR_RETURN(NULL);
 
     //Make sure header size is not 0 which would stall traversing list
         //Would only happen if heap is corrupt
     if (header->size==0)
     {
-        e->code=GC_ERROR_EMPTY_HEADER;
+        ERROR_SET(GC_ERROR_EMPTY_HEADER);
         return NULL;
     }
 
@@ -226,7 +229,7 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
         //Would only happen if heap is corrupt
     if (header->size%GC_OBJ_ALIGN!=0)
     {
-        e->code=GC_ERROR_OBJ_ALIGNMENT;
+        ERROR_SET(GC_ERROR_OBJ_ALIGNMENT);
         return NULL;
     }
 
@@ -235,7 +238,7 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
     struct GC_Header *new_header=(struct GC_Header *)(((uintptr_t)header)+header->size);
     if (new_header<=header)
     {
-        e->code=GC_ERROR_HEADER_SIZE;
+        ERROR_SET(GC_ERROR_HEADER_SIZE);
         return NULL;
     }
 
@@ -243,7 +246,7 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
         //Would only happen if heap is corrupt
     if (((uintptr_t)new_header)>((uintptr_t)gc.heap_base+gc.heap_size-sizeof(struct GC_Header)))
     {
-        e->code=GC_ERROR_HEADER_OVERFLOW;
+        ERROR_SET(GC_ERROR_HEADER_OVERFLOW);
         return NULL;
     }
 
@@ -254,8 +257,8 @@ struct GC_Header *gc_next_header(struct GC_Header *header,struct ErrorType *e)
 //Initialize garbage collector
 void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
 {
-    //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    //Reset error mechanism
+    error_reset(e);
 
     //Record heap characteristics for later
     gc.heap_base=new_heap_base;
@@ -303,7 +306,7 @@ void gc_init(void *new_heap_base,uint32_t new_heap_size,struct ErrorType *e)
 void gc_set_pid(uint8_t pid,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
     
     gc.current_pid=pid;
 }
@@ -311,13 +314,13 @@ void gc_set_pid(uint8_t pid,struct ErrorType *e)
 uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(GC_ID_NONE);
 
     //Object size cannot be 0
     if (size==0)
     {
-        e->code=GC_ERROR_OBJ_SIZE;
-        return 0;
+        ERROR_SET(GC_ERROR_OBJ_SIZE);
+        return GC_ID_NONE;
     }
 
     //Account for header and round up to alignment
@@ -348,7 +351,7 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
     {
         //Search heap for free memory slot
         struct GC_Header *header=gc_find_free(size,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(GC_ID_NONE);
         if (header!=NULL)
         {
             //Memory slot found - claim
@@ -367,7 +370,7 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
             if (old_size>size)
             {
                 struct GC_Header *new_header=gc_next_header(header,e);
-                if (e->code!=ERROR_NONE) return 0;
+                IF_ERROR_RETURN(GC_ID_NONE);
                 new_header->size=old_size-size;
                 new_header->end=false;
                 new_header->free=true;
@@ -383,19 +386,19 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
         {
             //Try 1 - compact heap quickly and try allocating again
             gc_compact_fast(e);
-            if (e->code!=ERROR_NONE) return 0;
+            IF_ERROR_RETURN(GC_ID_NONE);
         }
         else if (i==1)
         {
             //Try 2 - compact heap completely and try allocating again
             gc_compact_full(e);
-            if (e->code!=ERROR_NONE) return 0;
+            IF_ERROR_RETURN(GC_ID_NONE);
         }
         else
         {
             //Try 3 - heap fully compacted and no free memory slot - out of memory
-            e->code=GC_ERROR_OUT_OF_MEM;
-            return 0;
+            ERROR_SET(GC_ERROR_OUT_OF_MEM);
+            return GC_ID_NONE;
         }
     }
 }
@@ -403,21 +406,21 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
 void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Object size cannot be 0
     if (requested_size==0)
     {
-        e->code=GC_ERROR_OBJ_SIZE;
+        ERROR_SET(GC_ERROR_OBJ_SIZE);
         return;
     }
 
     //Object cannot be locked
     struct GC_Header *original_header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
     if (original_header->lock_count!=0)
     {
-        e->code=GC_ERROR_REALLOC_LOCKED;
+        ERROR_SET(GC_ERROR_REALLOC_LOCKED);
         return;
     }
 
@@ -436,7 +439,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
         uint32_t old_size=original_header->size;
         original_header->size=obj_size;
         struct GC_Header *new_header=gc_next_header(original_header,e);
-        if (e->code!=ERROR_NONE) return;
+        IF_ERROR_RETURN();
         new_header->size=old_size-obj_size;
         new_header->end=false;
         new_header->free=true;
@@ -452,14 +455,14 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             {
                 //Allocation succeeded
                 struct GC_Header *dest_header=gc_get_header(new_id,e);
-                if (e->code!=ERROR_NONE) return;
+                IF_ERROR_RETURN();
                 gc.id_table[new_id]=NULL;
                 original_header=gc_get_header(id,e);
-                if (e->code!=ERROR_NONE) return;
+                IF_ERROR_RETURN();
                 memcpy(dest_header,original_header,original_header->size);
                 dest_header->size=obj_size;
                 gc_update_id_table(original_header,dest_header,e);
-                if (e->code!=ERROR_NONE) return;
+                IF_ERROR_RETURN();
                 gc.id_table[dest_header->id]=dest_header;
                 original_header->free=true;
 
@@ -468,7 +471,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             }
             else if (e->code==GC_ERROR_OUT_OF_MEM)
             {
-                //Allocation failed - try alternate strategy below
+                //Allocation failed - clear error and try alternate strategy below
                 error_reset(e);
             }
             else
@@ -488,7 +491,6 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             struct GC_Header *range_begin=NULL;
             while(search_header->end==false)
             {
-                
                 printf("header: free %d, size %d, lock %d, id %d. free_size %d, unlocked_size %d\n",
                     search_header->free,search_header->size,
                     search_header->lock_count,search_header->id,free_size,unlocked_size);
@@ -532,32 +534,26 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                     }
                 }
 
-               //Advance to next object
-               search_header=gc_next_header(search_header,e);
-                if (e->code!=ERROR_NONE) return;
+                //Advance to next object
+                search_header=gc_next_header(search_header,e);
+                IF_ERROR_RETURN();
             }
 
             //If enough free space exists in the range, use it to expand the object
             uint32_t additional_space=obj_size-original_header->size;
             if (additional_space<=free_size)
             {
-                printf("start rearranging\n");
+                //Enough free space present - expand reallocated object using free space only
 
                 //Rearrange blocks so that reallocated object is first followed by free space
                     //followed by unlocked objects
                 gc_rearrange_realloc(id,range_begin,free_size,unlocked_size,e);
-                if (e->code!=ERROR_NONE) return;
-
-                printf("done rearranging\n");
-
-                gc_debug(e);
-                if (e->code!=ERROR_NONE) return;
-                printf("\n");
+                IF_ERROR_RETURN();
 
                 //Expand reallocated object
                 original_header=gc_get_header(id,e);
                 struct GC_Header *free_header=gc_next_header(original_header,e);
-                if (e->code!=ERROR_NONE) return;
+                IF_ERROR_RETURN();
                 uint32_t new_free_size=original_header->size+free_header->size-obj_size;
                 original_header->size=obj_size;
                 if (new_free_size>0)
@@ -572,6 +568,16 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                 //Done
                 return;
             }
+            else if  (additional_space<=free_size+unlocked_size)
+            {
+                //Enough space present between free and unlocked space - try to rearrange
+
+                //Find combination of unlocked items to fulfill request
+                uint32_t unlocked_required=additional_space-free_size;
+
+                //TODO: lock free space so new item created by subset does not use
+                    //free space
+            }
         }
 
         //Third, subset sum
@@ -581,12 +587,12 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
 void gc_free(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Check memory before freeing, including ID range
         //Also errors if memory here is free catching double free
     struct GC_Header *header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Make sure memory does not belong to another program
     if (gc.current_pid!=GC_ROOT_PID)
@@ -595,7 +601,7 @@ void gc_free(uint32_t id,struct ErrorType *e)
         if (header->pid!=gc.current_pid)
         {
             //PID of object does not belong to current process
-            e->code=GC_ERROR_WRONG_PID;
+            ERROR_SET(GC_ERROR_WRONG_PID);
             return;
         }
     }
@@ -608,7 +614,7 @@ void gc_free(uint32_t id,struct ErrorType *e)
     if (header->lock_count>0)
     {
         //Memory is still locked
-        e->code=GC_ERROR_FREE_LOCKED;
+        ERROR_SET(GC_ERROR_FREE_LOCKED);
         return;
     }
 
@@ -621,11 +627,12 @@ void gc_free(uint32_t id,struct ErrorType *e)
 void *gc_lock(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return NULL;
+    IF_ERROR_RETURN(NULL);
+
 
     //Check memory before locking including ID range
     struct GC_Header *header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return NULL;
+    IF_ERROR_RETURN(NULL);
 
     //Make sure memory does not belong to another program
     if (gc.current_pid!=GC_ROOT_PID)
@@ -634,7 +641,7 @@ void *gc_lock(uint32_t id,struct ErrorType *e)
         if (header->pid!=gc.current_pid)
         {
             //PID of object does not belong to current process
-            e->code=GC_ERROR_WRONG_PID;
+            ERROR_SET(GC_ERROR_WRONG_PID);
             return NULL;
         }
     }
@@ -647,7 +654,7 @@ void *gc_lock(uint32_t id,struct ErrorType *e)
     if (header->lock_count==GC_MAX_LOCKS)
     {
         //Exceeded max lock count
-        e->code=GC_ERROR_LOCK_COUNT;
+        ERROR_SET(GC_ERROR_LOCK_COUNT);
         return NULL;
     }
 
@@ -661,11 +668,11 @@ void *gc_lock(uint32_t id,struct ErrorType *e)
 void gc_unlock(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Check memory before freeing including ID range
     struct GC_Header *header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Make sure memory does not belong to another program
     if (gc.current_pid!=GC_ROOT_PID)
@@ -674,7 +681,7 @@ void gc_unlock(uint32_t id,struct ErrorType *e)
         if (header->pid!=gc.current_pid)
         {
             //PID of object does not belong to current process
-            e->code=GC_ERROR_WRONG_PID;
+            ERROR_SET(GC_ERROR_WRONG_PID);
             return;
         }
     }
@@ -687,7 +694,7 @@ void gc_unlock(uint32_t id,struct ErrorType *e)
     if (header->lock_count==0)
     {
         //Already unlocked
-        e->code=GC_ERROR_UNLOCK;
+        ERROR_SET(GC_ERROR_UNLOCK);
         return;
     }
 
@@ -698,7 +705,7 @@ void gc_unlock(uint32_t id,struct ErrorType *e)
 uint32_t gc_free_bytes(struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -716,14 +723,14 @@ uint32_t gc_free_bytes(struct ErrorType *e)
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(0);
     }
 }
 
 uint32_t gc_allocated_bytes(bool pid_only,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -750,14 +757,14 @@ uint32_t gc_allocated_bytes(bool pid_only,struct ErrorType *e)
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(0);
     }
 }
 
 uint32_t gc_locked_bytes(bool pid_only,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -787,7 +794,7 @@ uint32_t gc_locked_bytes(bool pid_only,struct ErrorType *e)
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(0);
     }
 }
 
@@ -796,7 +803,7 @@ uint32_t gc_locked_bytes(bool pid_only,struct ErrorType *e)
 uint32_t gc_lost_bytes(struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -822,14 +829,14 @@ uint32_t gc_lost_bytes(struct ErrorType *e)
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(0);
     }
 }
 
 uint32_t gc_obj_count(bool pid_only,bool locked,bool unlocked,bool free,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -866,14 +873,14 @@ uint32_t gc_obj_count(bool pid_only,bool locked,bool unlocked,bool free,struct E
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return 0;
+        IF_ERROR_RETURN(0);
     }
 }
 
 void gc_compact_fast(struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -892,7 +899,7 @@ void gc_compact_fast(struct ErrorType *e)
             {
                 //Advance to next object
                 struct GC_Header *combine_header=gc_next_header(header,e);
-                if (e->code!=ERROR_NONE) return;
+                IF_ERROR_RETURN();
 
                 //End of heap found?
                 if (combine_header->end==true) break;
@@ -912,7 +919,7 @@ void gc_compact_fast(struct ErrorType *e)
             //Move neighboring block down to fill hole if unlocked
             bool found=false;
             struct GC_Header *fill_header=gc_next_header(header,e);
-            if (e->code!=ERROR_NONE) return;
+            IF_ERROR_RETURN();
             if (fill_header->free==false)
             {
                 if (fill_header->lock_count==0)
@@ -924,7 +931,7 @@ void gc_compact_fast(struct ErrorType *e)
 
                     //Mark next object as free
                     struct GC_Header *free_header=gc_next_header(header,e);
-                    if (e->code!=ERROR_NONE) return;
+                    IF_ERROR_RETURN();
                     free_header->size=free_size;
                     free_header->free=true;
                     free_header->end=false;
@@ -945,7 +952,7 @@ void gc_compact_fast(struct ErrorType *e)
                 {
                     //Advance to next object
                     fill_header=gc_next_header(fill_header,e);
-                    if (e->code!=ERROR_NONE) return;
+                    IF_ERROR_RETURN();
 
                     //End of heap found?
                     if (fill_header->end==true) break;
@@ -969,7 +976,7 @@ void gc_compact_fast(struct ErrorType *e)
                                 if (old_size>header->size)
                                 {
                                     struct GC_Header *new_header=gc_next_header(header,e);
-                                    if (e->code!=ERROR_NONE) return;
+                                    IF_ERROR_RETURN();
                                     new_header->size=old_size-header->size;
                                     new_header->end=false;
                                     new_header->free=true;
@@ -977,11 +984,11 @@ void gc_compact_fast(struct ErrorType *e)
 
                                 //Update pointer to ID table if it changed
                                 gc_update_id_table(fill_header,header,e);
-                                if (e->code!=ERROR_NONE) return;
+                                IF_ERROR_RETURN();
 
                                 //Combine newly freed memory with next block if free
                                 struct GC_Header *next_header=gc_next_header(fill_header,e);
-                                if (e->code!=ERROR_NONE) return;
+                                IF_ERROR_RETURN();
                                 if (next_header->free==true)
                                     fill_header->size+=next_header->size;
 
@@ -996,7 +1003,7 @@ void gc_compact_fast(struct ErrorType *e)
 
         //Next header
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return;
+        IF_ERROR_RETURN();
     }
 }
 
@@ -1008,10 +1015,10 @@ void gc_compact_full(struct ErrorType *e)
 uint32_t gc_get_header_size(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     struct GC_Header *header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
     
     return header->size;
 }
@@ -1019,10 +1026,10 @@ uint32_t gc_get_header_size(uint32_t id,struct ErrorType *e)
 uint32_t gc_get_data_size(uint32_t id,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
 
     struct GC_Header *header=gc_get_header(id,e);
-    if (e->code!=ERROR_NONE) return 0;
+    IF_ERROR_RETURN(0);
     
     return header->size-sizeof(struct GC_Header);
 }
@@ -1030,7 +1037,7 @@ uint32_t gc_get_data_size(uint32_t id,struct ErrorType *e)
 void gc_check(struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -1048,7 +1055,7 @@ void gc_check(struct ErrorType *e)
             if (size!=gc.heap_size)
             {
                 //Total size of objects does not equal total heap
-                e->code=GC_ERROR_HEAP_SIZE;
+                ERROR_SET(GC_ERROR_HEAP_SIZE);
             }
 
             //No errors found - done
@@ -1057,14 +1064,14 @@ void gc_check(struct ErrorType *e)
 
         //Rely on heap corruption tests in gc_next_header 
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return;
+        IF_ERROR_RETURN();
     }
 }
 
 void gc_debug(struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //First object in heap
     struct GC_Header *header=(struct GC_Header *)gc.heap_base;
@@ -1087,34 +1094,34 @@ void gc_debug(struct ErrorType *e)
             if (gc.id_table[header->id]!=header)
             {
                 printf("ERROR: expected %X in id_table[%d] but found %X\n",header,header->id,gc.id_table[header->id]);
-                e->code=GC_ERROR_BAD_HEADER_ID;
+                ERROR_SET(GC_ERROR_BAD_HEADER_ID);
                 return;
             }
         }
 
         //Advance to next object
         header=gc_next_header(header,e);
-        if (e->code!=ERROR_NONE) return;
+        IF_ERROR_RETURN();
     }
 }
 
 void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
 {
     //Exit early if prior function set error
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     //Neither object can be end object
     struct GC_Header *obj1=header;
     if (obj1->end==true)
     {
-        e->code=GC_ERROR_SWAP_END;
+        ERROR_SET(GC_ERROR_SWAP_END);
         return;
     }
     struct GC_Header *obj2=gc_next_header(header,e);
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
     if (obj2->end==true)
     {
-        e->code=GC_ERROR_SWAP_END;
+        ERROR_SET(GC_ERROR_SWAP_END);
         return;
     }
 
@@ -1122,7 +1129,7 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     if (((obj1->free==false)&&(obj1->lock_count>0))||
         ((obj2->free==false)&&(obj2->lock_count>0)))
     {
-        e->code=GC_ERROR_SWAP_LOCKED;
+        ERROR_SET(GC_ERROR_SWAP_LOCKED);
         return;
     }
 
@@ -1150,14 +1157,10 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     if (obj1->free==true)
     {
         printf("swap 1st obj - free object header only\n"); 
-        int debug_counter=0;
 
         //Free object - only reverse header
         while(((uintptr_t)copy_begin.header-(uintptr_t)obj1)<sizeof(struct GC_Header))
         {
-            printf("- %d, %X (%X)\n",debug_counter,copy_begin.u32,*copy_begin.u32);
-            debug_counter++;
-
             *copy_end.u32=*copy_begin.u32;
             copy_end.u32--;
             copy_begin.u32++;
@@ -1166,21 +1169,16 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     else
     {
         printf("swap 1st obj - reverse whole object\n"); 
-        printf("- swapping ");
 
         //Reverse whole object
         while (copy_end.u32>copy_begin.u32)
         {
-            printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
-
             uint32_t temp=*copy_end.u32;
             *copy_end.u32=*copy_begin.u32;
             *copy_begin.u32=temp;
             copy_end.u32--;
             copy_begin.u32++;
         }
-
-        printf("\n");
     }
 
     //Reverse second object
@@ -1192,15 +1190,10 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     if (obj2->free==true)
     {
         printf("swap 2nd obj - free object header only\n"); 
-        int debug_counter=0;
-        printf("- end %d\n",copy_begin.header->end);
 
         //Free object - only reverse header
         while(((uintptr_t)copy_begin.header-(uintptr_t)obj2)<sizeof(struct GC_Header))
         {
-            printf("- %d, %X (%X)\n",debug_counter,copy_begin.u32,*copy_begin.u32);
-            debug_counter++;
-
             *copy_end.u32=*copy_begin.u32;
             copy_end.u32--;
             copy_begin.u32++;
@@ -1209,21 +1202,16 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     else
     {
         printf("swap 2nd obj - reverse whole object\n"); 
-        printf("- swapping ");
 
         //Reverse whole object
         while (copy_end.u32>copy_begin.u32)
         {
-            printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
-
             uint32_t temp=*copy_end.u32;
             *copy_end.u32=*copy_begin.u32;
             *copy_begin.u32=temp;
             copy_end.u32--;
             copy_begin.u32++;
         }
-
-        printf("\n");
     }
 
 
@@ -1233,12 +1221,9 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
     copy_end.header=(struct GC_Header *)(((uintptr_t)obj1)+obj1_size+obj2_size-sizeof(uint32_t));
 
     printf("swap combined obj %X, size %d, end %X\n",obj1,obj1_size+obj2_size,copy_end.header);
-    printf("- swapping ");
     
     while (copy_end.u32>copy_begin.u32)
     {
-        printf("%X (%X) <> %X (%X), \n",*copy_begin.u32,copy_begin.u32,*copy_end.u32,copy_end.u32);
-
         uint32_t temp=*copy_end.u32;
         *copy_end.u32=*copy_begin.u32;
         *copy_begin.u32=temp;
@@ -1246,29 +1231,306 @@ void gc_swap_next(struct GC_Header *header,struct ErrorType *e)
         copy_begin.u32++;
     }
 
-    printf("\n");
-    
     printf("Done swapping\n");
 
     //Assign IDs
     struct GC_Header *new_obj1=gc_next_header(obj1,e);
     struct GC_Header *new_obj2=obj1;
-    printf("1\n");
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
     gc_update_id_table(obj1,new_obj1,e);
-    printf("2\n");
     gc_update_id_table(obj2,new_obj2,e);
-    printf("3\n");
-    if (e->code!=ERROR_NONE) return;
+    IF_ERROR_RETURN();
 
     if (obj1_free==false) gc.id_table[obj1_id]=new_obj1;
     if (obj2_free==false) gc.id_table[obj2_id]=new_obj2;
-    
-    printf("4\n");
-
-    printf("Done assigning IDs\n");
-
-    gc_debug(e);
 }
 
+void gc_sort_id_list(uint32_t *obj_list,uint32_t obj_count,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    IF_ERROR_RETURN();
+
+    //List must have at least one item
+    if (obj_count==0)
+    {
+        ERROR_SET(GC_ERROR_SORT_EMPTY);
+        return;
+    }
+
+    //Sort object IDs by object size using selection sort
+    uint32_t finished_index=obj_count-1;
+    while(finished_index!=0)
+    {
+        //Search beginning of list for largest object
+        int largest_index;
+        uint32_t largest_size=0;
+        for (int i=0;i<=finished_index;i++)
+        {
+            uint32_t obj_id=obj_list[i];
+            struct GC_Header *obj_header=gc_get_header(obj_id,e);
+            IF_ERROR_RETURN();
+            uint32_t obj_size=obj_header->size;
+            if (obj_size>largest_size)
+            {
+                //Current object is largest so far
+                largest_index=i;
+                largest_size=obj_size;
+            }
+        }
+
+        //Done searching - swap list items (but not objects themselves)
+        uint32_t temp=obj_list[finished_index];
+        obj_list[finished_index]=obj_list[largest_index];
+        obj_list[largest_index]=temp;
+
+        //Shrink sort range
+        finished_index--;
+    }
+}
+
+uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t target,struct ErrorType *e)
+{
+    //Exit early if prior function set error
+    IF_ERROR_RETURN(GC_ID_NONE);
+
+    //List must have at least one item
+    if (obj_count==0)
+    {
+        ERROR_SET(GC_ERROR_SUBSET_EMPTY);
+        return GC_ID_NONE;
+    }
+
+    START HERE
+    - failing tests because objects created here come after objects in list taking up free space
+      that should cause an error
+    - need to reconsider strat here of using gc_alloc since could trigger GC and lose order
+    - just locking is enough?
+      - need to lock free space then too
+    - otoh, is it always compacted before reaching here?
+      - maybe this should be static but then hard to unit test
+    - best is probably gc_alloc_exclude
+
+
+    //Set IDs to unused until memory is allocated
+    uint32_t obj_list_id=GC_ID_NONE;
+    uint32_t backtrack_list_id=GC_ID_NONE;
+    uint32_t backtrack_final_id=GC_ID_NONE;
+
+    //Temporary space for object IDs
+    obj_list_id=gc_alloc(obj_count*sizeof(uint32_t),e);
+    uint32_t *obj_list=gc_lock(obj_list_id,e);
+    IF_ERROR_CLEANUP();
+
+    //Temporary space for back track search
+    backtrack_list_id=gc_alloc(obj_count*sizeof(uint8_t),e);
+    uint8_t *backtrack_list=gc_lock(backtrack_list_id,e);
+    IF_ERROR_CLEANUP();
+
+    //Temporary space for back track final copy
+    backtrack_final_id=gc_alloc(obj_count*sizeof(uint8_t),e);
+    uint8_t *backtrack_final=gc_lock(backtrack_final_id,e);
+    IF_ERROR_CLEANUP();
+
+    //Make list of object IDs for sorting
+    struct GC_Header *search_header=header;
+    for (uint32_t i=0;i<obj_count;i++)
+    {
+        if (search_header->free==true)
+        {
+            ERROR_SET(GC_ERROR_SUBSET_FREE);
+            IF_ERROR_CLEANUP();
+        }
+        obj_list[i]=search_header->id;
+        search_header=gc_next_header(search_header,e);
+        IF_ERROR_CLEANUP();
+    }
+
+    //Sort list of IDs
+    gc_sort_id_list(obj_list,obj_count,e);
+    IF_ERROR_CLEANUP();
+
+    //Backtracking algorithm to find best fit
+    enum
+    {
+        STEP_INCLUDE,
+        STEP_EXCLUDE,
+        STEP_DONE
+    };
+    bool solution_found=false;
+    int32_t index=0;
+    uint32_t total=0;
+    uint32_t backtrack_final_index;
+    uint32_t backtrack_final_total;
+    backtrack_list[0]=STEP_INCLUDE;
+    while(index!=-1)
+    {
+        uint32_t obj_size=gc_get_header_size(obj_list[index],e);
+        IF_ERROR_CLEANUP();
+        if (backtrack_list[index]==STEP_INCLUDE)
+        {
+
+            //Try to proceed with current value as potential part of solution
+            total+=obj_size;
+            if (total==target)
+            {
+                //Found perfect solution - stop searching
+                    //Copy solution to backtrack_final for processing below
+                memcpy(backtrack_final,backtrack_list,sizeof(uint8_t)*obj_count);
+                solution_found=true;
+                backtrack_final_index=index;
+                backtrack_final_total=total;
+
+                //Account for current step in final result
+                    //Final values INCLUDED were marked EXCLUDED because they were
+                    //already advanced in preparation for the next step
+                backtrack_final[index]=STEP_EXCLUDE;
+
+                //Done searching
+                break;
+            }
+            else if (total>target)
+            {
+                //Found solution which is at least big enough though not perfect
+                if ((solution_found==false)||
+                    ((solution_found==true)&&(total<backtrack_final_total)))
+                {
+                    //This solution is better than the last non-perfect solution, so
+                        //save it until a better solution is found
+                    memcpy(backtrack_final,backtrack_list,sizeof(uint8_t)*obj_count);
+                    solution_found=true;
+                    backtrack_final_index=index;
+                    backtrack_final_total=total;
+
+                    //Account for current step in final result
+                        //Final values INCLUDED were marked EXCLUDED because they were
+                        //already advanced in preparation for the next step
+                    backtrack_final[index]=STEP_EXCLUDE;
+                }
+
+                //Any further solutions including this total will be even larger, so
+                    //stop searching this branch
+                total-=obj_size;
+                index--;
+            }
+            else
+            {
+                //Current total is not large enough - keep searching branch with
+                    //this total
+                backtrack_list[index]+=1;
+                index++;
+                if (index==obj_count)
+                {
+                    //Reached end of list. Back track and proceed without this object.
+                    index--;
+                    total-=obj_size;
+                    backtrack_list[index]=STEP_DONE;
+                }
+                else
+                {
+                    //Haven't reached end of list - keep adding objects
+                    backtrack_list[index]=STEP_INCLUDE;
+                }
+            }
+        }
+        else if (backtrack_list[index]==STEP_EXCLUDE)
+        {
+            //Proceed down branch without including value
+            total-=obj_size;
+            backtrack_list[index]+=1;
+            index++;
+            if (index==obj_count)
+            {
+                //Reached end of list. Back track and proceed without this object.
+                index--;
+                backtrack_list[index]=STEP_DONE;
+            }
+            else
+            {
+                //Haven't reached end of list - keep adding objects
+                backtrack_list[index]=STEP_INCLUDE;
+            }
+        }
+        else if (backtrack_list[index]==STEP_DONE)
+        {
+            //Done with this branch - back track
+            index--;
+        }
+    }
+
+    //Adjust return object to reflect results
+    if (solution_found==false)
+    {
+        ERROR_SET(GC_ERROR_SUBSET_NOT_FOUND);
+        return GC_ID_NONE;
+    }
+    else
+    {
+        for (int i=0;i<obj_count;i++)
+        {
+            if (i<=backtrack_final_index)
+            {
+                //Final values INCLUDED were marked EXCLUDED because they were
+                    //already advanced in preparation for the next step
+                if (backtrack_final[i]==STEP_EXCLUDE)
+                {
+                    //Leave object ID in place because it's included in the solution
+                }
+                else
+                {
+                    //Erase object from solution since not used
+                    obj_list[i]=GC_ID_NONE;
+                }
+            }
+            else
+            {
+                //Erase object from solution since not used
+                    //Solution may be found without searching whole list so mark
+                    //anything beyond solution as unused.
+                obj_list[i]=GC_ID_NONE;
+            }
+        }
+    }
+
+    //Done - subset found
+    gc_unlock(obj_list_id,e);
+    IF_ERROR_CLEANUP();
+    gc_cleanup(backtrack_list_id,e);
+    gc_cleanup(backtrack_final_id,e);
+    IF_ERROR_CLEANUP();
+
+    //Return heap object with list of objects belonging to subset
+    return obj_list_id;
+
+    //Jump here to clean up memory before exiting after error
+    error_exit:
+
+    //Clean up temporary memory
+    gc_cleanup(obj_list_id,e);
+    gc_cleanup(backtrack_list_id,e);
+    gc_cleanup(backtrack_final_id,e);
+
+    //Done - no extra memory for subset returned
+    return GC_ID_NONE;
+}
+
+void gc_cleanup(uint32_t id,struct ErrorType *e)
+{
+    if (id!=GC_ID_NONE)
+    {
+        //Save original error
+        struct ErrorType e_copy=*e;
+        error_reset(e);
+
+        //Unlock even if not locked
+        gc_unlock(id,e);
+        error_reset(e);
+
+        //Free even if ID not valid
+        gc_free(id,e);
+        error_reset(e);
+
+        //Restore original error
+        *e=e_copy;
+    }
+}
 

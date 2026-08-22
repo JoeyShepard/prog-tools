@@ -11,6 +11,33 @@ void error_reset(struct ErrorType *e)
 {
     e->code=ERROR_NONE;
     e->messages=NULL;
+    for (int i=0;i<ERROR_UNWIND_COUNT;i++)
+    {
+        e->line[i].line_number=0;
+        e->line[i].function=NULL;
+        e->line[i].file_name=NULL;
+    }
+}
+
+void error_set_line(struct ErrorType *e,uint32_t line,const char *function,const char *file_name)
+{
+    //Look for empty slot to store line information
+    for (int i=0;i<ERROR_UNWIND_COUNT;i++)
+    {
+        if ((e->line[i].line_number==0)&&
+            (e->line[i].function==NULL)&&
+            (e->line[i].file_name==NULL))
+        {
+            //Slot found - store line information
+            e->line[i].line_number=line;
+            e->line[i].function=function;
+            e->line[i].file_name=file_name;
+            return;
+        }
+    }
+
+    //No slot found - error object is full
+    return;
 }
 
 #ifdef CG50
@@ -42,6 +69,11 @@ void error_reset(struct ErrorType *e)
         while(1);
     }
 
+    void error_debug(struct ErrorType *e)
+    {
+        //TODO
+    }
+
 #else
     //PC version
     #include <stdio.h>
@@ -70,6 +102,23 @@ void error_reset(struct ErrorType *e)
         exit(1);
     }
 
+    void error_debug(struct ErrorType *e)
+    {
+        printf("Error %d",e->code);
+        if (e->messages!=NULL)
+        {
+            printf("%s",e->messages[e->code]);
+        }
+        printf("\n");
+        
+        for (int i=0;i<ERROR_UNWIND_COUNT;i++)
+        {
+            if ((e->line[i].function!=NULL)&&(e->line[i].file_name!=NULL))
+            {
+                printf("  from line %d of %s() in %s\n",e->line[i].line_number,e->line[i].function,e->line[i].file_name);
+            }
+        }
+    }
 #endif
 
 void error_screen(int error,struct Point pos,int width,int height)

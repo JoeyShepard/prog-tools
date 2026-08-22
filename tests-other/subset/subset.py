@@ -3,7 +3,7 @@
 from random import randint,seed
 from time import perf_counter
 
-DEBUG=False
+DEBUG=True
 
 #List will never contain number >= target
 nums=[1,1,2,3,4,5]
@@ -68,6 +68,8 @@ def back_track(s,target):
                 total-=s[index]
                 index-=1
             elif total>target:
+                print(f"total: {total} - {s[index]} = {total-s[index]}")
+
                 total-=s[index]
                 index-=1
             else:
@@ -81,6 +83,9 @@ def back_track(s,target):
                     stack[index].step=0
 
         elif stack[index].step==1:
+
+            print(f"total: {total} - {s[index]} = {total-s[index]}")
+
             total-=s[index]
             stack[index].step+=1
             index+=1
@@ -156,5 +161,7 @@ def compare_test():
 seed(42)
 
 #timed_test()
-compare_test()
+#compare_test()
+
+back_track([1024,1024,2016,3024],3100)
 
