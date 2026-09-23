@@ -36,6 +36,9 @@ static void gc_update_id_table(struct GC_Header *old_header,struct GC_Header *ne
     //object is first followed by free space then unlocked objects
 static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint32_t free_size,uint32_t unlocked_size,struct ErrorType *e)
 {
+    //Exit function early if prior function set error
+    IF_ERROR_RETURN();
+
     //Free space in range is enough - rearrange unlocked objects
     struct GC_Header *end_header=(struct GC_Header *)(((uintptr_t)range_begin)+free_size+unlocked_size);
     bool changed;
@@ -151,6 +154,81 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
     } while(changed==true);
 }
 
+//Allocate memory for internal usage with following caveats:
+    //Returns error if free memory slots not found on first try
+    //Does not trigger garbage collection
+    //Excludes range if exclude pointers not NULL
+    //Returns pointer rather than ID
+    //Sets ID to GC_ID_TEMP and does not consume ID
+    //Locks memory and cannot be unlocked with gc_unlock
+    //Unlocked and freed with gc_free_temp
+static GC_Header *gc_alloc_temp(uint32_t size,GC_Header *exclude_begin,GC_Header *exclude_end,struct ErrorType *e)
+{
+    //Exit function early if prior function set error
+    IF_ERROR_RETURN();
+
+    //Object size cannot be 0
+    if (size==0)
+    {
+        ERROR_SET(GC_ERROR_OBJ_SIZE);
+        return GC_ID_NONE;
+    }
+
+    //Account for header and round up to alignment
+    size=gc_obj_size(size);
+
+    //Search heap for free memory slot
+    struct GC_Header *header=(struct GC_Header *)gc.heap_base;
+    while(header->end==false)
+    {
+        //Check that object is free
+        if ((header->free==true)&&(header->size>=size))
+        {
+            //Check that object is not in excluded range
+            if ((header>=exclude_begin)&&(header<exclude_end))
+            {
+                //Memory slot found - claim
+                header->end=false;
+                header->free=false;
+                header->pid=gc.current_pid;
+                header->lock_count=1;
+                uint32_t old_size=header->size;
+                header->size=size;
+                
+                //Create new free block if memory left over
+                if (old_size>size)
+                {
+                    struct GC_Header *new_header=gc_next_header(header,e);
+                    IF_ERROR_RETURN(NULL);
+                    new_header->size=old_size-size;
+                    new_header->end=false;
+                    new_header->free=true;
+                }
+
+                //Done
+                return header;
+            }
+        }
+
+        //Advance to next header
+        header=gc_next_header(header,e);
+        IF_ERROR_RETURN(NULL);
+    }
+
+    //Reached end without finding free slot
+    ERROR_SET(GC_ERROR_OUT_OF_MEM);
+    return NULL;
+}
+
+static void gc_alloc_free(GC_Header *header,struct ErrorType *e)
+{
+    //Exit function early if prior function set error
+    IF_ERROR_RETURN();
+
+    //Set object to free directly
+    header->free=true;
+}
+
 //Functions
 //=========
 uint32_t gc_obj_size(uint32_t size)
@@ -160,7 +238,6 @@ uint32_t gc_obj_size(uint32_t size)
 
 struct GC_Header *gc_find_free(uint32_t size,struct ErrorType *e)
 {
-    //TODO: change to Exit function
     //Exit early if prior function set error
     IF_ERROR_RETURN(NULL);
 
@@ -568,15 +645,14 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                 //Done
                 return;
             }
-            else if  (additional_space<=free_size+unlocked_size)
+            else if (additional_space<=free_size+unlocked_size)
             {
                 //Enough space present between free and unlocked space - try to rearrange
 
                 //Find combination of unlocked items to fulfill request
                 uint32_t unlocked_required=additional_space-free_size;
 
-                //TODO: lock free space so new item created by subset does not use
-                    //free space
+                //TODO: should remove this and 
             }
         }
 
@@ -1300,6 +1376,13 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
         return GC_ID_NONE;
     }
 
+    //Find last header after range
+    GC_Header *end_header=header;
+    //TODO:
+
+
+    //TODO: remove
+    /*
     START HERE
     - failing tests because objects created here come after objects in list taking up free space
       that should cause an error
@@ -1309,12 +1392,13 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
     - otoh, is it always compacted before reaching here?
       - maybe this should be static but then hard to unit test
     - best is probably gc_alloc_exclude
+    */
 
 
     //Set IDs to unused until memory is allocated
-    uint32_t obj_list_id=GC_ID_NONE;
-    uint32_t backtrack_list_id=GC_ID_NONE;
-    uint32_t backtrack_final_id=GC_ID_NONE;
+    uint32_t *obj_list=NULL;
+    uint32_t *backtrack_list=NULL;
+    uint32_t *backtrack_final=NULL;
 
     //Temporary space for object IDs
     obj_list_id=gc_alloc(obj_count*sizeof(uint32_t),e);
@@ -1337,6 +1421,7 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
     {
         if (search_header->free==true)
         {
+            //TODO: why???
             ERROR_SET(GC_ERROR_SUBSET_FREE);
             IF_ERROR_CLEANUP();
         }
@@ -1502,7 +1587,7 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
     return obj_list_id;
 
     //Jump here to clean up memory before exiting after error
-    error_exit:
+    cleanup:
 
     //Clean up temporary memory
     gc_cleanup(obj_list_id,e);

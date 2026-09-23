@@ -5,13 +5,14 @@
 
 #include "error.h"
 
-#define GC_ALIGN            4           //Alignment requirement on SH4
-#define GC_OBJ_ALIGN        16          //Must be large enough for header and GC_MIN_SIZE
-#define GC_TABLE_ELEMENTS   128         //Elements in table of memory IDs
-#define GC_ROOT_PID         0           //Root can access memory belonging to any PID
-#define GC_TABLE_ID         0           //First table entry is pointer to table
-#define GC_MAX_LOCKS        UINT8_MAX   //Max times same object can be locked
-#define GC_ID_NONE          UINT32_MAX  //ID used temporarily to indicate no ID
+#define GC_ALIGN            4               //Alignment requirement on SH4
+#define GC_OBJ_ALIGN        16              //Must be large enough for header and GC_MIN_SIZE
+#define GC_TABLE_ELEMENTS   128             //Elements in table of memory IDs
+#define GC_ROOT_PID         0               //Root can access memory belonging to any PID
+#define GC_TABLE_ID         0               //First table entry is pointer to table
+#define GC_MAX_LOCKS        UINT8_MAX       //Max times same object can be locked
+#define GC_ID_NONE          UINT32_MAX      //ID used as return value to indicate no ID
+#define GC_ID_TEMP          GC_ID_NONE-1    //ID for temporarily allocated objects
 
 enum
 {

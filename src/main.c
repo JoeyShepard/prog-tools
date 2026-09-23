@@ -9,6 +9,8 @@
 //TODO - PRIORITY
 //===============
 /*
+- restrict keyword may get more performance
+
 - delay on PC after key input is before any key is pressed
   - see separate thread and how keys are handled
   - increasing key buffer size did not help

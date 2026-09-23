@@ -12,7 +12,7 @@
 
 //Macros
 #define IF_ERROR_RETURN(return_value) if (e->code!=ERROR_NONE) {error_set_line(e,__LINE__,__FUNCTION__,__FILE_NAME__);return return_value;}
-#define IF_ERROR_CLEANUP() if (e->code!=ERROR_NONE) {error_set_line(e,__LINE__,__FUNCTION__,__FILE_NAME__);goto error_exit;}
+#define IF_ERROR_CLEANUP() if (e->code!=ERROR_NONE) {error_set_line(e,__LINE__,__FUNCTION__,__FILE_NAME__);goto cleanup;}
 #define ERROR_SET(new_code) e->code=new_code;error_set_line(e,__LINE__,__FUNCTION__,__FILE_NAME__);
 
 //TODO: separate out error mechanism from specific errors below?
