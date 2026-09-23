@@ -154,6 +154,7 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
     } while(changed==true);
 }
 
+//TODO: remove if not used
 //Allocate memory for internal usage with following caveats:
     //Returns error if free memory slots not found on first try
     //Does not trigger garbage collection
@@ -162,16 +163,17 @@ static void gc_rearrange_realloc(uint32_t id,struct GC_Header *range_begin,uint3
     //Sets ID to GC_ID_TEMP and does not consume ID
     //Locks memory and cannot be unlocked with gc_unlock
     //Unlocked and freed with gc_free_temp
-static GC_Header *gc_alloc_temp(uint32_t size,GC_Header *exclude_begin,GC_Header *exclude_end,struct ErrorType *e)
+static struct GC_Header *gc_alloc_temp(uint32_t size,struct GC_Header *exclude_begin,struct GC_Header *exclude_end,
+    struct ErrorType *e)
 {
     //Exit function early if prior function set error
-    IF_ERROR_RETURN();
+    IF_ERROR_RETURN(NULL);
 
     //Object size cannot be 0
     if (size==0)
     {
         ERROR_SET(GC_ERROR_OBJ_SIZE);
-        return GC_ID_NONE;
+        return NULL;
     }
 
     //Account for header and round up to alignment
@@ -220,7 +222,7 @@ static GC_Header *gc_alloc_temp(uint32_t size,GC_Header *exclude_begin,GC_Header
     return NULL;
 }
 
-static void gc_alloc_free(GC_Header *header,struct ErrorType *e)
+static void gc_free_temp(struct GC_Header *header,struct ErrorType *e)
 {
     //Exit function early if prior function set error
     IF_ERROR_RETURN();
@@ -424,7 +426,7 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
 
     //Try to find free memory slot then compact and try again if necessary
     const int try_count=3;
-    for (int i=0;i<try_count;i++)
+    for (int try=0;try<try_count;try++)
     {
         //Search heap for free memory slot
         struct GC_Header *header=gc_find_free(size,e);
@@ -459,13 +461,13 @@ uint32_t gc_alloc(uint32_t size,struct ErrorType *e)
         }
 
         //Search finished without finding free memory slot
-        if (i==0)
+        if (try==0)
         {
             //Try 1 - compact heap quickly and try allocating again
             gc_compact_fast(e);
             IF_ERROR_RETURN(GC_ID_NONE);
         }
-        else if (i==1)
+        else if (try==1)
         {
             //Try 2 - compact heap completely and try allocating again
             gc_compact_full(e);
@@ -559,6 +561,7 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
         }
 
         //Second, try to shift neighboring blocks in the same range to make room
+            //Note, gc_alloc above triggered garbage collection if got to here
         {
             original_header=gc_get_header(id,e);
             uint32_t unlocked_size=0;
@@ -620,8 +623,6 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
             uint32_t additional_space=obj_size-original_header->size;
             if (additional_space<=free_size)
             {
-                //Enough free space present - expand reallocated object using free space only
-
                 //Rearrange blocks so that reallocated object is first followed by free space
                     //followed by unlocked objects
                 gc_rearrange_realloc(id,range_begin,free_size,unlocked_size,e);
@@ -645,18 +646,18 @@ void gc_realloc(uint32_t id,uint32_t requested_size,struct ErrorType *e)
                 //Done
                 return;
             }
-            else if (additional_space<=free_size+unlocked_size)
-            {
-                //Enough space present between free and unlocked space - try to rearrange
-
-                //Find combination of unlocked items to fulfill request
-                uint32_t unlocked_required=additional_space-free_size;
-
-                //TODO: should remove this and 
-            }
         }
 
-        //Third, subset sum
+        //Third, TODO: figure out series of swaps?
+            //should be one solution whether has a lot of free memory or not
+        {
+            //See spreadsheet for examples
+
+            //Can find solution with multiple subset sum bin packing
+                //easy to find solution but how to rearrange once found?
+                    //permutation cycles
+                //also, should start search with current configuration and permute off that
+        }
     }
 }
 
@@ -1364,6 +1365,9 @@ void gc_sort_id_list(uint32_t *obj_list,uint32_t obj_count,struct ErrorType *e)
     }
 }
 
+//TODO: remove if not used
+/*
+//TODO: started changing to use gc_alloc_temp but did not finish
 uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t target,struct ErrorType *e)
 {
     //Exit early if prior function set error
@@ -1378,22 +1382,7 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
 
     //Find last header after range
     GC_Header *end_header=header;
-    //TODO:
-
-
-    //TODO: remove
-    /*
-    START HERE
-    - failing tests because objects created here come after objects in list taking up free space
-      that should cause an error
-    - need to reconsider strat here of using gc_alloc since could trigger GC and lose order
-    - just locking is enough?
-      - need to lock free space then too
-    - otoh, is it always compacted before reaching here?
-      - maybe this should be static but then hard to unit test
-    - best is probably gc_alloc_exclude
-    */
-
+    //TODO: find end header
 
     //Set IDs to unused until memory is allocated
     uint32_t *obj_list=NULL;
@@ -1597,6 +1586,7 @@ uint32_t gc_find_subset(struct GC_Header *header,uint32_t obj_count,uint32_t tar
     //Done - no extra memory for subset returned
     return GC_ID_NONE;
 }
+*/
 
 void gc_cleanup(uint32_t id,struct ErrorType *e)
 {

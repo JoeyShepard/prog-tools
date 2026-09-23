@@ -2124,6 +2124,7 @@ void test_gc_sort_id_list()             //17
     }
 }
 
+/*
 void test_gc_find_subset()
 {
     //Assert error on empty list
@@ -2202,6 +2203,7 @@ void test_gc_find_subset()
 
     //
 }
+*/
 
 int main()
 {
@@ -2223,9 +2225,8 @@ int main()
     RUN_TEST(test_gc_check);            //15
     RUN_TEST(test_gc_swap_next);        //16
     RUN_TEST(test_gc_sort_id_list);     //17
-    RUN_TEST(test_gc_find_subset);      //18
-
-    //gc_rearrange_realloc???
+    
+    //TODO: test_gc_find_subset if not removed
 
     return UNITY_END();
 }
