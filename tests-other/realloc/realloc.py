@@ -76,10 +76,61 @@ def reset_mem():
     global mem
     mem=[]
 
+def realloc(mem_id,new_size):
+    index=0
+    bin_size=0
+    ids=[]
+    bins=[]
+    bin_start=0
+
+    while index<len(mem):
+        size=mem[index+OFFSET_SIZE]
+        obj_id=mem[index+OFFSET_ID]
+        locked=mem[index+OFFSET_LOCKED]
+        free=mem[index+OFFSET_FREE]
+
+        added=False
+        if free==1:
+            bin_size+=size
+            added=True
+        else:
+            if locked==0:
+                bin_size+=size
+                ids+=[(obj_id,size)]
+                added=True
+
+        if added==True:
+            if bin_start==None:
+                bin_start=index
+
+        index+=size
+
+        if (free==0 and locked==1) or index==len(mem):
+            if bin_size!=0:
+                new_bin={}
+                new_bin["size"]=bin_size
+                new_bin["start"]=bin_start
+                bin_size=0
+                bin_start=None
+                bins+=[new_bin]
+
+    #Result of finding bins
+    for b in bins:
+        print(f"Bin at {b['start']} of size {b['size']}")
+
+    print(f"Unlocked IDs: {ids}")
+
+    #Sort items by size
+    ids=sorted(ids,key=lambda i: i[1],reverse=True)
+
+    print(f"Sort unlocked IDs: {ids}")
+
 #Shift memory down and reallocated memory up
+    #See gc spreadsheet
 def test1():
     reset_mem()
     reallocated=add_unlocked(20)
+    add_locked(10)
     add_locked(10)
     add_unlocked(20)
     add_free(10)
@@ -87,7 +138,8 @@ def test1():
     add_unlocked(30)
     add_free(10)
     verify()
-    #TODO: reallocate
+
+    realloc(reallocated,40)
 
 test_list=[
     test1
